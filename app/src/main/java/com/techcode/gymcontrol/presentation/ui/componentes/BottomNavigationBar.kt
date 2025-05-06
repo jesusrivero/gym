@@ -1,12 +1,8 @@
 package com.techcode.gymcontrol.presentation.ui.componentes
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Badge
@@ -38,7 +34,8 @@ data class BottomNavItem(
 fun BottomNavigationBar(
 	
 	navController: NavController,
-	modifier: Modifier = Modifier
+	modifier: Modifier = Modifier,
+	innerPadding: PaddingValues
 ) {
 	val navBackStackEntry by navController.currentBackStackEntryAsState()
 	val currentRoute = navBackStackEntry?.destination?.route
@@ -107,6 +104,9 @@ fun BottomNavigationBar(
 @Preview(showBackground = true)
 @Composable
 fun BottomNavigationBarPreview() {
-	BottomNavigationBar(navController = NavController(LocalContext.current))
+	BottomNavigationBar(
+		navController = NavController(LocalContext.current),
+		innerPadding = PaddingValues()
+	)
 }
 
