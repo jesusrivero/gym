@@ -1,8 +1,7 @@
-package com.techcode.gymcontrol.presentation.ui.screens
+package com.techcode.gymcontrol.presentation.ui.main
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,14 +31,30 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.techcode.gymcontrol.presentation.ui.componentes.BottomNavigationBar
-import com.techcode.gymcontrol.presentation.ui.viewmodels.UsuariosViewModel
+import com.techcode.gymcontrol.presentation.navegation.AppRoutes
+import com.techcode.gymcontrol.presentation.ui.commons.BottomNavigationBar
+import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(it: PaddingValues, navController: NavController, viewModel: UsuariosViewModel) {
-	val context = LocalContext.current
+fun MainScreen(navController: NavController, viewModel: PeopleViewModel) {
+	MainContent(
+		viewModel = viewModel,
+		navBottom = navController,
+		navRegister = { navController.navigate(AppRoutes.RegPersonScreen) },
+		navEdit = { navController.navigate(AppRoutes.EditPersonScreen(it)) }
+	)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainContent(
+	viewModel: PeopleViewModel,
+	navBottom: NavController,
+	navRegister: () -> Unit,
+	navEdit: (Int) -> Unit,
+) {
 	Scaffold(
 		topBar = {
 			TopAppBar(
@@ -48,16 +63,14 @@ fun MainScreen(it: PaddingValues, navController: NavController, viewModel: Usuar
 					containerColor = MaterialTheme.colorScheme.primary
 				)
 			)
-			
 		},
-		
 		floatingActionButton = {
 			FloatingActionButton(
 				shape = CircleShape,
-				onClick = { navController.navigate(route = "agregar") },
+				onClick = navRegister,
 				containerColor = MaterialTheme.colorScheme.primary,
 				contentColor = Color.White,
-				
+
 				) {
 				Icon(
 					modifier = Modifier.size(22.dp),
@@ -65,21 +78,14 @@ fun MainScreen(it: PaddingValues, navController: NavController, viewModel: Usuar
 					contentDescription = "Agregar",
 				)
 			}
-			
+
 		},
-		
-		
 		bottomBar = {
 			BottomNavigationBar(
-				navController = navController,
-				innerPadding = PaddingValues()
+				navController = navBottom,
 			)
 		}
-	
-	
 	)
-	
-	
 	{ innerPadding ->
 		Box(
 			modifier = Modifier
@@ -87,65 +93,51 @@ fun MainScreen(it: PaddingValues, navController: NavController, viewModel: Usuar
 				.padding(innerPadding),
 			contentAlignment = Alignment.Center
 		) {
-			
 			Text(text = "Lista de clientes", color = Color.White, fontWeight = FontWeight.Bold)
-			
-			
 		}
-		
-	
-		ContenInicioView(it, navController, viewModel)
-		
-	}
-}
+		val state = viewModel.state
 
-@Composable
-fun ContenInicioView(
-	it: PaddingValues,
-	navController: NavController,
-	viewModel: UsuariosViewModel
-) {
-	
-	
-	val state = viewModel.state
-	
-	Column(
-		modifier = Modifier.padding()
-	) {
-		LazyColumn {
-			items(state.listaUsuarios) {
-				Box(
-					modifier = Modifier
-						.padding(8.dp)
-						.fillMaxWidth()
-				
-				) {
-					Column(modifier = Modifier.padding(12.dp)) {
-						Text(text = it.usuario)
-						Text(text = it.email)
-						IconButton(onClick = { navController.navigate("editar/${it.id}/${it.usuario}/${it.email}") }) {
-							
-							Icon(imageVector = Icons.Default.Add, contentDescription = "Editar")
-						
+		Column(
+			modifier = Modifier.padding()
+		) {
+			LazyColumn {
+				items(state.userList) { user ->
+					Box(
+						modifier = Modifier
+							.padding(8.dp)
+							.fillMaxWidth()
+
+					) {
+						Column(modifier = Modifier.padding(12.dp)) {
+							Text(text = user.usuario)
+							Text(text = user.email)
+							IconButton(
+								onClick = {
+									navEdit.invoke(user.id)
+								}
+							) {
+								Icon(imageVector = Icons.Default.Add, contentDescription = "Editar")
+
+							}
+							IconButton(onClick = { viewModel.deleteUser(user) }) {
+								Icon(imageVector = Icons.Default.Delete, contentDescription = "Eliminar")
+							}
 						}
-						IconButton(onClick = { viewModel.borrarUsuario(it) }) {
-							
-							Icon(imageVector = Icons.Default.Delete, contentDescription = "Eliminar")
-						
-						}
-						
 					}
+
 				}
-				
 			}
 		}
 	}
-	
-	
 }
 
 @Preview(showBackground = true)
 @Composable
 fun HolaMainScreen() {
-	MainScreen(navController = NavController(LocalContext.current), viewModel = viewModel(), it = PaddingValues())
+	MainContent(
+		viewModel = viewModel(),
+		navEdit = {},
+		navBottom = NavController(LocalContext.current),
+		navRegister = {}
+	)
 }

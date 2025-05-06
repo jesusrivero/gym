@@ -1,7 +1,6 @@
-package com.techcode.gymcontrol.presentation.ui.screens
+package com.techcode.gymcontrol.presentation.ui.people
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,34 +16,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
-import com.techcode.gymcontrol.presentation.ui.componentes.BottomNavigationBar
+import com.techcode.gymcontrol.presentation.ui.commons.BottomNavigationBar
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistrosScreen(nvaController: NavController) {
-	val context = LocalContext.current
+fun ListPersonScreen(nav: NavController) {
+	LocalContext.current
 	Scaffold(
-		
 		topBar = {
 			TopAppBar(
 				modifier = Modifier.fillMaxWidth(),
-				title = { Text(text = "Registro de Pagos")},
-				
+				title = { Text(text = "Registro de Pagos") },
+
 				colors = TopAppBarDefaults.topAppBarColors(
 					containerColor = MaterialTheme.colorScheme.primary
 				)
 			)
 		},
-		
+
 		bottomBar = {
 			BottomNavigationBar(
-				navController = nvaController,
+				navController = nav,
 				modifier = Modifier.fillMaxWidth(),
-				innerPadding = PaddingValues()
 			)
 		}
-		
+
 	) { innerPadding ->
 		Box(
 			modifier = Modifier
@@ -52,18 +49,17 @@ fun RegistrosScreen(nvaController: NavController) {
 				.padding(innerPadding),
 			contentAlignment = Alignment.Center
 		) {
-			
+
 			Text(text = "Lista de clientes")
 		}
-		
-	}
-	
 
-	
+	}
+
+
 }
 
 @Preview(showBackground = true)
 @Composable
-fun RegistrosScreenPreview(){
-	RegistrosScreen(nvaController = NavController(LocalContext.current))
+fun RegistrosScreenPreview() {
+	ListPersonScreen(nav = NavController(LocalContext.current))
 }

@@ -1,11 +1,12 @@
-package com.techcode.gymcontrol.presentation.ui.room
+package com.techcode.gymcontrol.data.db
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.techcode.gymcontrol.presentation.ui.models.Usuarios
+import com.techcode.gymcontrol.data.db.dao.UsuariosDatabaseDao
+import com.techcode.gymcontrol.data.db.entity.PersonEntity
 
 @Database(
-	entities = [Usuarios::class],
+	entities = [PersonEntity::class],
 	version = 1,
 	exportSchema = false
 )
