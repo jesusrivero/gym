@@ -27,7 +27,9 @@ fun RegistrosScreen(nvaController: NavController) {
 		
 		topBar = {
 			TopAppBar(
-				title = { },
+				modifier = Modifier.fillMaxWidth(),
+				title = { Text(text = "Registro de Pagos")},
+				
 				colors = TopAppBarDefaults.topAppBarColors(
 					containerColor = MaterialTheme.colorScheme.primary
 				)

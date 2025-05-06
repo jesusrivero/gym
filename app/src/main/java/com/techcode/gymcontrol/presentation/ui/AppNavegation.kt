@@ -1,18 +1,17 @@
 package com.techcode.gymcontrol.presentation.ui
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.techcode.gymcontrol.presentation.ui.componentes.BottomNavItem
+import androidx.navigation.navArgument
 import com.techcode.gymcontrol.presentation.ui.screens.AppScreens
 import com.techcode.gymcontrol.presentation.ui.screens.MainScreen
 import com.techcode.gymcontrol.presentation.ui.screens.RegistrosScreen
+import com.techcode.gymcontrol.presentation.ui.viewmodels.UsuariosViewModel
 
 sealed class HomeScreen(val route: String) {
 	object Home : HomeScreen("home_screen")
@@ -20,12 +19,33 @@ sealed class HomeScreen(val route: String) {
 }
 
 @Composable
-fun AppNavegation(navController: NavHostController, modifier: Modifier = Modifier) {
+fun AppNavegation(
+	navController: NavHostController,
+	modifier: Modifier = Modifier,
+	viewModel: UsuariosViewModel
+) {
 	val navController = rememberNavController()
 	NavHost(navController = navController, startDestination = AppScreens.HomeScreen.route)
 	{
 		composable(AppScreens.HomeScreen.route) {
-			MainScreen(navController)
+			MainScreen(navController, viewModel)
+		}
+		composable(AppScreens.AgregarScreen.route) {
+			AgregarScreen(navController, viewModel)
+		}
+		composable(
+			route = "editar/{id}/{usuario}/{email}", arguments = listOf(
+			navArgument("id") { type = NavType.IntType },
+			navArgument("usuario") { type = NavType.StringType },
+			navArgument("email") { type = NavType.StringType }
+		)) {
+			EditarScreen(
+				navController,
+				viewModel,
+				it.arguments!!.getInt("id"),
+				it.arguments?.getString("usuario"),
+				it.arguments?.getString("email")
+			)
 		}
 		composable(AppScreens.RegistrosScreen.route) {
 			RegistrosScreen(navController)

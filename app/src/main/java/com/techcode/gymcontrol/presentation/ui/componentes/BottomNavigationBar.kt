@@ -1,8 +1,10 @@
 package com.techcode.gymcontrol.presentation.ui.componentes
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -17,6 +19,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -54,15 +58,16 @@ fun BottomNavigationBar(
 		)
 	)
 	
-	if (bottomNavItems.any { it.route == currentRoute }) {
-		
-		Box (modifier = Modifier.fillMaxWidth()){
-			NavigationBar(modifier = Modifier.fillMaxWidth().height(60.dp)) {
+	Box(){
+		if (bottomNavItems.any { it.route == currentRoute }) {
+			
+			
+			NavigationBar( modifier = modifier.height(60.dp)
+			
+			) {
 				
 				bottomNavItems.forEach { item ->
-					
 					NavigationBarItem(
-						modifier = modifier,
 						icon = {
 							BadgedBox(badge = {
 								if (item.badgeCount > 0) {
@@ -74,25 +79,34 @@ fun BottomNavigationBar(
 						},
 						label = { Text(item.name) },
 						selected = currentRoute == item.route,
+						modifier = modifier.height(10.dp),
 						onClick = {
 							navController.navigate(item.route) {
-								
+								// Evita múltiples copias del mismo destino
 								launchSingleTop = true
-								
+								// Restaura el estado al volver a un destino existente
 								restoreState = true
-								
+								// Configura el comportamiento de navegación
 								popUpTo(navController.graph.startDestinationId) {
 									saveState = true
 								}
 							}
 						}
 					)
-					
 				}
-				
 			}
+			
+			
 		}
-		
+	
 	}
+	
+	
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BottomNavigationBarPreview() {
+	BottomNavigationBar(navController = NavController(LocalContext.current))
 }
 

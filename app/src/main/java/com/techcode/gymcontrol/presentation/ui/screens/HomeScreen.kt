@@ -2,7 +2,6 @@ package com.techcode.gymcontrol.presentation.ui.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -24,12 +23,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.presentation.ui.componentes.BottomNavigationBar
-
+import com.techcode.gymcontrol.presentation.ui.viewmodels.UsuariosViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(navController: NavController) {
+fun MainScreen(navController: NavController, viewModel: UsuariosViewModel) {
 	val context = LocalContext.current
 	Scaffold(
 		topBar = {
@@ -82,5 +81,5 @@ fun MainScreen(navController: NavController) {
 @Preview(showBackground = true)
 @Composable
 fun HolaMainScreen() {
-	MainScreen(navController = NavController(LocalContext.current))
+	MainScreen(navController = NavController(LocalContext.current), viewModel = viewModel)
 }
