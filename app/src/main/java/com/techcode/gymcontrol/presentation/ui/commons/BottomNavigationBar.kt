@@ -1,7 +1,6 @@
-package com.techcode.gymcontrol.presentation.ui.componentes
+package com.techcode.gymcontrol.presentation.ui.commons
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -20,7 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.techcode.gymcontrol.presentation.ui.screens.AppScreens
+import com.techcode.gymcontrol.presentation.navegation.AppRoutes
 
 
 data class BottomNavItem(
@@ -32,73 +31,55 @@ data class BottomNavItem(
 
 @Composable
 fun BottomNavigationBar(
-	
 	navController: NavController,
 	modifier: Modifier = Modifier,
-	innerPadding: PaddingValues
 ) {
 	val navBackStackEntry by navController.currentBackStackEntryAsState()
 	val currentRoute = navBackStackEntry?.destination?.route
 	val bottomNavItems = listOf(
 		BottomNavItem(
 			name = "Home",
-			route = AppScreens.HomeScreen.route,
+			route = AppRoutes.MainScreen.toString(),
 			icon = Icons.Default.Home,
 			badgeCount = 0
 		),
 		BottomNavItem(
 			name = "Registros",
-			route = AppScreens.RegistrosScreen.route,
+			route = AppRoutes.ListPersonScreen.toString(),
 			icon = Icons.Default.Home,
 			badgeCount = 0
-		
 		)
 	)
-	
-	Box(){
-		if (bottomNavItems.any { it.route == currentRoute }) {
-			
-			
-			NavigationBar( modifier = modifier.height(60.dp)
-			
-			) {
-				
-				bottomNavItems.forEach { item ->
-					NavigationBarItem(
-						icon = {
-							BadgedBox(badge = {
-								if (item.badgeCount > 0) {
-									Badge { Text(item.badgeCount.toString()) }
-								}
-							}) {
-								Icon(item.icon, contentDescription = item.name)
-							}
-						},
-						label = { Text(item.name) },
-						selected = currentRoute == item.route,
-						modifier = modifier.height(10.dp),
-						onClick = {
-							navController.navigate(item.route) {
-								// Evita múltiples copias del mismo destino
-								launchSingleTop = true
-								// Restaura el estado al volver a un destino existente
-								restoreState = true
-								// Configura el comportamiento de navegación
-								popUpTo(navController.graph.startDestinationId) {
-									saveState = true
-								}
-							}
+
+	NavigationBar {
+		bottomNavItems.forEach { item ->
+			NavigationBarItem(
+				icon = {
+					BadgedBox(badge = {
+						if (item.badgeCount > 0) {
+							Badge { Text(item.badgeCount.toString()) }
 						}
-					)
+					}) {
+						Icon(item.icon, contentDescription = item.name)
+					}
+				},
+				label = { Text(item.name) },
+				selected = currentRoute == item.route,
+				onClick = {
+					navController.navigate(item.route) {
+						// Evita múltiples copias del mismo destino
+						launchSingleTop = true
+						// Restaura el estado al volver a un destino existente
+						restoreState = true
+						// Configura el comportamiento de navegación
+						popUpTo(navController.graph.startDestinationId) {
+							saveState = true
+						}
+					}
 				}
-			}
-			
-			
+			)
 		}
-	
 	}
-	
-	
 }
 
 @Preview(showBackground = true)
@@ -106,7 +87,6 @@ fun BottomNavigationBar(
 fun BottomNavigationBarPreview() {
 	BottomNavigationBar(
 		navController = NavController(LocalContext.current),
-		innerPadding = PaddingValues()
 	)
 }
 

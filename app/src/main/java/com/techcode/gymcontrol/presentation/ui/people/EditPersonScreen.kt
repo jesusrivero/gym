@@ -1,46 +1,44 @@
-package com.techcode.gymcontrol.presentation.ui.screens
+package com.techcode.gymcontrol.presentation.ui.people
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.techcode.gymcontrol.presentation.ui.models.Usuarios
+import com.techcode.gymcontrol.data.db.entity.PersonEntity
 
-import com.techcode.gymcontrol.presentation.ui.viewmodels.UsuariosViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AgregarScreen(navController: NavController, viewModel: UsuariosViewModel) {
+fun EditPersonScreen(navController: NavController, viewModel: PeopleViewModel, id: Int, usuario: String? = null, email: String? = null) {
 	Scaffold(
 		topBar = {
 			CenterAlignedTopAppBar(
 				title = {
-					Text(text = "Gym Control", color = Color.White, fontWeight = FontWeight.Bold)
+					Text(text = "Editar Usuario", color = Color.White, fontWeight = FontWeight.Bold)
 				},
 				colors = TopAppBarDefaults.topAppBarColors(
 					containerColor = MaterialTheme.colorScheme.primary
@@ -58,7 +56,7 @@ fun AgregarScreen(navController: NavController, viewModel: UsuariosViewModel) {
 			)
 		}
 	) {
-		ContenAgregarView(it, navController, viewModel)
+		ContenEditarView(it, navController, viewModel, id, usuario, email)
 	}
 }
 
@@ -66,10 +64,13 @@ fun AgregarScreen(navController: NavController, viewModel: UsuariosViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContenAgregarView(
+fun ContenEditarView(
 	it: PaddingValues,
 	navController: NavController,
-	viewModel: UsuariosViewModel
+	viewModel: PeopleViewModel,
+	id: Int,
+	usuario: String?,
+	email: String?
 ) {
 	var usuario by remember { mutableStateOf("") }
 	var email by remember { mutableStateOf("") }
@@ -82,7 +83,7 @@ fun ContenAgregarView(
 		horizontalAlignment = Alignment.CenterHorizontally
 	){
 		OutlinedTextField(
-			value = usuario,
+			value = usuario ?: "",
 			onValueChange = { usuario = it },
 			label = { Text("usuario") },
 			modifier = Modifier
@@ -92,7 +93,7 @@ fun ContenAgregarView(
 		)
 		
 		OutlinedTextField(
-			value = email,
+			value = email ?: "",
 			onValueChange = { email = it },
 			label = { Text("email") },
 			modifier = Modifier
@@ -103,18 +104,16 @@ fun ContenAgregarView(
 		
 		Button(
 			onClick = {
-				val usuario = Usuarios(usuario = usuario, email = email)
+				val usuario = PersonEntity(id = id , usuario = usuario!!, email = email!!)
 				
-				viewModel.agregarUsuario(usuario)
+				viewModel.updateUser(usuario)
 				navController.popBackStack()
 			}
 		){
-			Text(text = "Agregar")
+			Text(text = "Editar")
 			
 			
 		}
 		
 	}
 }
-
-

@@ -1,6 +1,5 @@
-package com.techcode.gymcontrol.ui.theme
+package com.techcode.gymcontrol.presentation.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

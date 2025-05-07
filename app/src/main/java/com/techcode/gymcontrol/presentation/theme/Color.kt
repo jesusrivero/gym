@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol.ui.theme
+package com.techcode.gymcontrol.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 

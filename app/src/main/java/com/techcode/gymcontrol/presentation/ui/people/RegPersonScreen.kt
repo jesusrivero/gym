@@ -1,5 +1,4 @@
-package com.techcode.gymcontrol.presentation.ui.screens
-
+package com.techcode.gymcontrol.presentation.ui.people
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,38 +7,36 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.techcode.gymcontrol.presentation.ui.models.Usuarios
-import com.techcode.gymcontrol.presentation.ui.viewmodels.UsuariosViewModel
-
+import com.techcode.gymcontrol.data.db.entity.PersonEntity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditarScreen(navController: NavController, viewModel: UsuariosViewModel, id: Int, usuario: String?, email: String?) {
+fun RegPersonScreen(navController: NavController, viewModel: PeopleViewModel) {
 	Scaffold(
 		topBar = {
 			CenterAlignedTopAppBar(
 				title = {
-					Text(text = "Editar Usuario", color = Color.White, fontWeight = FontWeight.Bold)
+					Text(text = "Gym Control", color = Color.White, fontWeight = FontWeight.Bold)
 				},
 				colors = TopAppBarDefaults.topAppBarColors(
 					containerColor = MaterialTheme.colorScheme.primary
@@ -57,7 +54,7 @@ fun EditarScreen(navController: NavController, viewModel: UsuariosViewModel, id:
 			)
 		}
 	) {
-		ContenEditarView(it, navController, viewModel, id, usuario, email)
+		ContenAgregarView(it, navController, viewModel)
 	}
 }
 
@@ -65,13 +62,10 @@ fun EditarScreen(navController: NavController, viewModel: UsuariosViewModel, id:
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContenEditarView(
+fun ContenAgregarView(
 	it: PaddingValues,
 	navController: NavController,
-	viewModel: UsuariosViewModel,
-	id: Int,
-	usuario: String?,
-	email: String?
+	viewModel: PeopleViewModel
 ) {
 	var usuario by remember { mutableStateOf("") }
 	var email by remember { mutableStateOf("") }
@@ -84,7 +78,7 @@ fun ContenEditarView(
 		horizontalAlignment = Alignment.CenterHorizontally
 	){
 		OutlinedTextField(
-			value = usuario ?: "",
+			value = usuario,
 			onValueChange = { usuario = it },
 			label = { Text("usuario") },
 			modifier = Modifier
@@ -94,7 +88,7 @@ fun ContenEditarView(
 		)
 		
 		OutlinedTextField(
-			value = email ?: "",
+			value = email,
 			onValueChange = { email = it },
 			label = { Text("email") },
 			modifier = Modifier
@@ -105,16 +99,18 @@ fun ContenEditarView(
 		
 		Button(
 			onClick = {
-				val usuario = Usuarios(id = id , usuario = usuario!!, email = email!!)
+				val usuario = PersonEntity(usuario = usuario, email = email)
 				
-				viewModel.actualizarUsuario(usuario)
+				viewModel.saveUser(usuario)
 				navController.popBackStack()
 			}
 		){
-			Text(text = "Editar")
+			Text(text = "Agregar")
 			
 			
 		}
 		
 	}
 }
+
+
