@@ -1,5 +1,7 @@
 [versions]
+accompanistPager = "0.28.0"
 agp = "8.9.2"
+foundation = "1.8.1"
 kotlin = "2.0.21"
 coreKtx = "1.16.0"
 junit = "4.13.2"
@@ -16,6 +18,8 @@ ksp = "2.0.21-1.0.28"
 ksp-compiler = "2.52"
 
 [libraries]
+accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
+androidx-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "foundation" }
 ksp-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "ksp-compiler"}
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }

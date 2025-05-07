@@ -3,6 +3,7 @@ package com.techcode.gymcontrol.presentation.ui.commons
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -15,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -36,51 +38,54 @@ fun BottomNavigationBar(
 ) {
 	val navBackStackEntry by navController.currentBackStackEntryAsState()
 	val currentRoute = navBackStackEntry?.destination?.route
-	val bottomNavItems = listOf(
-		BottomNavItem(
-			name = "Home",
-			route = AppRoutes.MainScreen.toString(),
-			icon = Icons.Default.Home,
-			badgeCount = 0
-		),
-		BottomNavItem(
-			name = "Registros",
-			route = AppRoutes.ListPersonScreen.toString(),
-			icon = Icons.Default.Home,
-			badgeCount = 0
-		)
-	)
+
+	
 
 	NavigationBar {
-		bottomNavItems.forEach { item ->
 			NavigationBarItem(
-				icon = {
-					BadgedBox(badge = {
-						if (item.badgeCount > 0) {
-							Badge { Text(item.badgeCount.toString()) }
-						}
-					}) {
-						Icon(item.icon, contentDescription = item.name)
-					}
-				},
-				label = { Text(item.name) },
-				selected = currentRoute == item.route,
+				icon =  {
+						Icon(imageVector = Icons.Default.Home, contentDescription = "Home")
+					},
+				label = { Text("Home") },
+				selected = currentRoute == AppRoutes.MainScreen.toString(),
 				onClick = {
-					navController.navigate(item.route) {
-						// Evita múltiples copias del mismo destino
+					navController.navigate(AppRoutes.MainScreen) {
+					
 						launchSingleTop = true
-						// Restaura el estado al volver a un destino existente
+						
 						restoreState = true
-						// Configura el comportamiento de navegación
+					
 						popUpTo(navController.graph.startDestinationId) {
 							saveState = true
 						}
 					}
 				}
 			)
+		NavigationBarItem(
+			icon = {
+					Icon(imageVector = Icons.Default.AccountBox, contentDescription = "Registro Pagos")
+				
+			},
+			label = {  Text("Registro Pago") },
+			selected = currentRoute == AppRoutes.RegPersonScreen.toString(),
+			onClick = {
+				navController.navigate(AppRoutes.PersonasScreen) {
+					
+					launchSingleTop = true
+					
+					restoreState = true
+					
+					popUpTo(navController.graph.startDestinationId) {
+						saveState = true
+					}
+				}
+			}
+		)
+			
 		}
+		
 	}
-}
+
 
 @Preview(showBackground = true)
 @Composable

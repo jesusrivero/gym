@@ -10,6 +10,7 @@ import com.techcode.gymcontrol.presentation.ui.people.EditPersonScreen
 import com.techcode.gymcontrol.presentation.ui.people.ListPersonScreen
 import com.techcode.gymcontrol.presentation.ui.people.RegPersonScreen
 import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
+import com.techcode.gymcontrol.presentation.ui.screens.PersonsScreen
 
 @Composable
 fun NavigationHost(
@@ -21,7 +22,7 @@ fun NavigationHost(
 		composable<AppRoutes.MainScreen> {
 			MainScreen(
 				navController = navController,
-				viewModel = viewModel
+			
 			)
 		}
 		composable<AppRoutes.RegPersonScreen> {
@@ -40,6 +41,9 @@ fun NavigationHost(
 			ListPersonScreen(
 				nav = navController
 			)
+		}
+		composable<AppRoutes.PersonasScreen> {
+			PersonsScreen ( viewModel = viewModel, navEdit = { navController.navigate(AppRoutes.EditPersonScreen(it)) })
 		}
 	}
 }

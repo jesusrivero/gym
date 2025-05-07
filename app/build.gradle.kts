@@ -43,6 +43,9 @@ android {
 }
 
 dependencies {
+	
+	implementation (libs.androidx.foundation)
+	implementation (libs.accompanist.pager)  // Alternativa si usas Material 2
 	implementation(libs.kotlinx.serialization.json)              // JSON con Kotlinx
 	implementation(libs.androidx.room.runtime)                   // Room runtime
 	implementation(libs.androidx.room.ktx)                       // Room con corutinas

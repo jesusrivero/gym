@@ -14,4 +14,7 @@ object AppRoutes {
 
 	@Serializable
 	data object ListPersonScreen
+	
+	@Serializable
+	data object PersonasScreen
 }
