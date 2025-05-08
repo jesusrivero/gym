@@ -9,6 +9,8 @@ object AppRoutes {
 	@Serializable
 	data object RegPersonScreen
 
+	
+	
 	@Serializable
 	data class EditPersonScreen(val idPerson: Int? = null)
 
