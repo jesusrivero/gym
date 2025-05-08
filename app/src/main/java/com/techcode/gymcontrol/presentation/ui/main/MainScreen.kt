@@ -97,7 +97,7 @@ fun MainContent(
 				WelcomeCard(name = "Alberto", date = "12/08/2023")
 				Text("Resumen General", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(start = 15.dp))
 				SumaryCarsScreen()
-				Text("Resumen de Menbresias", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(start = 15.dp))
+				Text("Resumen de Membresias", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(start = 15.dp))
 				MembersCardScreen()
 				MovementsCarScreen()
 				
