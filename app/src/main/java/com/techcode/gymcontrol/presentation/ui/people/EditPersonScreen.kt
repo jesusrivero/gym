@@ -1,5 +1,6 @@
 package com.techcode.gymcontrol.presentation.ui.people
 
+import android.R
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -48,7 +50,7 @@ fun EditPersonScreen(navController: NavController, viewModel: PeopleViewModel, i
 						onClick = { navController.popBackStack() }
 					) {
 						Icon(
-							imageVector = Icons.Default.PlayArrow,
+							painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_back),
 							contentDescription = "Regresar", tint = Color.White
 						)
 					}

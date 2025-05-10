@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.data.db.entity.PersonEntity
@@ -46,7 +47,7 @@ fun RegPersonScreen(navController: NavController, viewModel: PeopleViewModel) {
 						onClick = { navController.popBackStack() }
 					) {
 						Icon(
-							imageVector = Icons.Default.PlayArrow,
+							painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_back),
 							contentDescription = "Regresar", tint = Color.White
 						)
 					}

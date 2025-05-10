@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
@@ -24,12 +25,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.techcode.gymcontrol.presentation.navegation.AppRoutes
 
 
-data class BottomNavItem(
-	val name: String,
-	val route: String,
-	val icon: ImageVector,
-	val badgeCount: Int = 0
-)
+
 
 @Composable
 fun BottomNavigationBar(
@@ -61,15 +57,56 @@ fun BottomNavigationBar(
 					}
 				}
 			)
+		
+		NavigationBarItem(
+			icon =  {
+				Icon( painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_payments), contentDescription = "Registro de pago")
+			},
+			label = { Text("Registrar Pago") },
+			selected = currentRoute == AppRoutes.PaymentsScreen.toString(),
+			onClick = {
+				navController.navigate(AppRoutes.PaymentsScreen) {
+					
+					launchSingleTop = true
+					
+					restoreState = true
+					
+					popUpTo(navController.graph.startDestinationId) {
+						saveState = true
+					}
+				}
+			}
+		)
+		
 		NavigationBarItem(
 			icon = {
-					Icon(imageVector = Icons.Default.AccountBox, contentDescription = "Registro Pagos")
+					Icon(imageVector = Icons.Default.AccountBox, contentDescription = "Clientes")
 				
 			},
-			label = {  Text("Registro Pago") },
+			label = {  Text("Clientes") },
 			selected = currentRoute == AppRoutes.RegPersonScreen.toString(),
 			onClick = {
 				navController.navigate(AppRoutes.PersonasScreen) {
+					
+					launchSingleTop = true
+					
+					restoreState = true
+					
+					popUpTo(navController.graph.startDestinationId) {
+						saveState = true
+					}
+				}
+			}
+		)
+		
+		NavigationBarItem(
+			icon =  {
+				Icon( painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ad_admin), contentDescription = "Administrar")
+			},
+			label = { Text("Administrar") },
+			selected = currentRoute == AppRoutes.ManageScreen.toString(),
+			onClick = {
+				navController.navigate(AppRoutes.ManageScreen) {
 					
 					launchSingleTop = true
 					
