@@ -27,12 +27,13 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun WelcomeCard(name: String, date: String) {
+	
 	Card(
 		modifier = Modifier
 			.fillMaxWidth()
 			.padding(14.dp),
 		colors = CardDefaults.cardColors(
-			containerColor = Color(0xFF6200EE),
+			containerColor = Color(0xE0447A9C),
 		),
 		elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
 	) {

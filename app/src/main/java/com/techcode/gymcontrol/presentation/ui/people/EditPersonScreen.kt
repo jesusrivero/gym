@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -43,7 +44,7 @@ fun EditPersonScreen(navController: NavController, viewModel: PeopleViewModel, i
 					Text(text = "Editar Usuario", color = Color.White, fontWeight = FontWeight.Bold)
 				},
 				colors = TopAppBarDefaults.topAppBarColors(
-					containerColor = MaterialTheme.colorScheme.primary
+					containerColor = Color(0xBAA7D3DC)
 				),
 				navigationIcon = {
 					IconButton(
@@ -105,12 +106,15 @@ fun ContenEditarView(
 		)
 		
 		Button(
+			
 			onClick = {
 				val usuario = PersonEntity(id = id , usuario = usuario!!, email = email!!)
-				
 				viewModel.updateUser(usuario)
 				navController.popBackStack()
-			}
+			}, colors = ButtonDefaults.buttonColors(
+				containerColor = Color(0xBAA7D3DC)
+				
+			)
 		){
 			Text(text = "Editar")
 			

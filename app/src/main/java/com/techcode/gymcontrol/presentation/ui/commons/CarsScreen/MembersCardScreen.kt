@@ -1,18 +1,23 @@
 package com.techcode.gymcontrol.presentation.ui.commons.CarsScreen
 
-import android.provider.MediaStore
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,21 +37,121 @@ fun MembersCardScreen() {
 			.padding(horizontal = 16.dp, vertical = 8.dp),
 		horizontalArrangement = Arrangement.spacedBy(16.dp)
 	) {
+		MembersCard(
+			color = Color(0xFF4CAF50),
+			modifier = Modifier
+		) {
+			Column(
+				horizontalAlignment = Alignment.CenterHorizontally,
+				verticalArrangement = Arrangement.Center
+			) {
+				Text(
+					text = "Semanal",
+					color = Color.White,
+					fontSize = 16.sp,
+					fontWeight = FontWeight.Bold
+				)
+				Row(verticalAlignment = Alignment.CenterVertically) {
+					
+					Icon(
+						imageVector = Icons.Default.Person,
+						contentDescription = "Car",
+						tint = Color.White,
+						modifier = Modifier.size(20.dp)
+					)
+					
+					Spacer(modifier = Modifier.height(4.dp))
+					
+					
+					Text(
+						text = "50",
+						color = Color.White,
+						fontSize = 16.sp
+					)
+				}
+			}
+		}
 		
-		MembersyCard(title = "Resumen 1", color = Color(0xFF4CAF50))
+		
+		MembersCard(
+			color = Color(0xFF2196F3),
+		) {
+			Column(
+				horizontalAlignment = Alignment.CenterHorizontally,
+				verticalArrangement = Arrangement.Center
+			) {
+				
+				Text(
+					text = "Quincenal",
+					color = Color.White,
+					fontSize = 16.sp,
+					fontWeight = FontWeight.Bold
+				)
+				Row(verticalAlignment = Alignment.CenterVertically) {
+					Icon(
+						imageVector = Icons.Default.Person,
+						contentDescription = "Activos",
+						tint = Color.White,
+						modifier = Modifier.size(20.dp)
+					)
+					Spacer(modifier = Modifier.height(4.dp))
+					
+					Text(
+						text = "25",
+						color = Color.White,
+						fontSize = 16.sp
+					)
+				}
+			}
+			
+		}
 		
 		
-		MembersyCard(title = "Resumen 2", color = Color(0xFF2196F3))
 		
-		
-		MembersyCard(title = "Resumen 3", color = Color(0xFF9C27B0))
+		MembersCard(
+			color = Color(0xFF9C27B0),
+		) {
+			Column(
+				horizontalAlignment = Alignment.CenterHorizontally,
+				verticalArrangement = Arrangement.Center
+			) {
+				Text(
+					text = "Mensual",
+					color = Color.White,
+					fontSize = 16.sp,
+					fontWeight = FontWeight.Bold
+				)
+				Row(verticalAlignment = Alignment.CenterVertically) {
+					Icon(
+						imageVector = Icons.Default.Person,
+						contentDescription = "Inactivos",
+						tint = Color.White,
+						modifier = Modifier.size(20.dp)
+					)
+					Spacer(modifier = Modifier.height(4.dp))
+					
+					Text(
+						text = "25",
+						color = Color.White,
+						fontSize = 16.sp
+					)
+					
+				}
+				
+				
+			}
+		}
 	}
 }
 
 @Composable
-fun MembersyCard(title: String, color: Color) {
+fun MembersCard(
+	color: Color,
+	modifier: Modifier = Modifier,
+	content: @Composable () -> Unit,
+) {
 	Card(
-		modifier = Modifier
+		modifier = modifier
 			.width(150.dp)
 			.height(100.dp),
 		colors = CardDefaults.cardColors(containerColor = color),
@@ -58,12 +163,7 @@ fun MembersyCard(title: String, color: Color) {
 				.padding(16.dp),
 			contentAlignment = Alignment.Center
 		) {
-			Text(
-				text = title,
-				color = Color.White,
-				fontSize = 20.sp,
-				fontWeight = FontWeight.Bold
-			)
+			content()
 		}
 	}
 }

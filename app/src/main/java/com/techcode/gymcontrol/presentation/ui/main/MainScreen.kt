@@ -16,7 +16,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -60,7 +62,7 @@ fun MainContent(
 			TopAppBar(
 				title = { Text(text = "Gym Control", color = Color.White, fontWeight = FontWeight.Bold) },
 				colors = TopAppBarDefaults.topAppBarColors(
-					containerColor = MaterialTheme.colorScheme.primary
+					containerColor = Color(0xBAA7D3DC)
 				)
 			)
 		},
@@ -68,7 +70,7 @@ fun MainContent(
 			FloatingActionButton(
 				shape = CircleShape,
 				onClick = navRegister,
-				containerColor = MaterialTheme.colorScheme.primary,
+				containerColor = Color(0xFFA7D3DC),
 				contentColor = Color.White,
 
 				) {
@@ -93,6 +95,8 @@ fun MainContent(
 				.padding(innerPadding),
 			contentAlignment = Alignment.Center
 		) {
+			
+			
 			Column(modifier = Modifier.padding(8.dp)) {
 				WelcomeCard(name = "Alberto", date = "12/08/2023")
 				Text("Resumen General", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(start = 15.dp))

@@ -43,7 +43,7 @@ fun ManageScreen(
 			TopAppBar(
 				title = { Text(text = "Panel de Administracion", color = Color.White, fontWeight = FontWeight.Bold) },
 				colors = TopAppBarDefaults.topAppBarColors(
-					containerColor = MaterialTheme.colorScheme.primary
+					containerColor = Color(0xBAA7D3DC)
 				)
 			)
 		},

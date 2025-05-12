@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -34,7 +37,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.presentation.ui.commons.BottomNavigationBar
 
@@ -46,6 +48,7 @@ fun PaymentsScreen(
 	var Description by remember { mutableStateOf("") }
 	var Reference by remember { mutableStateOf("") }
 	var paymentFrequency by remember { mutableStateOf("") }
+	var typepayment by remember { mutableStateOf("") }
 	Scaffold(
 		topBar = {
 			TopAppBar(
@@ -57,7 +60,7 @@ fun PaymentsScreen(
 					)
 				},
 				colors = TopAppBarDefaults.topAppBarColors(
-					containerColor = MaterialTheme.colorScheme.primary
+					containerColor = Color(0xBAA7D3DC)
 				)
 			)
 		},
@@ -75,19 +78,10 @@ fun PaymentsScreen(
 			contentAlignment = Alignment.Center
 		) {
 			Column(
-				modifier = Modifier
+				modifier = Modifier.verticalScroll(rememberScrollState())
 					.fillMaxSize()
 					.padding(16.dp)
 			) {
-				
-				Text(
-					text = "Persona a pagar",
-					style = MaterialTheme.typography.headlineMedium,
-					modifier = Modifier.padding(bottom = 16.dp),
-					fontWeight = FontWeight.Bold,
-					fontSize = 28.sp
-				)
-				
 				
 				OutlinedTextField(
 					value = "",
@@ -130,11 +124,48 @@ fun PaymentsScreen(
 				
 				Spacer(modifier = Modifier.padding(8.dp))
 				
+				ExposedDropdownMenuBox(
+					expanded = false,
+					onExpandedChange = {}
+				) {
+					OutlinedTextField(
+						value = typepayment,
+						onValueChange = {},
+						label = { Text("Frecuencia de pago") },
+						modifier = Modifier.fillMaxWidth(),
+						readOnly = true,
+						trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) }
+					)
+					
+					ExposedDropdownMenu(
+						expanded = false,
+						onDismissRequest = {}
+					) {
+						listOf("Semanal", "Quincenal", "Mensual").forEach { frequency ->
+							DropdownMenuItem(
+								text = { Text(frequency) },
+								onClick = {
+									typepayment = frequency
+								}
+							)
+						}
+					}
+				}
 				
+				
+				Spacer(modifier = Modifier.padding(8.dp))
 				MontoSection(it = PaddingValues())
 				
 				Spacer(modifier = Modifier.padding(8.dp))
 				
+				OutlinedTextField(
+					value = Reference,
+					onValueChange = { Reference = it },
+					label = { Text("Referencia del pago") },
+					modifier = Modifier
+						.fillMaxWidth()
+				)
+				Spacer(modifier = Modifier.padding(8.dp))
 				
 				OutlinedTextField(
 					value = Description,
@@ -145,17 +176,16 @@ fun PaymentsScreen(
 				)
 				Spacer(modifier = Modifier.padding(8.dp))
 				
-				OutlinedTextField(
-					value = Reference,
-					onValueChange = { Reference = it },
-					label = { Text("Referencia del pago") },
+				
+				
+				Button(
+					onClick = { },
+					colors = ButtonDefaults.buttonColors(containerColor = Color(0xBAA7D3DC)),
 					modifier = Modifier
+						.align(Alignment.CenterHorizontally)
 						.fillMaxWidth()
-				)
-				
-				 Spacer(modifier = Modifier.padding(8.dp))
-				
-				Button(onClick = { /*TODO*/ }, modifier = Modifier.align(Alignment.CenterHorizontally).fillMaxWidth().padding(bottom = 16.dp)) {
+						.padding(bottom = 16.dp)
+				) {
 					Text(text = "Guardar")
 				}
 				

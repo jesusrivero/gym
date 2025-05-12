@@ -1,5 +1,4 @@
 package com.techcode.gymcontrol.presentation.ui.people
-
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,20 +27,20 @@ fun ListPersonScreen(nav: NavController) {
 			TopAppBar(
 				modifier = Modifier.fillMaxWidth(),
 				title = { Text(text = "Registro de Pagos") },
-
+				
 				colors = TopAppBarDefaults.topAppBarColors(
 					containerColor = MaterialTheme.colorScheme.primary
 				)
 			)
 		},
-
+		
 		bottomBar = {
 			BottomNavigationBar(
 				navController = nav,
 				modifier = Modifier.fillMaxWidth(),
 			)
 		}
-
+	
 	) { innerPadding ->
 		Box(
 			modifier = Modifier
@@ -49,13 +48,13 @@ fun ListPersonScreen(nav: NavController) {
 				.padding(innerPadding),
 			contentAlignment = Alignment.Center
 		) {
-
+			
 			Text(text = "Lista de clientes")
 		}
-
+		
 	}
-
-
+	
+	
 }
 
 @Preview(showBackground = true)

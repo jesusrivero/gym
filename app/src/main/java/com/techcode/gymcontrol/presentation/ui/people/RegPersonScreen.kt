@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -40,7 +41,7 @@ fun RegPersonScreen(navController: NavController, viewModel: PeopleViewModel) {
 					Text(text = "Gym Control", color = Color.White, fontWeight = FontWeight.Bold)
 				},
 				colors = TopAppBarDefaults.topAppBarColors(
-					containerColor = MaterialTheme.colorScheme.primary
+					containerColor = Color(0xBAA7D3DC)
 				),
 				navigationIcon = {
 					IconButton(
@@ -101,12 +102,14 @@ fun ContenAgregarView(
 		Button(
 			onClick = {
 				val usuario = PersonEntity(usuario = usuario, email = email)
-				
 				viewModel.saveUser(usuario)
 				navController.popBackStack()
-			}
+			}, colors = ButtonDefaults.buttonColors(
+				containerColor = Color(0xBAA7D3DC)
+			
+			)
 		){
-			Text(text = "Agregar")
+			Text(text = "Agregar",)
 			
 			
 		}
