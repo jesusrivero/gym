@@ -51,8 +51,8 @@ fun EditPersonScreen(navController: NavController, viewModel: PeopleViewModel, i
 						onClick = { navController.popBackStack() }
 					) {
 						Icon(
-							painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_back),
-							contentDescription = "Regresar", tint = Color.White
+								painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_back),
+						contentDescription = "Regresar", tint = Color.White
 						)
 					}
 				}

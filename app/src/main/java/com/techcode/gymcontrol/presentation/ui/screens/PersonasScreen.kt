@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -27,6 +29,8 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -37,7 +41,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.presentation.ui.commons.BottomNavigationBar
@@ -53,7 +59,7 @@ fun PersonsScreen(
 ) {
 
 	var searchText by remember { mutableStateOf("") }
-	
+
 	Scaffold(
 		topBar = {
 			Column {
@@ -69,30 +75,35 @@ fun PersonsScreen(
 						containerColor = Color(0xBAA7D3DC)
 					)
 				)
-				
-				SearchBar(
+
+
+				TextField(
+					value = searchText,
+					onValueChange = { searchText = it },
 					modifier = Modifier
-						.fillMaxWidth(),
-					query = searchText,
-					onQueryChange = { searchText = it },
-					onSearch = { },
-					active = false,
-					onActiveChange = {},
+						.fillMaxWidth()
+						.padding(horizontal = 16.dp, vertical = 8.dp),
 					placeholder = { Text("Buscar personas...") },
 					leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") },
 					shape = MaterialTheme.shapes.large,
-					colors = SearchBarDefaults.colors(
-						containerColor = MaterialTheme.colorScheme.surface,
-						inputFieldColors = SearchBarDefaults.inputFieldColors(
-							focusedTextColor = MaterialTheme.colorScheme.onSurface,
-							unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-							focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-							unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-							focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
-							unfocusedLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-						)
+					colors = TextFieldDefaults.colors(
+						focusedContainerColor = MaterialTheme.colorScheme.surface,
+						unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+						focusedTextColor = MaterialTheme.colorScheme.onSurface,
+						unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+						focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+						unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+						focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
+						unfocusedLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+						focusedIndicatorColor = Color.Transparent,
+						unfocusedIndicatorColor = Color.Transparent,
+					),
+					singleLine = true,
+					keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+					keyboardActions = KeyboardActions(
+						onSearch = {  }
 					)
-				) {}
+				)
 			}
 		},
 		bottomBar = {
@@ -102,7 +113,7 @@ fun PersonsScreen(
 		}
 	) { innerPadding ->
 		val state = viewModel.state
-		
+
 
 		val filteredList = if (searchText.isBlank()) {
 			state.userList
@@ -112,7 +123,7 @@ fun PersonsScreen(
 						user.email.contains(searchText, ignoreCase = true)
 			}
 		}
-		
+
 		Box(
 			modifier = Modifier
 				.fillMaxSize()
@@ -156,17 +167,27 @@ fun PersonsScreen(
 											fontWeight = FontWeight.SemiBold,
 											color = MaterialTheme.colorScheme.onSurface
 										)
-										
+
 										Spacer(modifier = Modifier.height(4.dp))
-										
+
 										Text(
 											text = user.email,
 											style = MaterialTheme.typography.bodyMedium,
 											color = MaterialTheme.colorScheme.onSurfaceVariant
 										)
 									}
-									
+
 									Row {
+										IconButton(
+											onClick = { },
+											modifier = Modifier.size(40.dp)
+										) {
+											Icon(
+												painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_details),
+												contentDescription = "Detalles", tint = Color.Black
+											)
+										}
+
 										IconButton(
 											onClick = { navEdit(user.id) },
 											modifier = Modifier.size(40.dp)
@@ -177,7 +198,7 @@ fun PersonsScreen(
 												tint = MaterialTheme.colorScheme.primary
 											)
 										}
-										
+
 										IconButton(
 											onClick = { viewModel.deleteUser(user) },
 											modifier = Modifier.size(40.dp)
