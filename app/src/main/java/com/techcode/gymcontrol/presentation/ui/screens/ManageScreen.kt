@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -21,6 +23,7 @@ import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
@@ -35,6 +38,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,6 +56,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.techcode.gymcontrol.presentation.navegation.AppRoutes
 import com.techcode.gymcontrol.presentation.ui.commons.BottomNavigationBar
 
 //@OptIn(ExperimentalMaterial3Api::class)
@@ -65,15 +73,16 @@ import com.techcode.gymcontrol.presentation.ui.commons.BottomNavigationBar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageScreen(
-    navBottom: NavController,
 
-    ) {
+    navController: NavController,
+) {
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Panel de Administracion",
+                        text = "Panel de Administración",
                         color = Color.White,
                         fontWeight = FontWeight.Bold
                     )
@@ -85,79 +94,88 @@ fun ManageScreen(
         },
         bottomBar = {
             BottomNavigationBar(
-                navController = navBottom,
+                navController = navController,
             )
         }
-    )
-    { innerPadding ->
-        Box(
+    ) { innerPadding ->
+        Column (
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
-            contentAlignment = Alignment.Center
+                .padding(innerPadding)
+                .verticalScroll(
+                    rememberScrollState())
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
 
                 SettingsSectionTitle("General")
-                Spacer(modifier = Modifier.padding(top = 10.dp))
-                SettingsItem("Informacion de la cuenta", Icons.Default.AccountCircle)
-                Spacer(modifier = Modifier.padding(top = 8.dp))
 
-                HorizontalDivider(thickness = 1.dp)
+                SettingsItem(
+                    text = "Información de la cuenta",
+                    icon = Icons.Default.AccountCircle,
+                    onClick = { navController.navigate(AppRoutes.MainScreen) }
+                )
 
-                Spacer(modifier = Modifier.padding(top = 10.dp))
+                HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
 
-                SettingsItem("Membresias", Icons.Default.Menu)
 
-                Spacer(modifier = Modifier.padding(top = 10.dp))
 
-                HorizontalDivider(thickness = 1.dp)
+                SettingsItem(
+                    text = "Membresías",
+                    icon = Icons.Default.Menu,
+                    onClick = { navController.navigate("") }
+                )
 
-                Spacer(modifier = Modifier.padding(top = 10.dp))
+                HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
 
-                SettingsItem("Reportes", Icons.Default.Settings)
 
-                Spacer(modifier = Modifier.padding(top = 10.dp))
 
-                HorizontalDivider(thickness = 1.dp)
-                Spacer(modifier = Modifier.padding(top = 10.dp))
+                SettingsItem(
+                    text = "Reportes",
+                    icon = Icons.Default.Settings,
+                    onClick = { navController.navigate("") }
+                )
 
-                SettingsItem("Bitaroca de acciones", Icons.Default.Build)
-                Spacer(modifier = Modifier.padding(top = 10.dp))
+                HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
 
-                HorizontalDivider(thickness = 1.dp)
+                SettingsItem(
+                    text = "Reportes",
+                    icon = Icons.Default.Settings,
+                    onClick = { navController.navigate("") }
+                )
+
+                HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
+
+
+                SettingsItem(
+                    text = "Bitácora de acciones",
+                    icon = Icons.Default.Build,
+                    onClick = { navController.navigate("") }
+                )
+
+                HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
 
                 Spacer(modifier = Modifier.padding(top = 15.dp))
 
-                SettingsSectionTitle("General")
-                Spacer(modifier = Modifier.padding(top = 8.dp))
+                SettingsSectionTitle("Soporte")
 
-                SettingsItem("Reportar errores", Icons.Default.Email)
-                Spacer(modifier = Modifier.padding(top = 10.dp))
+                SettingsItem(
+                    text = "Reportar errores",
+                    icon = Icons.Default.Email,
+                    onClick = { navController.navigate("") }
+                )
 
-                HorizontalDivider(thickness = 1.dp)
+                HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
 
-                Spacer(modifier = Modifier.padding(top = 10.dp))
+                SettingsItem(
+                    text = "Sobre nosotros",
+                    icon = Icons.Default.Info,
+                    onClick = { navController.navigate("") }
+                )
 
-                SettingsItem("Sobre nosotros", Icons.Default.Info)
-
-                Spacer(modifier = Modifier.padding(top = 10.dp))
-
-                HorizontalDivider(thickness = 1.dp)
-
-
+                HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
             }
-
-
         }
     }
 
-
-}
 
 @Composable
 fun SettingsSectionTitle(title: String) {
@@ -168,45 +186,54 @@ fun SettingsSectionTitle(title: String) {
             fontSize = 30.sp
         ),
         color = MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier.padding(bottom = 8.dp)
-
+        modifier = Modifier.padding(bottom = 8.dp).padding(start = 10.dp, top = 15.dp)
     )
-
 }
 
 @Composable
-fun SettingsItem(text: String, icon: ImageVector) {
+fun SettingsItem(
+    text: String,
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
     MaterialTheme {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(vertical = 15.dp)
+                .padding(end = 5.dp)
+                .padding(start = 10.dp)
+               ,
+
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                modifier = Modifier.size(20.dp)
             )
-            Spacer(modifier = Modifier.padding(start = 6.dp))
+
+            Spacer(modifier = Modifier.padding(start = 8.dp))
 
             Text(
                 text = text,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.weight(1f)
             )
-            Icon(
-                imageVector = Icons.Default.ArrowDropDown,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
 
+            IconButton(
+                onClick = onClick,
+                modifier = Modifier.size(30.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowRight,
+                    contentDescription = "Navegar",
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
         }
-
     }
-
-
 }
 
 

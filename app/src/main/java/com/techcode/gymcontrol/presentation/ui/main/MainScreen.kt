@@ -92,7 +92,6 @@ fun MainContent(
 			modifier = Modifier
 				.fillMaxSize()
 				.padding(innerPadding)
-				.padding(8.dp)
 				.verticalScroll(
 					rememberScrollState()
 				)
@@ -101,13 +100,13 @@ fun MainContent(
 			Text(
 				"Resumen General",
 				style = MaterialTheme.typography.headlineSmall,
-				modifier = Modifier.padding(start = 15.dp)
+				modifier = Modifier.padding(start = 10.dp)
 			)
 			SumaryCarsScreen()
 			Text(
 				"Resumen de Membresias",
 				style = MaterialTheme.typography.headlineSmall,
-				modifier = Modifier.padding(start = 15.dp)
+				modifier = Modifier.padding(start = 10.dp)
 			)
 			MembersCardScreen()
 			MovementsCarScreen()

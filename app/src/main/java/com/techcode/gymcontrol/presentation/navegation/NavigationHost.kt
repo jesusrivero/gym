@@ -46,7 +46,7 @@ fun NavigationHost (
 		
 		composable<AppRoutes.ManageScreen> {
 			ManageScreen(
-				navBottom = navController,
+				navController= navController,
 				
 			)
 		}
