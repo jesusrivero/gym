@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -101,9 +102,18 @@ fun PreferencesScreen(
 
 
 
+
             SettingsItem(
-                text = "Membresías",
+                text = "Generar Respaldo",
                 icon = Icons.Default.Menu,
+                onClick = { navController.navigate("") }
+            )
+
+            HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
+
+            SettingsItem(
+                text = "Notificaciones",
+                icon = Icons.Default.Notifications,
                 onClick = { navController.navigate("") }
             )
 

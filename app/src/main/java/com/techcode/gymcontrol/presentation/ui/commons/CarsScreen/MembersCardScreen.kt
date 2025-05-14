@@ -38,7 +38,7 @@ fun MembersCardScreen() {
 		horizontalArrangement = Arrangement.spacedBy(16.dp)
 	) {
 		MembersCard(
-			color = Color(0xFF4CAF50),
+			color = Color(0xCE447A9C),
 			modifier = Modifier
 		) {
 			Column(
@@ -74,7 +74,7 @@ fun MembersCardScreen() {
 		
 		
 		MembersCard(
-			color = Color(0xFF2196F3),
+			color = Color(0xCE447A9C),
 		) {
 			Column(
 				horizontalAlignment = Alignment.CenterHorizontally,
@@ -109,7 +109,7 @@ fun MembersCardScreen() {
 		
 		
 		MembersCard(
-			color = Color(0xFF9C27B0),
+			color = Color(0xCE447A9C),
 		) {
 			Column(
 				horizontalAlignment = Alignment.CenterHorizontally,

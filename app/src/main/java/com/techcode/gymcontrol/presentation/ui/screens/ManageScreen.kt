@@ -113,7 +113,33 @@ fun ManagerContent(
 							) {
 								Column {
 									Text("Personas", fontWeight = FontWeight.Bold)
-									Text("Listado de clientes")
+									Text("Listado de personas")
+								}
+								Icon(Icons.Default.Menu, contentDescription = "Icono")
+							}
+						}
+					}
+
+					Card(
+						modifier = Modifier
+							.fillMaxWidth()
+							.padding(top = 6.dp)
+							.height(200.dp),
+						onClick = { navController.navigate(AppRoutes.ListPaymentsScreen) },
+						shape = RoundedCornerShape(8.dp)
+					) {
+						Box(modifier = Modifier.fillMaxSize()) {
+							Row(
+								modifier = Modifier
+									.align(Alignment.BottomStart)
+									.padding(16.dp)
+									.fillMaxWidth(),
+								verticalAlignment = Alignment.CenterVertically,
+								horizontalArrangement = Arrangement.SpaceBetween
+							) {
+								Column {
+									Text("Pagos", fontWeight = FontWeight.Bold)
+									Text("Listado de pagos")
 								}
 								Icon(Icons.Default.Menu, contentDescription = "Icono")
 							}
@@ -146,31 +172,7 @@ fun ManagerContent(
 						}
 					}
 					
-					Card(
-						modifier = Modifier
-							.fillMaxWidth()
-							.padding(top = 6.dp)
-							.height(200.dp),
-						onClick = { navController.navigate(AppRoutes.PersonasScreen) },
-						shape = RoundedCornerShape(8.dp)
-					) {
-						Box(modifier = Modifier.fillMaxSize()) {
-							Row(
-								modifier = Modifier
-									.align(Alignment.BottomStart)
-									.padding(16.dp)
-									.fillMaxWidth(),
-								verticalAlignment = Alignment.CenterVertically,
-								horizontalArrangement = Arrangement.SpaceBetween
-							) {
-								Column {
-									Text("Pagos", fontWeight = FontWeight.Bold)
-									Text("Listado de pagos")
-								}
-								Icon(Icons.Default.Menu, contentDescription = "Icono")
-							}
-						}
-					}
+
 					
 					Card(
 						modifier = Modifier

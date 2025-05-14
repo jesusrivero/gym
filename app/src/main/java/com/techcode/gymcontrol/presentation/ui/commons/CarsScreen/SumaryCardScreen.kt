@@ -39,7 +39,7 @@ fun SumaryCarsScreen() {
 		
 		
 		SummaryCard(
-			color = Color(0xFF4CAF50),
+			color = Color(0xC92196F3),
 			modifier = Modifier
 		) {
 			Column(
@@ -72,10 +72,10 @@ fun SumaryCarsScreen() {
 				}
 			}
 		}
-		
+
 		
 		SummaryCard(
-			color = Color(0xFF2196F3),
+			color = Color(0xCD4CAF50),
 		) {
 			Column(
 				horizontalAlignment = Alignment.CenterHorizontally,
@@ -110,7 +110,7 @@ fun SumaryCarsScreen() {
 		
 		
 		SummaryCard(
-			color = Color(0xFF9C27B0),
+			color = Color(0xB4E33E3E),
 		) {
 			Column(
 				horizontalAlignment = Alignment.CenterHorizontally,
