@@ -42,11 +42,11 @@ import com.techcode.gymcontrol.presentation.ui.commons.CarsScreen.WelcomeCard
 @Composable
 fun MainScreen(navController: NavController) {
 	MainContent(
-	
+
 		navBottom = navController,
 		navRegister = { navController.navigate(AppRoutes.RegPersonScreen) },
 
-	)
+		)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,7 +56,7 @@ fun MainContent(
 	navBottom: NavController,
 	navRegister: () -> Unit,
 
-) {
+	) {
 	Scaffold(
 		topBar = {
 			TopAppBar(
@@ -89,27 +89,31 @@ fun MainContent(
 		}
 	)
 	{ innerPadding ->
-		Box(
+		Column(
 			modifier = Modifier
 				.fillMaxSize()
-				.padding(innerPadding),
-			contentAlignment = Alignment.Center
+				.padding(innerPadding)
+				.padding(8.dp)
+				.verticalScroll(
+					rememberScrollState()
+				)
 		) {
-			
-			
-			Column(modifier = Modifier.padding(8.dp)) {
-				WelcomeCard(name = "Alberto", date = "12/08/2023")
-				Text("Resumen General", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(start = 15.dp))
-				SumaryCarsScreen()
-				Text("Resumen de Membresias", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(start = 15.dp))
-				MembersCardScreen()
-				MovementsCarScreen()
-				
-			}
-		}
-		
+			WelcomeCard(name = "Alberto", date = "12/08/2023")
+			Text(
+				"Resumen General",
+				style = MaterialTheme.typography.headlineSmall,
+				modifier = Modifier.padding(start = 15.dp)
+			)
+			SumaryCarsScreen()
+			Text(
+				"Resumen de Membresias",
+				style = MaterialTheme.typography.headlineSmall,
+				modifier = Modifier.padding(start = 15.dp)
+			)
+			MembersCardScreen()
+			MovementsCarScreen()
 
-		
+		}
 	}
 }
 

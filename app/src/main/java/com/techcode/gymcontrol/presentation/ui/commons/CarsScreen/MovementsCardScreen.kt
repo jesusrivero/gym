@@ -32,19 +32,9 @@ fun MovementsCarScreen() {
 			),
 			modifier = Modifier.padding(bottom = 16.dp)
 		)
-		
-		
-		MovimientosList(movimientos = getSampleMovimientos())
-	}
-}
 
-@Composable
-fun MovimientosList(movimientos: List<Movimiento>) {
-	LazyColumn(
-		verticalArrangement = Arrangement.spacedBy(12.dp)
-	) {
-		items(movimientos.size) { movimiento ->
-			MovimientoItem(movimiento = movimientos[movimiento])
+		getSampleMovimientos().forEach{ item ->
+			MovimientoItem(movimiento = item)
 		}
 	}
 }
