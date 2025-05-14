@@ -1,11 +1,15 @@
+import org.jetbrains.kotlin.gradle.model.Kapt
+
 plugins {
 	alias(libs.plugins.android.application)
 	alias(libs.plugins.kotlin.android)
 	alias(libs.plugins.kotlin.compose)
 	alias(libs.plugins.kotlinx.serialization.json)
 	alias(libs.plugins.ksp)
-
-
+	alias(libs.plugins.hilt.android)
+	kotlin("kapt")
+	
+	
 }
 
 android {
@@ -55,9 +59,9 @@ dependencies {
 	ksp(libs.androidx.room.compiler)                             // Room compiler
 	implementation(libs.androidx.lifecycle.viewmodel.compose)    // ViewModel + Compose
 	implementation(libs.androidx.navigation.compose)             // Navigation en Compose
-
-	implementation(libs.hilt.android)
-	implementation (libs.androidx.hilt.navigation.compose)
+	implementation(libs.hilt.android)                            //Hilt Android
+	implementation (libs.androidx.hilt.navigation.compose)       // Hilt navigation
+	kapt(libs.hilt.compiler)                                     // Hilt compiler
 	//DEFAULT
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.lifecycle.runtime.ktx)

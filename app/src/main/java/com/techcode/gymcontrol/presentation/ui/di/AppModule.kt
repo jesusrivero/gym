@@ -1,5 +1,6 @@
 package com.techcode.gymcontrol.presentation.ui.di
 
+import android.app.Application
 import android.content.Context
 import androidx.room.Room
 import com.techcode.gymcontrol.data.db.AppDatabase
@@ -16,10 +17,10 @@ import javax.inject.Singleton
 object AppModule {
 
     @Provides
-    @Singleton
-    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
+  
+    fun provideAppDatabase(): AppDatabase {
         return Room.databaseBuilder(
-            context,
+            MyApp.myApp.baseContext,
             AppDatabase::class.java,
             "db_usuarios"
         ).build()

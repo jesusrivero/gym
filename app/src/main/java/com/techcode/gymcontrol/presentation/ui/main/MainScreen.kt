@@ -11,9 +11,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-
-
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -29,6 +26,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.presentation.navegation.AppRoutes
 import com.techcode.gymcontrol.presentation.ui.commons.BottomNavigationBar
@@ -36,12 +34,13 @@ import com.techcode.gymcontrol.presentation.ui.commons.CarsScreen.MembersCardScr
 import com.techcode.gymcontrol.presentation.ui.commons.CarsScreen.SumaryCarsScreen
 import com.techcode.gymcontrol.presentation.ui.commons.CarsScreen.MovementsCarScreen
 import com.techcode.gymcontrol.presentation.ui.commons.CarsScreen.WelcomeCard
+import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(navController: NavController) {
+fun MainScreen(navController: NavController, viewModel: PeopleViewModel= hiltViewModel()) {
 	MainContent(
 		navBottom = navController,
 		navRegister = { navController.navigate(AppRoutes.RegPersonScreen) },
@@ -117,11 +116,11 @@ fun MainContent(
 	}
 }
 
-/*@Preview(showBackground = true)
+@Preview(showBackground = true)
 @Composable
 fun HolaMainScreen() {
 	MainContent(
 		navBottom = NavController(LocalContext.current),
 		navRegister = {}
 	)
-}*/
+}

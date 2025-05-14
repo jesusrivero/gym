@@ -131,7 +131,7 @@ fun PaymentsScreen(
 					OutlinedTextField(
 						value = typepayment,
 						onValueChange = {},
-						label = { Text("Frecuencia de pago") },
+						label = { Text("Tipo de pago") },
 						modifier = Modifier.fillMaxWidth(),
 						readOnly = true,
 						trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) }
@@ -141,7 +141,7 @@ fun PaymentsScreen(
 						expanded = false,
 						onDismissRequest = {}
 					) {
-						listOf("Semanal", "Quincenal", "Mensual").forEach { frequency ->
+						listOf("Pago Movil", "Dolares", "Mixto").forEach { frequency ->
 							DropdownMenuItem(
 								text = { Text(frequency) },
 								onClick = {
