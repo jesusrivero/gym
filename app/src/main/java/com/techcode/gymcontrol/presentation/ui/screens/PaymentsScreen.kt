@@ -48,7 +48,6 @@ fun PaymentsScreen(
 	var Description by remember { mutableStateOf("") }
 	var Reference by remember { mutableStateOf("") }
 	var paymentFrequency by remember { mutableStateOf("") }
-	var typepayment by remember { mutableStateOf("") }
 	Scaffold(
 		topBar = {
 			TopAppBar(
@@ -75,7 +74,7 @@ fun PaymentsScreen(
 			modifier = Modifier
 				.fillMaxSize()
 				.padding(innerPadding),
-			contentAlignment = Alignment.Center
+
 		) {
 			Column(
 				modifier = Modifier.verticalScroll(rememberScrollState())
@@ -145,9 +144,8 @@ fun PaymentsScreen(
 						.fillMaxWidth()
 				)
 				Spacer(modifier = Modifier.padding(8.dp))
-				
-				
-				
+
+
 				Button(
 					onClick = { },
 					colors = ButtonDefaults.buttonColors(containerColor = Color(0xBAA7D3DC)),
@@ -158,9 +156,9 @@ fun PaymentsScreen(
 				) {
 					Text(text = "Guardar")
 				}
-				
+
 			}
-			
+
 		}
 		
 	}
@@ -168,11 +166,11 @@ fun PaymentsScreen(
 
 
 
-@Preview(showBackground = true)
+/*@Preview(showBackground = true)
 @Composable
 fun PaymentsScreenPreview() {
 	PaymentsScreen(
 		navBottom = NavController(LocalContext.current),
 		
 		)
-}
+}*/

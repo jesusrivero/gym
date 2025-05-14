@@ -71,6 +71,7 @@ fun PaymentScreen() {
 				
 			
 				Column {
+
 					if (typePayment == "Pago Movil") {
 						OutlinedTextField(
 							value = montoBs,
@@ -80,7 +81,7 @@ fun PaymentScreen() {
 							keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
 						)
 					}
-					Spacer(modifier = Modifier.padding(top=8.dp))
+
 					if (typePayment == "Dolares") {
 						OutlinedTextField(
 							value = montoDolares,

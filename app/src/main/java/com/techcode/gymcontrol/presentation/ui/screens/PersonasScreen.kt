@@ -50,6 +50,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import com.techcode.gymcontrol.data.db.entity.PersonEntity
 import com.techcode.gymcontrol.presentation.ui.commons.BottomNavigationBar
 import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
 
@@ -63,12 +64,13 @@ fun PersonsScreen(
 ) {
 
     var showUserDialog by remember { mutableStateOf(false) }
+    var selectedUser by remember { mutableStateOf<PersonEntity?>(null) }
     var searchText by remember { mutableStateOf("") }
 
-    if (showUserDialog) {
-        if (showUserDialog) {
+    if (showUserDialog && selectedUser !=null) {
             AlertDialog(
-                onDismissRequest = { showUserDialog = false },
+                onDismissRequest = { showUserDialog = false
+                    selectedUser = null},
                 title = {
                     Box(modifier= Modifier.fillMaxWidth(),contentAlignment = Alignment.Center){
                         Text("Información")
@@ -76,9 +78,9 @@ fun PersonsScreen(
                    },
                 text = {
                     Column {
-                        Text("Nombre: usuario@ejemplo.com")
+                        Text("Nombre: ${selectedUser?.usuario ?: ""}")
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Email: juan123")
+                        Text("Email: ${selectedUser?.email ?: ""}")
                     }
                 },
                 confirmButton = {
@@ -91,7 +93,7 @@ fun PersonsScreen(
             )
         }
 
-    }
+
 
 
         Scaffold(
@@ -219,6 +221,7 @@ fun PersonsScreen(
                                         Row {
                                             IconButton(
                                                 onClick = {
+                                                    selectedUser = user
                                                     showUserDialog = true
                                                 },
                                                 modifier = Modifier.size(40.dp)
