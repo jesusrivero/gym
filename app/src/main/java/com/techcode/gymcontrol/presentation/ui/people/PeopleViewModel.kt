@@ -20,6 +20,8 @@ class PeopleViewModel @Inject constructor(
 	private val dao: UsuariosDatabaseDao
 
 ) : ViewModel() {
+
+
 	var state by mutableStateOf(PeopleState())
 		private set
 
@@ -52,5 +54,4 @@ class PeopleViewModel @Inject constructor(
 	data class PeopleState(
 		val userList: List<PersonEntity> = emptyList()
 	)
-
 }

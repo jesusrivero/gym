@@ -1,5 +1,6 @@
 package com.techcode.gymcontrol.presentation.ui.screens
 
+import android.R.attr.text
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,6 +31,7 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
@@ -45,6 +48,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.presentation.ui.commons.BottomNavigationBar
 import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
@@ -53,169 +57,215 @@ import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PersonsScreen(
-	navBottom: NavController,
-	viewModel: PeopleViewModel,
-	navEdit: (Int) -> Unit,
+    navBottom: NavController,
+    viewModel: PeopleViewModel,
+    navEdit: (Int) -> Unit,
 ) {
 
-	var searchText by remember { mutableStateOf("") }
+    var showUserDialog by remember { mutableStateOf(false) }
+    var searchText by remember { mutableStateOf("") }
 
-	Scaffold(
-		topBar = {
-			Column {
-				TopAppBar(
-					title = {
-						Text(
-							text = "Listado de Personas",
-							color = Color.White,
-							fontWeight = FontWeight.Bold
-						)
-					},
-					colors = TopAppBarDefaults.topAppBarColors(
-						containerColor = Color(0xBAA7D3DC)
-					)
-				)
+    if (showUserDialog) {
+        if (showUserDialog) {
+            AlertDialog(
+                onDismissRequest = { showUserDialog = false },
+                title = {
+                    Box(modifier= Modifier.fillMaxWidth(),contentAlignment = Alignment.Center){
+                        Text("Información")
+                    }
+                   },
+                text = {
+                    Column {
+                        Text("Nombre: usuario@ejemplo.com")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Email: juan123")
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = { showUserDialog = false }
+                    ) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
 
-
-				TextField(
-					value = searchText,
-					onValueChange = { searchText = it },
-					modifier = Modifier
-						.fillMaxWidth()
-						.padding(horizontal = 16.dp, vertical = 8.dp),
-					placeholder = { Text("Buscar personas...") },
-					leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") },
-					shape = MaterialTheme.shapes.large,
-					colors = TextFieldDefaults.colors(
-						focusedContainerColor = MaterialTheme.colorScheme.surface,
-						unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-						focusedTextColor = MaterialTheme.colorScheme.onSurface,
-						unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-						focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-						unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-						focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
-						unfocusedLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-						focusedIndicatorColor = Color.Transparent,
-						unfocusedIndicatorColor = Color.Transparent,
-					),
-					singleLine = true,
-					keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-					keyboardActions = KeyboardActions(
-						onSearch = {  }
-					)
-				)
-			}
-		},
-		bottomBar = {
-			BottomNavigationBar(
-				navController = navBottom,
-			)
-		}
-	) { innerPadding ->
-		val state = viewModel.state
+    }
 
 
-		val filteredList = if (searchText.isBlank()) {
-			state.userList
-		} else {
-			state.userList.filter { user ->
-				user.usuario.contains(searchText, ignoreCase = true) ||
-						user.email.contains(searchText, ignoreCase = true)
-			}
-		}
+        Scaffold(
+            topBar = {
+                Column {
+                    TopAppBar(
+                        title = {
+                            Text(
+                                text = "Listado de Personas",
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = Color(0xBAA7D3DC)
+                        )
+                    )
 
-		Box(
-			modifier = Modifier
-				.fillMaxSize()
-				.padding(innerPadding),
-			contentAlignment = Alignment.Center
-		) {
-			if (filteredList.isEmpty()) {
-				Text(
-					text = if (searchText.isNotEmpty()) "No se encontraron resultados" else "No hay personas registradas",
-					color = MaterialTheme.colorScheme.onSurfaceVariant
-				)
-			} else {
-				LazyColumn(
-					modifier = Modifier
-						.fillMaxSize()
-						.padding(horizontal = 12.dp),
-					verticalArrangement = Arrangement.spacedBy(8.dp)
-				) {
-					items(filteredList) { user ->
-						Surface(
-							modifier = Modifier
-								.fillMaxWidth()
-								.padding(vertical = 4.dp),
-							shape = RoundedCornerShape(12.dp),
-							color = MaterialTheme.colorScheme.surface,
-							border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant)
-						) {
-							Box(
-								modifier = Modifier.padding(12.dp)
-							) {
-								Row(
-									modifier = Modifier.fillMaxWidth(),
-									verticalAlignment = Alignment.CenterVertically
-								) {
-									Column(
-										modifier = Modifier.weight(1f)
-									) {
-										Text(
-											text = user.usuario,
-											style = MaterialTheme.typography.titleMedium,
-											fontWeight = FontWeight.SemiBold,
-											color = MaterialTheme.colorScheme.onSurface
-										)
 
-										Spacer(modifier = Modifier.height(4.dp))
+                    TextField(
+                        value = searchText,
+                        onValueChange = { searchText = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        placeholder = { Text("Buscar personas...") },
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") },
+                        shape = MaterialTheme.shapes.large,
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
+                            unfocusedLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                        ),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(
+                            onSearch = { }
+                        )
+                    )
+                }
+            },
+            bottomBar = {
+                BottomNavigationBar(
+                    navController = navBottom,
+                )
+            }
+        ) { innerPadding ->
+            val state = viewModel.state
 
-										Text(
-											text = user.email,
-											style = MaterialTheme.typography.bodyMedium,
-											color = MaterialTheme.colorScheme.onSurfaceVariant
-										)
-									}
 
-									Row {
-										IconButton(
-											onClick = { },
-											modifier = Modifier.size(40.dp)
-										) {
-											Icon(
-												painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_details),
-												contentDescription = "Detalles", tint = Color.Black
-											)
-										}
+            val filteredList = if (searchText.isBlank()) {
+                state.userList
+            } else {
+                state.userList.filter { user ->
+                    user.usuario.contains(searchText, ignoreCase = true) ||
+                            user.email.contains(searchText, ignoreCase = true)
+                }
+            }
 
-										IconButton(
-											onClick = { navEdit(user.id) },
-											modifier = Modifier.size(40.dp)
-										) {
-											Icon(
-												imageVector = Icons.Default.Edit,
-												contentDescription = "Editar",
-												tint = MaterialTheme.colorScheme.primary
-											)
-										}
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.Center
+            ) {
 
-										IconButton(
-											onClick = { viewModel.deleteUser(user) },
-											modifier = Modifier.size(40.dp)
-										) {
-											Icon(
-												imageVector = Icons.Default.Delete,
-												contentDescription = "Eliminar",
-												tint = MaterialTheme.colorScheme.error
-											)
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-}
+
+                if (filteredList.isEmpty()) {
+                    Text(
+                        text = if (searchText.isNotEmpty()) "No se encontraron resultados" else "No hay personas registradas",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(filteredList) { user ->
+                            Surface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.surface,
+                                border = BorderStroke(
+                                    0.5.dp,
+                                    MaterialTheme.colorScheme.outlineVariant
+                                )
+                            ) {
+                                Box(
+                                    modifier = Modifier.padding(12.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(
+                                            modifier = Modifier.weight(1f)
+                                        ) {
+                                            Text(
+                                                text = user.usuario,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+
+                                            Spacer(modifier = Modifier.height(4.dp))
+
+                                            Text(
+                                                text = user.email,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+
+                                        Row {
+                                            IconButton(
+                                                onClick = {
+                                                    showUserDialog = true
+                                                },
+                                                modifier = Modifier.size(40.dp)
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_details),
+                                                    contentDescription = "Detalles",
+                                                    tint = Color.Black
+                                                )
+                                            }
+
+
+
+                                            IconButton(
+                                                onClick = { navEdit(user.id) },
+                                                modifier = Modifier.size(40.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Edit,
+                                                    contentDescription = "Editar",
+                                                    tint = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
+
+                                            IconButton(
+                                                onClick = { viewModel.deleteUser(user) },
+                                                modifier = Modifier.size(40.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Delete,
+                                                    contentDescription = "Eliminar",
+                                                    tint = MaterialTheme.colorScheme.error
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                }
+
+
+            }
+        }
+    }
+
+
+

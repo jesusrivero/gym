@@ -86,7 +86,7 @@ fun ContenEditarView(
 		horizontalAlignment = Alignment.CenterHorizontally
 	){
 		OutlinedTextField(
-			value = usuario ?: "",
+			value = usuario ?: usuario,
 			onValueChange = { usuario = it },
 			label = { Text("usuario") },
 			modifier = Modifier
@@ -96,7 +96,7 @@ fun ContenEditarView(
 		)
 		
 		OutlinedTextField(
-			value = email ?: "",
+			value = email ?: email,
 			onValueChange = { email = it },
 			label = { Text("email") },
 			modifier = Modifier
