@@ -7,11 +7,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.techcode.gymcontrol.data.db.dao.UsuariosDatabaseDao
 import com.techcode.gymcontrol.data.db.entity.PersonEntity
+import dagger.hilt.android.HiltAndroidApp
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class PeopleViewModel(
+
+@HiltViewModel
+class PeopleViewModel @Inject constructor(
+
 	private val dao: UsuariosDatabaseDao
+
 ) : ViewModel() {
 	var state by mutableStateOf(PeopleState())
 		private set

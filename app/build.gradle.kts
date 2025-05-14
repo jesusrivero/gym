@@ -4,6 +4,8 @@ plugins {
 	alias(libs.plugins.kotlin.compose)
 	alias(libs.plugins.kotlinx.serialization.json)
 	alias(libs.plugins.ksp)
+
+
 }
 
 android {
@@ -18,6 +20,7 @@ android {
 		versionName = "1.0"
 
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+		//noinspection WrongGradleMethod
 		ksp {
 			arg("room.schemaLocation", "${projectDir}/schemas")
 		}
@@ -52,6 +55,9 @@ dependencies {
 	ksp(libs.androidx.room.compiler)                             // Room compiler
 	implementation(libs.androidx.lifecycle.viewmodel.compose)    // ViewModel + Compose
 	implementation(libs.androidx.navigation.compose)             // Navigation en Compose
+
+	implementation(libs.hilt.android)
+	implementation (libs.androidx.hilt.navigation.compose)
 	//DEFAULT
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.lifecycle.runtime.ktx)

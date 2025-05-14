@@ -36,13 +36,13 @@ import com.techcode.gymcontrol.presentation.ui.commons.CarsScreen.MembersCardScr
 import com.techcode.gymcontrol.presentation.ui.commons.CarsScreen.SumaryCarsScreen
 import com.techcode.gymcontrol.presentation.ui.commons.CarsScreen.MovementsCarScreen
 import com.techcode.gymcontrol.presentation.ui.commons.CarsScreen.WelcomeCard
+import dagger.hilt.android.AndroidEntryPoint
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(navController: NavController) {
 	MainContent(
-
 		navBottom = navController,
 		navRegister = { navController.navigate(AppRoutes.RegPersonScreen) },
 
@@ -117,11 +117,11 @@ fun MainContent(
 	}
 }
 
-@Preview(showBackground = true)
+/*@Preview(showBackground = true)
 @Composable
 fun HolaMainScreen() {
 	MainContent(
 		navBottom = NavController(LocalContext.current),
 		navRegister = {}
 	)
-}
+}*/
