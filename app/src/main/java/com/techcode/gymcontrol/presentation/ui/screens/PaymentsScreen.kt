@@ -124,39 +124,9 @@ fun PaymentsScreen(
 				
 				Spacer(modifier = Modifier.padding(8.dp))
 				
-				ExposedDropdownMenuBox(
-					expanded = false,
-					onExpandedChange = {}
-				) {
-					OutlinedTextField(
-						value = typepayment,
-						onValueChange = {},
-						label = { Text("Tipo de pago") },
-						modifier = Modifier.fillMaxWidth(),
-						readOnly = true,
-						trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) }
-					)
-					
-					ExposedDropdownMenu(
-						expanded = false,
-						onDismissRequest = {}
-					) {
-						listOf("Pago Movil", "Dolares", "Mixto").forEach { frequency ->
-							DropdownMenuItem(
-								text = { Text(frequency) },
-								onClick = {
-									typepayment = frequency
-								}
-							)
-						}
-					}
-				}
+				PaymentScreen()
 				
-				
-				Spacer(modifier = Modifier.padding(8.dp))
-				MontoSection(it = PaddingValues())
-				
-				Spacer(modifier = Modifier.padding(8.dp))
+				Spacer(modifier = Modifier.padding(6.dp))
 				
 				OutlinedTextField(
 					value = Reference,
@@ -196,48 +166,6 @@ fun PaymentsScreen(
 	}
 }
 
-@Composable
-fun MontoSection(it: PaddingValues) {
-	Column(
-		modifier = Modifier
-			.fillMaxWidth()
-	) {
-		
-		var Montobs by remember { mutableStateOf("") }
-		var MontoD by remember { mutableStateOf("") }
-		
-		Text(
-			text = "Monto",
-			style = MaterialTheme.typography.titleLarge,
-			
-			)
-		
-		Row(
-			verticalAlignment = Alignment.CenterVertically
-		) {
-			
-			OutlinedTextField(
-				value = Montobs,
-				onValueChange = { Montobs = it },
-				label = { Text("Monto en Bs") },
-				modifier = Modifier
-					.weight(1f)
-					.padding(end = 10.dp),
-				keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-			)
-			
-			
-			OutlinedTextField(
-				value = MontoD,
-				onValueChange = { MontoD = it },
-				label = { Text("Monto en $") },
-				modifier = Modifier.weight(1f),
-				keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-			)
-		}
-		
-	}
-}
 
 
 @Preview(showBackground = true)
