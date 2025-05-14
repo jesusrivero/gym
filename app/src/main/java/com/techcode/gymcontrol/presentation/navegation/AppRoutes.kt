@@ -10,7 +10,7 @@ object AppRoutes {
 	data object RegPersonScreen
 
 	@Serializable
-	data object ManageScreen
+	data object PreferencesScreen
 
 	
 	@Serializable
@@ -24,4 +24,10 @@ object AppRoutes {
 	
 	@Serializable
 	data object PersonasScreen
+
+	@Serializable
+	data object ManageScreen
+
+
+
 }

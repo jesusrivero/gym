@@ -1,13 +1,8 @@
 package com.techcode.gymcontrol.presentation.ui.commons
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -15,11 +10,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.techcode.gymcontrol.presentation.navegation.AppRoutes
@@ -80,13 +73,13 @@ fun BottomNavigationBar(
 		
 		NavigationBarItem(
 			icon = {
-					Icon(imageVector = Icons.Default.AccountBox, contentDescription = "Clientes")
+					Icon(imageVector = Icons.Default.AccountBox, contentDescription = "Administrar")
 				
 			},
-			label = {  Text("Clientes") },
-			selected = currentRoute == AppRoutes.RegPersonScreen.toString(),
+			label = {  Text("Administrar") },
+			selected = currentRoute == AppRoutes.ManageScreen.toString(),
 			onClick = {
-				navController.navigate(AppRoutes.PersonasScreen) {
+				navController.navigate(AppRoutes.ManageScreen) {
 					
 					launchSingleTop = true
 					
@@ -101,12 +94,12 @@ fun BottomNavigationBar(
 		
 		NavigationBarItem(
 			icon =  {
-				Icon( painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ad_admin), contentDescription = "Administrar")
+				Icon( painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ad_admin), contentDescription = "Preferencias")
 			},
-			label = { Text("Administrar") },
-			selected = currentRoute == AppRoutes.ManageScreen.toString(),
+			label = { Text("Preferencias") },
+			selected = currentRoute == AppRoutes.PreferencesScreen.toString(),
 			onClick = {
-				navController.navigate(AppRoutes.ManageScreen) {
+				navController.navigate(AppRoutes.PreferencesScreen) {
 					
 					launchSingleTop = true
 					

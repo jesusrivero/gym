@@ -107,6 +107,16 @@ fun PersonsScreen(
                                 fontWeight = FontWeight.Bold
                             )
                         },
+                        navigationIcon = {
+                            IconButton(
+                                onClick = { navBottom.popBackStack() }
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_back),
+                                    contentDescription = "Regresar", tint = Color.White
+                                )
+                            }
+                        },
                         colors = TopAppBarDefaults.topAppBarColors(
                             containerColor = Color(0xBAA7D3DC)
                         )
@@ -142,11 +152,7 @@ fun PersonsScreen(
                     )
                 }
             },
-            bottomBar = {
-                BottomNavigationBar(
-                    navController = navBottom,
-                )
-            }
+
         ) { innerPadding ->
             val state = viewModel.state
 

@@ -5,17 +5,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.room.Dao
 import com.techcode.gymcontrol.presentation.ui.main.MainScreen
 import com.techcode.gymcontrol.presentation.ui.people.EditPersonScreen
 import com.techcode.gymcontrol.presentation.ui.people.ListPersonScreen
 import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
 import com.techcode.gymcontrol.presentation.ui.people.RegPersonScreen
 import com.techcode.gymcontrol.presentation.ui.screens.ManageScreen
+import com.techcode.gymcontrol.presentation.ui.screens.PreferencesScreen
 import com.techcode.gymcontrol.presentation.ui.screens.PaymentsScreen
 import com.techcode.gymcontrol.presentation.ui.screens.PersonsScreen
-import dagger.hilt.android.HiltAndroidApp
-import javax.inject.Inject
 
 @Composable
 fun NavigationHost (
@@ -44,10 +42,10 @@ fun NavigationHost (
 			)
 		}
 		
-		composable<AppRoutes.ManageScreen> {
-			ManageScreen(
+		composable<AppRoutes.PreferencesScreen> {
+			PreferencesScreen(
 				navController= navController,
-				
+
 			)
 		}
 		
@@ -69,8 +67,14 @@ fun NavigationHost (
 		PaymentsScreen(
 				navBottom = navController)
 		}
-		
-		
+
+		composable<AppRoutes.ManageScreen> {
+			ManageScreen(
+				navController= navController)
+		}
+
+
+
 	}
 }
 
