@@ -179,7 +179,7 @@ fun ManagerContent(
 							.fillMaxWidth()
 							.padding(top = 6.dp)
 							.height(200.dp),
-						onClick = { navController.navigate(AppRoutes.PersonasScreen) },
+						onClick = { navController.navigate(AppRoutes.ReportScreen) },
 						shape = RoundedCornerShape(8.dp)
 					) {
 						Box(modifier = Modifier.fillMaxSize()) {

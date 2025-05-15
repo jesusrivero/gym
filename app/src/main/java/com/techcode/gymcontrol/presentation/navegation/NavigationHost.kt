@@ -17,6 +17,7 @@ import com.techcode.gymcontrol.presentation.ui.screens.ManageScreen
 import com.techcode.gymcontrol.presentation.ui.screens.PreferencesScreen
 import com.techcode.gymcontrol.presentation.ui.screens.PaymentsScreen
 import com.techcode.gymcontrol.presentation.ui.screens.PersonsScreen
+import com.techcode.gymcontrol.presentation.ui.screens.ReportScreen
 
 @Composable
 fun NavigationHost (
@@ -86,6 +87,11 @@ fun NavigationHost (
 
 		composable<AppRoutes.ManageScreen> {
 			ManageScreen(
+				navController= navController)
+		}
+
+		composable<AppRoutes.ReportScreen> {
+			ReportScreen(
 				navController= navController)
 		}
 

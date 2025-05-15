@@ -12,4 +12,5 @@ data class PersonEntity(
 	val usuario: String,
 	@ColumnInfo(name = "email")
 	val email: String
+
 )

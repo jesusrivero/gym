@@ -34,6 +34,9 @@ object AppRoutes {
 	@Serializable
 	data object ListPaymentsScreen
 
+	@Serializable
+	data object ReportScreen
+
 
 
 }
