@@ -1,6 +1,9 @@
 package com.techcode.gymcontrol.presentation.ui.screens
 
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,7 +12,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -31,13 +36,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.techcode.gymcontrol.presentation.ui.commons.BottomNavigationBar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,6 +58,7 @@ fun PaymentsScreen(
 	var Description by remember { mutableStateOf("") }
 	var Reference by remember { mutableStateOf("") }
 	var paymentFrequency by remember { mutableStateOf("") }
+	var clientPhotoUri by remember { mutableStateOf<String?>(null) }
 	Scaffold(
 		topBar = {
 			TopAppBar(
@@ -80,8 +91,68 @@ fun PaymentsScreen(
 				modifier = Modifier.verticalScroll(rememberScrollState())
 					.fillMaxSize()
 					.padding(16.dp)
+			) { Box(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(bottom = 16.dp),
+				contentAlignment = Alignment.Center
 			) {
-				
+				Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
+					if (clientPhotoUri != null) {
+						Image(
+							painter = rememberAsyncImagePainter(
+								ImageRequest.Builder(LocalContext.current)
+									.data(clientPhotoUri)
+									.build()
+							),
+							contentDescription = "Foto del cliente",
+							modifier = Modifier
+								.size(100.dp)
+								.clip(CircleShape)
+								.border(2.dp, Color(0xBAA7D3DC), CircleShape)
+								.clickable {
+
+
+
+									// Aquí va la implementar la selección de foto
+								},
+							contentScale = ContentScale.Crop
+						)
+					} else {
+						Image(
+							painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_add_person),
+							contentDescription = "Foto por defecto",
+							modifier = Modifier
+								.size(100.dp)
+								.clip(CircleShape)
+								.border(2.dp, Color(0xBAA7D3DC), CircleShape)
+								.clickable {
+
+
+
+								},
+							contentScale = ContentScale.Crop
+						)
+					}
+
+					Spacer(modifier = Modifier.padding(8.dp))
+
+					Text(
+						text = "Cambiar foto",
+						color = Color(0xBAA7D3DC),
+						modifier = Modifier.clickable {
+
+
+
+
+							// Implementar selección de foto
+						}
+					)
+				}
+			}
+
+
 				OutlinedTextField(
 					value = "",
 					onValueChange = {},

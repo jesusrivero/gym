@@ -139,7 +139,7 @@ fun ListPaymentsScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            text = "Listado de Personas",
+                            text = "Listado de pagos",
                             color = Color.White,
                             fontWeight = FontWeight.Bold
                         )

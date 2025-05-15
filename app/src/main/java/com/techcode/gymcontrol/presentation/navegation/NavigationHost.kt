@@ -1,5 +1,8 @@
 package com.techcode.gymcontrol.presentation.navegation
 
+import ReportScreen
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
@@ -17,8 +20,9 @@ import com.techcode.gymcontrol.presentation.ui.screens.ManageScreen
 import com.techcode.gymcontrol.presentation.ui.screens.PreferencesScreen
 import com.techcode.gymcontrol.presentation.ui.screens.PaymentsScreen
 import com.techcode.gymcontrol.presentation.ui.screens.PersonsScreen
-import com.techcode.gymcontrol.presentation.ui.screens.ReportScreen
 
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavigationHost (
 	viewModel: PeopleViewModel= hiltViewModel()
@@ -91,8 +95,8 @@ fun NavigationHost (
 		}
 
 		composable<AppRoutes.ReportScreen> {
-			ReportScreen(
-				navController= navController)
+			ReportScreen(navController= navController )
+
 		}
 
 
