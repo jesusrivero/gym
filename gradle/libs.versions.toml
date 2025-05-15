@@ -20,6 +20,7 @@ roomCompilerVersion = "2.6.1"
 ksp = "2.0.21-1.0.28"
 ksp-compiler = "2.52"
 hilt = "2.51.1"
+benchmarkMacro = "1.3.4"
 
 [libraries]
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
@@ -48,6 +49,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 ksp-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "ksp-compiler"}
+androidx-benchmark-macro = { group = "androidx.benchmark", name = "benchmark-macro", version.ref = "benchmarkMacro" }
 
 
 [plugins]

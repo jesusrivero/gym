@@ -1,6 +1,9 @@
 package com.techcode.gymcontrol.presentation.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,16 +14,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,6 +43,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,9 +57,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.squareup.wire.Instant
 import com.techcode.gymcontrol.data.db.entity.PersonEntity
 import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListPaymentsScreen(
@@ -61,9 +77,19 @@ fun ListPaymentsScreen(
     var selectedUser by remember { mutableStateOf<PersonEntity?>(null) }
     var searchText by remember { mutableStateOf("") }
 
+    // Estados para los filtros
+    var selectedState by remember { mutableStateOf("Todos") }
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    var expandedFilter by remember { mutableStateOf(false) } // Estado para controlar el dropdown
+
+    // Opciones para el filtro de estado
+    val filterOptions = listOf("Todos", "Dolares", "Bolivares", "Mixtos")
+
     if (showUserDialog && selectedUser !=null) {
         AlertDialog(
-            onDismissRequest = { showUserDialog = false
+            onDismissRequest = {
+                showUserDialog = false
                 selectedUser = null},
             title = {
                 Box(modifier= Modifier.fillMaxWidth(),contentAlignment = Alignment.Center){
@@ -86,9 +112,26 @@ fun ListPaymentsScreen(
             }
         )
     }
-
-
-
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState()
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let {
+                            selectedDate = java.time.Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
+                        }
+                        showDatePicker = false
+                    }
+                ) {
+                    Text("OK")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -96,18 +139,17 @@ fun ListPaymentsScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            text = "Listado de pagos",
+                            text = "Listado de Personas",
                             color = Color.White,
                             fontWeight = FontWeight.Bold
                         )
                     },
                     navigationIcon = {
-                        IconButton(
-                            onClick = { navBottom.popBackStack() }
-                        ) {
+                        IconButton(onClick = { navBottom.popBackStack() }) {
                             Icon(
                                 painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_back),
-                                contentDescription = "Regresar", tint = Color.White
+                                contentDescription = "Regresar",
+                                tint = Color.White
                             )
                         }
                     },
@@ -115,6 +157,118 @@ fun ListPaymentsScreen(
                         containerColor = Color(0xBAA7D3DC)
                     )
                 )
+
+
+
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
+                        .padding(8.dp)
+                ) {
+                    // Filtro por estado - Modificado para incluir el dropdown
+                    Box {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Filtrar por tipo de pago: $selectedState",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.weight(1f))
+
+                            IconButton(
+                                onClick = { expandedFilter = true },
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ArrowDropDown,
+                                    contentDescription = "Desplegar estados",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+
+                        // Menú desplegable
+                        DropdownMenu(
+                            expanded = expandedFilter,
+                            onDismissRequest = { expandedFilter = false },
+                            modifier = Modifier.fillMaxWidth(0.8f)
+                        ) {
+                            filterOptions.forEach { option ->
+                                DropdownMenuItem(
+                                    text = { Text(option) },
+                                    onClick = {
+                                        selectedState = option
+                                        expandedFilter = false
+                                        // Aquí puedes agregar la lógica para filtrar
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+
+                    Text(
+                        text = "Seleccionar fecha",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 4.dp))
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = selectedDate?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) ?: "No seleccionada",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (selectedDate != null) MaterialTheme.colorScheme.onSurface
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        IconButton(
+                            onClick = { showDatePicker = true },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Seleccionar fecha",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+
+
+                    if (selectedState.isNotEmpty() || selectedDate != null) {
+                        Spacer(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                        )
+
+                        TextButton(
+                            onClick = {
+                                selectedState = ""
+                                selectedDate = null
+                            },
+                            modifier = Modifier.align(Alignment.End)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Limpiar filtros",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Limpiar filtros")
+                            }
+                        }
+                    }
+                }
+
 
 
                 TextField(

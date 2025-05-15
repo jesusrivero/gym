@@ -52,10 +52,11 @@ android {
 dependencies {
 	
 	implementation (libs.androidx.foundation)
-	implementation (libs.accompanist.pager)  // Alternativa si usas Material 2
+	implementation (libs.accompanist.pager)  // Alternativa si usas Material
 	implementation(libs.kotlinx.serialization.json)              // JSON con Kotlinx
 	implementation(libs.androidx.room.runtime)                   // Room runtime
-	implementation(libs.androidx.room.ktx)                       // Room con corutinas
+	implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.benchmark.macro)                       // Room con corutinas
 	ksp(libs.androidx.room.compiler)                             // Room compiler
 	implementation(libs.androidx.lifecycle.viewmodel.compose)    // ViewModel + Compose
 	implementation(libs.androidx.navigation.compose)             // Navigation en Compose
