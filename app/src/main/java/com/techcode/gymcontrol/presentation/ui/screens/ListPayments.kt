@@ -258,7 +258,7 @@ fun ListPaymentsScreen(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = Icons.Default.Close,
-                                    contentDescription = "Limpiar filtros",
+                                    contentDescription = "Limpiar filtross",
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(16.dp)
                                 )
