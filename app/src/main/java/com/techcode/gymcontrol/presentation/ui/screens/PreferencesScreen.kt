@@ -109,24 +109,7 @@ fun PreferencesScreen(
 
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
 
-
-
-            SettingsItem(
-                text = "Reportes",
-                icon = Icons.Default.Settings,
-                onClick = { navController.navigate("") }
-            )
-
-            HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
-
-            SettingsItem(
-                text = "Listado de Clientes",
-                icon = Icons.Default.Settings,
-                onClick = {navController.navigate(AppRoutes.PersonasScreen)}
-            )
-
-            HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
-
+	        
 
             SettingsItem(
                 text = "Bitácora de acciones",
@@ -151,7 +134,7 @@ fun PreferencesScreen(
             SettingsItem(
                 text = "Sobre nosotros",
                 icon = Icons.Default.Info,
-                onClick = { navController.navigate("") }
+                onClick = { navController.navigate(AppRoutes.ContactScreen) }
             )
 
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))

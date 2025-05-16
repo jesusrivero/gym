@@ -27,6 +27,9 @@ object AppRoutes {
 
 	@Serializable
 	data object ManageScreen
+	
+	@Serializable
+	data object ContactScreen
 
 
 

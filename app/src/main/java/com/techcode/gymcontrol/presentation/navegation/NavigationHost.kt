@@ -10,6 +10,7 @@ import com.techcode.gymcontrol.presentation.ui.people.EditPersonScreen
 import com.techcode.gymcontrol.presentation.ui.people.ListPersonScreen
 import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
 import com.techcode.gymcontrol.presentation.ui.people.RegPersonScreen
+import com.techcode.gymcontrol.presentation.ui.screens.ContactScreen
 import com.techcode.gymcontrol.presentation.ui.screens.ManageScreen
 import com.techcode.gymcontrol.presentation.ui.screens.PreferencesScreen
 import com.techcode.gymcontrol.presentation.ui.screens.PaymentsScreen
@@ -66,6 +67,12 @@ fun NavigationHost (
 		composable<AppRoutes.PaymentsScreen> {
 		PaymentsScreen(
 				navBottom = navController)
+		}
+		
+		composable<AppRoutes.ContactScreen> {
+			ContactScreen(
+				navController= navController)
+			
 		}
 
 		composable<AppRoutes.ManageScreen> {

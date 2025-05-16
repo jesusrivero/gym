@@ -36,6 +36,8 @@ fun SumaryCarsScreen() {
 			.padding(horizontal = 16.dp, vertical = 8.dp),
 		horizontalArrangement = Arrangement.spacedBy(16.dp)
 	) {
+		
+		
 		SummaryCard(
 			color = Color(0xFF4CAF50),
 			modifier = Modifier
