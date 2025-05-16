@@ -1,7 +1,6 @@
 package com.techcode.gymcontrol.presentation.ui.screens
-import androidx.compose.foundation.layout.Arrangement
+
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -20,38 +19,40 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.techcode.gymcontrol.presentation.navegation.AppRoutes
+import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContactScreen(navController: NavController) {
-	ManagerContent(
-		navController = navController,
+fun ContactScreen(
+	navController: NavController,
+	viewModel: PeopleViewModel = hiltViewModel(),
+) {
+	MainContent(
 		navBottom = navController,
-	)
+		navRegister = { navController.navigate(AppRoutes.RegPersonScreen) },
+		
+		)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContactContent(
-	navController: NavController,
-	navBottom: NavController,
+fun MainContent(
 	
+	navBottom: NavController,
+	navRegister: () -> Unit,
 	
 	) {
 	Scaffold(
 		topBar = {
 			TopAppBar(
-				title = {
-					Text(
-						text = "",
-						color = Color.White,
-						fontWeight = FontWeight.Bold
-					)
-				},navigationIcon = {
+				title = { Text(text = "", color = Color.White, fontWeight = FontWeight.Bold) },
+				navigationIcon = {
 					IconButton(
-						onClick = { }
+						onClick = { navBottom.popBackStack() }
 					) {
 						Icon(
 							painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_back),
@@ -63,7 +64,7 @@ fun ContactContent(
 					containerColor = Color(0xBAA7D3DC)
 				)
 			)
-		},
+		}
 	)
 	{ innerPadding ->
 		Column(
@@ -74,34 +75,23 @@ fun ContactContent(
 					rememberScrollState()
 				)
 		) {
-			Row(
-				modifier = Modifier
-					.padding(horizontal = 4.dp, vertical = 4.dp),
-				horizontalArrangement = Arrangement.spacedBy(16.dp)
-			){
-
 			
 			
-			
-			
-			
-			
-			}
-			
-			}
-		
+		}
 	}
-	
-	
 }
-
-
 
 @Preview(showBackground = true)
 @Composable
-fun ContactoScreenPreview() {
-	ContactContent(
+fun ContactScreenPreview() {
+	MainContent(
 		navBottom = NavController(LocalContext.current),
-		navController = NavController(LocalContext.current)
+		navRegister = {}
 	)
 }
+
+
+
+
+
+	

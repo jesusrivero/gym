@@ -5,6 +5,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.techcode.gymcontrol.presentation.navegation.AppRoutes.ContactScreen
 import com.techcode.gymcontrol.presentation.ui.main.MainScreen
 import com.techcode.gymcontrol.presentation.ui.people.EditPersonScreen
 import com.techcode.gymcontrol.presentation.ui.people.ListPersonScreen
@@ -70,8 +71,7 @@ fun NavigationHost (
 		}
 		
 		composable<AppRoutes.ContactScreen> {
-			ContactScreen(
-				navController= navController)
+			ContactScreen( navController= navController )
 			
 		}
 
