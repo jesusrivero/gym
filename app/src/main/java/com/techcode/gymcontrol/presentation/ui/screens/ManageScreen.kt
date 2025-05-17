@@ -169,6 +169,7 @@ fun ManagerContent(
 								Column {
 									Text("Membresias", fontWeight = FontWeight.Bold)
 									Text("Listado de membresias")
+									Text("Listado de membresias")
 								}
 								Icon(Icons.Default.Menu, contentDescription = "Icono")
 							}
