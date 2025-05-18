@@ -103,6 +103,7 @@ fun PaymentsScreen(
                 .padding(innerPadding)
                 .padding(8.dp)
                 .verticalScroll(rememberScrollState())
+
         ) {
             OutlinedTextField(
                 value = nameUser,
@@ -113,7 +114,7 @@ fun PaymentsScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Menú desplegable de frecuencia de pago
+
             ExposedDropdownMenuBox(
                 expanded = isDropdownExpanded,
                 onExpandedChange = { isDropdownExpanded = it }
@@ -160,7 +161,7 @@ fun PaymentsScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Menú desplegable de tipo de pago
+
             ExposedDropdownMenuBox(
                 expanded = isTypeDropdownExpanded && isPaymentTypeEnabled,
                 onExpandedChange = { if (isPaymentTypeEnabled) isTypeDropdownExpanded = it }
@@ -201,7 +202,7 @@ fun PaymentsScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Campos de monto según tipo de pago
+
             when (paymentState.type) {
                 "Dólares" -> {
                     OutlinedTextField(
@@ -248,7 +249,7 @@ fun PaymentsScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Campo de referencia (no se muestra para dólares)
+
             if (paymentState.type != "Dólares") {
                 OutlinedTextField(
                     value = reference,
@@ -260,7 +261,7 @@ fun PaymentsScreen(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            // Campo de descripción
+
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
@@ -270,7 +271,6 @@ fun PaymentsScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Botón de guardar
             Button(
                 onClick = {
                     val paymentData = when (paymentState.type) {
@@ -279,7 +279,7 @@ fun PaymentsScreen(
                         "Mixto" -> "$${paymentState.amountDollar} + Bs${paymentState.amountBs}"
                         else -> ""
                     }
-                    // Aquí puedes agregar la lógica para guardar los datos
+                    // Aquí se va a agregar la lógica para guardar los datos
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xBAA7D3DC)),
                 modifier = Modifier

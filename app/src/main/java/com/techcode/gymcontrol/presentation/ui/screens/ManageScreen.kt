@@ -87,9 +87,7 @@ fun ManagerContent(
 			modifier = Modifier
 				.fillMaxSize()
 				.padding(innerPadding)
-				.verticalScroll(
-					rememberScrollState()
-				)
+				.verticalScroll(rememberScrollState())
 		) {
 			Row(
 				modifier = Modifier

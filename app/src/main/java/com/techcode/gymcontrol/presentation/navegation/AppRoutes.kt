@@ -40,6 +40,7 @@ object AppRoutes {
 	@Serializable
 	data object MembershipScreen
 
-
+	@Serializable
+	data object ErrorReportScreen
 
 }

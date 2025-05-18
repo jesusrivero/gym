@@ -1,5 +1,6 @@
 package com.techcode.gymcontrol.presentation.ui.screens.SubScreen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -110,6 +111,7 @@ fun MembershipContent(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
+
         ) {
             Text(
                 text = "Configuración de Valores de Pago",

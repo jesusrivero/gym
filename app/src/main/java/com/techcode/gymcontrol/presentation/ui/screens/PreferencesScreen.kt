@@ -127,7 +127,7 @@ fun PreferencesScreen(
             SettingsItem(
                 text = "Reportar errores",
                 icon = Icons.Default.Email,
-                onClick = { navController.navigate("") }
+                onClick = { navController.navigate(AppRoutes.ErrorReportScreen) }
             )
 
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))

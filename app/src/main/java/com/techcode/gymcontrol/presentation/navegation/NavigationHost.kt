@@ -18,6 +18,7 @@ import com.techcode.gymcontrol.presentation.ui.screens.SubScreen.ListPaymentsScr
 import com.techcode.gymcontrol.presentation.ui.screens.ManageScreen
 import com.techcode.gymcontrol.presentation.ui.screens.PreferencesScreen
 import com.techcode.gymcontrol.presentation.ui.screens.PaymentsScreen
+import com.techcode.gymcontrol.presentation.ui.screens.SubScreen.ErrorReportScreen
 import com.techcode.gymcontrol.presentation.ui.screens.SubScreen.PersonsScreen
 import com.techcode.gymcontrol.presentation.ui.screens.SubScreen.MembershipScreen
 
@@ -79,6 +80,11 @@ fun NavigationHost (
 		composable<AppRoutes.ContactScreen> {
 			ContactScreen( navController= navController )
 			
+		}
+
+		composable<AppRoutes.ErrorReportScreen> {
+			ErrorReportScreen( navController= navController )
+
 		}
 
 		composable<AppRoutes.ListPaymentsScreen> {
