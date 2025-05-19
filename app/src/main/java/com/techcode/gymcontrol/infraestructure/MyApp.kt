@@ -1,7 +1,7 @@
-package com.techcode.gymcontrol.presentation.ui.di
+package com.techcode.gymcontrol.infraestructure
+
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
-
 
 @HiltAndroidApp
 class MyApp: Application(){
@@ -14,5 +14,3 @@ class MyApp: Application(){
 		myApp = this
 	}
 }
-
-

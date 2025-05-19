@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.data.db.entity.PersonEntity
+import com.techcode.gymcontrol.domain.model.Person
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -103,7 +104,7 @@ fun ContenAgregarView(
 		
 		Button(
 			onClick = {
-				val usuario = PersonEntity(usuario = usuario, email = email)
+				val usuario = Person(usuario = usuario, email = email)
 				viewModel.saveUser(usuario)
 				navController.popBackStack()
 			}, colors = ButtonDefaults.buttonColors(
