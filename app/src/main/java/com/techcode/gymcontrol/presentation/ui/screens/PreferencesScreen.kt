@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -42,24 +43,12 @@ import androidx.navigation.NavController
 import com.techcode.gymcontrol.presentation.navegation.AppRoutes
 import com.techcode.gymcontrol.presentation.ui.commons.BottomNavigationBar
 
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun ManageScreen(navController: NavController) {
-//	ManagerContent(
-
-//		navBottom = navController,
-//		navRegister = { navController.navigate(AppRoutes.RegPersonScreen) },
-
-//		)
-//}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreferencesScreen(
-
     navController: NavController,
 ) {
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -89,7 +78,6 @@ fun PreferencesScreen(
                     rememberScrollState()
                 )
         ) {
-
             SettingsSectionTitle("General")
 
             SettingsItem(
@@ -98,27 +86,17 @@ fun PreferencesScreen(
                 onClick = { navController.navigate(AppRoutes.MainScreen) }
             )
 
-            HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
-
-
-
             SettingsItem(
                 text = "Notificaciones",
                 icon = Icons.Default.Notifications,
-                onClick = { navController.navigate("") }
+                onClick = { navController.navigate(AppRoutes.NotificationScreen) }
             )
-
-            HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
-
-	        
 
             SettingsItem(
-                text = "Bitácora de acciones",
+                text = "Seguridad",
                 icon = Icons.Default.Build,
-                onClick = { navController.navigate("") }
+                onClick = { navController.navigate(AppRoutes.SecurityScreen) }
             )
-
-            HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
 
             Spacer(modifier = Modifier.padding(top = 15.dp))
 
@@ -130,19 +108,14 @@ fun PreferencesScreen(
                 onClick = { navController.navigate(AppRoutes.ErrorReportScreen) }
             )
 
-            HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
-
             SettingsItem(
                 text = "Sobre nosotros",
                 icon = Icons.Default.Info,
                 onClick = { navController.navigate(AppRoutes.ContactScreen) }
             )
-
-            HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
         }
     }
 }
-
 
 @Composable
 fun SettingsSectionTitle(title: String) {
@@ -167,20 +140,21 @@ fun SettingsItem(
     icon: ImageVector,
     onClick: () -> Unit
 ) {
-    MaterialTheme {
-        TextButton(modifier = Modifier.fillMaxWidth()
-            ,onClick = onClick
-            ,colors = ButtonDefaults.textButtonColors(
+    Column {
+        TextButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = onClick,
+            colors = ButtonDefaults.textButtonColors(
                 contentColor = textColor,
                 disabledContentColor = disabledTextColor
-            )) {
-
+            )
+        ) {
             Row(
                 modifier = Modifier
                     .padding(vertical = 10.dp, horizontal = 5.dp)
-                    .padding(end = 5.dp)
-                    ,verticalAlignment = Alignment.CenterVertically
-                    ,horizontalArrangement = Arrangement.SpaceBetween
+                    .padding(end = 5.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Icon(
                     imageVector = icon,
@@ -197,16 +171,21 @@ fun SettingsItem(
                     modifier = Modifier.weight(1f)
                 )
 
-
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowRight,
                     contentDescription = "Navegar",
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
-
-
         }
+
+
+        Spacer(modifier = Modifier.height(4.dp))
+        HorizontalDivider(
+            thickness = 1.dp,
+            modifier = Modifier.padding(horizontal = 16.dp),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+        )
     }
 }
 

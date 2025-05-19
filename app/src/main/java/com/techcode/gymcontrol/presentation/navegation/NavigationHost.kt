@@ -21,6 +21,8 @@ import com.techcode.gymcontrol.presentation.ui.screens.PaymentsScreen
 import com.techcode.gymcontrol.presentation.ui.screens.SubScreen.ErrorReportScreen
 import com.techcode.gymcontrol.presentation.ui.screens.SubScreen.PersonsScreen
 import com.techcode.gymcontrol.presentation.ui.screens.SubScreen.MembershipScreen
+import com.techcode.gymcontrol.presentation.ui.screens.SubScreen.NotificationScreen
+import com.techcode.gymcontrol.presentation.ui.screens.SubScreen.SecurityScreen
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -110,6 +112,18 @@ fun NavigationHost (
 			ReportScreen(navController= navController )
 
 		}
+
+		composable<AppRoutes.SecurityScreen> {
+			SecurityScreen(navController= navController)
+
+		}
+
+		composable<AppRoutes.NotificationScreen> {
+			NotificationScreen( navController= navController )
+
+		}
+
+
 
 
 

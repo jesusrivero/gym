@@ -5,18 +5,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.techcode.gymcontrol.data.db.AppDatabase
-import com.techcode.gymcontrol.data.db.dao.UsuariosDatabaseDao
-import com.techcode.gymcontrol.data.db.entity.PersonEntity
 import com.techcode.gymcontrol.domain.model.Person
 import com.techcode.gymcontrol.domain.usecase.usuario.DeleteUserUseCase
 import com.techcode.gymcontrol.domain.usecase.usuario.GetUsersUseCase
 import com.techcode.gymcontrol.domain.usecase.usuario.RegistrarUsuarioUseCase
 import com.techcode.gymcontrol.domain.usecase.usuario.UpdateUserUseCase
-
-import dagger.hilt.android.HiltAndroidApp
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.collectLatest
+
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

@@ -43,4 +43,10 @@ object AppRoutes {
 	@Serializable
 	data object ErrorReportScreen
 
+	@Serializable
+	data object NotificationScreen
+
+	@Serializable
+	data object SecurityScreen
+
 }
