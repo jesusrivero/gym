@@ -74,6 +74,9 @@ fun ContenAgregarView(
 ) {
 	var usuario by remember { mutableStateOf("") }
 	var email by remember { mutableStateOf("") }
+	var cedula by remember { mutableStateOf("") }
+	var numeroTelefono by remember { mutableStateOf("") }
+	
 	
 	Column (
 		modifier = Modifier
@@ -85,7 +88,7 @@ fun ContenAgregarView(
 		OutlinedTextField(
 			value = usuario,
 			onValueChange = { usuario = it },
-			label = { Text("usuario") },
+			label = { Text("Nombre y apellido") },
 			modifier = Modifier
 				.fillMaxWidth()
 				.padding(horizontal = 30.dp)
@@ -95,7 +98,27 @@ fun ContenAgregarView(
 		OutlinedTextField(
 			value = email,
 			onValueChange = { email = it },
-			label = { Text("email") },
+			label = { Text("Introduzca su email") },
+			modifier = Modifier
+				.fillMaxWidth()
+				.padding(horizontal = 30.dp)
+				.padding(bottom = 15.dp)
+		)
+		
+		OutlinedTextField(
+			value = cedula,
+			onValueChange = { cedula = it },
+			label = { Text("Cedula de identidad") },
+			modifier = Modifier
+				.fillMaxWidth()
+				.padding(horizontal = 30.dp)
+				.padding(bottom = 15.dp)
+		)
+		
+		OutlinedTextField(
+			value = numeroTelefono,
+			onValueChange = { numeroTelefono = it },
+			label = { Text("Introduzca su numero de telefono") },
 			modifier = Modifier
 				.fillMaxWidth()
 				.padding(horizontal = 30.dp)
@@ -104,7 +127,7 @@ fun ContenAgregarView(
 		
 		Button(
 			onClick = {
-				val usuario = Person(usuario = usuario, email = email)
+				val usuario = Person(usuario = usuario, email = email, cedula = cedula, numeroTelefono = numeroTelefono)
 				viewModel.saveUser(usuario)
 				navController.popBackStack()
 			}, colors = ButtonDefaults.buttonColors(

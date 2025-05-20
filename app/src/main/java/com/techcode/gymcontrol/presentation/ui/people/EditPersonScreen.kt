@@ -32,11 +32,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.data.db.entity.PersonEntity
+import com.techcode.gymcontrol.domain.model.Person
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditPersonScreen(navController: NavController, viewModel: PeopleViewModel, id: Int, usuario: String? = null, email: String? = null) {
+fun EditPersonScreen(navController: NavController, viewModel: PeopleViewModel, id: Int, usuario: String? = null, email: String? = null, cedula: String? = null, numeroTelefono: String? = null) {
 	Scaffold(
 		topBar = {
 			CenterAlignedTopAppBar(
@@ -59,7 +60,7 @@ fun EditPersonScreen(navController: NavController, viewModel: PeopleViewModel, i
 			)
 		}
 	) {
-		ContenEditarView(it, navController, viewModel, id, usuario, email)
+		ContenEditarView(it, navController, viewModel, id, usuario, email, cedula, numeroTelefono)
 	}
 }
 
@@ -73,10 +74,14 @@ fun ContenEditarView(
 	viewModel: PeopleViewModel,
 	id: Int,
 	usuario: String?,
-	email: String?
+	email: String?,
+	cedula: String?,
+	numeroTelefono: String?
 ) {
 	var usuario by remember { mutableStateOf("") }
 	var email by remember { mutableStateOf("") }
+	var cedula by remember { mutableStateOf("") }
+	var numeroTelefono by remember { mutableStateOf("") }
 	
 	Column (
 		modifier = Modifier
@@ -86,7 +91,7 @@ fun ContenEditarView(
 		horizontalAlignment = Alignment.CenterHorizontally
 	){
 		OutlinedTextField(
-			value = usuario ?: usuario,
+			value = usuario,
 			onValueChange = { usuario = it },
 			label = { Text("usuario") },
 			modifier = Modifier
@@ -96,7 +101,7 @@ fun ContenEditarView(
 		)
 		
 		OutlinedTextField(
-			value = email ?: email,
+			value = email,
 			onValueChange = { email = it },
 			label = { Text("email") },
 			modifier = Modifier
@@ -108,7 +113,7 @@ fun ContenEditarView(
 		Button(
 			
 			onClick = {
-				val usuario = PersonEntity(id = id , usuario = usuario!!, email = email!!)
+				val usuario = Person(id = id , usuario = usuario, email = email, cedula = cedula, numeroTelefono = numeroTelefono)
 				viewModel.updateUser(usuario)
 				navController.popBackStack()
 			}, colors = ButtonDefaults.buttonColors(

@@ -57,8 +57,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.squareup.wire.Instant
-import com.techcode.gymcontrol.data.db.entity.PersonEntity
+import com.techcode.gymcontrol.domain.model.Person
 import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
 import java.time.LocalDate
 import java.time.ZoneId
@@ -70,11 +69,11 @@ import java.time.format.DateTimeFormatter
 fun ListPaymentsScreen(
     navBottom: NavController,
     viewModel: PeopleViewModel,
-    navEdit: (Int) -> Unit,
+    navEdit: (Int?) -> Unit,
 ) {
 
     var showUserDialog by remember { mutableStateOf(false) }
-    var selectedUser by remember { mutableStateOf<PersonEntity?>(null) }
+    var selectedUser by remember { mutableStateOf<Person?>(null) }
     var searchText by remember { mutableStateOf("") }
 
     // Estados para los filtros
