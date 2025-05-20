@@ -1,18 +1,20 @@
 package com.techcode.gymcontrol.presentation.ui.people
 
 import androidx.lifecycle.ViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
-@HiltViewModel
+
 class PaymentSettingsViewModel @Inject constructor() : ViewModel() {
-    // Valores de membresía
+
     private val _paymentValues = MutableStateFlow(mapOf(
         "Semanal" to "4",
         "Quincenal" to "8",
-        "Mensual" to "15"
+        "Mensual" to "15",
+        "Trimestral" to "40",
+        "Semestral" to "85",
+        "Anual" to "160"
     ))
     val paymentValues: StateFlow<Map<String, String>> = _paymentValues
 

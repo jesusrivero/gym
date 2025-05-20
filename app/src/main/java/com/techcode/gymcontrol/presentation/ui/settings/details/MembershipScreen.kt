@@ -35,7 +35,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -69,17 +68,27 @@ fun MembershipContent(
     val weeklyValue = remember(paymentValues) { paymentValues["Semanal"] ?: "" }
     val biweeklyValue = remember(paymentValues) { paymentValues["Quincenal"] ?: "" }
     val monthlyValue = remember(paymentValues) { paymentValues["Mensual"] ?: "" }
+    val quarterlyValue = remember(paymentValues) { paymentValues["Trimestral"] ?: "" }
+    val binnualValue = remember(paymentValues) { paymentValues["Semestral"] ?: "" }
+    val annualValue = remember(paymentValues) { paymentValues["Anual"] ?: "" }
 
     // Estados editables
     var editedWeekly by remember { mutableStateOf(weeklyValue) }
     var editedBiweekly by remember { mutableStateOf(biweeklyValue) }
     var editedMonthly by remember { mutableStateOf(monthlyValue) }
+    var editedQuarterly by remember { mutableStateOf(quarterlyValue) }
+    var editedBinnual by remember { mutableStateOf(binnualValue) }
+    var editedAnnual by remember { mutableStateOf(annualValue) }
 
     // Sincronizar cuando cambian los valores del ViewModel
     LaunchedEffect(paymentValues) {
         editedWeekly = paymentValues["Semanal"] ?: ""
         editedBiweekly = paymentValues["Quincenal"] ?: ""
         editedMonthly = paymentValues["Mensual"] ?: ""
+        editedQuarterly = paymentValues["Trimestral"] ?: ""
+        editedBinnual = paymentValues["Semestral"] ?: ""
+        editedAnnual = paymentValues["Anual"] ?: ""
+
     }
 
     Scaffold(
@@ -132,6 +141,7 @@ fun MembershipContent(
                             color = Color.Black,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
+
                         Spacer(modifier=Modifier.padding(4.dp))
 
                         // Semanal
@@ -185,6 +195,59 @@ fun MembershipContent(
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                             )
                         }
+
+                        // Trimestral
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Trimestral:",
+                                modifier = Modifier.weight(1f)
+                            )
+                            OutlinedTextField(
+                                value = editedQuarterly,
+                                onValueChange = { editedQuarterly = it },
+                                modifier = Modifier.weight(1f),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                            )
+                        }
+
+                        // Semestral
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Semestral:",
+                                modifier = Modifier.weight(1f)
+                            )
+                            OutlinedTextField(
+                                value = editedBinnual,
+                                onValueChange = { editedBinnual = it },
+                                modifier = Modifier.weight(1f),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                            )
+                        }
+
+                        // Anual
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Anual:",
+                                modifier = Modifier.weight(1f)
+                            )
+                            OutlinedTextField(
+                                value = editedAnnual,
+                                onValueChange = { editedAnnual = it },
+                                modifier = Modifier.weight(1f),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                            )
+                        }
+
+
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Button(
@@ -192,13 +255,19 @@ fun MembershipContent(
                                 // Validar que los valores no estén vacíos
                                 if (editedWeekly.isNotBlank() &&
                                     editedBiweekly.isNotBlank() &&
-                                    editedMonthly.isNotBlank()
+                                    editedMonthly.isNotBlank() &&
+                                    editedQuarterly.isNotBlank() &&
+                                    editedBinnual.isNotBlank() &&
+                                    editedAnnual.isNotBlank()
                                 ) {
 
                                     val newValues = mapOf(
                                         "Semanal" to editedWeekly,
                                         "Quincenal" to editedBiweekly,
-                                        "Mensual" to editedMonthly
+                                        "Mensual" to editedMonthly,
+                                        "Trimestral" to editedQuarterly,
+                                        "Semestral" to editedBinnual,
+                                        "Anual" to editedAnnual
                                     )
                                     viewModel.updatePaymentValues(newValues)
 
@@ -215,7 +284,10 @@ fun MembershipContent(
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xBAA7D3DC)),
                             enabled = editedWeekly.isNotBlank() &&
                                     editedBiweekly.isNotBlank() &&
-                                    editedMonthly.isNotBlank()
+                                    editedMonthly.isNotBlank() &&
+                                    editedQuarterly.isNotBlank() &&
+                                    editedBinnual.isNotBlank() &&
+                                    editedAnnual.isNotBlank()
                         ) {
                             Text("Guardar cambios")
                         }

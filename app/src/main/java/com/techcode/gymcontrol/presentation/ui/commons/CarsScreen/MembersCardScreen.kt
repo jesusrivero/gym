@@ -29,141 +29,217 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun MembersCardScreen() {
-	val scrollState = rememberScrollState()
-	
-	Row(
-		modifier = Modifier
-			.horizontalScroll(scrollState)
-			.padding(horizontal = 16.dp, vertical = 8.dp),
-		horizontalArrangement = Arrangement.spacedBy(16.dp)
-	) {
-		MembersCard(
-			color = Color(0xCE447A9C),
-			modifier = Modifier
-		) {
-			Column(
-				horizontalAlignment = Alignment.CenterHorizontally,
-				verticalArrangement = Arrangement.Center
-			) {
-				Text(
-					text = "Semanal",
-					color = Color.White,
-					fontSize = 16.sp,
-					fontWeight = FontWeight.Bold
-				)
-				Row(verticalAlignment = Alignment.CenterVertically) {
-					
-					Icon(
-						imageVector = Icons.Default.Person,
-						contentDescription = "Car",
-						tint = Color.White,
-						modifier = Modifier.size(20.dp)
-					)
-					
-					Spacer(modifier = Modifier.height(4.dp))
-					
-					
-					Text(
-						text = "50",
-						color = Color.White,
-						fontSize = 16.sp
-					)
-				}
-			}
-		}
-		
-		
-		MembersCard(
-			color = Color(0xCE447A9C),
-		) {
-			Column(
-				horizontalAlignment = Alignment.CenterHorizontally,
-				verticalArrangement = Arrangement.Center
-			) {
-				
-				Text(
-					text = "Quincenal",
-					color = Color.White,
-					fontSize = 16.sp,
-					fontWeight = FontWeight.Bold
-				)
-				Row(verticalAlignment = Alignment.CenterVertically) {
-					Icon(
-						imageVector = Icons.Default.Person,
-						contentDescription = "Activos",
-						tint = Color.White,
-						modifier = Modifier.size(20.dp)
-					)
-					Spacer(modifier = Modifier.height(4.dp))
-					
-					Text(
-						text = "25",
-						color = Color.White,
-						fontSize = 16.sp
-					)
-				}
-			}
-			
-		}
-		
-		
-		
-		MembersCard(
-			color = Color(0xCE447A9C),
-		) {
-			Column(
-				horizontalAlignment = Alignment.CenterHorizontally,
-				verticalArrangement = Arrangement.Center
-			) {
-				Text(
-					text = "Mensual",
-					color = Color.White,
-					fontSize = 16.sp,
-					fontWeight = FontWeight.Bold
-				)
-				Row(verticalAlignment = Alignment.CenterVertically) {
-					Icon(
-						imageVector = Icons.Default.Person,
-						contentDescription = "Inactivos",
-						tint = Color.White,
-						modifier = Modifier.size(20.dp)
-					)
-					Spacer(modifier = Modifier.height(4.dp))
-					
-					Text(
-						text = "25",
-						color = Color.White,
-						fontSize = 16.sp
-					)
-					
-				}
-				
-				
-			}
-		}
-	}
+    val scrollState = rememberScrollState()
+
+    Row(
+        modifier = Modifier
+            .horizontalScroll(scrollState)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        MembersCard(
+            color = Color(0xCE447A9C),
+            modifier = Modifier
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Semanal",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Semanal",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "50",
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                }
+            }
+        }
+
+        MembersCard(
+            color = Color(0xCE447A9C),
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Quincenal",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Quincenal",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "25",
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                }
+            }
+        }
+
+        MembersCard(
+            color = Color(0xCE447A9C),
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Mensual",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Mensual",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "25",
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                }
+            }
+        }
+
+        MembersCard(
+            color = Color(0xCE447A9C),
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Trimestral",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Trimestral",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "25",
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                }
+            }
+        }
+
+        MembersCard(
+            color = Color(0xCE447A9C),
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Semestral",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Semestral",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "25",
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                }
+            }
+        }
+
+        MembersCard(
+            color = Color(0xCE447A9C),
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Anual",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Anual",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "25",
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
 fun MembersCard(
-	color: Color,
-	modifier: Modifier = Modifier,
-	content: @Composable () -> Unit,
+    color: Color,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
 ) {
-	Card(
-		modifier = modifier
-			.width(150.dp)
-			.height(100.dp),
-		colors = CardDefaults.cardColors(containerColor = color),
-		elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-	) {
-		Box(
-			modifier = Modifier
-				.fillMaxSize()
-				.padding(16.dp),
-			contentAlignment = Alignment.Center
-		) {
-			content()
-		}
-	}
+    Card(
+        modifier = modifier
+            .width(150.dp)
+            .height(100.dp),
+        colors = CardDefaults.cardColors(containerColor = color),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            content()
+        }
+    }
 }

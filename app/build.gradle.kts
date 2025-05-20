@@ -64,6 +64,7 @@ dependencies {
 	implementation (libs.androidx.hilt.navigation.compose)       // Hilt navigation
 	kapt(libs.hilt.compiler)                                     // Hilt compiler
 	implementation(libs.coil.compose)
+	implementation (libs.androidx.material.icons.extended)
 	//DEFAULT
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.lifecycle.runtime.ktx)

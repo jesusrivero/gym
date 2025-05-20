@@ -36,7 +36,7 @@ import com.techcode.gymcontrol.presentation.ui.commons.CarsScreen.SumaryCarsScre
 import com.techcode.gymcontrol.presentation.ui.commons.CarsScreen.MovementsCarScreen
 import com.techcode.gymcontrol.presentation.ui.commons.CarsScreen.WelcomeCard
 import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
-import dagger.hilt.android.AndroidEntryPoint
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)

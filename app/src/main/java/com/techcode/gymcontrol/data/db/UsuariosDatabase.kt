@@ -8,10 +8,11 @@ import com.techcode.gymcontrol.data.db.entity.PersonEntity
 
 @Database(
 	entities = [PersonEntity::class],
-	version = 2,
-	autoMigrations= [
-		AutoMigration(from = 1, to = 2),
-	]
+	version = 1,
+//	autoMigrations= [
+//		AutoMigration(from = 1, to = 2, ),
+//		AutoMigration(from = 2, to = 3, )
+//	]
 )
 abstract class AppDatabase : RoomDatabase() {
 	abstract fun usuariosDao(): UsuariosDatabaseDao
