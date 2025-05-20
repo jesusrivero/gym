@@ -1,5 +1,7 @@
 package com.techcode.gymcontrol.presentation.ui.settings.details
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -32,9 +35,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.R
@@ -81,7 +86,13 @@ fun MembershipContent(
         topBar = {
             Column {
                 TopAppBar(
-                    title = { Text("Listado de pagos", color = Color.White, fontWeight = FontWeight.Bold) },
+                    title = {
+                        Text(
+                            "Listado de pagos",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
                     navigationIcon = {
                         IconButton(onClick = { navBottom.popBackStack() }) {
                             Icon(
@@ -103,76 +114,77 @@ fun MembershipContent(
                 .verticalScroll(rememberScrollState())
 
         ) {
-            Text(
-                text = "Configuración de Valores de Pago",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(16.dp)
-            )
 
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
+
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Editar valores de pago en dólares",
-                        style = MaterialTheme.typography.titleSmall,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
 
-                    // Semanal
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
+                Box(modifier = Modifier.background(color = Color.White)){
+
+                    Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "Semanal:",
-                            modifier = Modifier.weight(1f)
+                            text = "Editar valores de pago en dólares",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontSize = 15.sp,
+                            color = Color.Black,
+                            modifier = Modifier.padding(bottom = 8.dp)
                         )
-                        OutlinedTextField(
-                            value = editedWeekly,
-                            onValueChange = { editedWeekly = it },
-                            modifier = Modifier.weight(1f),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                        )
-                    }
+                        Spacer(modifier=Modifier.padding(4.dp))
 
-                    // Quincenal
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "Quincenal:",
-                            modifier = Modifier.weight(1f)
-                        )
-                        OutlinedTextField(
-                            value = editedBiweekly,
-                            onValueChange = { editedBiweekly = it },
-                            modifier = Modifier.weight(1f),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                        )
-                    }
+                        // Semanal
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Semanal:",
+                                modifier = Modifier.weight(1f)
+                            )
+                            OutlinedTextField(
+                                value = editedWeekly,
+                                onValueChange = { editedWeekly = it },
+                                modifier = Modifier.weight(1f),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                            )
+                        }
 
-
-                    // Mensual
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "Mensual:",
-                            modifier = Modifier.weight(1f)
-                        )
-                        OutlinedTextField(
-                            value = editedMonthly,
-                            onValueChange = { editedMonthly = it },
-                            modifier = Modifier.weight(1f),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                        )
+                        // Quincenal
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Quincenal:",
+                                modifier = Modifier.weight(1f)
+                            )
+                            OutlinedTextField(
+                                value = editedBiweekly,
+                                onValueChange = { editedBiweekly = it },
+                                modifier = Modifier.weight(1f),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                            )
+                        }
 
 
+                        // Mensual
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Mensual:",
+                                modifier = Modifier.weight(1f)
+                            )
+                            OutlinedTextField(
+                                value = editedMonthly,
+                                onValueChange = { editedMonthly = it },
+                                modifier = Modifier.weight(1f),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                            )
+                        }
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Button(
@@ -180,7 +192,8 @@ fun MembershipContent(
                                 // Validar que los valores no estén vacíos
                                 if (editedWeekly.isNotBlank() &&
                                     editedBiweekly.isNotBlank() &&
-                                    editedMonthly.isNotBlank()) {
+                                    editedMonthly.isNotBlank()
+                                ) {
 
                                     val newValues = mapOf(
                                         "Semanal" to editedWeekly,
@@ -196,17 +209,23 @@ fun MembershipContent(
                                     // scaffoldState.snackbarHostState.showSnackbar("Complete todos los campos")
                                 }
                             },
-                            modifier = Modifier.padding(),
+                            modifier = Modifier
+                                .padding()
+                                .fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xBAA7D3DC)),
                             enabled = editedWeekly.isNotBlank() &&
                                     editedBiweekly.isNotBlank() &&
                                     editedMonthly.isNotBlank()
                         ) {
                             Text("Guardar cambios")
                         }
+                    }
+
                 }
+
             }
         }
     }
-}}
+}
 
 

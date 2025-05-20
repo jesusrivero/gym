@@ -110,6 +110,7 @@ fun AccountContent(
 				OutlinedTextField(
 					value = name,
 					onValueChange = { name = it },
+					label = { Text("Nombre")},
 					modifier = Modifier.fillMaxWidth(),
 					enabled = isEditing,
 					singleLine = true
@@ -123,6 +124,7 @@ fun AccountContent(
 				OutlinedTextField(
 					value = email,
 					onValueChange = { email = it },
+					label = { Text("Correo")},
 					modifier = Modifier.fillMaxWidth(),
 					enabled = isEditing,
 					singleLine = true,
@@ -137,6 +139,7 @@ fun AccountContent(
 				OutlinedTextField(
 					value = phone,
 					onValueChange = { phone = it },
+					label = { Text("Telefono")},
 					modifier = Modifier.fillMaxWidth(),
 					enabled = isEditing,
 					singleLine = true,

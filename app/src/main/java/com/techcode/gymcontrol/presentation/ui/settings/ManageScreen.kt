@@ -1,5 +1,8 @@
 package com.techcode.gymcontrol.presentation.ui.settings
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.R
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,7 +27,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -93,9 +98,16 @@ fun ManagerContent(
 							.fillMaxWidth()
 							.height(170.dp),
 						onClick = { navController.navigate(AppRoutes.PersonasScreen) },
-						shape = RoundedCornerShape(8.dp)
+						shape = RoundedCornerShape(8.dp),
+
 					) {
 						Box(modifier = Modifier.fillMaxSize()) {
+							Image(
+								painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_background),
+								contentDescription = "Fondo de la tarjeta",
+								modifier = Modifier.fillMaxSize(),
+								contentScale = ContentScale.Crop
+							)
 							Row(
 								modifier = Modifier
 									.align(Alignment.BottomStart)
@@ -105,10 +117,10 @@ fun ManagerContent(
 								horizontalArrangement = Arrangement.SpaceBetween
 							) {
 								Column {
-									Text("Personas", fontWeight = FontWeight.Bold)
-									Text("Listado de personas")
+									Text("Personas", fontWeight = FontWeight.Bold, color = Color.White)
+									Text("Listado de personas", color = Color.White)
 								}
-								Icon(Icons.Default.Menu, contentDescription = "Icono")
+								Icon(Icons.Default.Menu, contentDescription = "Icono", tint = Color.White)
 							}
 						}
 					}
@@ -117,11 +129,18 @@ fun ManagerContent(
 						modifier = Modifier
 							.fillMaxWidth()
 							.padding(top = 6.dp)
-							.height(170.dp),
+							.height(170.dp)
+							.background(Color.White),
 						onClick = { navController.navigate(AppRoutes.ListPaymentsScreen) },
 						shape = RoundedCornerShape(8.dp)
 					) {
 						Box(modifier = Modifier.fillMaxSize()) {
+							Image(
+								painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_background),
+								contentDescription = "Fondo de la tarjeta",
+								modifier = Modifier.fillMaxSize(),
+								contentScale = ContentScale.Crop
+							)
 							Row(
 								modifier = Modifier
 									.align(Alignment.BottomStart)
@@ -131,10 +150,10 @@ fun ManagerContent(
 								horizontalArrangement = Arrangement.SpaceBetween
 							) {
 								Column {
-									Text("Pagos", fontWeight = FontWeight.Bold)
-									Text("Listado de pagos")
+									Text("Pagos", fontWeight = FontWeight.Bold, color = Color.White)
+									Text("Listado de pagos", color = Color.White)
 								}
-								Icon(Icons.Default.Menu, contentDescription = "Icono")
+								Icon(Icons.Default.Menu, contentDescription = "Icono", tint = Color.White)
 							}
 						}
 					}
@@ -143,11 +162,18 @@ fun ManagerContent(
 						modifier = Modifier
 							.fillMaxWidth()
 							.padding(top = 6.dp)
-							.height(170.dp),
+							.height(170.dp)
+						   .background(Color.White),
 						 onClick = { navController.navigate(AppRoutes.MembershipScreen) },
 						shape = RoundedCornerShape(8.dp)
 					) {
 						Box(modifier = Modifier.fillMaxSize()) {
+							Image(
+								painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_background),
+								contentDescription = "Fondo de la tarjeta",
+								modifier = Modifier.fillMaxSize(),
+								contentScale = ContentScale.Crop
+							)
 							Row(
 								modifier = Modifier
 									.align(Alignment.BottomStart)
@@ -157,10 +183,10 @@ fun ManagerContent(
 								horizontalArrangement = Arrangement.SpaceBetween
 							) {
 								Column {
-									Text("Membresias", fontWeight = FontWeight.Bold)
-									Text("Listado de membresias")
+									Text("Membresias", fontWeight = FontWeight.Bold, color = Color.White)
+									Text("Listado de membresias", color = Color.White)
 								}
-								Icon(Icons.Default.Menu, contentDescription = "Icono")
+								Icon(Icons.Default.Menu, contentDescription = "Icono", tint = Color.White)
 							}
 						}
 					}
@@ -171,11 +197,18 @@ fun ManagerContent(
 						modifier = Modifier
 							.fillMaxWidth()
 							.padding(top = 6.dp)
-							.height(170.dp),
+							.height(170.dp)
+							.background(Color.White),
 						onClick = { navController.navigate(AppRoutes.ReportScreen) },
 						shape = RoundedCornerShape(8.dp)
 					) {
 						Box(modifier = Modifier.fillMaxSize()) {
+							Image(
+								painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_background),
+								contentDescription = "Fondo de la tarjeta",
+								modifier = Modifier.fillMaxSize(),
+								contentScale = ContentScale.Crop
+							)
 							Row(
 								modifier = Modifier
 									.align(Alignment.BottomStart)
@@ -185,10 +218,10 @@ fun ManagerContent(
 								horizontalArrangement = Arrangement.SpaceBetween
 							) {
 								Column {
-									Text("Reportes", fontWeight = FontWeight.Bold)
-									Text("Listado de reportes")
+									Text("Reportes", fontWeight = FontWeight.Bold, color = Color.White)
+									Text("Listado de reportes", color = Color.White)
 								}
-								Icon(Icons.Default.Menu, contentDescription = "Icono")
+								Icon(Icons.Default.Menu, contentDescription = "Icono", tint = Color.White)
 							}
 						}
 					}

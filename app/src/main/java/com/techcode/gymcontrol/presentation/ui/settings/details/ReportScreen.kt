@@ -281,7 +281,8 @@ fun ReportFilters(
 
                 ExposedDropdownMenu(
                     expanded = expandedFilter,
-                    onDismissRequest = { expandedFilter = false }
+                    onDismissRequest = { expandedFilter = false },
+                    modifier = Modifier.background(Color.White)
                 ) {
                     reportTypes.forEach { type ->
                         DropdownMenuItem(

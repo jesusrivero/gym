@@ -59,18 +59,13 @@ fun SecurityContent(
 	var currentPassword by remember { mutableStateOf("") }
 	var newPassword by remember { mutableStateOf("") }
 	var confirmPassword by remember { mutableStateOf("") }
-
 	var showCurrentPassword by remember { mutableStateOf(false) }
 	var showNewPassword by remember { mutableStateOf(false) }
 	var showConfirmPassword by remember { mutableStateOf(false) }
-
 	var twoStepVerification by remember { mutableStateOf(false) }
 	var appLockEnabled by remember { mutableStateOf(false) }
-
-	// Estado para controlar el error de confirmación
 	var passwordError by remember { mutableStateOf(false) }
 
-	// Función para validar las contraseñas
 	fun validatePasswords(): Boolean {
 		val isValid = newPassword == confirmPassword
 		passwordError = !isValid && confirmPassword.isNotEmpty()

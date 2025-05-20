@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -118,6 +119,11 @@ fun ErrorReportContent(
                     .height(150.dp),
                 label = { Text("Describe el problema") },
                 placeholder = { Text("Ejemplo: La app se cierra cuando...") },
+                shape = MaterialTheme.shapes.medium,
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent),
+
             )
 
             Spacer(modifier = Modifier.height(24.dp))

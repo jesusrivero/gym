@@ -3,6 +3,7 @@ package com.techcode.gymcontrol.presentation.ui.settings.details
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -365,7 +366,8 @@ fun PaymentFilters(
                     )
                     ExposedDropdownMenu(
                         expanded = expandedFilter,
-                        onDismissRequest = { expandedFilter = false }
+                        onDismissRequest = { expandedFilter = false },
+                        modifier = Modifier.background(Color.White)
                     ) {
                         paymentTypeOptions.forEach { option ->
                             DropdownMenuItem(
