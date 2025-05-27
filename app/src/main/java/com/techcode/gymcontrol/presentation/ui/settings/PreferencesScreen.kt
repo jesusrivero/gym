@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol.presentation.ui.screens
+package com.techcode.gymcontrol.presentation.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,9 +17,7 @@ import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -81,11 +79,10 @@ fun PreferencesScreen(
             SettingsSectionTitle("General")
 
             SettingsItem(
-                text = "Información de la cuenta",
+                text = "Cuenta y Datos",
                 icon = Icons.Default.AccountCircle,
-                onClick = { navController.navigate(AppRoutes.MainScreen) }
+                onClick = { navController.navigate(AppRoutes.AccountScreen) }
             )
-
             SettingsItem(
                 text = "Notificaciones",
                 icon = Icons.Default.Notifications,
@@ -190,11 +187,3 @@ fun SettingsItem(
 }
 
 
-/*@Preview(showBackground = true)
-@Composable
-fun ManagerScreenPreview() {
-	ManageScreen(
-		navBottom = NavController(LocalContext.current),
-		
-	)
-}*/

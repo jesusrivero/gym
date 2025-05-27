@@ -1,6 +1,5 @@
-package com.techcode.gymcontrol.presentation.ui.screens.SubScreen
+package com.techcode.gymcontrol.presentation.ui.settings.details
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +15,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -100,7 +100,6 @@ fun ErrorReportContent(
                 Icon(
                     painter = painterResource(id = R.drawable.ic_payments),
                     contentDescription = "Error",
-                    tint = Color.Red,
                     modifier = Modifier.size(32.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -137,8 +136,11 @@ fun ErrorReportContent(
             ) {
                 Text("Enviar Reporte")
             }
-
-            Spacer(modifier = Modifier.height(32.dp))
+	        
+	        Divider(
+		        modifier = Modifier.padding(vertical = 8.dp),
+		        color = Color.LightGray
+	        )
 
 
             Text(
@@ -157,7 +159,7 @@ fun ErrorReportContent(
                 Icon(
                     imageVector = Icons.Default.Email,
                     contentDescription = "Email",
-                    tint = Color(0xBAA7D3DC)
+									
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
@@ -176,7 +178,7 @@ fun ErrorReportContent(
                 Icon(
                     imageVector = Icons.Default.Phone,
                     contentDescription = "Teléfono",
-                    tint = Color(0xBAA7D3DC)
+									
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(

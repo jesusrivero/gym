@@ -13,16 +13,17 @@ import com.techcode.gymcontrol.presentation.ui.people.EditPersonScreen
 import com.techcode.gymcontrol.presentation.ui.people.ListPersonScreen
 import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
 import com.techcode.gymcontrol.presentation.ui.people.RegPersonScreen
-import com.techcode.gymcontrol.presentation.ui.screens.SubScreen.ContactScreen
-import com.techcode.gymcontrol.presentation.ui.screens.SubScreen.ListPaymentsScreen
-import com.techcode.gymcontrol.presentation.ui.screens.ManageScreen
-import com.techcode.gymcontrol.presentation.ui.screens.PreferencesScreen
-import com.techcode.gymcontrol.presentation.ui.screens.PaymentsScreen
-import com.techcode.gymcontrol.presentation.ui.screens.SubScreen.ErrorReportScreen
-import com.techcode.gymcontrol.presentation.ui.screens.SubScreen.PersonsScreen
-import com.techcode.gymcontrol.presentation.ui.screens.SubScreen.MembershipScreen
-import com.techcode.gymcontrol.presentation.ui.screens.SubScreen.NotificationScreen
-import com.techcode.gymcontrol.presentation.ui.screens.SubScreen.SecurityScreen
+import com.techcode.gymcontrol.presentation.ui.settings.details.ContactScreen
+import com.techcode.gymcontrol.presentation.ui.settings.details.ListPaymentsScreen
+import com.techcode.gymcontrol.presentation.ui.settings.ManageScreen
+import com.techcode.gymcontrol.presentation.ui.settings.PreferencesScreen
+import com.techcode.gymcontrol.presentation.ui.settings.PaymentsScreen
+import com.techcode.gymcontrol.presentation.ui.settings.details.AccountScreen
+import com.techcode.gymcontrol.presentation.ui.settings.details.ErrorReportScreen
+import com.techcode.gymcontrol.presentation.ui.settings.details.PersonsScreen
+import com.techcode.gymcontrol.presentation.ui.settings.details.MembershipScreen
+import com.techcode.gymcontrol.presentation.ui.settings.details.NotificationScreen
+import com.techcode.gymcontrol.presentation.ui.settings.details.SecurityScreen
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -112,6 +113,11 @@ fun NavigationHost (
 			ReportScreen(navController= navController )
 
 		}
+		composable<AppRoutes.AccountScreen> {
+			AccountScreen(navController= navController)
+			
+		}
+		
 
 		composable<AppRoutes.SecurityScreen> {
 			SecurityScreen(navController= navController)

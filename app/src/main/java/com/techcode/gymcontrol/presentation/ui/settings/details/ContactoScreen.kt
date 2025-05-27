@@ -1,6 +1,5 @@
-package com.techcode.gymcontrol.presentation.ui.screens.SubScreen
+package com.techcode.gymcontrol.presentation.ui.settings.details
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,7 +30,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.R
 
@@ -81,7 +79,8 @@ fun MainContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
+                .padding(innerPadding)
+	          .padding(horizontal = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
@@ -113,8 +112,7 @@ fun MainContent(
 
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
+                    .padding(horizontal = 16.dp)
             ) {
                 Text(
                     text = "Sobre Nosotros",
@@ -187,7 +185,7 @@ fun MainContent(
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth()
-                    .padding(horizontal = 32.dp)
+							
             ) {
                 Text(text = "Visitar nuestro sitio web")
             }
