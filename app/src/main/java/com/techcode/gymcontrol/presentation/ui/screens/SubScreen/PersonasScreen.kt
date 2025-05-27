@@ -280,8 +280,7 @@ fun PersonsScreen(
 											color = MaterialTheme.colorScheme.onSurface
 										)
 										Spacer(modifier = Modifier.height(4.dp))
-
-
+										
 										Row(
 											modifier = Modifier.fillMaxWidth(),
 											horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -294,7 +293,7 @@ fun PersonsScreen(
 										Spacer(modifier = Modifier.height(8.dp))
 
 										Text(
-											text = "Teléfono: ${user.numeroTelefono}",
+											text = "Usuario: ${user.usuario}",
 											style = MaterialTheme.typography.bodyMedium,
 											color = MaterialTheme.colorScheme.onSurfaceVariant
 										)

@@ -125,6 +125,7 @@ fun ContenAgregarView(
 				.fillMaxWidth()
 
 		)
+		
 		Spacer(modifier = Modifier.padding(vertical = 8.dp))
 
 		Button(

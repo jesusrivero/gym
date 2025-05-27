@@ -9,25 +9,20 @@ import com.techcode.gymcontrol.domain.model.Person
 data class PersonEntity(
 	@PrimaryKey(autoGenerate = true)
 	val id: Int = 0,
-	@ColumnInfo(name = "usuario")
 	val usuario: String,
-	@ColumnInfo(name = "email")
 	val email: String,
-	@ColumnInfo(name = "cedula")
 	val cedula: String,
-	@ColumnInfo(name = "numeroTelefono")
-	val numeroTelefono: String
+	val numeroTelefono: String,
 ) {
-	fun toPerson():Person {
+	fun toPerson(): Person {
 		return Person(
 			id = id,
-			usuario= usuario,
-			email= email,
-			cedula= cedula,
-			numeroTelefono= numeroTelefono
+			usuario = usuario,
+			email = email,
+			cedula = cedula,
+			numeroTelefono = numeroTelefono
 		)
 	}
-	
 	
 }
 

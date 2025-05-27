@@ -24,10 +24,8 @@ class UsuarioRepositoryIMPL(
 		var ListPerson: List<Person> = emptyList()
 		dao.obtenerUsuarios().collectLatest { res ->
 			ListPerson = res.map { it.toPerson()}
-
 		}
 		return ListPerson
 	}
 }
 
-//actualizarUsuario
