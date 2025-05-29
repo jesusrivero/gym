@@ -31,7 +31,7 @@ class PeopleViewModel @Inject constructor(
 		state = state.copy(isLoading = true, error = null)
 		try {
 			registrarUsuarioUseCase.invoke(user)
-			getUsers() // Actualizar la lista después de agregar
+			getUsers()
 		} catch (e: Exception) {
 			state = state.copy(error = e.message ?: "Error al guardar usuario")
 			e.printStackTrace()
@@ -56,8 +56,7 @@ class PeopleViewModel @Inject constructor(
 	fun updateUser(user: Person) = viewModelScope.launch {
 		state = state.copy(isLoading = true, error = null)
 		try {
-			updateUserUseCase(user) // Pasamos el usuario a actualizar
-			// Actualizamos la lista completa después de la modificación
+			updateUserUseCase(user)
 			getUsers()
 		} catch (e: Exception) {
 			state = state.copy(error = e.message ?: "Error al actualizar usuario")
@@ -74,7 +73,7 @@ class PeopleViewModel @Inject constructor(
 			// Actualizamos la lista completa después de la eliminación
 			getUsers()
 
-			// Opcional: Mensaje de éxito
+			
 			state = state.copy()
 		} catch (e: Exception) {
 			state = state.copy(error = e.message ?: "Error al eliminar usuario")

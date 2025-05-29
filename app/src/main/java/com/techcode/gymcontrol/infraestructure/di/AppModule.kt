@@ -4,6 +4,7 @@ import androidx.room.Room
 import com.techcode.gymcontrol.data.db.AppDatabase
 import com.techcode.gymcontrol.data.db.dao.UsuariosDatabaseDao
 import com.techcode.gymcontrol.data.repository.UsuarioRepositoryIMPL
+import com.techcode.gymcontrol.data.sharedPreferences.PreferencesManager
 import com.techcode.gymcontrol.domain.repository.UsuarioRepository
 import com.techcode.gymcontrol.infraestructure.MyApp
 import dagger.Module
@@ -33,6 +34,12 @@ object AppModule {
 	@Provides
 	fun provideUsuarioRepository(dao: UsuariosDatabaseDao): UsuarioRepository {
 		return UsuarioRepositoryIMPL(dao)
+	}
+	
+	@Provides
+	fun provideSharedManager(): PreferencesManager {
+		return PreferencesManager(MyApp.myApp.baseContext)
+		
 	}
 	
 }
