@@ -60,7 +60,7 @@ fun PaymentsScreenContent(
 	navBottom: NavController,
 	state: PaymentSettingsViewModel.PaymentState,
 ) {
-	var editedWeekly by rememberSaveable { mutableStateOf("") }
+
 	val viewModel: PaymentSettingsViewModel = hiltViewModel()
 	val paymentState by viewModel.paymentState.collectAsState()
 	
@@ -74,8 +74,9 @@ fun PaymentsScreenContent(
 	val isPaymentTypeEnabled = paymentState.frequency.isNotEmpty()
 	
 	
-	LaunchedEffect(state) {
-		viewModel.getWeeklyValue()
+	LaunchedEffect(true) {
+		viewModel.getPricesValue()
+
 	}
 	
 	Scaffold(

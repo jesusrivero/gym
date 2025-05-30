@@ -40,7 +40,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.R
 import com.techcode.gymcontrol.presentation.ui.people.PaymentSettingsViewModel
@@ -49,12 +48,25 @@ import com.techcode.gymcontrol.presentation.ui.people.PaymentSettingsViewModel
 @Composable
 fun MembershipScreen(navController: NavController) {
 	val viewModel: PaymentSettingsViewModel = hiltViewModel()
+	
+	LaunchedEffect(true) {
+		viewModel.getPricesValue()
+	
+	}
 	MembershipContent(
 		navController = navController,
 		navBottom = navController,
 		state = viewModel.paymentState.collectAsState().value,
-		onSubmit = {
-			viewModel.updateWeeklyValue(it)
+		onSubmit = { p1, p2, p3, p4, p5, p6 ->
+			viewModel.updatePricesMembership(
+				WeeklyValue = p1,
+				BiweeklyValue = p2,
+				MonthlyValue = p3,
+				QuarterlyValue = p4,
+				BiannualValue = p5,
+				AnnualValue = p6
+			
+			)
 		}
 	)
 }
@@ -64,9 +76,9 @@ fun MembershipScreen(navController: NavController) {
 fun MembershipContent(
 	navController: NavController,
 	navBottom: NavController,
-	onSubmit: (Int) -> Unit,
+	onSubmit: (String, String, String, String, String, String) -> Unit,
 	state: PaymentSettingsViewModel.PaymentState,
-	) {
+) {
 	
 	var editedWeekly by rememberSaveable { mutableStateOf("") }
 	var editedBiweekly by rememberSaveable { mutableStateOf("") }
@@ -75,8 +87,15 @@ fun MembershipContent(
 	var editedBinnual by rememberSaveable { mutableStateOf("") }
 	var editedAnnual by rememberSaveable { mutableStateOf("") }
 	
-	LaunchedEffect(state){
-		editedWeekly = state.WeeklyValue.toString()
+	LaunchedEffect(state) {
+		state.PricesMembership?.let{
+			editedWeekly = it.weekly.orEmpty()
+			editedBiweekly = it.biweekly.orEmpty()
+			editedMonthly = it.monthly.orEmpty()
+			editedQuarterly = it.quarterly.orEmpty()
+			editedBinnual = it.biannual.orEmpty()
+			editedAnnual = it.annual.orEmpty()
+		}
 		
 	}
 	
@@ -242,7 +261,16 @@ fun MembershipContent(
 						Spacer(modifier = Modifier.height(16.dp))
 						
 						Button(
-							onClick = { onSubmit(editedWeekly.toInt())},
+							onClick = {
+								onSubmit(
+									editedWeekly,
+									editedBiweekly,
+									editedMonthly,
+									editedQuarterly,
+									editedBinnual,
+									editedAnnual
+								)
+							},
 							modifier = Modifier
 								.padding()
 								.fillMaxWidth(),

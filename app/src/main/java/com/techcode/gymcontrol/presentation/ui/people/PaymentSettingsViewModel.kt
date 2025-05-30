@@ -2,7 +2,8 @@ package com.techcode.gymcontrol.presentation.ui.people
 
 import androidx.lifecycle.ViewModel
 import com.techcode.gymcontrol.data.sharedPreferences.PreferencesManager
-import com.techcode.gymcontrol.data.sharedPreferences.PreferencesManager.Companion.KEY_WEEKLY_VALUE
+import com.techcode.gymcontrol.data.sharedPreferences.PreferencesManager.Companion.KEY_BIWEEKLY_VALUE
+import com.techcode.gymcontrol.domain.model.PricesMembership
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,38 +18,76 @@ class PaymentSettingsViewModel @Inject constructor(
 	private val _paymentState = MutableStateFlow(PaymentState())
 	val paymentState: StateFlow<PaymentState> = _paymentState
 	
+	
 	data class PaymentState(
 		val frequency: String = "",
 		val type: String = "",
 		val amountDollar: String = "",
 		val amountBs: String = "",
+		val MonthlyValue: Int = 0,
 		val WeeklyValue: Int = 0,
+		val BiweeklyValue: Int = 0,
+		val QuarterlyValue: Int = 0,
+		val BinnualValue: Int = 0,
+		val AnnualValue: Int = 0,
 		val ListMembership: Map<String, Int> = emptyMap(),
+		val PricesMembership: PricesMembership? = null,
 	)
 	
-	init {
-		getWeeklyValue()
+	
+	
+	fun updatePricesMembership(
+		MonthlyValue: String?,
+		BiweeklyValue: String?,
+		WeeklyValue: String?,
+		QuarterlyValue: String?,
+		BiannualValue: String?,
+		AnnualValue: String?,
+	) {
+		PreferencesManager.savePrices(
+			PricesMembership(
+				weekly = WeeklyValue,
+				biweekly = BiweeklyValue,
+				monthly = MonthlyValue,
+				quarterly = QuarterlyValue,
+				biannual = BiannualValue,
+				annual = AnnualValue
+			)
+		)
+		
+	}
+	
+	fun getPricesValue() {
+		val prueba = PreferencesManager.getPrices()
+		val weeklyValue = prueba?.weekly?.toInt() ?: 0
+		val biweeklyValue = prueba?.biweekly?.toInt() ?: 0
+		val monthlyValue = prueba?.monthly?.toInt() ?: 0
+		val quarterlyValue = prueba?.quarterly?.toInt() ?: 0
+		val biannualValue = prueba?.biannual?.toInt() ?: 0
+		val annualValue = prueba?.annual?.toInt() ?: 0
+		
 		
 		_paymentState.value = _paymentState.value.copy(
 			ListMembership = mapOf(
-				"Semanal" to _paymentState.value.WeeklyValue,
-				"Quincenal" to 8,
-				"Mensual" to 15,
-				"Trimestral" to 40,
-				"Semestral" to 85,
-				"Anual" to 160
+				"Semanal" to weeklyValue,
+				"Quincenal" to biweeklyValue,
+				"Mensual" to monthlyValue,
+				"Trimestral" to quarterlyValue,
+				"Semestral" to biannualValue,
+				"Anual" to annualValue
 			
 			)
 		)
+		
 	}
 	
-	fun updateWeeklyValue(newValue: Int) {
-		PreferencesManager.saveData(KEY_WEEKLY_VALUE, newValue)
+	fun updateBiweeklyValue(newValue: Int) {
+		PreferencesManager.saveData(KEY_BIWEEKLY_VALUE, newValue)
 	}
 	
-	fun getWeeklyValue() {
-		val weeklyValue = PreferencesManager.getData(KEY_WEEKLY_VALUE)
-		_paymentState.value = _paymentState.value.copy(WeeklyValue = weeklyValue)
+	fun getBiweeklyValue() {
+		val biweeklyValue = PreferencesManager.getData(KEY_BIWEEKLY_VALUE)
+		_paymentState.value = _paymentState.value.copy(BiweeklyValue = biweeklyValue)
 	}
 	
 	
