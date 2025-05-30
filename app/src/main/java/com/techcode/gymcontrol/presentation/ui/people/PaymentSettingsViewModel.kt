@@ -2,6 +2,7 @@ package com.techcode.gymcontrol.presentation.ui.people
 
 import androidx.lifecycle.ViewModel
 import com.techcode.gymcontrol.data.sharedPreferences.PreferencesManager
+import com.techcode.gymcontrol.data.sharedPreferences.PreferencesManager.Companion.KEY_WEEKLY_VALUE
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,19 +14,6 @@ class PaymentSettingsViewModel @Inject constructor(
 ) : ViewModel() {
 	
 	
-	private val _paymentValues = MutableStateFlow(
-		mapOf(
-			"Semanal" to "4",
-			"Quincenal" to "8",
-			"Mensual" to "15",
-			"Trimestral" to "40",
-			"Semestral" to "85",
-			"Anual" to "160"
-		)
-	)
-	val paymentValues: StateFlow<Map<String, String>> = _paymentValues
-	
-	
 	private val _paymentState = MutableStateFlow(PaymentState())
 	val paymentState: StateFlow<PaymentState> = _paymentState
 	
@@ -34,11 +22,35 @@ class PaymentSettingsViewModel @Inject constructor(
 		val type: String = "",
 		val amountDollar: String = "",
 		val amountBs: String = "",
+		val WeeklyValue: Int = 0,
+		val ListMembership: Map<String, Int> = emptyMap(),
 	)
 	
-	fun updatePaymentValues(newValues: Map<String, String>) {
-		_paymentValues.value = newValues
+	init {
+		getWeeklyValue()
+		
+		_paymentState.value = _paymentState.value.copy(
+			ListMembership = mapOf(
+				"Semanal" to _paymentState.value.WeeklyValue,
+				"Quincenal" to 8,
+				"Mensual" to 15,
+				"Trimestral" to 40,
+				"Semestral" to 85,
+				"Anual" to 160
+			
+			)
+		)
 	}
+	
+	fun updateWeeklyValue(newValue: Int) {
+		PreferencesManager.saveData(KEY_WEEKLY_VALUE, newValue)
+	}
+	
+	fun getWeeklyValue() {
+		val weeklyValue = PreferencesManager.getData(KEY_WEEKLY_VALUE)
+		_paymentState.value = _paymentState.value.copy(WeeklyValue = weeklyValue)
+	}
+	
 	
 	fun updatePaymentFrequency(frequency: String) {
 		_paymentState.value = _paymentState.value.copy(frequency = frequency)
@@ -62,7 +74,7 @@ class PaymentSettingsViewModel @Inject constructor(
 		val current = _paymentState.value
 		if (current.type == "Dólares" && current.frequency.isNotEmpty()) {
 			_paymentState.value = current.copy(
-				amountDollar = _paymentValues.value[current.frequency] ?: "",
+				amountDollar = _paymentState.value.ListMembership[current.frequency].toString() ?: "",
 				amountBs = ""
 			)
 		} else if (current.type == "Bolívares") {

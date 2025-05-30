@@ -29,7 +29,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -40,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.R
@@ -48,11 +48,14 @@ import com.techcode.gymcontrol.presentation.ui.people.PaymentSettingsViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MembershipScreen(navController: NavController) {
-	val viewModel: PaymentSettingsViewModel = viewModel()
+	val viewModel: PaymentSettingsViewModel = hiltViewModel()
 	MembershipContent(
 		navController = navController,
 		navBottom = navController,
-		viewModel = viewModel
+		state = viewModel.paymentState.collectAsState().value,
+		onSubmit = {
+			viewModel.updateWeeklyValue(it)
+		}
 	)
 }
 
@@ -61,36 +64,22 @@ fun MembershipScreen(navController: NavController) {
 fun MembershipContent(
 	navController: NavController,
 	navBottom: NavController,
-	viewModel: PaymentSettingsViewModel,
-) {
-	val paymentValues by viewModel.paymentValues.collectAsState()
+	onSubmit: (Int) -> Unit,
+	state: PaymentSettingsViewModel.PaymentState,
+	) {
 	
-
-	val weeklyValue = rememberSaveable(paymentValues) { paymentValues["Semanal"] ?: "" }
-	val biweeklyValue = rememberSaveable(paymentValues) { paymentValues["Quincenal"] ?: "" }
-	val monthlyValue = rememberSaveable(paymentValues) { paymentValues["Mensual"] ?: "" }
-	val quarterlyValue = rememberSaveable(paymentValues) { paymentValues["Trimestral"] ?: "" }
-	val binnualValue = rememberSaveable(paymentValues) { paymentValues["Semestral"] ?: "" }
-	val annualValue =rememberSaveable(paymentValues) { paymentValues["Anual"] ?: "" }
+	var editedWeekly by rememberSaveable { mutableStateOf("") }
+	var editedBiweekly by rememberSaveable { mutableStateOf("") }
+	var editedMonthly by rememberSaveable { mutableStateOf("") }
+	var editedQuarterly by rememberSaveable { mutableStateOf("") }
+	var editedBinnual by rememberSaveable { mutableStateOf("") }
+	var editedAnnual by rememberSaveable { mutableStateOf("") }
 	
-
-	var editedWeekly by rememberSaveable { mutableStateOf(weeklyValue) }
-	var editedBiweekly by rememberSaveable { mutableStateOf(biweeklyValue) }
-	var editedMonthly by rememberSaveable { mutableStateOf(monthlyValue) }
-	var editedQuarterly by rememberSaveable { mutableStateOf(quarterlyValue) }
-	var editedBinnual by rememberSaveable { mutableStateOf(binnualValue) }
-	var editedAnnual by rememberSaveable { mutableStateOf(annualValue) }
-	
-	
-	LaunchedEffect(paymentValues) {
-		editedWeekly = paymentValues["Semanal"] ?: ""
-		editedBiweekly = paymentValues["Quincenal"] ?: ""
-		editedMonthly = paymentValues["Mensual"] ?: ""
-		editedQuarterly = paymentValues["Trimestral"] ?: ""
-		editedBinnual = paymentValues["Semestral"] ?: ""
-		editedAnnual = paymentValues["Anual"] ?: ""
+	LaunchedEffect(state){
+		editedWeekly = state.WeeklyValue.toString()
 		
 	}
+	
 	
 	Scaffold(
 		topBar = {
@@ -156,7 +145,7 @@ fun MembershipContent(
 								modifier = Modifier.weight(1f)
 							)
 							OutlinedTextField(
-								value = editedWeekly,
+								value = editedWeekly.toString(),
 								onValueChange = { editedWeekly = it },
 								modifier = Modifier.weight(1f),
 								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
@@ -173,7 +162,7 @@ fun MembershipContent(
 								modifier = Modifier.weight(1f)
 							)
 							OutlinedTextField(
-								value = editedBiweekly,
+								value = editedBiweekly.toString(),
 								onValueChange = { editedBiweekly = it },
 								modifier = Modifier.weight(1f),
 								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
@@ -191,7 +180,7 @@ fun MembershipContent(
 								modifier = Modifier.weight(1f)
 							)
 							OutlinedTextField(
-								value = editedMonthly,
+								value = editedMonthly.toString(),
 								onValueChange = { editedMonthly = it },
 								modifier = Modifier.weight(1f),
 								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
@@ -208,7 +197,7 @@ fun MembershipContent(
 								modifier = Modifier.weight(1f)
 							)
 							OutlinedTextField(
-								value = editedQuarterly,
+								value = editedQuarterly.toString(),
 								onValueChange = { editedQuarterly = it },
 								modifier = Modifier.weight(1f),
 								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
@@ -225,7 +214,7 @@ fun MembershipContent(
 								modifier = Modifier.weight(1f)
 							)
 							OutlinedTextField(
-								value = editedBinnual,
+								value = editedBinnual.toString(),
 								onValueChange = { editedBinnual = it },
 								modifier = Modifier.weight(1f),
 								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
@@ -242,7 +231,7 @@ fun MembershipContent(
 								modifier = Modifier.weight(1f)
 							)
 							OutlinedTextField(
-								value = editedAnnual,
+								value = editedAnnual.toString(),
 								onValueChange = { editedAnnual = it },
 								modifier = Modifier.weight(1f),
 								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
@@ -253,42 +242,11 @@ fun MembershipContent(
 						Spacer(modifier = Modifier.height(16.dp))
 						
 						Button(
-							onClick = {
-								
-								if (editedWeekly.isNotBlank() &&
-									editedBiweekly.isNotBlank() &&
-									editedMonthly.isNotBlank() &&
-									editedQuarterly.isNotBlank() &&
-									editedBinnual.isNotBlank() &&
-									editedAnnual.isNotBlank()
-								) {
-									
-									val newValues = mapOf(
-										"Semanal" to editedWeekly,
-										"Quincenal" to editedBiweekly,
-										"Mensual" to editedMonthly,
-										"Trimestral" to editedQuarterly,
-										"Semestral" to editedBinnual,
-										"Anual" to editedAnnual
-									)
-									viewModel.updatePaymentValues(newValues)
-									
-//								  scaffoldState.snackbarHostState.showSnackbar("Valores actualizados")
-								} else {
-								
-//								 scaffoldState.snackbarHostState.showSnackbar("Complete todos los campos")
-								}
-							},
+							onClick = { onSubmit(editedWeekly.toInt())},
 							modifier = Modifier
 								.padding()
 								.fillMaxWidth(),
 							colors = ButtonDefaults.buttonColors(containerColor = Color(0xBAA7D3DC)),
-							enabled = editedWeekly.isNotBlank() &&
-									editedBiweekly.isNotBlank() &&
-									editedMonthly.isNotBlank() &&
-									editedQuarterly.isNotBlank() &&
-									editedBinnual.isNotBlank() &&
-									editedAnnual.isNotBlank()
 						) {
 							Text("Guardar cambios")
 						}
