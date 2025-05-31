@@ -21,6 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -29,6 +30,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -44,6 +46,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.R
 import com.techcode.gymcontrol.presentation.ui.people.PaymentSettingsViewModel
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,6 +75,22 @@ fun MembershipScreen(navController: NavController) {
     )
 }
 
+fun allFieldsAreValid(
+    weekly: String,
+    biweekly: String,
+    monthly: String,
+    quarterly: String,
+    biannual: String,
+    annual: String
+): Boolean {
+    return weekly.isNotBlank() &&
+            biweekly.isNotBlank() &&
+            monthly.isNotBlank() &&
+            quarterly.isNotBlank() &&
+            biannual.isNotBlank() &&
+            annual.isNotBlank()
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MembershipContent(
@@ -80,7 +99,8 @@ fun MembershipContent(
     onSubmit: (String, String, String, String, String, String) -> Unit,
     state: PaymentSettingsViewModel.PaymentState,
 ) {
-
+    var showSnackbar by remember { mutableStateOf(false) }
+    var snackbarMessage by remember { mutableStateOf("") }
     var editedWeekly by rememberSaveable { mutableStateOf("") }
     var editedBiweekly by rememberSaveable { mutableStateOf("") }
     var editedMonthly by rememberSaveable { mutableStateOf("") }
@@ -89,7 +109,7 @@ fun MembershipContent(
     var editedAnnual by rememberSaveable { mutableStateOf("") }
 
     LaunchedEffect(state) {
-        state.PricesMembership?.let{
+        state.PricesMembership?.let {
             editedWeekly = it.weekly.orEmpty()
             editedBiweekly = it.biweekly.orEmpty()
             editedMonthly = it.monthly.orEmpty()
@@ -100,7 +120,12 @@ fun MembershipContent(
 
     }
 
-
+    if (showSnackbar) {
+        LaunchedEffect(showSnackbar) {
+            delay(2000) // 3 segundos
+            showSnackbar = false
+        }
+    }
     Scaffold(
         topBar = {
             Column {
@@ -123,6 +148,16 @@ fun MembershipContent(
                     },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xBAA7D3DC))
                 )
+            }
+        },
+        snackbarHost = {
+            if (showSnackbar) {
+                Snackbar(
+                    modifier = Modifier.padding(8.dp),
+                    action = {}
+                ) {
+                    Text(text = snackbarMessage)
+                }
             }
         }
     ) { innerPadding ->
@@ -167,6 +202,7 @@ fun MembershipContent(
                             OutlinedTextField(
                                 value = editedWeekly.toString(),
                                 onValueChange = { editedWeekly = it },
+                                label = { Text("Valor semanal") },
                                 modifier = Modifier.weight(1f),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                             )
@@ -184,6 +220,7 @@ fun MembershipContent(
                             OutlinedTextField(
                                 value = editedBiweekly.toString(),
                                 onValueChange = { editedBiweekly = it },
+                                label = { Text("Valor quincenal") },
                                 modifier = Modifier.weight(1f),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                             )
@@ -202,6 +239,7 @@ fun MembershipContent(
                             OutlinedTextField(
                                 value = editedMonthly.toString(),
                                 onValueChange = { editedMonthly = it },
+                                label = { Text("Valor mensual") },
                                 modifier = Modifier.weight(1f),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                             )
@@ -219,6 +257,7 @@ fun MembershipContent(
                             OutlinedTextField(
                                 value = editedQuarterly.toString(),
                                 onValueChange = { editedQuarterly = it },
+                                label = { Text("Valor trimestral") },
                                 modifier = Modifier.weight(1f),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                             )
@@ -236,6 +275,7 @@ fun MembershipContent(
                             OutlinedTextField(
                                 value = editedBinnual.toString(),
                                 onValueChange = { editedBinnual = it },
+                                label = { Text("Valor semestral") },
                                 modifier = Modifier.weight(1f),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                             )
@@ -253,6 +293,7 @@ fun MembershipContent(
                             OutlinedTextField(
                                 value = editedAnnual.toString(),
                                 onValueChange = { editedAnnual = it },
+                                label = { Text("Valor semanal") },
                                 modifier = Modifier.weight(1f),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                             )
@@ -263,19 +304,46 @@ fun MembershipContent(
 
                         Button(
                             onClick = {
-                                onSubmit(
-                                    editedWeekly,
-                                    editedBiweekly,
-                                    editedMonthly,
-                                    editedQuarterly,
-                                    editedBinnual,
-                                    editedAnnual
-                                )
+                                if (allFieldsAreValid(
+                                        editedWeekly,
+                                        editedBiweekly,
+                                        editedMonthly,
+                                        editedQuarterly,
+                                        editedBinnual,
+                                        editedAnnual
+                                    )
+                                ) {
+                                    onSubmit(
+                                        editedWeekly,
+                                        editedBiweekly,
+                                        editedMonthly,
+                                        editedQuarterly,
+                                        editedBinnual,
+                                        editedAnnual
+                                    )
+                                    snackbarMessage = "Cambios guardados correctamente"
+                                    showSnackbar = true
+                                } else {
+                                    snackbarMessage = "Por favor complete todos los campos"
+                                    showSnackbar = true
+                                }
                             },
                             modifier = Modifier
                                 .padding()
                                 .fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xBAA7D3DC)),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xBAA7D3DC),
+                                disabledContainerColor = Color.LightGray
+                            ),
+                            enabled = allFieldsAreValid(
+                                editedWeekly,
+                                editedBiweekly,
+                                editedMonthly,
+                                editedQuarterly,
+                                editedBinnual,
+                                editedAnnual
+                            )
+
                         ) {
                             Text("Guardar cambios")
                         }
