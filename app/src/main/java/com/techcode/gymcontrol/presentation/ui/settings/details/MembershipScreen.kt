@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,15 +53,24 @@ import kotlinx.coroutines.delay
 @Composable
 fun MembershipScreen(navController: NavController) {
     val viewModel: PaymentSettingsViewModel = hiltViewModel()
+    val state by viewModel.paymentState.collectAsState()
 
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
         viewModel.getPricesValue()
-
     }
+
+    // Efecto para mostrar snackbar cuando se actualizan los precios
+    var showUpdateSnackbar by remember { mutableStateOf(false) }
+    LaunchedEffect(state.PricesMembership) {
+        if (state.PricesMembership != null) {
+            showUpdateSnackbar = true
+        }
+    }
+
     MembershipContent(
         navController = navController,
         navBottom = navController,
-        state = viewModel.paymentState.collectAsState().value,
+        state = state,
         onSubmit = { p1, p2, p3, p4, p5, p6 ->
             viewModel.updatePricesMembership(
                 WeeklyValue = p1,
@@ -69,9 +79,10 @@ fun MembershipScreen(navController: NavController) {
                 QuarterlyValue = p4,
                 BiannualValue = p5,
                 AnnualValue = p6
-
             )
-        }
+        },
+        showUpdateSnackbar = showUpdateSnackbar,
+        onDismissSnackbar = { showUpdateSnackbar = false }
     )
 }
 
@@ -83,12 +94,12 @@ fun allFieldsAreValid(
     biannual: String,
     annual: String
 ): Boolean {
-    return weekly.isNotBlank() &&
-            biweekly.isNotBlank() &&
-            monthly.isNotBlank() &&
-            quarterly.isNotBlank() &&
-            biannual.isNotBlank() &&
-            annual.isNotBlank()
+    return weekly.isNotBlank() && weekly.toDoubleOrNull() != null &&
+            biweekly.isNotBlank() && biweekly.toDoubleOrNull() != null &&
+            monthly.isNotBlank() && monthly.toDoubleOrNull() != null &&
+            quarterly.isNotBlank() && quarterly.toDoubleOrNull() != null &&
+            biannual.isNotBlank() && biannual.toDoubleOrNull() != null &&
+            annual.isNotBlank() && annual.toDoubleOrNull() != null
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,9 +109,13 @@ fun MembershipContent(
     navBottom: NavController,
     onSubmit: (String, String, String, String, String, String) -> Unit,
     state: PaymentSettingsViewModel.PaymentState,
+    showUpdateSnackbar: Boolean = false,
+    onDismissSnackbar: () -> Unit = {}
 ) {
     var showSnackbar by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf("") }
+
+    // Estados locales sincronizados con el estado del ViewModel
     var editedWeekly by rememberSaveable { mutableStateOf("") }
     var editedBiweekly by rememberSaveable { mutableStateOf("") }
     var editedMonthly by rememberSaveable { mutableStateOf("") }
@@ -108,7 +123,8 @@ fun MembershipContent(
     var editedBinnual by rememberSaveable { mutableStateOf("") }
     var editedAnnual by rememberSaveable { mutableStateOf("") }
 
-    LaunchedEffect(state) {
+    // Sincronizar con el estado actual
+    LaunchedEffect(state.PricesMembership) {
         state.PricesMembership?.let {
             editedWeekly = it.weekly.orEmpty()
             editedBiweekly = it.biweekly.orEmpty()
@@ -117,12 +133,11 @@ fun MembershipContent(
             editedBinnual = it.biannual.orEmpty()
             editedAnnual = it.annual.orEmpty()
         }
-
     }
 
     if (showSnackbar) {
         LaunchedEffect(showSnackbar) {
-            delay(2000) // 3 segundos
+            delay(2000)
             showSnackbar = false
         }
     }
@@ -201,10 +216,14 @@ fun MembershipContent(
                             )
                             OutlinedTextField(
                                 value = editedWeekly.toString(),
-                                onValueChange = { editedWeekly = it },
+                                onValueChange = {
+                                    if (it.isEmpty() || it.toDoubleOrNull() != null) {
+                                        editedWeekly = it
+                                    }
+                                },
                                 label = { Text("Valor semanal") },
                                 modifier = Modifier.weight(1f),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
                             )
                         }
 
@@ -219,10 +238,14 @@ fun MembershipContent(
                             )
                             OutlinedTextField(
                                 value = editedBiweekly.toString(),
-                                onValueChange = { editedBiweekly = it },
+                                onValueChange = {
+                                    if (it.isEmpty() || it.toDoubleOrNull() != null) {
+                                        editedBiweekly = it
+                                    }
+                                },
                                 label = { Text("Valor quincenal") },
                                 modifier = Modifier.weight(1f),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
                             )
                         }
 
@@ -238,10 +261,14 @@ fun MembershipContent(
                             )
                             OutlinedTextField(
                                 value = editedMonthly.toString(),
-                                onValueChange = { editedMonthly = it },
+                                onValueChange = {
+                                    if (it.isEmpty() || it.toDoubleOrNull() != null) {
+                                        editedMonthly = it
+                                    }
+                                },
                                 label = { Text("Valor mensual") },
                                 modifier = Modifier.weight(1f),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
                             )
                         }
 
@@ -256,10 +283,14 @@ fun MembershipContent(
                             )
                             OutlinedTextField(
                                 value = editedQuarterly.toString(),
-                                onValueChange = { editedQuarterly = it },
+                                onValueChange = {
+                                    if (it.isEmpty() || it.toDoubleOrNull() != null) {
+                                        editedQuarterly = it
+                                    }
+                                },
                                 label = { Text("Valor trimestral") },
                                 modifier = Modifier.weight(1f),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
                             )
                         }
 
@@ -274,10 +305,14 @@ fun MembershipContent(
                             )
                             OutlinedTextField(
                                 value = editedBinnual.toString(),
-                                onValueChange = { editedBinnual = it },
+                                onValueChange = {
+                                    if (it.isEmpty() || it.toDoubleOrNull() != null) {
+                                        editedBinnual = it
+                                    }
+                                },
                                 label = { Text("Valor semestral") },
                                 modifier = Modifier.weight(1f),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
                             )
                         }
 
@@ -292,10 +327,14 @@ fun MembershipContent(
                             )
                             OutlinedTextField(
                                 value = editedAnnual.toString(),
-                                onValueChange = { editedAnnual = it },
+                                onValueChange = {
+                                    if (it.isEmpty() || it.toDoubleOrNull() != null) {
+                                        editedAnnual = it
+                                    }
+                                },
                                 label = { Text("Valor semanal") },
                                 modifier = Modifier.weight(1f),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
                             )
                         }
 
