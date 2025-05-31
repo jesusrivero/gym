@@ -108,6 +108,17 @@ class PaymentSettingsViewModel @Inject constructor(
 	fun updateAmountBs(amount: String) {
 		_paymentState.value = _paymentState.value.copy(amountBs = amount)
 	}
+
+	fun resetPaymentState() {
+		_paymentState.value = _paymentState.value.copy(
+			frequency = "",
+			type = "",
+			amountDollar = "",
+			amountBs = ""
+		)
+	}
+
+
 	
 	private fun updateAmounts() {
 		val current = _paymentState.value

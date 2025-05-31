@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -76,7 +77,10 @@ fun PaymentsScreenContent(
 	
 	LaunchedEffect(true) {
 		viewModel.getPricesValue()
+	}
 
+	DisposableEffect(Unit) {
+		onDispose { viewModel.resetPaymentState() }
 	}
 	
 	Scaffold(
@@ -282,6 +286,7 @@ fun PaymentsScreenContent(
 						"Mixto" -> "$${paymentState.amountDollar} + Bs${paymentState.amountBs}"
 						else -> ""
 					}
+
 					// Aquí se va a agregar la lógica para guardar los datos
 				},
 				colors = ButtonDefaults.buttonColors(containerColor = Color(0xBAA7D3DC)),
