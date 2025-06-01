@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,13 +41,16 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.techcode.gymcontrol.R
+import com.techcode.gymcontrol.data.sharedPreferences.PreferencesManager
 
 @Composable
 fun NotificationScreen(
     navController: NavController,
 ) {
+    val preferencesManager = rememberPreferencesManager()
     NotificationScreenContent(
-        navBottom = navController
+        navBottom = navController,
+        preferencesManager = preferencesManager
     )
 }
 
@@ -54,12 +58,38 @@ fun NotificationScreen(
 @Composable
 fun NotificationScreenContent(
     navBottom: NavController,
+    preferencesManager: PreferencesManager
 ) {
-    var newClientEnabled by remember { mutableStateOf(true) }
-    var paymentRegisteredEnabled by remember { mutableStateOf(true) }
-    var membershipExpirationEnabled by remember { mutableStateOf(true) }
-    var weekStartEnabled by remember { mutableStateOf(true) } // Nuevo estado para Inicio de semana
-    var pushNotificationsEnabled by remember { mutableStateOf(true) }
+    // Cargar configuraciones guardadas
+    var notificationSettings by remember {
+        mutableStateOf(preferencesManager.getNotificationSettings())
+    }
+
+    // Función para actualizar configuraciones
+    fun updateSettings(
+        newClient: Boolean = notificationSettings.newClientEnabled,
+        paymentRegistered: Boolean = notificationSettings.paymentRegisteredEnabled,
+        membershipExpiration: Boolean = notificationSettings.membershipExpirationEnabled,
+        weekStart: Boolean = notificationSettings.weekStartEnabled,
+        pushNotifications: Boolean = notificationSettings.pushNotificationsEnabled
+    ) {
+        // Actualizar estado local
+        notificationSettings = notificationSettings.copy(
+            newClientEnabled = newClient,
+            paymentRegisteredEnabled = paymentRegistered,
+            membershipExpirationEnabled = membershipExpiration,
+            weekStartEnabled = weekStart,
+            pushNotificationsEnabled = pushNotifications
+        )
+        // Guardar en SharedPreferences
+        preferencesManager.saveNotificationSettings(
+            newClient,
+            paymentRegistered,
+            membershipExpiration,
+            weekStart,
+            pushNotifications
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -93,47 +123,47 @@ fun NotificationScreenContent(
                 .padding(innerPadding)
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
-	            .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState()),
         ) {
-
             Text(
                 text = "Tipos de notificaciones",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(vertical = 16.dp)
             )
 
-
             NotificationOptionItem(
                 title = "Cliente nuevo",
-                enabled = newClientEnabled,
-                onCheckedChange = { newClientEnabled = it }
+                enabled = notificationSettings.newClientEnabled,
+                onCheckedChange = { updateSettings(newClient = it) }
             )
+
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
 
             NotificationOptionItem(
                 title = "Pago registrado",
-                enabled = paymentRegisteredEnabled,
-                onCheckedChange = { paymentRegisteredEnabled = it }
+                enabled = notificationSettings.paymentRegisteredEnabled,
+                onCheckedChange = { updateSettings(paymentRegistered = it) }
             )
+
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
 
             NotificationOptionItem(
                 title = "Vencimiento de membresía",
-                enabled = membershipExpirationEnabled,
-                onCheckedChange = { membershipExpirationEnabled = it }
+                enabled = notificationSettings.membershipExpirationEnabled,
+                onCheckedChange = { updateSettings(membershipExpiration = it) }
             )
-            HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
 
+            HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
 
             NotificationOptionItem(
                 title = "Inicio de semana",
-                enabled = weekStartEnabled,
-                onCheckedChange = { weekStartEnabled = it }
+                enabled = notificationSettings.weekStartEnabled,
+                onCheckedChange = { updateSettings(weekStart = it) }
             )
+
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
 
             Spacer(modifier = Modifier.height(24.dp))
-
 
             Text(
                 text = "Canal de notificaciones",
@@ -143,8 +173,8 @@ fun NotificationScreenContent(
 
             NotificationOptionItem(
                 title = "Notificaciones push",
-                enabled = pushNotificationsEnabled,
-                onCheckedChange = { pushNotificationsEnabled = it }
+                enabled = notificationSettings.pushNotificationsEnabled,
+                onCheckedChange = { updateSettings(pushNotifications = it) }
             )
         }
     }
@@ -186,10 +216,18 @@ fun NotificationOptionItem(
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun NotificationContentPreview() {
+fun rememberPreferencesManager(): PreferencesManager {
+    val context = LocalContext.current
+    return remember { PreferencesManager(context) }
+}
 
-        NotificationScreenContent(navBottom = rememberNavController())
 
-    }
+// Data class para las configuraciones de notificación
+//data class NotificationSettings(
+//    val newClientEnabled: Boolean,
+//    val paymentRegisteredEnabled: Boolean,
+//    val membershipExpirationEnabled: Boolean,
+//    val weekStartEnabled: Boolean,
+//    val pushNotificationsEnabled: Boolean
+//)

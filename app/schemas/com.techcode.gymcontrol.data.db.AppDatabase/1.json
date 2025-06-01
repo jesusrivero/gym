@@ -2,16 +2,17 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "511a34294303a45125cbd7f8a0d62209",
+    "identityHash": "1e724efe59fe2676318f7a516ded4407",
     "entities": [
       {
         "tableName": "usuarios",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `usuario` TEXT NOT NULL, `email` TEXT NOT NULL, `cedula` TEXT NOT NULL, `numeroTelefono` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `usuario` TEXT NOT NULL, `email` TEXT NOT NULL, `cedula` TEXT NOT NULL, `numeroTelefono` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
-            "affinity": "INTEGER"
+            "affinity": "INTEGER",
+            "notNull": true
           },
           {
             "fieldPath": "usuario",
@@ -48,7 +49,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '511a34294303a45125cbd7f8a0d62209')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1e724efe59fe2676318f7a516ded4407')"
     ]
   }
 }
