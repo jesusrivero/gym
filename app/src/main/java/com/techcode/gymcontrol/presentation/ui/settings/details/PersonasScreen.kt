@@ -74,7 +74,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -234,7 +233,7 @@ fun PersonsScreen(
 				user.usuario.contains(searchText, ignoreCase = true) ||
 						user.email.contains(searchText, ignoreCase = true) ||
 						user.cedula.contains(searchText, ignoreCase = true)
-				        user.numeroTelefono.contains(searchText, ignoreCase = true)
+				user.numeroTelefono.contains(searchText, ignoreCase = true)
 			}
 		}
 
@@ -277,7 +276,7 @@ fun PersonsScreen(
 											color = MaterialTheme.colorScheme.onSurface
 										)
 										Spacer(modifier = Modifier.height(4.dp))
-										
+
 										Row(
 											modifier = Modifier.fillMaxWidth(),
 											horizontalArrangement = Arrangement.spacedBy(8.dp)

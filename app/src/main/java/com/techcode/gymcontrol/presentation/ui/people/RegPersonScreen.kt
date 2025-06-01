@@ -134,8 +134,9 @@ fun ContenAgregarView(
 				viewModel.saveUser(usuario)
 				navController.popBackStack()
 			}, colors = ButtonDefaults.buttonColors(
-				containerColor = Color(0xCD4CAF50)
-			),modifier = Modifier.fillMaxWidth()
+				containerColor = Color(0xBAA7D3DC)
+
+			)
 		){
 			Text(text = "Agregar",)
 
