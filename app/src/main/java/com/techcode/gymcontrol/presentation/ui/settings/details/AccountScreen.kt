@@ -156,7 +156,7 @@ fun AccountContent(
 						onClick = { isEditing = true },
 						modifier = Modifier.fillMaxWidth(),
 						colors = ButtonDefaults.buttonColors(
-							containerColor = Color(0xBAA7D3DC))
+							containerColor = Color(0xCD4CAF50))
 					) {
 						Text("Editar Datos")
 					}
@@ -169,7 +169,7 @@ fun AccountContent(
 							onClick = { isEditing = false },
 							modifier = Modifier.weight(1f),
 							colors = ButtonDefaults.buttonColors(
-								containerColor = Color(0xBAA7D3DC))
+								containerColor = Color(0xCD4CAF50))
 						) {
 							Text("Guardar Cambios")
 						}
@@ -183,7 +183,7 @@ fun AccountContent(
 							},
 							modifier = Modifier.weight(1f),
 							colors = ButtonDefaults.buttonColors(
-								containerColor = Color(0xBAA7D3DC))
+								containerColor = Color(0xCD4CAF50))
 						) {
 							Text("Cancelar")
 						}

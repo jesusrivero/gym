@@ -184,7 +184,7 @@ fun MainContent(
 
             Button(
                 onClick = { },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xBAA7D3DC)),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xCD4CAF50)),
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth()

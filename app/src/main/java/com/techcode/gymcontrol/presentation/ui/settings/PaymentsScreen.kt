@@ -289,7 +289,7 @@ fun PaymentsScreenContent(
 
 					// Aquí se va a agregar la lógica para guardar los datos
 				},
-				colors = ButtonDefaults.buttonColors(containerColor = Color(0xBAA7D3DC)),
+				colors = ButtonDefaults.buttonColors(containerColor = Color(0xCD4CAF50)),
 				modifier = Modifier
 					.fillMaxWidth()
 					.padding(top = 8.dp)

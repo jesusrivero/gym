@@ -371,7 +371,7 @@ fun MembershipContent(
                                 .padding()
                                 .fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xBAA7D3DC),
+                                containerColor = Color(0xCD4CAF50),
                                 disabledContainerColor = Color.LightGray
                             ),
                             enabled = allFieldsAreValid(

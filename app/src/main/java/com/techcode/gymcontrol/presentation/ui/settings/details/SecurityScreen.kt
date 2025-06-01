@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -124,16 +125,18 @@ fun SecurityContent(
 					IconButton(onClick = { showCurrentPassword = !showCurrentPassword }) {
 						Icon(
 							painter = painterResource(
-								id = if (showCurrentPassword) R.drawable.ic_payments else R.drawable.ic_payments
+								id = if (showCurrentPassword) R.drawable.ic_visibility else R.drawable.ic_no_visibility
 							),
-							contentDescription = if (showCurrentPassword) "Ocultar contraseña" else "Mostrar contraseña"
+							contentDescription = if (showCurrentPassword) "Ocultar contraseña" else "Mostrar contraseña",
+							modifier = Modifier.size(22.dp)
 						)
 					}
 				},
 				leadingIcon = {
 					Icon(
-						painter = painterResource(id = R.drawable.ic_payments),
-						contentDescription = "Contraseña"
+						painter = painterResource(id = R.drawable.ic_password),
+						contentDescription = "Confirmar contraseña",
+						modifier = Modifier.size(20.dp)
 					)
 				},
 				keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
@@ -156,16 +159,18 @@ fun SecurityContent(
 					IconButton(onClick = { showNewPassword = !showNewPassword }) {
 						Icon(
 							painter = painterResource(
-								id = if (showNewPassword) R.drawable.ic_payments else R.drawable.ic_payments
+								id = if (showNewPassword) R.drawable.ic_visibility else R.drawable.ic_no_visibility
 							),
-							contentDescription = if (showNewPassword) "Ocultar contraseña" else "Mostrar contraseña"
+							contentDescription = if (showNewPassword) "Ocultar contraseña" else "Mostrar contraseña",
+							modifier = Modifier.size(22.dp)
 						)
 					}
 				},
 				leadingIcon = {
 					Icon(
-						painter = painterResource(id = R.drawable.ic_payments),
-						contentDescription = "Nueva contraseña"
+						painter = painterResource(id = R.drawable.ic_password),
+						contentDescription = "Confirmar contraseña",
+						modifier = Modifier.size(20.dp)
 					)
 				},
 				keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
@@ -201,16 +206,18 @@ fun SecurityContent(
 					IconButton(onClick = { showConfirmPassword = !showConfirmPassword }) {
 						Icon(
 							painter = painterResource(
-								id = if (showConfirmPassword) R.drawable.ic_payments else R.drawable.ic_payments
+								id = if (showConfirmPassword) R.drawable.ic_visibility else R.drawable.ic_no_visibility
 							),
-							contentDescription = if (showConfirmPassword) "Ocultar contraseña" else "Mostrar contraseña"
+							contentDescription = if (showConfirmPassword) "Ocultar contraseña" else "Mostrar contraseña",
+							modifier = Modifier.size(22.dp)
 						)
 					}
 				},
 				leadingIcon = {
 					Icon(
-						painter = painterResource(id = R.drawable.ic_back),
-						contentDescription = "Confirmar contraseña"
+						painter = painterResource(id = R.drawable.ic_password),
+						contentDescription = "Confirmar contraseña",
+						modifier = Modifier.size(20.dp)
 					)
 				},
 				keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
@@ -272,7 +279,7 @@ fun SecurityContent(
 						.fillMaxWidth()
 						.height(50.dp),
 					colors = ButtonDefaults.buttonColors(
-						containerColor = Color(0xBAA7D3DC)
+						containerColor = Color(0xCD4CAF50)
 					)
 				) {
 					Text("Guardar cambios", color = Color.White)
