@@ -27,7 +27,6 @@ class PreferencesManager(context: Context) {
 		const val KEY_PUSH_NOTIFICATIONS = "push_notifications"
 	}
 
-
 	private val sharedPreferences: SharedPreferences =
 		context.getSharedPreferences("GymControlPreferences", Context.MODE_PRIVATE)
 	private val notificationPrefs: SharedPreferences =

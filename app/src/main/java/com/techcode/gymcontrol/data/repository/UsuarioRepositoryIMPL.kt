@@ -4,6 +4,7 @@ import com.techcode.gymcontrol.data.db.dao.UsuariosDatabaseDao
 import com.techcode.gymcontrol.domain.model.Person
 import com.techcode.gymcontrol.domain.repository.UsuarioRepository
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 class UsuarioRepositoryIMPL(
@@ -21,11 +22,8 @@ class UsuarioRepositoryIMPL(
 	}
 	
 	override suspend fun obtenerUsuarios(): List<Person> {
-		var ListPerson: List<Person> = emptyList()
-		dao.obtenerUsuarios().collectLatest { res ->
-			ListPerson = res.map { it.toPerson()}
-		}
-		return ListPerson
+		return dao.obtenerUsuarios().map { list -> list.map{ it.toPerson()} }.first()
 	}
+
 }
 
