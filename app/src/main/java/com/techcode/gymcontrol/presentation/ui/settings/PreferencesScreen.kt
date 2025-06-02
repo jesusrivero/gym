@@ -81,7 +81,7 @@ fun PreferencesScreen(
             SettingsItem(
                 text = "Cuenta y Datos",
                 icon = Icons.Default.AccountCircle,
-                onClick = { navController.navigate(AppRoutes.AccountScreen) }
+                onClick = { navController.navigate(AppRoutes.LoginScreen) }
             )
             SettingsItem(
                 text = "Notificaciones",

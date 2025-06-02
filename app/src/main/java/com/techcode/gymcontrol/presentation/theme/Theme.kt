@@ -12,56 +12,69 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val LightColorScheme = lightColorScheme(
-	primary = Color(0xFF006A60),
-	onPrimary = Color(0xFFFFFFFF),
-	primaryContainer = Color(0xFF80F2DD),
-	onPrimaryContainer = Color(0xFF00201B),
-	secondary = Color(0xFF4A635F),
-	onSecondary = Color(0xFFFFFFFF),
-	secondaryContainer = Color(0xFFCCE8E1),
-	onSecondaryContainer = Color(0xFF05201B),
-	tertiary = Color(0xFF3F6375),
-	onTertiary = Color(0xFFFFFFFF),
-	tertiaryContainer = Color(0xFFC3E8FF),
-	onTertiaryContainer = Color(0xFF001E2C),
-	error = Color(0xFFBA1A1A),
-	onError = Color(0xFFFFFFFF),
-	errorContainer = Color(0xFFFFDAD6),
+	primary = Color(0xFF1E88E5), // Azul sobrio y moderno
+	onPrimary = Color.White,
+	primaryContainer = Color(0xFFD6E4FF),
+	onPrimaryContainer = Color(0xFF001E3C),
+
+	secondary = Color(0xFF6D6D6D),
+	onSecondary = Color.White,
+	secondaryContainer = Color(0xFFE0E0E0),
+	onSecondaryContainer = Color(0xFF1A1A1A),
+
+	tertiary = Color(0xFF546E7A),
+	onTertiary = Color.White,
+	tertiaryContainer = Color(0xFFD0DAE0),
+	onTertiaryContainer = Color(0xFF0A1F29),
+
+	error = Color(0xFFD32F2F),
+	onError = Color.White,
+	errorContainer = Color(0xFFFFDAD4),
 	onErrorContainer = Color(0xFF410002),
-	background = Color(0xFFFFFFFF),
-	onBackground = Color(0xFF191C1B),
-	surface = Color(0xFFFAFDFA),
-	onSurface = Color(0xFF191C1B),
-	surfaceVariant = Color(0xFFDBE5E1),
-	onSurfaceVariant = Color(0xFF3F4946),
-	outline = Color(0xFF6F7976)
+
+	background = Color(0xFFF9F9F9),
+	onBackground = Color(0xFF121212),
+
+	surface = Color.White,
+	onSurface = Color(0xFF121212),
+
+	surfaceVariant = Color(0xFFE0E0E0),
+	onSurfaceVariant = Color(0xFF3E3E3E),
+
+	outline = Color(0xFFB0B0B0)
 )
 
-
 private val DarkColorScheme = darkColorScheme(
-	primary = Color(0xFF80F2DD),
-	onPrimary = Color(0xFF00382F),
-	primaryContainer = Color(0xFF005046),
-	onPrimaryContainer = Color(0xFF80F2DD),
-	secondary = Color(0xFFB0CCC5),
-	onSecondary = Color(0xFF1C3530),
-	secondaryContainer = Color(0xFF334B46),
-	onSecondaryContainer = Color(0xFFCCE8E1),
-	tertiary = Color(0xFFA7CCE8),
-	onTertiary = Color(0xFF0A3447),
-	tertiaryContainer = Color(0xFF264B60),
-	onTertiaryContainer = Color(0xFFC3E8FF),
-	error = Color(0xFFFFB4AB),
-	onError = Color(0xFF690005),
-	errorContainer = Color(0xFF93000A),
-	onErrorContainer = Color(0xFFFFDAD6),
-	background = Color(0xFF191C1B),
-	onBackground = Color(0xFFE0E3E1),
-	surface = Color(0xFF191C1B),
-	onSurface = Color(0xFFE0E3E1),
-	surfaceVariant = Color(0xFF3F4946),
-	onSurfaceVariant = Color(0xFFBFC9C5),
-	outline = Color(0xFF89938F)
+	primary = Color(0xFF90CAF9), // Azul claro elegante
+	onPrimary = Color(0xFF00315D),
+	primaryContainer = Color(0xFF1565C0),
+	onPrimaryContainer = Color(0xFFD6E4FF),
+
+	secondary = Color(0xFFB0BEC5),
+	onSecondary = Color(0xFF263238),
+	secondaryContainer = Color(0xFF37474F),
+	onSecondaryContainer = Color(0xFFCFD8DC),
+
+	tertiary = Color(0xFFB0C4D0),
+	onTertiary = Color(0xFF102631),
+	tertiaryContainer = Color(0xFF263238),
+	onTertiaryContainer = Color(0xFFD0DAE0),
+
+	error = Color(0xFFEF5350),
+	onError = Color(0xFF370001),
+	errorContainer = Color(0xFF8C1D18),
+	onErrorContainer = Color(0xFFFFDAD4),
+
+	background = Color(0xFF121212),
+	onBackground = Color(0xFFECECEC),
+
+	surface = Color(0xFF1E1E1E),
+	onSurface = Color(0xFFECECEC),
+
+	surfaceVariant = Color(0xFF2C2C2C),
+	onSurfaceVariant = Color(0xFFB0B0B0),
+
+	outline = Color(0xFF757575)
 )
 
 @Composable

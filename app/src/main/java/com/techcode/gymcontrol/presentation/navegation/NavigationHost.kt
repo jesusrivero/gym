@@ -8,11 +8,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.techcode.gymcontrol.presentation.ui.auth.LoginScreen
 import com.techcode.gymcontrol.presentation.ui.main.MainScreen
 import com.techcode.gymcontrol.presentation.ui.people.EditPersonScreen
 import com.techcode.gymcontrol.presentation.ui.people.ListPersonScreen
 import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
 import com.techcode.gymcontrol.presentation.ui.people.RegPersonScreen
+import com.techcode.gymcontrol.presentation.ui.register.RegisterScreen
 import com.techcode.gymcontrol.presentation.ui.settings.details.ContactScreen
 import com.techcode.gymcontrol.presentation.ui.settings.details.ListPaymentsScreen
 import com.techcode.gymcontrol.presentation.ui.settings.ManageScreen
@@ -117,7 +119,17 @@ fun NavigationHost (
 			AccountScreen(navController= navController)
 			
 		}
-		
+
+		composable<AppRoutes.LoginScreen> {
+			LoginScreen(navController= navController)
+
+		}
+
+		composable<AppRoutes.RegisterScreen> {
+			RegisterScreen(navController= navController)
+
+		}
+
 
 		composable<AppRoutes.SecurityScreen> {
 			SecurityScreen(navController= navController)

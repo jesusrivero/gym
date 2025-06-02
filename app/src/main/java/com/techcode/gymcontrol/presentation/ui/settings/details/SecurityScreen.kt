@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -134,7 +136,7 @@ fun SecurityContent(
 				},
 				leadingIcon = {
 					Icon(
-						painter = painterResource(id = R.drawable.ic_password),
+						Icons.Default.Lock,
 						contentDescription = "Confirmar contraseña",
 						modifier = Modifier.size(20.dp)
 					)
@@ -168,7 +170,7 @@ fun SecurityContent(
 				},
 				leadingIcon = {
 					Icon(
-						painter = painterResource(id = R.drawable.ic_password),
+						Icons.Default.Lock,
 						contentDescription = "Confirmar contraseña",
 						modifier = Modifier.size(20.dp)
 					)
@@ -215,7 +217,7 @@ fun SecurityContent(
 				},
 				leadingIcon = {
 					Icon(
-						painter = painterResource(id = R.drawable.ic_password),
+						Icons.Default.Lock,
 						contentDescription = "Confirmar contraseña",
 						modifier = Modifier.size(20.dp)
 					)

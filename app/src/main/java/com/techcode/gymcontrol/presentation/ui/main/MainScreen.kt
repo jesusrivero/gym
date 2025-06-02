@@ -1,12 +1,10 @@
 package com.techcode.gymcontrol.presentation.ui.main
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -26,10 +24,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.presentation.navegation.AppRoutes
+import com.techcode.gymcontrol.presentation.theme.GymTheme
 import com.techcode.gymcontrol.presentation.ui.commons.BottomNavigationBar
 import com.techcode.gymcontrol.presentation.ui.commons.CarsScreen.MembersCardScreen
 import com.techcode.gymcontrol.presentation.ui.commons.CarsScreen.SumaryCarsScreen
@@ -42,20 +40,22 @@ import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(navController: NavController, viewModel: PeopleViewModel= hiltViewModel()) {
-	MainContent(
-		navBottom = navController,
-		navRegister = { navController.navigate(AppRoutes.RegPersonScreen) },
 
-		)
+	GymTheme{
+		MainContent(
+			navBottom = navController,
+			navRegister = { navController.navigate(AppRoutes.RegPersonScreen) },
+
+			)
+	}
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainContent(
-
 	navBottom: NavController,
 	navRegister: () -> Unit,
-
 	) {
 	Scaffold(
 		topBar = {

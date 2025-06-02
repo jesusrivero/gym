@@ -52,4 +52,10 @@ object AppRoutes {
 	@Serializable
 	data object AccountScreen
 
+	@Serializable
+	data object LoginScreen
+
+	@Serializable
+	data object RegisterScreen
+
 }

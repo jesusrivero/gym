@@ -51,11 +51,6 @@ fun ManageScreen(navController: NavController) {
 fun ManagerContent(
 	navController: NavController,
 	navBottom: NavController,
-
-
-
-
-
 	) {
 	Scaffold(
 		topBar = {
