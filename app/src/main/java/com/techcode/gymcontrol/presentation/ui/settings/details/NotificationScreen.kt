@@ -19,6 +19,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -42,16 +43,19 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.techcode.gymcontrol.R
 import com.techcode.gymcontrol.data.sharedPreferences.PreferencesManager
+import com.techcode.gymcontrol.presentation.theme.GymTheme
 
 @Composable
 fun NotificationScreen(
     navController: NavController,
 ) {
-    val preferencesManager = rememberPreferencesManager()
-    NotificationScreenContent(
-        navBottom = navController,
-        preferencesManager = preferencesManager
-    )
+    GymTheme {
+        val preferencesManager = rememberPreferencesManager()
+        NotificationScreenContent(
+            navBottom = navController,
+            preferencesManager = preferencesManager
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,12 +64,10 @@ fun NotificationScreenContent(
     navBottom: NavController,
     preferencesManager: PreferencesManager
 ) {
-    // Cargar configuraciones guardadas
     var notificationSettings by remember {
         mutableStateOf(preferencesManager.getNotificationSettings())
     }
 
-    // Función para actualizar configuraciones
     fun updateSettings(
         newClient: Boolean = notificationSettings.newClientEnabled,
         paymentRegistered: Boolean = notificationSettings.paymentRegisteredEnabled,
@@ -73,7 +75,6 @@ fun NotificationScreenContent(
         weekStart: Boolean = notificationSettings.weekStartEnabled,
         pushNotifications: Boolean = notificationSettings.pushNotificationsEnabled
     ) {
-        // Actualizar estado local
         notificationSettings = notificationSettings.copy(
             newClientEnabled = newClient,
             paymentRegisteredEnabled = paymentRegistered,
@@ -81,7 +82,6 @@ fun NotificationScreenContent(
             weekStartEnabled = weekStart,
             pushNotificationsEnabled = pushNotifications
         )
-        // Guardar en SharedPreferences
         preferencesManager.saveNotificationSettings(
             newClient,
             paymentRegistered,
@@ -102,9 +102,7 @@ fun NotificationScreenContent(
                     )
                 },
                 navigationIcon = {
-                    IconButton(
-                        onClick = { navBottom.popBackStack() }
-                    ) {
+                    IconButton(onClick = { navBottom.popBackStack() }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_back),
                             contentDescription = "Regresar",
@@ -113,7 +111,7 @@ fun NotificationScreenContent(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xBAA7D3DC)
+                    containerColor = colorScheme.primary
                 )
             )
         }
@@ -195,10 +193,11 @@ fun NotificationOptionItem(
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface
         )
 
-        Spacer(modifier = Modifier.width(4.dp))
+        Spacer(modifier = Modifier.width(8.dp))
 
         Switch(
             checked = enabled,
@@ -209,12 +208,20 @@ fun NotificationOptionItem(
                         imageVector = Icons.Filled.Check,
                         contentDescription = null,
                         modifier = Modifier.size(SwitchDefaults.IconSize),
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
-            } else null
+            } else null,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = MaterialTheme.colorScheme.primary,
+                uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.54f),
+                uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
+            )
         )
     }
 }
+
 
 @Composable
 fun rememberPreferencesManager(): PreferencesManager {

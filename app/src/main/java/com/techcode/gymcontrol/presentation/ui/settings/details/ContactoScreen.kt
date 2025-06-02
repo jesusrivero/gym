@@ -21,6 +21,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -34,16 +35,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.R
-
+import com.techcode.gymcontrol.presentation.theme.GymTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContactScreen(
     navController: NavController,
 ) {
-    MainContent(
-        navBottom = navController
-    )
+    GymTheme {
+        MainContent(
+            navBottom = navController
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,7 +76,7 @@ fun MainContent(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xBAA7D3DC)
+                    containerColor = colorScheme.primary
                 )
             )
         }
@@ -82,8 +85,8 @@ fun MainContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-	          .padding(horizontal = 8.dp)
-	            .verticalScroll(rememberScrollState()),
+                .padding(horizontal = 8.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
@@ -95,7 +98,6 @@ fun MainContent(
                     .size(100.dp)
                     .padding(top = 32.dp, bottom = 16.dp)
             )
-
 
             Text(
                 text = "NombreApp",
@@ -111,7 +113,6 @@ fun MainContent(
             )
 
             Spacer(modifier = Modifier.height(32.dp))
-
 
             Column(
                 modifier = Modifier
@@ -136,7 +137,6 @@ fun MainContent(
                     color = Color.LightGray
                 )
 
-
                 Text(
                     text = "Contáctanos:",
                     style = MaterialTheme.typography.titleMedium,
@@ -152,7 +152,6 @@ fun MainContent(
                         imageVector = Icons.Default.Email,
                         contentDescription = "Email",
                         modifier = Modifier.size(20.dp),
-
                     )
                     Text(
                         text = "  contacto@ejemplo.com",
@@ -170,7 +169,6 @@ fun MainContent(
                         imageVector = Icons.Default.Phone,
                         contentDescription = "Teléfono",
                         modifier = Modifier.size(20.dp),
-
                     )
                     Text(
                         text = "  +58 000 0000",
@@ -181,24 +179,9 @@ fun MainContent(
                 }
             }
 
-
-            Button(
-                onClick = { },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xCD4CAF50)),
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
-							
-            ) {
-                Text(text = "Visitar nuestro sitio web")
-            }
         }
     }
 }
-
-
-
-
 
 
 	

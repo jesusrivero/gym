@@ -39,6 +39,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -66,6 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.R
 import com.techcode.gymcontrol.domain.model.Person
+import com.techcode.gymcontrol.presentation.theme.GymTheme
 import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
 import java.time.Instant
 import java.time.LocalDate
@@ -80,230 +82,217 @@ fun ListPaymentsScreen(
     viewModel: PeopleViewModel,
     navEdit: (Int?) -> Unit
 ) {
-    var showUserDialog by remember { mutableStateOf(false) }
-    var selectedUser by remember { mutableStateOf<Person?>(null) }
-    var searchText by remember { mutableStateOf("") }
-    var selectedPaymentType by remember { mutableStateOf("Todos") }
-    var startDate by remember { mutableStateOf<LocalDate?>(null) }
-    var endDate by remember { mutableStateOf<LocalDate?>(null) }
-    var showStartDatePicker by remember { mutableStateOf(false) }
-    var showEndDatePicker by remember { mutableStateOf(false) }
+    GymTheme {
+        var showUserDialog by remember { mutableStateOf(false) }
+        var selectedUser by remember { mutableStateOf<Person?>(null) }
+        var searchText by remember { mutableStateOf("") }
+        var selectedPaymentType by remember { mutableStateOf("Todos") }
+        var startDate by remember { mutableStateOf<LocalDate?>(null) }
+        var endDate by remember { mutableStateOf<LocalDate?>(null) }
+        var showStartDatePicker by remember { mutableStateOf(false) }
+        var showEndDatePicker by remember { mutableStateOf(false) }
 
-    val paymentTypeOptions = listOf("Todos", "Dólares", "Bolívares", "Mixtos")
-    val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+        val paymentTypeOptions = listOf("Todos", "Dólares", "Bolívares", "Mixtos")
+        val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
+        if (showUserDialog && selectedUser != null) {
+            AlertDialog(
+                onDismissRequest = { showUserDialog = false },
+                title = {
+                    Text(
+                        "Detalles del pago",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                },
+                text = {
+                    Column {
+                        DetailRow("Nombre:", selectedUser?.usuario ?: "")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        DetailRow("Email:", selectedUser?.email ?: "")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        DetailRow("Tipo de pago:", "Dólares") // Simulado
+                        Spacer(modifier = Modifier.height(8.dp))
+                        DetailRow("Monto:", "$100.00") // Simulado
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = { showUserDialog = false },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Cerrar")
+                    }
+                }
+            )
+        }
 
-    if (showUserDialog && selectedUser != null) {
-        AlertDialog(
-            onDismissRequest = { showUserDialog = false },
-            title = { Text("Detalles del pago", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
-            text = {
+        if (showStartDatePicker) {
+            val datePickerState = rememberDatePickerState()
+            DatePickerDialog(
+                onDismissRequest = { showStartDatePicker = false },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            datePickerState.selectedDateMillis?.let {
+                                startDate = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault())
+                                    .toLocalDate()
+                            }
+                            showStartDatePicker = false
+                        }
+                    ) {
+                        Text("OK")
+                    }
+                }
+            ) {
+                DatePicker(state = datePickerState)
+            }
+        }
+
+        if (showEndDatePicker) {
+            val datePickerState = rememberDatePickerState()
+            DatePickerDialog(
+                onDismissRequest = { showEndDatePicker = false },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            datePickerState.selectedDateMillis?.let {
+                                endDate = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault())
+                                    .toLocalDate()
+                            }
+                            showEndDatePicker = false
+                        }
+                    ) {
+                        Text("OK")
+                    }
+                }
+            ) {
+                DatePicker(state = datePickerState)
+            }
+        }
+
+        Scaffold(
+            topBar = {
                 Column {
-                    DetailRow("Nombre:", selectedUser?.usuario ?: "")
-                    Spacer(modifier = Modifier.height(8.dp))
-                    DetailRow("Email:", selectedUser?.email ?: "")
-                    Spacer(modifier = Modifier.height(8.dp))
-                    DetailRow("Tipo de pago:", "Dólares") // Ejemplo
-                    Spacer(modifier = Modifier.height(8.dp))
-                    DetailRow("Monto:", "$100.00") // Ejemplo
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = { showUserDialog = false },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xBAA7D3DC))
-                ) {
-                    Text("Cerrar")
-                }
-            }
-        )
-    }
-
-
-    if (showStartDatePicker) {
-        val datePickerState = rememberDatePickerState()
-        DatePickerDialog(
-            onDismissRequest = { showStartDatePicker = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        datePickerState.selectedDateMillis?.let {
-                            startDate = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
-                        }
-                        showStartDatePicker = false
-                    }
-                ) {
-                    Text("OK")
-                }
-            }
-        ) {
-            DatePicker(state = datePickerState, title = { Text("Seleccionar fecha inicial") })
-        }
-    }
-
-    if (showEndDatePicker) {
-        val datePickerState = rememberDatePickerState()
-        DatePickerDialog(
-            onDismissRequest = { showEndDatePicker = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        datePickerState.selectedDateMillis?.let {
-                            endDate = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
-                        }
-                        showEndDatePicker = false
-                    }
-                ) {
-                    Text("OK")
-                }
-            }
-        ) {
-            DatePicker(state = datePickerState, title = { Text("Seleccionar fecha final") })
-        }
-    }
-
-    Scaffold(
-        topBar = {
-            Column {
-                TopAppBar(
-                    title = { Text("Listado de pagos", color = Color.White, fontWeight = FontWeight.Bold) },
-                    navigationIcon = {
-                        IconButton(onClick = { navBottom.popBackStack() }) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_back),
-                                contentDescription = "Regresar",
-                                tint = Color.White
+                    TopAppBar(
+                        title = {
+                            Text(
+                                text = "Listado de pagos",
+                                color = colorScheme.onPrimary,
+                                fontWeight = FontWeight.Bold,
                             )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xBAA7D3DC))
-                )
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = { navBottom.popBackStack() }) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_back),
+                                    contentDescription = "Regresar"
+                                )
+                            }
+                        },colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = colorScheme.primary)
+                    )
 
-
-                PaymentFilters(
-                    selectedPaymentType = selectedPaymentType,
-                    paymentTypeOptions = paymentTypeOptions,
-                    onPaymentTypeSelected = { selectedPaymentType = it },
-                    startDate = startDate,
-                    endDate = endDate,
-                    onStartDateClick = { showStartDatePicker = true },
-                    onEndDateClick = { showEndDatePicker = true },
-                    onClearFilters = {
-                        selectedPaymentType = "Todos"
-                        startDate = null
-                        endDate = null
-                    },
-                    dateFormatter = dateFormatter,
-                    searchText = searchText,
-                    onSearchTextChanged = { searchText = it }
-                )
+                    PaymentFilters(
+                        selectedPaymentType = selectedPaymentType,
+                        paymentTypeOptions = paymentTypeOptions,
+                        onPaymentTypeSelected = { selectedPaymentType = it },
+                        startDate = startDate,
+                        endDate = endDate,
+                        onStartDateClick = { showStartDatePicker = true },
+                        onEndDateClick = { showEndDatePicker = true },
+                        onClearFilters = {
+                            selectedPaymentType = "Todos"
+                            startDate = null
+                            endDate = null
+                        },
+                        dateFormatter = dateFormatter,
+                        searchText = searchText,
+                        onSearchTextChanged = { searchText = it }
+                    )
+                }
             }
-        }
-    ) { innerPadding ->
-        val state = viewModel.state
-        val filteredList = if (searchText.isBlank()) {
-            state.userList
-        } else {
-            state.userList.filter { user ->
-                user.usuario.contains(searchText, ignoreCase = true) ||
-                        user.email.contains(searchText, ignoreCase = true)
-            }
-        }
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentAlignment = Alignment.Center
-        ) {
-            if (filteredList.isEmpty()) {
-                Text(
-                    text = if (searchText.isNotEmpty()) "No se encontraron resultados" else "No hay pagos registrados",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+        ) { innerPadding ->
+            val state = viewModel.state
+            val filteredList = if (searchText.isBlank()) {
+                state.userList
             } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(filteredList) { user ->
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-                        ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = user.usuario,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-                                        Spacer(modifier = Modifier.height(4.dp))
-                                        Text(
-                                            text = user.email,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceBetween
-                                        ) {
-                                            PaymentInfoBadge("Dólares", "$100.00")
-                                            PaymentInfoBadge("Fecha", "15/06/2023")
+                state.userList.filter {
+                    it.usuario.contains(searchText, true) || it.email.contains(searchText, true)
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.Center
+            ) {
+                if (filteredList.isEmpty()) {
+                    Text(
+                        text = if (searchText.isNotEmpty()) "No se encontraron resultados" else "No hay pagos registrados",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(filteredList) { user ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = user.usuario,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.SemiBold
+                                            )
+                                            Text(
+                                                text = user.email,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+                                                PaymentInfoBadge("Dólares", "$100.00")
+                                                PaymentInfoBadge("Fecha", "15/06/2023")
+                                            }
+                                        }
+                                        IconButton(onClick = {
+                                            selectedUser = user; showUserDialog = true
+                                        }) {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.ic_details),
+                                                contentDescription = "Detalles"
+                                            )
                                         }
                                     }
-                                    IconButton(
-                                        onClick = { selectedUser = user; showUserDialog = true },
-                                        modifier = Modifier.size(40.dp)
+
+                                    Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.End
                                     ) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_details),
-                                            contentDescription = "Detalles",
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-                                }
-                                Divider(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp),
-                                    color = MaterialTheme.colorScheme.outlineVariant,
-                                    thickness = 0.5.dp
-                                )
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.End
-                                ) {
-                                    IconButton(
-                                        onClick = { navEdit(user.id) },
-                                        modifier = Modifier.size(40.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Edit,
-                                            contentDescription = "Editar",
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-                                    IconButton(
-                                        onClick = { viewModel.deleteUser(user) },
-                                        modifier = Modifier.size(40.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Delete,
-                                            contentDescription = "Eliminar",
-                                            tint = MaterialTheme.colorScheme.error
-                                        )
+                                        IconButton(onClick = { navEdit(user.id) }) {
+                                            Icon(Icons.Default.Edit, contentDescription = "Editar")
+                                        }
+                                        IconButton(onClick = { viewModel.deleteUser(user) }) {
+                                            Icon(
+                                                Icons.Default.Delete,
+                                                contentDescription = "Eliminar",
+                                                tint = MaterialTheme.colorScheme.error
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -314,6 +303,7 @@ fun ListPaymentsScreen(
         }
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
@@ -452,8 +442,7 @@ fun PaymentFilters(
                             contentColor = MaterialTheme.colorScheme.primary
                         ),
                         border = BorderStroke(
-                            1.dp,
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                            1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
                         )
                     ) {
                         Icon(
@@ -496,28 +485,10 @@ fun PaymentFilters(
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
         )
     }
-}
 
 
-@Composable
-private fun DetailRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-    }
 }
+
 
 @Composable
 private fun PaymentInfoBadge(label: String, value: String) {
@@ -530,15 +501,30 @@ private fun PaymentInfoBadge(label: String, value: String) {
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall
-            )
+            Text(text = label, style = MaterialTheme.typography.labelSmall)
             Text(
                 text = value,
                 style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.Bold
             )
         }
+    }
+}
+
+@Composable
+private fun DetailRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }

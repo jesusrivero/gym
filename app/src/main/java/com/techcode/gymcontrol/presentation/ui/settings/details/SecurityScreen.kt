@@ -19,6 +19,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -42,8 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.R
-
-
+import com.techcode.gymcontrol.presentation.theme.GymTheme
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,9 +51,11 @@ import com.techcode.gymcontrol.R
 fun SecurityScreen(
 	navController: NavController,
 ) {
-	SecurityContent(
-		navBottom = navController
-	)
+	GymTheme {
+		SecurityContent(
+			navBottom = navController
+		)
+	}
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -99,7 +101,7 @@ fun SecurityContent(
 					}
 				},
 				colors = TopAppBarDefaults.topAppBarColors(
-					containerColor = Color(0xBAA7D3DC)
+					containerColor = colorScheme.primary
 				)
 			)
 		}
@@ -144,7 +146,6 @@ fun SecurityContent(
 				keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
 			)
 
-
 			OutlinedTextField(
 				value = newPassword,
 				onValueChange = {
@@ -177,7 +178,6 @@ fun SecurityContent(
 				},
 				keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
 			)
-
 
 			OutlinedTextField(
 				value = confirmPassword,
@@ -263,7 +263,6 @@ fun SecurityContent(
 				}
 			}
 
-
 			Column(
 				modifier = Modifier
 					.fillMaxWidth()
@@ -274,7 +273,6 @@ fun SecurityContent(
 					onClick = {
 						if (validatePasswords()) {
 							//  lógica para guardar los cambios
-							// Solo se ejecutará si las contraseñas coinciden
 						}
 					},
 					modifier = Modifier

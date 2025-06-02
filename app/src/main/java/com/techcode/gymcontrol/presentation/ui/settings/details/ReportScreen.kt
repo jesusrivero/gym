@@ -1,3 +1,4 @@
+import android.R
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
@@ -66,22 +67,18 @@ import java.time.format.DateTimeFormatter
 fun ReportScreen(
     navController: NavController
 ) {
-    // Estados para la UI
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    // Estados para los filtros
     var selectedReportType by remember { mutableStateOf("Todos") }
     var startDate by remember { mutableStateOf<LocalDate?>(null) }
     var endDate by remember { mutableStateOf<LocalDate?>(null) }
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
 
-
     val reportTypes = listOf("Clientes", "Pagos", "Próximos Pagos", "Vencimientos")
     val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
-    // Validación de fechas
     LaunchedEffect(startDate, endDate) {
         if (startDate != null && endDate != null && endDate!!.isBefore(startDate)) {
             scope.launch {
@@ -99,8 +96,8 @@ fun ReportScreen(
                     title = {
                         Text(
                             text = "Reportes",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            style = MaterialTheme.typography.titleLarge
                         )
                     },
                     navigationIcon = {
@@ -108,12 +105,12 @@ fun ReportScreen(
                             Icon(
                                 painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_back),
                                 contentDescription = "Regresar",
-                                tint = Color.White
+                                tint = MaterialTheme.colorScheme.onPrimary
                             )
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color(0xBAA7D3DC)
+                        containerColor = MaterialTheme.colorScheme.primary
                     )
                 )
 
@@ -154,14 +151,14 @@ fun ReportScreen(
             if (selectedReportType == "Todos" && startDate == null && endDate == null) {
                 Text(
                     text = "Seleccione filtros para ver los reportes",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center
                 )
             } else {
-
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     item {
-                        Text("Lista de reportes filtrados aparecerá aquí")
-                        // Ejemplo de cómo mostraría los datos filtrados
+                        Text("Lista de reportes filtrados aparecerá aquí", style = MaterialTheme.typography.titleMedium)
                         Text("Tipo seleccionado: $selectedReportType")
                         startDate?.let { Text("Fecha inicio: ${it.format(dateFormatter)}") }
                         endDate?.let { Text("Fecha fin: ${it.format(dateFormatter)}") }
@@ -249,7 +246,6 @@ fun ReportFilters(
         shadowElevation = 4.dp
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-
             Text(
                 text = "Tipo de Reporte",
                 style = MaterialTheme.typography.labelMedium,
@@ -265,13 +261,12 @@ fun ReportFilters(
                     value = selectedReportType,
                     onValueChange = {},
                     readOnly = true,
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedFilter)
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedFilter)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
                         .menuAnchor(),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
                 )
 
                 ExposedDropdownMenu(
@@ -293,7 +288,6 @@ fun ReportFilters(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-
             Text(
                 text = "Rango de Fechas",
                 style = MaterialTheme.typography.labelMedium,
@@ -305,24 +299,9 @@ fun ReportFilters(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-
-                DateSelectorButton(
-                    label = "Desde",
-                    date = startDate,
-                    formatter = dateFormatter,
-                    onClick = onStartDateClick,
-                    modifier = Modifier.weight(1f)
-                )
-
-                DateSelectorButton(
-                    label = "Hasta",
-                    date = endDate,
-                    formatter = dateFormatter,
-                    onClick = onEndDateClick,
-                    modifier = Modifier.weight(1f)
-                )
+                DateSelectorButton("Desde", startDate, dateFormatter, onStartDateClick, Modifier.weight(1f))
+                DateSelectorButton("Hasta", endDate, dateFormatter, onEndDateClick, Modifier.weight(1f))
             }
-
 
             Row(
                 modifier = Modifier
@@ -333,10 +312,7 @@ fun ReportFilters(
                 Button(
                     onClick = { /* Lógica para aplicar filtros */ },
                     enabled = selectedReportType != "Todos" || startDate != null || endDate != null,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xBAA7D3DC)
-                    )
+                    modifier = Modifier.weight(1f)
                 ) {
                     Text("Generar Reporte")
                 }
@@ -350,11 +326,7 @@ fun ReportFilters(
                     )
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Limpiar",
-                            modifier = Modifier.size(18.dp)
-                        )
+                        Icon(Icons.Default.Close, contentDescription = "Limpiar", modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Limpiar")
                     }
@@ -377,10 +349,7 @@ private fun DateSelectorButton(
         onClick = onClick,
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
-        )
+        colors = ButtonDefaults.outlinedButtonColors()
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(

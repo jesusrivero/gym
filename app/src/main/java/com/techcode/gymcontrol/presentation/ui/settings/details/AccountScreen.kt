@@ -38,16 +38,18 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.techcode.gymcontrol.R
-
+import com.techcode.gymcontrol.presentation.theme.GymTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(
 	navController: NavController,
 ) {
-	AccountContent(
-		navBottom = navController
-	)
+	GymTheme {
+		AccountContent(
+			navBottom = navController
+		)
+	}
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,7 +62,6 @@ fun AccountContent(
 	var email by remember { mutableStateOf("") }
 	var phone by remember { mutableStateOf("") }
 
-	
 	Scaffold(
 		topBar = {
 			TopAppBar(
@@ -97,8 +98,6 @@ fun AccountContent(
 			horizontalAlignment = Alignment.CenterHorizontally,
 			verticalArrangement = Arrangement.Top
 		) {
-		
-			
 			Column(
 				modifier = Modifier
 					.fillMaxWidth()
@@ -109,54 +108,55 @@ fun AccountContent(
 					text = "Nombre",
 					style = MaterialTheme.typography.labelLarge
 				)
-				
+
 				OutlinedTextField(
 					value = name,
 					onValueChange = { name = it },
-					label = { Text("Nombre")},
+					label = { Text("Nombre") },
 					modifier = Modifier.fillMaxWidth(),
 					enabled = isEditing,
 					singleLine = true
 				)
-				
+
 				Text(
 					text = "Correo",
 					style = MaterialTheme.typography.labelLarge
 				)
-				
+
 				OutlinedTextField(
 					value = email,
 					onValueChange = { email = it },
-					label = { Text("Correo")},
+					label = { Text("Correo") },
 					modifier = Modifier.fillMaxWidth(),
 					enabled = isEditing,
 					singleLine = true,
 					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
 				)
-				
+
 				Text(
 					text = "Teléfono",
 					style = MaterialTheme.typography.labelLarge
 				)
-				
+
 				OutlinedTextField(
 					value = phone,
 					onValueChange = { phone = it },
-					label = { Text("Telefono")},
+					label = { Text("Teléfono") },
 					modifier = Modifier.fillMaxWidth(),
 					enabled = isEditing,
 					singleLine = true,
 					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
 				)
-				
+
 				Spacer(modifier = Modifier.height(16.dp))
-				
+
 				if (!isEditing) {
 					Button(
 						onClick = { isEditing = true },
 						modifier = Modifier.fillMaxWidth(),
 						colors = ButtonDefaults.buttonColors(
-							containerColor = Color(0xCD4CAF50))
+							containerColor = Color(0xCD4CAF50)
+						)
 					) {
 						Text("Editar Datos")
 					}
@@ -169,21 +169,23 @@ fun AccountContent(
 							onClick = { isEditing = false },
 							modifier = Modifier.weight(1f),
 							colors = ButtonDefaults.buttonColors(
-								containerColor = Color(0xCD4CAF50))
+								containerColor = Color(0xCD4CAF50)
+							)
 						) {
 							Text("Guardar Cambios")
 						}
-						
+
 						Button(
 							onClick = {
 								isEditing = false
-								name =  ""
+								name = ""
 								email = ""
 								phone = ""
 							},
 							modifier = Modifier.weight(1f),
 							colors = ButtonDefaults.buttonColors(
-								containerColor = Color(0xCD4CAF50))
+								containerColor = Color(0xCD4CAF50)
+							)
 						) {
 							Text("Cancelar")
 						}
@@ -197,7 +199,7 @@ fun AccountContent(
 @Preview(showBackground = true)
 @Composable
 fun AccountScreenPreview() {
-	MaterialTheme {
-		AccountScreen(rememberNavController())
+	GymTheme {
+		AccountScreen(navController = rememberNavController())
 	}
 }

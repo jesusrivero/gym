@@ -17,6 +17,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -45,9 +46,7 @@ import com.techcode.gymcontrol.presentation.ui.people.PaymentSettingsViewModel
 
 
 @Composable
-fun PaymentsScreen(
-	navBottom: NavController,
-) {
+fun PaymentsScreen(navBottom: NavController) {
 	val viewModel: PaymentSettingsViewModel = hiltViewModel()
 	PaymentsScreenContent(
 		navBottom = navBottom,
@@ -61,11 +60,10 @@ fun PaymentsScreenContent(
 	navBottom: NavController,
 	state: PaymentSettingsViewModel.PaymentState,
 ) {
-
 	val viewModel: PaymentSettingsViewModel = hiltViewModel()
 	val paymentState by viewModel.paymentState.collectAsState()
-	
-	// Estados locales solo para campos no manejados por el ViewModel
+	val colorScheme = MaterialTheme.colorScheme
+
 	var description by remember { mutableStateOf("") }
 	var nameUser by remember { mutableStateOf("") }
 	var reference by remember { mutableStateOf("") }
@@ -73,8 +71,7 @@ fun PaymentsScreenContent(
 	var isTypeDropdownExpanded by remember { mutableStateOf(false) }
 	val paymentTypes = listOf("Dólares", "Bolívares", "Mixto")
 	val isPaymentTypeEnabled = paymentState.frequency.isNotEmpty()
-	
-	
+
 	LaunchedEffect(true) {
 		viewModel.getPricesValue()
 	}
@@ -82,19 +79,19 @@ fun PaymentsScreenContent(
 	DisposableEffect(Unit) {
 		onDispose { viewModel.resetPaymentState() }
 	}
-	
+
 	Scaffold(
 		topBar = {
 			TopAppBar(
 				title = {
 					Text(
 						text = "Registro de pagos",
-						color = Color.White,
+						color = colorScheme.onPrimary,
 						fontWeight = FontWeight.Bold
 					)
 				},
 				colors = TopAppBarDefaults.topAppBarColors(
-					containerColor = Color(0xBAA7D3DC)
+					containerColor = colorScheme.primary
 				)
 			)
 		},
@@ -108,7 +105,6 @@ fun PaymentsScreenContent(
 				.padding(innerPadding)
 				.padding(8.dp)
 				.verticalScroll(rememberScrollState())
-		
 		) {
 			OutlinedTextField(
 				value = nameUser,
@@ -116,10 +112,9 @@ fun PaymentsScreenContent(
 				label = { Text("Nombre y apellido") },
 				modifier = Modifier.fillMaxWidth()
 			)
-			
+
 			Spacer(modifier = Modifier.height(8.dp))
-			
-			
+
 			ExposedDropdownMenuBox(
 				expanded = isDropdownExpanded,
 				onExpandedChange = { isDropdownExpanded = it }
@@ -128,17 +123,13 @@ fun PaymentsScreenContent(
 					value = paymentState.frequency,
 					onValueChange = {},
 					label = { Text("Frecuencia de pago") },
-					modifier = Modifier
-						.fillMaxWidth()
-						.menuAnchor(),
+					modifier = Modifier.fillMaxWidth().menuAnchor(),
 					readOnly = true,
 					trailingIcon = {
-						ExposedDropdownMenuDefaults.TrailingIcon(
-							expanded = isDropdownExpanded
-						)
+						ExposedDropdownMenuDefaults.TrailingIcon(expanded = isDropdownExpanded)
 					}
 				)
-				
+
 				ExposedDropdownMenu(
 					expanded = isDropdownExpanded,
 					onDismissRequest = { isDropdownExpanded = false }
@@ -151,7 +142,7 @@ fun PaymentsScreenContent(
 									Text(
 										text = "Valor: ${paymentState.ListMembership[frequency]}$",
 										fontSize = 12.sp,
-										color = Color.Gray
+										color = colorScheme.onSurfaceVariant
 									)
 								}
 							},
@@ -163,10 +154,9 @@ fun PaymentsScreenContent(
 					}
 				}
 			}
-			
+
 			Spacer(modifier = Modifier.height(8.dp))
-			
-			
+
 			ExposedDropdownMenuBox(
 				expanded = isTypeDropdownExpanded && isPaymentTypeEnabled,
 				onExpandedChange = { if (isPaymentTypeEnabled) isTypeDropdownExpanded = it }
@@ -175,9 +165,7 @@ fun PaymentsScreenContent(
 					value = paymentState.type,
 					onValueChange = {},
 					label = { Text("Tipo de pago") },
-					modifier = Modifier
-						.fillMaxWidth()
-						.menuAnchor(),
+					modifier = Modifier.fillMaxWidth().menuAnchor(),
 					readOnly = true,
 					trailingIcon = {
 						ExposedDropdownMenuDefaults.TrailingIcon(
@@ -186,7 +174,7 @@ fun PaymentsScreenContent(
 					},
 					enabled = isPaymentTypeEnabled
 				)
-				
+
 				if (isPaymentTypeEnabled) {
 					ExposedDropdownMenu(
 						expanded = isTypeDropdownExpanded,
@@ -204,10 +192,9 @@ fun PaymentsScreenContent(
 					}
 				}
 			}
-			
+
 			Spacer(modifier = Modifier.height(8.dp))
-			
-			
+
 			when (paymentState.type) {
 				"Dólares" -> {
 					OutlinedTextField(
@@ -219,7 +206,6 @@ fun PaymentsScreenContent(
 						keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
 					)
 				}
-				
 				"Bolívares" -> {
 					OutlinedTextField(
 						value = paymentState.amountBs,
@@ -229,7 +215,6 @@ fun PaymentsScreenContent(
 						keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
 					)
 				}
-				
 				"Mixto" -> {
 					Row(
 						modifier = Modifier.fillMaxWidth(),
@@ -242,7 +227,6 @@ fun PaymentsScreenContent(
 							modifier = Modifier.weight(1f),
 							keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
 						)
-						
 						OutlinedTextField(
 							value = paymentState.amountBs,
 							onValueChange = { viewModel.updateAmountBs(it) },
@@ -253,10 +237,9 @@ fun PaymentsScreenContent(
 					}
 				}
 			}
-			
+
 			Spacer(modifier = Modifier.height(8.dp))
-			
-			
+
 			if (paymentState.type != "Dólares") {
 				OutlinedTextField(
 					value = reference,
@@ -267,17 +250,16 @@ fun PaymentsScreenContent(
 				)
 				Spacer(modifier = Modifier.height(8.dp))
 			}
-			
-			
+
 			OutlinedTextField(
 				value = description,
 				onValueChange = { description = it },
 				label = { Text("Descripción") },
 				modifier = Modifier.fillMaxWidth()
 			)
-			
+
 			Spacer(modifier = Modifier.height(8.dp))
-			
+
 			Button(
 				onClick = {
 					val paymentData = when (paymentState.type) {
@@ -287,9 +269,12 @@ fun PaymentsScreenContent(
 						else -> ""
 					}
 
-					// Aquí se va a agregar la lógica para guardar los datos
+					// Lógica de guardado va aquí
 				},
-				colors = ButtonDefaults.buttonColors(containerColor = Color(0xCD4CAF50)),
+				colors = ButtonDefaults.buttonColors(
+					containerColor = colorScheme.primary,
+					contentColor = colorScheme.onPrimary
+				),
 				modifier = Modifier
 					.fillMaxWidth()
 					.padding(top = 8.dp)
@@ -299,7 +284,6 @@ fun PaymentsScreenContent(
 		}
 	}
 }
-
 /*@Preview(showBackground = true)
 @Composable
 fun PaymentsScreenPreview() {

@@ -15,6 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,9 +47,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.R
+import com.techcode.gymcontrol.presentation.theme.GymTheme
 import com.techcode.gymcontrol.presentation.ui.people.PaymentSettingsViewModel
 import kotlinx.coroutines.delay
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MembershipScreen(navController: NavController) {
@@ -59,7 +60,6 @@ fun MembershipScreen(navController: NavController) {
         viewModel.getPricesValue()
     }
 
-    // Efecto para mostrar snackbar cuando se actualizan los precios
     var showUpdateSnackbar by remember { mutableStateOf(false) }
     LaunchedEffect(state.PricesMembership) {
         if (state.PricesMembership != null) {
@@ -67,23 +67,25 @@ fun MembershipScreen(navController: NavController) {
         }
     }
 
-    MembershipContent(
-        navController = navController,
-        navBottom = navController,
-        state = state,
-        onSubmit = { p1, p2, p3, p4, p5, p6 ->
-            viewModel.updatePricesMembership(
-                WeeklyValue = p1,
-                BiweeklyValue = p2,
-                MonthlyValue = p3,
-                QuarterlyValue = p4,
-                BiannualValue = p5,
-                AnnualValue = p6
-            )
-        },
-        showUpdateSnackbar = showUpdateSnackbar,
-        onDismissSnackbar = { showUpdateSnackbar = false }
-    )
+    GymTheme {
+        MembershipContent(
+            navController = navController,
+            navBottom = navController,
+            state = state,
+            onSubmit = { p1, p2, p3, p4, p5, p6 ->
+                viewModel.updatePricesMembership(
+                    WeeklyValue = p1,
+                    BiweeklyValue = p2,
+                    MonthlyValue = p3,
+                    QuarterlyValue = p4,
+                    BiannualValue = p5,
+                    AnnualValue = p6
+                )
+            },
+            showUpdateSnackbar = showUpdateSnackbar,
+            onDismissSnackbar = { showUpdateSnackbar = false }
+        )
+    }
 }
 
 fun allFieldsAreValid(
@@ -112,64 +114,64 @@ fun MembershipContent(
     showUpdateSnackbar: Boolean = false,
     onDismissSnackbar: () -> Unit = {}
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+    val typography = MaterialTheme.typography
+
     var showSnackbar by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf("") }
 
-    // Estados locales sincronizados con el estado del ViewModel
     var editedWeekly by rememberSaveable { mutableStateOf("") }
     var editedBiweekly by rememberSaveable { mutableStateOf("") }
     var editedMonthly by rememberSaveable { mutableStateOf("") }
     var editedQuarterly by rememberSaveable { mutableStateOf("") }
-    var editedBinnual by rememberSaveable { mutableStateOf("") }
+    var editedBiannual by rememberSaveable { mutableStateOf("") }
     var editedAnnual by rememberSaveable { mutableStateOf("") }
 
-    // Sincronizar con el estado actual
     LaunchedEffect(state.PricesMembership) {
         state.PricesMembership?.let {
             editedWeekly = it.weekly.orEmpty()
             editedBiweekly = it.biweekly.orEmpty()
             editedMonthly = it.monthly.orEmpty()
             editedQuarterly = it.quarterly.orEmpty()
-            editedBinnual = it.biannual.orEmpty()
+            editedBiannual = it.biannual.orEmpty()
             editedAnnual = it.annual.orEmpty()
         }
     }
 
     if (showSnackbar) {
-        LaunchedEffect(showSnackbar) {
+        LaunchedEffect(Unit) {
             delay(2000)
             showSnackbar = false
         }
     }
+
     Scaffold(
         topBar = {
-            Column {
-                TopAppBar(
-                    title = {
-                        Text(
-                            "Listado de membresías",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
+            TopAppBar(
+                title = {
+                    Text(
+                        "Listado de membresías",
+                        color = colorScheme.onPrimary,
+                        style = typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navBottom.popBackStack() }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_back),
+                            contentDescription = "Regresar",
+                            tint = colorScheme.onPrimary
                         )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = { navBottom.popBackStack() }) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_back),
-                                contentDescription = "Regresar",
-                                tint = Color.White
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xBAA7D3DC))
-                )
-            }
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.primary)
+            )
         },
         snackbarHost = {
             if (showSnackbar) {
                 Snackbar(
-                    modifier = Modifier.padding(8.dp),
-                    action = {}
+                    modifier = Modifier.padding(8.dp)
                 ) {
                     Text(text = snackbarMessage)
                 }
@@ -178,221 +180,99 @@ fun MembershipContent(
     ) { innerPadding ->
         Column(
             modifier = Modifier
-                .fillMaxSize()
                 .padding(innerPadding)
+                .padding(16.dp)
                 .verticalScroll(rememberScrollState())
-
         ) {
-
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
+                elevation = CardDefaults.cardElevation(4.dp)
             ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(colorScheme.background)
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = "Editar valores de pago en dólares",
+                        style = typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.onBackground
+                    )
 
-                Box(modifier = Modifier.background(color = Color.White)) {
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "Editar valores de pago en dólares",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
+                    MembershipTextField("Semanal", editedWeekly) { editedWeekly = it }
+                    MembershipTextField("Quincenal", editedBiweekly) { editedBiweekly = it }
+                    MembershipTextField("Mensual", editedMonthly) { editedMonthly = it }
+                    MembershipTextField("Trimestral", editedQuarterly) { editedQuarterly = it }
+                    MembershipTextField("Semestral", editedBiannual) { editedBiannual = it }
+                    MembershipTextField("Anual", editedAnnual) { editedAnnual = it }
 
-                        Spacer(modifier = Modifier.padding(4.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                        // Semanal
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = "Semanal:",
-                                modifier = Modifier.weight(1f)
-                            )
-                            OutlinedTextField(
-                                value = editedWeekly.toString(),
-                                onValueChange = {
-                                    if (it.isEmpty() || it.toDoubleOrNull() != null) {
-                                        editedWeekly = it
-                                    }
-                                },
-                                label = { Text("Valor semanal") },
-                                modifier = Modifier.weight(1f),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
-                            )
-                        }
-
-                        // Quincenal
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = "Quincenal:",
-                                modifier = Modifier.weight(1f)
-                            )
-                            OutlinedTextField(
-                                value = editedBiweekly.toString(),
-                                onValueChange = {
-                                    if (it.isEmpty() || it.toDoubleOrNull() != null) {
-                                        editedBiweekly = it
-                                    }
-                                },
-                                label = { Text("Valor quincenal") },
-                                modifier = Modifier.weight(1f),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
-                            )
-                        }
-
-
-                        // Mensual
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = "Mensual:",
-                                modifier = Modifier.weight(1f)
-                            )
-                            OutlinedTextField(
-                                value = editedMonthly.toString(),
-                                onValueChange = {
-                                    if (it.isEmpty() || it.toDoubleOrNull() != null) {
-                                        editedMonthly = it
-                                    }
-                                },
-                                label = { Text("Valor mensual") },
-                                modifier = Modifier.weight(1f),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
-                            )
-                        }
-
-                        // Trimestral
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = "Trimestral:",
-                                modifier = Modifier.weight(1f)
-                            )
-                            OutlinedTextField(
-                                value = editedQuarterly.toString(),
-                                onValueChange = {
-                                    if (it.isEmpty() || it.toDoubleOrNull() != null) {
-                                        editedQuarterly = it
-                                    }
-                                },
-                                label = { Text("Valor trimestral") },
-                                modifier = Modifier.weight(1f),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
-                            )
-                        }
-
-                        // Semestral
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = "Semestral:",
-                                modifier = Modifier.weight(1f)
-                            )
-                            OutlinedTextField(
-                                value = editedBinnual.toString(),
-                                onValueChange = {
-                                    if (it.isEmpty() || it.toDoubleOrNull() != null) {
-                                        editedBinnual = it
-                                    }
-                                },
-                                label = { Text("Valor semestral") },
-                                modifier = Modifier.weight(1f),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
-                            )
-                        }
-
-                        // Anual
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = "Anual:",
-                                modifier = Modifier.weight(1f)
-                            )
-                            OutlinedTextField(
-                                value = editedAnnual.toString(),
-                                onValueChange = {
-                                    if (it.isEmpty() || it.toDoubleOrNull() != null) {
-                                        editedAnnual = it
-                                    }
-                                },
-                                label = { Text("Valor semanal") },
-                                modifier = Modifier.weight(1f),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
-                            )
-                        }
-
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Button(
-                            onClick = {
-                                if (allFieldsAreValid(
-                                        editedWeekly,
-                                        editedBiweekly,
-                                        editedMonthly,
-                                        editedQuarterly,
-                                        editedBinnual,
-                                        editedAnnual
-                                    )
-                                ) {
-                                    onSubmit(
-                                        editedWeekly,
-                                        editedBiweekly,
-                                        editedMonthly,
-                                        editedQuarterly,
-                                        editedBinnual,
-                                        editedAnnual
-                                    )
-                                    snackbarMessage = "Cambios guardados correctamente"
-                                    showSnackbar = true
-                                } else {
-                                    snackbarMessage = "Por favor complete todos los campos"
-                                    showSnackbar = true
-                                }
-                            },
-                            modifier = Modifier
-                                .padding()
-                                .fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xCD4CAF50),
-                                disabledContainerColor = Color.LightGray
-                            ),
-                            enabled = allFieldsAreValid(
-                                editedWeekly,
-                                editedBiweekly,
-                                editedMonthly,
-                                editedQuarterly,
-                                editedBinnual,
-                                editedAnnual
-                            )
-
-                        ) {
-                            Text("Guardar cambios")
-                        }
+                    Button(
+                        onClick = {
+                            if (allFieldsAreValid(
+                                    editedWeekly,
+                                    editedBiweekly,
+                                    editedMonthly,
+                                    editedQuarterly,
+                                    editedBiannual,
+                                    editedAnnual
+                                )
+                            ) {
+                                onSubmit(
+                                    editedWeekly,
+                                    editedBiweekly,
+                                    editedMonthly,
+                                    editedQuarterly,
+                                    editedBiannual,
+                                    editedAnnual
+                                )
+                                snackbarMessage = "Cambios guardados correctamente"
+                            } else {
+                                snackbarMessage = "Por favor complete todos los campos"
+                            }
+                            showSnackbar = true
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = allFieldsAreValid(
+                            editedWeekly,
+                            editedBiweekly,
+                            editedMonthly,
+                            editedQuarterly,
+                            editedBiannual,
+                            editedAnnual
+                        ),
+                        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+                    ) {
+                        Text("Guardar cambios")
                     }
-
                 }
-
             }
         }
     }
 }
 
-
+@Composable
+fun MembershipTextField(label: String, value: String, onValueChange: (String) -> Unit) {
+    val typography = MaterialTheme.typography
+    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+        Text(text = "$label:", style = typography.bodyMedium)
+        OutlinedTextField(
+            value = value,
+            onValueChange = {
+                if (it.isEmpty() || it.toDoubleOrNull() != null) onValueChange(it)
+            },
+            label = { Text("Valor $label".lowercase()) },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = androidx.compose.ui.text.input.KeyboardType.Number,
+                imeAction = ImeAction.Next
+            )
+        )
+    }
+}

@@ -40,6 +40,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -74,19 +75,19 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-@RequiresApi(Build.VERSION_CODES.O)
+
+
 @OptIn(ExperimentalMaterial3Api::class)
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PersonsScreen(
 	navBottom: NavController,
 	viewModel: PeopleViewModel,
 	navEdit: (Int) -> Unit,
 ) {
-	LaunchedEffect(true) {
+	LaunchedEffect(Unit) {
 		viewModel.getUsers()
 	}
-
-
 
 	var showUserDialog by remember { mutableStateOf(false) }
 	var selectedUser by remember { mutableStateOf<Person?>(null) }
@@ -96,10 +97,9 @@ fun PersonsScreen(
 	var endDate by remember { mutableStateOf<LocalDate?>(null) }
 	var showStartDatePicker by remember { mutableStateOf(false) }
 	var showEndDatePicker by remember { mutableStateOf(false) }
+
 	val filterOptions = listOf("Todos", "Activos", "Inactivos", "Próximos a pagar")
 	val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-
-
 
 	if (showUserDialog && selectedUser != null) {
 		AlertDialog(
@@ -108,9 +108,7 @@ fun PersonsScreen(
 				selectedUser = null
 			},
 			title = {
-				Text("Información del usuario",
-					modifier = Modifier.fillMaxWidth(),
-					textAlign = TextAlign.Center)
+				Text("Información del usuario", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
 			},
 			text = {
 				Column {
@@ -135,20 +133,17 @@ fun PersonsScreen(
 		)
 	}
 
-
 	if (showStartDatePicker) {
 		val datePickerState = rememberDatePickerState()
 		DatePickerDialog(
 			onDismissRequest = { showStartDatePicker = false },
 			confirmButton = {
-				TextButton(
-					onClick = {
-						datePickerState.selectedDateMillis?.let {
-							startDate = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
-						}
-						showStartDatePicker = false
+				TextButton(onClick = {
+					datePickerState.selectedDateMillis?.let {
+						startDate = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
 					}
-				) {
+					showStartDatePicker = false
+				}) {
 					Text("OK")
 				}
 			}
@@ -162,14 +157,12 @@ fun PersonsScreen(
 		DatePickerDialog(
 			onDismissRequest = { showEndDatePicker = false },
 			confirmButton = {
-				TextButton(
-					onClick = {
-						datePickerState.selectedDateMillis?.let {
-							endDate = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
-						}
-						showEndDatePicker = false
+				TextButton(onClick = {
+					datePickerState.selectedDateMillis?.let {
+						endDate = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
 					}
-				) {
+					showEndDatePicker = false
+				}) {
 					Text("OK")
 				}
 			}
@@ -184,9 +177,9 @@ fun PersonsScreen(
 				TopAppBar(
 					title = {
 						Text(
-							text = "Listado de Personas",
-							color = Color.White,
-							fontWeight = FontWeight.Bold
+							text = "Listado de personas",
+							color = colorScheme.onPrimary,
+							fontWeight = FontWeight.Bold,
 						)
 					},
 					navigationIcon = {
@@ -198,12 +191,9 @@ fun PersonsScreen(
 							)
 						}
 					},
-					colors = TopAppBarDefaults.topAppBarColors(
-						containerColor = Color(0xBAA7D3DC)
+					colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = colorScheme.primary
 					)
 				)
-
-
 				PaymentFilters(
 					selectedPaymentType = selectedState,
 					paymentTypeOptions = filterOptions,
@@ -219,36 +209,27 @@ fun PersonsScreen(
 					},
 					dateFormatter = dateFormatter,
 					searchText = searchText,
-					onSearchTextChanged = { searchText = it },
-					labelPaymentType = "Filtrar por estado",
-					labelSearch = "Buscar personas..."
+					onSearchTextChanged = { searchText = it }
 				)
 			}
 		}
 	) { innerPadding ->
 		val state = viewModel.state
-
-		val filteredList = if (searchText.isBlank()) {
-			state.userList
-		} else {
-			state.userList.filter { user ->
-				user.usuario.contains(searchText, ignoreCase = true) ||
-						user.email.contains(searchText, ignoreCase = true) ||
-						user.cedula.contains(searchText, ignoreCase = true)
-				user.numeroTelefono.contains(searchText, ignoreCase = true)
-			}
+		val filteredList = state.userList.filter {
+			(searchText.isBlank() || it.usuario.contains(searchText, true)
+					|| it.email.contains(searchText, true)
+					|| it.cedula.contains(searchText, true)
+					|| it.numeroTelefono.contains(searchText, true))
 		}
 
-		Box(
-			modifier = Modifier
-				.fillMaxSize()
-				.padding(innerPadding),
+		Box(modifier = Modifier
+			.fillMaxSize()
+			.padding(innerPadding),
 			contentAlignment = Alignment.Center
 		) {
 			if (filteredList.isEmpty()) {
 				Text(
-					text = if (searchText.isNotEmpty()) "No se encontraron resultados"
-					else "No hay personas registradas",
+					text = if (searchText.isNotEmpty()) "No se encontraron resultados" else "No hay personas registradas",
 					color = MaterialTheme.colorScheme.onSurfaceVariant
 				)
 			} else {
@@ -262,47 +243,24 @@ fun PersonsScreen(
 						Card(
 							modifier = Modifier.fillMaxWidth(),
 							shape = RoundedCornerShape(16.dp),
-							elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-							colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+							elevation = CardDefaults.cardElevation(2.dp),
+							colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
 						) {
 							Column(modifier = Modifier.padding(16.dp)) {
-								Row(
-									modifier = Modifier.fillMaxWidth(),
-									verticalAlignment = Alignment.CenterVertically
-								) {
+								Row(verticalAlignment = Alignment.CenterVertically) {
 									Column(modifier = Modifier.weight(1f)) {
 										Text(
-											text = user.usuario,
+											user.usuario,
 											style = MaterialTheme.typography.titleMedium,
-											fontWeight = FontWeight.SemiBold,
-											color = MaterialTheme.colorScheme.onSurface
+											fontWeight = FontWeight.SemiBold
 										)
 										Spacer(modifier = Modifier.height(4.dp))
-
-										Row(
-											modifier = Modifier.fillMaxWidth(),
-											horizontalArrangement = Arrangement.spacedBy(8.dp)
-										) {
+										Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
 											PaymentInfoBadge("Email", user.email)
 											PaymentInfoBadge("Cédula", user.cedula)
-											PaymentInfoBadge("Numero", user.numeroTelefono)
+											PaymentInfoBadge("Número", user.numeroTelefono)
 										}
-
-										Spacer(modifier = Modifier.height(8.dp))
-
-										Text(
-											text = "Usuario: ${user.usuario}",
-											style = MaterialTheme.typography.bodyMedium,
-											color = MaterialTheme.colorScheme.onSurfaceVariant
-										)
-										Text(
-											text = user.numeroTelefono,
-											style = MaterialTheme.typography.titleMedium,
-											fontWeight = FontWeight.SemiBold,
-											color = MaterialTheme.colorScheme.onSurface
-										)
 									}
-
 									IconButton(
 										onClick = { selectedUser = user; showUserDialog = true },
 										modifier = Modifier.size(40.dp)
@@ -314,39 +272,17 @@ fun PersonsScreen(
 										)
 									}
 								}
-
 								Divider(
-									modifier = Modifier
-										.fillMaxWidth()
-										.padding(vertical = 8.dp),
+									modifier = Modifier.padding(vertical = 8.dp),
 									color = MaterialTheme.colorScheme.outlineVariant,
 									thickness = 0.5.dp
 								)
-
-								Row(
-									modifier = Modifier.fillMaxWidth(),
-									horizontalArrangement = Arrangement.End
-								) {
-									IconButton(
-										onClick = { user.id?.let { navEdit(it) } },
-										modifier = Modifier.size(40.dp)
-									) {
-										Icon(
-											imageVector = Icons.Default.Edit,
-											contentDescription = "Editar",
-											tint = MaterialTheme.colorScheme.primary
-										)
+								Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+									IconButton(onClick = { user.id?.let { navEdit(it) } }) {
+										Icon(Icons.Default.Edit, "Editar", tint = MaterialTheme.colorScheme.primary)
 									}
-
-									IconButton(
-										onClick = { viewModel.deleteUser(user) },
-										modifier = Modifier.size(40.dp)
-									) {
-										Icon(
-											imageVector = Icons.Default.Delete,
-											contentDescription = "Eliminar",
-											tint = MaterialTheme.colorScheme.error
-										)
+									IconButton(onClick = { viewModel.deleteUser(user) }) {
+										Icon(Icons.Default.Delete, "Eliminar", tint = MaterialTheme.colorScheme.error)
 									}
 								}
 							}
@@ -358,195 +294,6 @@ fun PersonsScreen(
 	}
 }
 
-
-@OptIn(ExperimentalMaterial3Api::class)
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun PaymentFilters(
-	selectedPaymentType: String,
-	paymentTypeOptions: List<String>,
-	onPaymentTypeSelected: (String) -> Unit,
-	startDate: LocalDate?,
-	endDate: LocalDate?,
-	onStartDateClick: () -> Unit,
-	onEndDateClick: () -> Unit,
-	onClearFilters: () -> Unit,
-	dateFormatter: DateTimeFormatter,
-	searchText: String,
-	onSearchTextChanged: (String) -> Unit,
-	labelPaymentType: String = "Tipo de pago",
-	labelSearch: String = "Buscar..."
-) {
-	var expandedFilter by remember { mutableStateOf(false) }
-
-	Column {
-		Surface(
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(horizontal = 16.dp, vertical = 8.dp),
-			shape = RoundedCornerShape(16.dp),
-			color = MaterialTheme.colorScheme.surface,
-			shadowElevation = 4.dp
-		) {
-			Column(modifier = Modifier.padding(16.dp)) {
-
-
-				Text(
-					text = labelPaymentType,
-					style = MaterialTheme.typography.labelMedium,
-					color = MaterialTheme.colorScheme.onSurfaceVariant,
-					modifier = Modifier.padding(bottom = 4.dp)
-				)
-
-				ExposedDropdownMenuBox(
-					expanded = expandedFilter,
-					onExpandedChange = { expandedFilter = it }
-				) {
-					OutlinedTextField(
-						value = selectedPaymentType,
-						onValueChange = {},
-						readOnly = true,
-						trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedFilter) },
-						modifier = Modifier
-							.fillMaxWidth()
-							.menuAnchor(),
-						shape = RoundedCornerShape(12.dp)
-					)
-
-					ExposedDropdownMenu(
-						expanded = expandedFilter,
-						onDismissRequest = { expandedFilter = false },
-						modifier = Modifier.background(Color.White)
-					) {
-						paymentTypeOptions.forEach { option ->
-							DropdownMenuItem(
-								text = { Text(option, modifier = Modifier.fillMaxWidth()) },
-								onClick = { onPaymentTypeSelected(option); expandedFilter = false }
-							)
-						}
-					}
-				}
-
-				Spacer(modifier = Modifier.height(16.dp))
-
-
-				Text(
-					text = "Rango de fechas",
-					style = MaterialTheme.typography.labelMedium,
-					color = MaterialTheme.colorScheme.onSurfaceVariant,
-					modifier = Modifier.padding(bottom = 4.dp)
-				)
-
-				Row(
-					modifier = Modifier.fillMaxWidth(),
-					horizontalArrangement = Arrangement.spacedBy(8.dp)
-				) {
-					OutlinedButton(
-						onClick = onStartDateClick,
-						modifier = Modifier.weight(1f),
-						shape = RoundedCornerShape(12.dp),
-						colors = ButtonDefaults.outlinedButtonColors(
-							containerColor = MaterialTheme.colorScheme.surface,
-							contentColor = MaterialTheme.colorScheme.onSurface
-						)
-					) {
-						Column(horizontalAlignment = Alignment.CenterHorizontally) {
-							Text(
-								text = "Desde",
-								style = MaterialTheme.typography.labelSmall,
-								color = MaterialTheme.colorScheme.onSurfaceVariant
-							)
-							Text(
-								text = startDate?.format(dateFormatter) ?: "Seleccionar",
-								style = MaterialTheme.typography.bodyMedium,
-								color = if (startDate != null) MaterialTheme.colorScheme.onSurface
-								else MaterialTheme.colorScheme.onSurfaceVariant
-							)
-						}
-					}
-
-					OutlinedButton(
-						onClick = onEndDateClick,
-						modifier = Modifier.weight(1f),
-						shape = RoundedCornerShape(12.dp),
-						colors = ButtonDefaults.outlinedButtonColors(
-							containerColor = MaterialTheme.colorScheme.surface,
-							contentColor = MaterialTheme.colorScheme.onSurface
-						)
-					) {
-						Column(horizontalAlignment = Alignment.CenterHorizontally) {
-							Text(
-								text = "Hasta",
-								style = MaterialTheme.typography.labelSmall,
-								color = MaterialTheme.colorScheme.onSurfaceVariant
-							)
-							Text(
-								text = endDate?.format(dateFormatter) ?: "Seleccionar",
-								style = MaterialTheme.typography.bodyMedium,
-								color = if (endDate != null) MaterialTheme.colorScheme.onSurface
-								else MaterialTheme.colorScheme.onSurfaceVariant
-							)
-						}
-					}
-				}
-
-
-				if (selectedPaymentType != "Todos" || startDate != null || endDate != null) {
-					Spacer(modifier = Modifier.height(16.dp))
-					OutlinedButton(
-						onClick = onClearFilters,
-						modifier = Modifier.fillMaxWidth(),
-						colors = ButtonDefaults.outlinedButtonColors(
-							contentColor = MaterialTheme.colorScheme.primary
-						),
-						border = BorderStroke(
-							1.dp,
-							MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-						)
-					) {
-						Icon(
-							imageVector = Icons.Default.Close,
-							contentDescription = "Limpiar",
-							modifier = Modifier.size(18.dp)
-						)
-						Spacer(modifier = Modifier.width(8.dp))
-						Text("Limpiar filtros")
-					}
-				}
-			}
-		}
-
-
-		TextField(
-			value = searchText,
-			onValueChange = onSearchTextChanged,
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(horizontal = 16.dp, vertical = 8.dp),
-			placeholder = { Text(labelSearch) },
-			leadingIcon = {
-				Icon(
-					Icons.Default.Search,
-					contentDescription = "Buscar",
-					tint = MaterialTheme.colorScheme.primary
-				)
-			},
-			shape = RoundedCornerShape(16.dp),
-			colors = TextFieldDefaults.colors(
-				focusedContainerColor = MaterialTheme.colorScheme.surface,
-				unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-				focusedIndicatorColor = Color.Transparent,
-				unfocusedIndicatorColor = Color.Transparent,
-				focusedTextColor = MaterialTheme.colorScheme.onSurface,
-				unfocusedTextColor = MaterialTheme.colorScheme.onSurface
-			),
-			singleLine = true,
-			keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
-		)
-	}
-}
-
-
 @Composable
 private fun DetailRow(label: String, value: String) {
 	Row(
@@ -555,13 +302,11 @@ private fun DetailRow(label: String, value: String) {
 	) {
 		Text(
 			text = label,
-			style = MaterialTheme.typography.bodyMedium,
 			fontWeight = FontWeight.Bold,
 			color = MaterialTheme.colorScheme.onSurfaceVariant
 		)
 		Text(
 			text = value,
-			style = MaterialTheme.typography.bodyMedium,
 			color = MaterialTheme.colorScheme.onSurface
 		)
 	}
@@ -578,15 +323,8 @@ private fun PaymentInfoBadge(label: String, value: String) {
 			modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
 			horizontalAlignment = Alignment.CenterHorizontally
 		) {
-			Text(
-				text = label,
-				style = MaterialTheme.typography.labelSmall
-			)
-			Text(
-				text = value,
-				style = MaterialTheme.typography.bodySmall,
-				fontWeight = FontWeight.Bold
-			)
+			Text(text = label, style = MaterialTheme.typography.labelSmall)
+			Text(text = value, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
 		}
 	}
 }

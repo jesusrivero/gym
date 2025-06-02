@@ -3,8 +3,10 @@ package com.techcode.gymcontrol.presentation.ui.people
 import android.R
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
@@ -27,104 +29,152 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.data.db.entity.PersonEntity
 import com.techcode.gymcontrol.domain.model.Person
-
+import com.techcode.gymcontrol.presentation.theme.GymTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditPersonScreen(navController: NavController, viewModel: PeopleViewModel, id: Int, usuario: String? = null, email: String? = null, cedula: String? = null, numeroTelefono: String? = null) {
+fun EditPersonScreen(
+	navController: NavController,
+	viewModel: PeopleViewModel,
+	id: Int,
+	usuario: String? = null,
+	email: String? = null,
+	cedula: String? = null,
+	numeroTelefono: String? = null
+) {
+	val colorScheme = MaterialTheme.colorScheme
+
 	Scaffold(
 		topBar = {
 			CenterAlignedTopAppBar(
 				title = {
-					Text(text = "Editar Usuario", color = Color.White, fontWeight = FontWeight.Bold)
+					Text(
+						text = "Editar Usuario",
+						color = colorScheme.onPrimary,
+						fontWeight = FontWeight.Bold
+					)
 				},
-				colors = TopAppBarDefaults.topAppBarColors(
-					containerColor = Color(0xBAA7D3DC)
+				colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+					containerColor = colorScheme.primary
 				),
 				navigationIcon = {
-					IconButton(
-						onClick = { navController.popBackStack() }
-					) {
+					IconButton(onClick = { navController.popBackStack() }) {
 						Icon(
-								painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_back),
-						contentDescription = "Regresar", tint = Color.White
+							painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_back),
+							contentDescription = "Regresar",
+							tint = colorScheme.onPrimary
 						)
 					}
 				}
 			)
 		}
-	) {
-		ContenEditarView(it, navController, viewModel, id, usuario, email, cedula, numeroTelefono)
+	) { paddingValues ->
+		EditPersonContent(
+			modifier = Modifier.padding(paddingValues),
+			viewModel = viewModel,
+			navController = navController,
+			id = id,
+			initialUsuario = usuario.orEmpty(),
+			initialEmail = email.orEmpty(),
+			initialCedula = cedula.orEmpty(),
+			initialNumeroTelefono = numeroTelefono.orEmpty()
+		)
 	}
 }
 
-
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContenEditarView(
-	it: PaddingValues,
-	navController: NavController,
+fun EditPersonContent(
+	modifier: Modifier = Modifier,
 	viewModel: PeopleViewModel,
+	navController: NavController,
 	id: Int,
-	usuario: String?,
-	email: String?,
-	cedula: String?,
-	numeroTelefono: String?
+	initialUsuario: String,
+	initialEmail: String,
+	initialCedula: String,
+	initialNumeroTelefono: String
 ) {
-	var usuario by remember { mutableStateOf("") }
-	var email by remember { mutableStateOf("") }
-	var cedula by remember { mutableStateOf("") }
-	var numeroTelefono by remember { mutableStateOf("") }
-	
-	Column (
-		modifier = Modifier
-			.padding(it)
-			.padding(top = 30.dp)
+	var usuario by remember { mutableStateOf(initialUsuario) }
+	var email by remember { mutableStateOf(initialEmail) }
+	var cedula by remember { mutableStateOf(initialCedula) }
+	var numeroTelefono by remember { mutableStateOf(initialNumeroTelefono) }
+
+	val colorScheme = MaterialTheme.colorScheme
+
+	Column(
+		modifier = modifier
+			.padding(16.dp)
 			.fillMaxSize(),
 		horizontalAlignment = Alignment.CenterHorizontally
-	){
+	) {
 		OutlinedTextField(
 			value = usuario,
 			onValueChange = { usuario = it },
-			label = { Text("usuario") },
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(horizontal = 30.dp)
-				.padding(bottom = 15.dp)
+			label = { Text("Nombre y apellido") },
+			modifier = Modifier.fillMaxWidth()
 		)
-		
+
+		Spacer(modifier = Modifier.height(8.dp))
+
 		OutlinedTextField(
 			value = email,
 			onValueChange = { email = it },
-			label = { Text("email") },
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(horizontal = 30.dp)
-				.padding(bottom = 15.dp)
+			label = { Text("Correo electrónico") },
+			modifier = Modifier.fillMaxWidth()
 		)
-		
+
+		Spacer(modifier = Modifier.height(8.dp))
+
+		OutlinedTextField(
+			value = cedula,
+			onValueChange = { cedula = it },
+			label = { Text("Cédula de identidad") },
+			modifier = Modifier.fillMaxWidth()
+		)
+
+		Spacer(modifier = Modifier.height(8.dp))
+
+		OutlinedTextField(
+			value = numeroTelefono,
+			onValueChange = { numeroTelefono = it },
+			label = { Text("Número de teléfono") },
+			modifier = Modifier.fillMaxWidth()
+		)
+
+		Spacer(modifier = Modifier.height(16.dp))
+
 		Button(
-			
 			onClick = {
-				val usuario = Person(id = id , usuario = usuario, email = email, cedula = cedula, numeroTelefono = numeroTelefono)
-				viewModel.updateUser(usuario)
+				val updatedPerson = Person(
+					id = id,
+					usuario = usuario,
+					email = email,
+					cedula = cedula,
+					numeroTelefono = numeroTelefono
+				)
+				viewModel.updateUser(updatedPerson)
 				navController.popBackStack()
-			}, colors = ButtonDefaults.buttonColors(
-				containerColor = Color(0xCD4CAF50)
-			), modifier = Modifier.fillMaxWidth()
-		){
-			Text(text = "Editar")
-			
-			
+			},
+			colors = ButtonDefaults.buttonColors(
+				containerColor = colorScheme.primary,
+				contentColor = colorScheme.onPrimary
+			),
+			modifier = Modifier.fillMaxWidth()
+		) {
+			Text("Guardar cambios", style = MaterialTheme.typography.labelLarge)
 		}
-		
 	}
+
+
 }
+
+
+
 

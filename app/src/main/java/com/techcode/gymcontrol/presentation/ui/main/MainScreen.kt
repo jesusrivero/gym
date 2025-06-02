@@ -26,6 +26,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.techcode.gymcontrol.presentation.navegation.AppRoutes
 import com.techcode.gymcontrol.presentation.theme.GymTheme
 import com.techcode.gymcontrol.presentation.ui.commons.BottomNavigationBar
@@ -35,20 +36,18 @@ import com.techcode.gymcontrol.presentation.ui.commons.CarsScreen.MovementsCarSc
 import com.techcode.gymcontrol.presentation.ui.commons.CarsScreen.WelcomeCard
 import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
 
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(navController: NavController, viewModel: PeopleViewModel= hiltViewModel()) {
-
-	GymTheme{
+fun MainScreen(
+	navController: NavController,
+	viewModel: PeopleViewModel = hiltViewModel()
+) {
+	GymTheme {
 		MainContent(
 			navBottom = navController,
-			navRegister = { navController.navigate(AppRoutes.RegPersonScreen) },
-
-			)
+			navRegister = { navController.navigate(AppRoutes.RegPersonScreen) }
+		)
 	}
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,13 +55,21 @@ fun MainScreen(navController: NavController, viewModel: PeopleViewModel= hiltVie
 fun MainContent(
 	navBottom: NavController,
 	navRegister: () -> Unit,
-	) {
+) {
+	val colorScheme = MaterialTheme.colorScheme
+
 	Scaffold(
 		topBar = {
 			TopAppBar(
-				title = { Text(text = "Gym Control", color = Color.White, fontWeight = FontWeight.Bold) },
+				title = {
+					Text(
+						text = "Gym Control",
+						color = colorScheme.onPrimary,
+						fontWeight = FontWeight.Bold
+					)
+				},
 				colors = TopAppBarDefaults.topAppBarColors(
-					containerColor = Color(0xBAA7D3DC)
+					containerColor = colorScheme.primary
 				)
 			)
 		},
@@ -70,48 +77,47 @@ fun MainContent(
 			FloatingActionButton(
 				shape = CircleShape,
 				onClick = navRegister,
-				containerColor = Color(0xFFA7D3DC),
-				contentColor = Color.White,
-
-				) {
+				containerColor = colorScheme.primary,
+				contentColor = colorScheme.onPrimary
+			) {
 				Icon(
 					modifier = Modifier.size(22.dp),
 					imageVector = Icons.Default.Add,
-					contentDescription = "Agregar",
+					contentDescription = "Agregar"
 				)
 			}
-
 		},
 		bottomBar = {
-			BottomNavigationBar(
-				navController = navBottom,
-			)
+			BottomNavigationBar(navController = navBottom)
 		}
-	)
-	{ innerPadding ->
+	) { innerPadding ->
 		Column(
 			modifier = Modifier
 				.fillMaxSize()
 				.padding(innerPadding)
-				.verticalScroll(
-					rememberScrollState()
-				)
+				.verticalScroll(rememberScrollState())
 		) {
 			WelcomeCard(name = "Alberto", date = "12/08/2023")
-			Text(
-				"Resumen General",
-				style = MaterialTheme.typography.headlineSmall,
-				modifier = Modifier.padding(start = 10.dp)
-			)
-			SumaryCarsScreen()
-			Text(
-				"Resumen de Membresias",
-				style = MaterialTheme.typography.headlineSmall,
-				modifier = Modifier.padding(start = 10.dp)
-			)
-			MembersCardScreen()
-			MovementsCarScreen()
 
+			Text(
+				text = "Resumen General",
+				style = MaterialTheme.typography.headlineSmall,
+				modifier = Modifier.padding(start = 10.dp),
+				color = colorScheme.onBackground
+			)
+
+			SumaryCarsScreen()
+
+			Text(
+				text = "Resumen de Membresias",
+				style = MaterialTheme.typography.headlineSmall,
+				modifier = Modifier.padding(start = 10.dp),
+				color = colorScheme.onBackground
+			)
+
+			MembersCardScreen()
+
+			MovementsCarScreen()
 		}
 	}
 }
@@ -120,7 +126,7 @@ fun MainContent(
 @Composable
 fun HolaMainScreen() {
 	MainContent(
-		navBottom = NavController(LocalContext.current),
+		navBottom = rememberNavController(),
 		navRegister = {}
 	)
 }
