@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol.presentation.ui.register
+package com.techcode.gymcontrol.presentation.ui.auth.register
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.techcode.gymcontrol.R
 import com.techcode.gymcontrol.presentation.navegation.AppRoutes
 import com.techcode.gymcontrol.presentation.theme.GymTheme
 
@@ -210,7 +211,7 @@ fun RegisterContent(navController: NavController) {
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_google),
+                painter = painterResource(id = R.drawable.ic_google),
                 contentDescription = null,
                 tint = Color.Unspecified,
                 modifier = Modifier.size(32.dp)

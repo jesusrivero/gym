@@ -1,5 +1,6 @@
 package com.techcode.gymcontrol.presentation.ui.settings.details
 
+import androidx.compose.material3.TextField
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,7 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -38,23 +39,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.techcode.gymcontrol.R
 import com.techcode.gymcontrol.presentation.theme.GymTheme
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ErrorReportScreen(
     navController: NavController,
 ) {
-
     GymTheme {
         ErrorReportContent(
             navBottom = navController
         )
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -86,7 +88,7 @@ fun ErrorReportContent(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = colorScheme.primary
+                    containerColor = MaterialTheme.colorScheme.primary
                 )
             )
         }
@@ -96,11 +98,10 @@ fun ErrorReportContent(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp)
-	            .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Top
         ) {
             Spacer(modifier = Modifier.height(24.dp))
-
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -118,7 +119,6 @@ fun ErrorReportContent(
                 )
             }
 
-
             TextField(
                 value = errorDescription,
                 onValueChange = { errorDescription = it },
@@ -127,37 +127,36 @@ fun ErrorReportContent(
                     .height(150.dp),
                 label = { Text("Describe el problema") },
                 placeholder = { Text("Ejemplo: La app se cierra cuando...") },
+                colors = TextFieldDefaults.colors(
+                    unfocusedContainerColor = Color.White,
+                    focusedContainerColor = Color.White
+                )
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-
             Button(
                 onClick = {
-
                     navBottom.popBackStack()
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = errorDescription.isNotBlank(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xCD4CAF50)
+                colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
                 )
-            ) {
+             {
                 Text("Enviar Reporte")
             }
-	        
-	        Divider(
-		        modifier = Modifier.padding(vertical = 8.dp),
-		        color = Color.LightGray
-	        )
 
+            Divider(
+                modifier = Modifier.padding(vertical = 8.dp),
+                color = Color.LightGray
+            )
 
             Text(
                 text = "O contáctanos:",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
-
 
             Row(
                 modifier = Modifier
@@ -168,7 +167,6 @@ fun ErrorReportContent(
                 Icon(
                     imageVector = Icons.Default.Email,
                     contentDescription = "Email",
-									
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
@@ -176,7 +174,6 @@ fun ErrorReportContent(
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-
 
             Row(
                 modifier = Modifier
@@ -187,7 +184,6 @@ fun ErrorReportContent(
                 Icon(
                     imageVector = Icons.Default.Phone,
                     contentDescription = "Teléfono",
-									
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
@@ -196,5 +192,14 @@ fun ErrorReportContent(
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ErrorReportScreenPreview() {
+    val NavController = rememberNavController()
+    GymTheme {
+        ErrorReportContent(navBottom = NavController)
     }
 }

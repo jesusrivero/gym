@@ -36,6 +36,7 @@ import com.techcode.gymcontrol.presentation.navegation.AppRoutes
 import com.techcode.gymcontrol.presentation.theme.GymTheme
 
 
+
 @Composable
 fun LoginScreen(navController: NavController) {
     GymTheme {
@@ -142,7 +143,7 @@ fun LoginContent(navController: NavController) {
             fontSize = 14.sp,
             modifier = Modifier
                 .align(Alignment.End)
-                .clickable { }
+                .clickable {  navController.navigate(AppRoutes.RecoverPasswordScreen) }
         )
 
         Spacer(modifier = Modifier.height(32.dp))
