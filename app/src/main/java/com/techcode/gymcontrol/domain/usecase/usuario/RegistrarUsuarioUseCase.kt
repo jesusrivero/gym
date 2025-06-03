@@ -17,7 +17,7 @@ class RegistrarUsuarioUseCase @Inject constructor(
 
 	suspend operator fun invoke(usuario: Person): Result = withContext(Dispatchers.IO) {
 		return@withContext try {
-			// Validaciones básicas del usuario
+			
 			if (usuario.usuario.isBlank()) {
 				return@withContext Result.Error("El nombre no puede estar vacío")
 			}
@@ -25,8 +25,7 @@ class RegistrarUsuarioUseCase @Inject constructor(
 			if (usuario.email.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(usuario.email).matches()) {
 				return@withContext Result.Error("Email no válido")
 			}
-
-			// Intentar registrar el usuario
+			
 			usuarioRepository.agregarUsuario(usuario)
 			Result.Success
 		} catch (e: Exception) {

@@ -21,30 +21,41 @@ class PeopleViewModel @Inject constructor(
 	private val registrarUsuarioUseCase: RegistrarUsuarioUseCase,
 	private val updateUserUseCase: UpdateUserUseCase,
 	private val deleteUserUseCase: DeleteUserUseCase,
-	private val getUsersUseCase: GetUsersUseCase
+	private val getUsersUseCase: GetUsersUseCase,
 ) : ViewModel() {
-
+	
 	var state by mutableStateOf(PeopleState())
 		private set
-
-	fun saveUser(user: Person) = viewModelScope.launch {
-		state = state.copy(isLoading = true, error = null)
-		try {
-			registrarUsuarioUseCase.invoke(user)
-			getUsers()
-		} catch (e: Exception) {
-			state = state.copy(error = e.message ?: "Error al guardar usuario")
-			e.printStackTrace()
-		} finally {
-			state = state.copy(isLoading = false)
+	
+	fun saveUser(user: Person) {
+		viewModelScope.launch {
+			state = state.copy(isLoading = true, error = null)
+			try {
+				registrarUsuarioUseCase.invoke(user).let {
+					when (it) {
+						is RegistrarUsuarioUseCase.Result.Success -> {
+							getUsers()
+						}
+						
+						is RegistrarUsuarioUseCase.Result.Error -> {
+							state = state.copy(error = it.message)
+						}
+					}
+				}
+			} catch (e: Exception) {
+				state = state.copy(error = e.message ?: "Error al guardar usuario")
+				e.printStackTrace()
+			} finally {
+				state = state.copy(isLoading = false)
+			}
 		}
 	}
-
+	
 	fun getUsers() = viewModelScope.launch {
 		state = state.copy(isLoading = true, error = null)
 		try {
 			val res = getUsersUseCase.invoke()
-			state = state.copy(userList = res)
+			state = state.copy(userList = res.sortedByDescending { it.id })
 		} catch (e: Exception) {
 			state = state.copy(error = e.message ?: "Error al obtener usuarios")
 			e.printStackTrace()
@@ -52,7 +63,7 @@ class PeopleViewModel @Inject constructor(
 			state = state.copy(isLoading = false)
 		}
 	}
-
+	
 	fun updateUser(user: Person) = viewModelScope.launch {
 		state = state.copy(isLoading = true, error = null)
 		try {
@@ -65,14 +76,14 @@ class PeopleViewModel @Inject constructor(
 			state = state.copy(isLoading = false)
 		}
 	}
-
+	
 	fun deleteUser(user: Person) = viewModelScope.launch {
 		state = state.copy(isLoading = true, error = null)
 		try {
 			deleteUserUseCase(user) // Pasamos el usuario a eliminar
 			// Actualizamos la lista completa después de la eliminación
 			getUsers()
-
+			
 			
 			state = state.copy()
 		} catch (e: Exception) {
@@ -82,12 +93,11 @@ class PeopleViewModel @Inject constructor(
 			state = state.copy(isLoading = false)
 		}
 	}
-
 	
-
+	
 	data class PeopleState(
 		val userList: List<Person> = emptyList(),
 		val isLoading: Boolean = false,
-		val error: String? = null
+		val error: String? = null,
 	)
 }

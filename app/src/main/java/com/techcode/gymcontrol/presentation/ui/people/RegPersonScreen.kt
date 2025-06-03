@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
@@ -17,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.getValue
@@ -26,10 +30,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.domain.model.Person
+import com.techcode.gymcontrol.presentation.navegation.AppRoutes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,8 +89,9 @@ fun RegPersonContent(
 	var email by remember { mutableStateOf("") }
 	var cedula by remember { mutableStateOf("") }
 	var numeroTelefono by remember { mutableStateOf("") }
-
 	val colorScheme = MaterialTheme.colorScheme
+	var isValidEmail by remember(email) { mutableStateOf(false) }
+	isValidEmail = email.trim().matches(Regex("^[A-Za-z0-9+_.-]+@gmail\\.com$"))
 
 	Column(
 		modifier = modifier
@@ -99,13 +107,31 @@ fun RegPersonContent(
 		)
 
 		Spacer(modifier = Modifier.height(8.dp))
-
+		
 		OutlinedTextField(
 			value = email,
 			onValueChange = { email = it },
-			label = { Text("Introduzca su email") },
-			modifier = Modifier.fillMaxWidth()
+			modifier = Modifier
+				.fillMaxWidth()
+				.height(56.dp),
+			textStyle = LocalTextStyle.current.copy(color = colorScheme.onSurface),
+			placeholder = {
+				Text("Correo electrónico", color = colorScheme.onSurfaceVariant)
+			},
+			singleLine = true,
+			isError = email.isNotBlank() && !isValidEmail
 		)
+		
+		if (email.isNotBlank() && !isValidEmail) {
+			Text(
+				text = "Debe ser un correo válido de Gmail",
+				color = MaterialTheme.colorScheme.error,
+				fontSize = 12.sp,
+				modifier = Modifier
+					.align(Alignment.Start)
+					.padding(top = 4.dp)
+			)
+		}
 
 		Spacer(modifier = Modifier.height(8.dp))
 
@@ -113,6 +139,7 @@ fun RegPersonContent(
 			value = cedula,
 			onValueChange = { cedula = it },
 			label = { Text("Cédula de identidad") },
+			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
 			modifier = Modifier.fillMaxWidth()
 		)
 
@@ -122,6 +149,7 @@ fun RegPersonContent(
 			value = numeroTelefono,
 			onValueChange = { numeroTelefono = it },
 			label = { Text("Número de teléfono") },
+			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
 			modifier = Modifier.fillMaxWidth()
 		)
 
@@ -136,7 +164,7 @@ fun RegPersonContent(
 					numeroTelefono = numeroTelefono
 				)
 				viewModel.saveUser(person)
-				navController.popBackStack()
+				navController.navigate(AppRoutes.PersonasScreen)
 			},
 			colors = ButtonDefaults.buttonColors(
 				containerColor = colorScheme.primary,

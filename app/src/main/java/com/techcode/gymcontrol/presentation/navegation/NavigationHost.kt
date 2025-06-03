@@ -74,6 +74,7 @@ fun NavigationHost (
 			PersonsScreen(
 				viewModel = viewModel,
 				navEdit = { navController.navigate(AppRoutes.EditPersonScreen(it)) },
+//				navPag = { navController.navigate(AppRoutes.PaymentsScreen) },
 				navBottom = navController)
 		}
 		

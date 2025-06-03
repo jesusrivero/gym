@@ -24,6 +24,5 @@ class UsuarioRepositoryIMPL(
 	override suspend fun obtenerUsuarios(): List<Person> {
 		return dao.obtenerUsuarios().map { list -> list.map{ it.toPerson()} }.first()
 	}
-
 }
 

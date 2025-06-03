@@ -18,7 +18,7 @@ class PreferencesManager(context: Context) {
 //		const val KEY_BINNUAL_VALUE = "binnualValue"
 //		const val KEY_ANNUAL_VALUE = "annualValue"
 
-		// Notificaciones
+
 		private const val NOTIFICATION_PREFS = "NotificationPrefs"
 		const val KEY_NEW_CLIENT = "new_client"
 		const val KEY_PAYMENT_REGISTERED = "payment_registered"
@@ -53,8 +53,7 @@ class PreferencesManager(context: Context) {
 		val json = sharedPreferences.getString(PRICES_MEMBERSHIP, null)
 		return json?.fromJson()
 	}
-
-	// Métodos para notificaciones
+	
 	fun saveNotificationSettings(
 		newClient: Boolean,
 		paymentRegistered: Boolean,

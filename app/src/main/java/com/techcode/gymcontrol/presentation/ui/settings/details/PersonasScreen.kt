@@ -3,8 +3,6 @@ package com.techcode.gymcontrol.presentation.ui.settings.details
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,16 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Payment
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -33,22 +28,15 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.Divider
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
@@ -63,18 +51,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.R
 import com.techcode.gymcontrol.domain.model.Person
+import com.techcode.gymcontrol.presentation.theme.GymTheme
 import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,11 +71,12 @@ fun PersonsScreen(
 	navBottom: NavController,
 	viewModel: PeopleViewModel,
 	navEdit: (Int) -> Unit,
+//	navPag: (Int) -> Unit
 ) {
 	LaunchedEffect(Unit) {
 		viewModel.getUsers()
 	}
-
+	
 	var showUserDialog by remember { mutableStateOf(false) }
 	var selectedUser by remember { mutableStateOf<Person?>(null) }
 	var searchText by remember { mutableStateOf("") }
@@ -97,10 +85,10 @@ fun PersonsScreen(
 	var endDate by remember { mutableStateOf<LocalDate?>(null) }
 	var showStartDatePicker by remember { mutableStateOf(false) }
 	var showEndDatePicker by remember { mutableStateOf(false) }
-
+	
 	val filterOptions = listOf("Todos", "Activos", "Inactivos", "Próximos a pagar")
 	val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-
+	
 	if (showUserDialog && selectedUser != null) {
 		AlertDialog(
 			onDismissRequest = {
@@ -108,7 +96,11 @@ fun PersonsScreen(
 				selectedUser = null
 			},
 			title = {
-				Text("Información del usuario", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+				Text(
+					"Información del usuario",
+					modifier = Modifier.fillMaxWidth(),
+					textAlign = TextAlign.Center
+				)
 			},
 			text = {
 				Column {
@@ -125,14 +117,17 @@ fun PersonsScreen(
 				Button(
 					onClick = { showUserDialog = false },
 					modifier = Modifier.fillMaxWidth(),
-					colors = ButtonDefaults.buttonColors(containerColor = Color(0xBAA7D3DC))
+					colors = ButtonDefaults.buttonColors(
+						containerColor = colorScheme.primary,
+						contentColor = colorScheme.onPrimary
+					)
 				) {
 					Text("Cerrar")
 				}
 			}
 		)
 	}
-
+	
 	if (showStartDatePicker) {
 		val datePickerState = rememberDatePickerState()
 		DatePickerDialog(
@@ -151,7 +146,7 @@ fun PersonsScreen(
 			DatePicker(state = datePickerState, title = { Text("Seleccionar fecha inicial") })
 		}
 	}
-
+	
 	if (showEndDatePicker) {
 		val datePickerState = rememberDatePickerState()
 		DatePickerDialog(
@@ -170,7 +165,7 @@ fun PersonsScreen(
 			DatePicker(state = datePickerState, title = { Text("Seleccionar fecha final") })
 		}
 	}
-
+	
 	Scaffold(
 		topBar = {
 			Column {
@@ -191,7 +186,8 @@ fun PersonsScreen(
 							)
 						}
 					},
-					colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = colorScheme.primary
+					colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+						containerColor = colorScheme.primary
 					)
 				)
 				PaymentFilters(
@@ -221,10 +217,11 @@ fun PersonsScreen(
 					|| it.cedula.contains(searchText, true)
 					|| it.numeroTelefono.contains(searchText, true))
 		}
-
-		Box(modifier = Modifier
-			.fillMaxSize()
-			.padding(innerPadding),
+		
+		Box(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(innerPadding),
 			contentAlignment = Alignment.Center
 		) {
 			if (filteredList.isEmpty()) {
@@ -268,21 +265,24 @@ fun PersonsScreen(
 										Icon(
 											painter = painterResource(id = R.drawable.ic_details),
 											contentDescription = "Detalles",
-											tint = MaterialTheme.colorScheme.primary
+											tint = colorScheme.primary
 										)
 									}
 								}
 								Divider(
 									modifier = Modifier.padding(vertical = 8.dp),
-									color = MaterialTheme.colorScheme.outlineVariant,
+									color = colorScheme.outlineVariant,
 									thickness = 0.5.dp
 								)
 								Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+//									IconButton(onClick = { user.id?.let { navPag(it) } }) {
+//										Icon(Icons.Default.Payment, "Pagar", tint = colorScheme.primary)
+//									}
 									IconButton(onClick = { user.id?.let { navEdit(it) } }) {
-										Icon(Icons.Default.Edit, "Editar", tint = MaterialTheme.colorScheme.primary)
+										Icon(Icons.Default.Edit, "Editar", tint = colorScheme.primary)
 									}
 									IconButton(onClick = { viewModel.deleteUser(user) }) {
-										Icon(Icons.Default.Delete, "Eliminar", tint = MaterialTheme.colorScheme.error)
+										Icon(Icons.Default.Delete, "Eliminar", tint = colorScheme.error)
 									}
 								}
 							}
@@ -296,31 +296,37 @@ fun PersonsScreen(
 
 @Composable
 private fun DetailRow(label: String, value: String) {
-	Row(
-		modifier = Modifier.fillMaxWidth(),
-		horizontalArrangement = Arrangement.SpaceBetween
-	) {
-		Text(
-			text = label,
-			fontWeight = FontWeight.Bold,
-			color = MaterialTheme.colorScheme.onSurfaceVariant
-		)
-		Text(
-			text = value,
-			color = MaterialTheme.colorScheme.onSurface
-		)
+	GymTheme {
+		Row(
+			modifier = Modifier.fillMaxWidth(),
+			horizontalArrangement = Arrangement.SpaceBetween,
+			verticalAlignment = Alignment.CenterVertically,
+		) {
+			Text(
+				text = label,
+				fontWeight = FontWeight.Bold,
+				color = colorScheme.onSurfaceVariant
+			)
+			Text(
+				text = value,
+				color = colorScheme.onSurface
+			)
+		}
+		
 	}
+	
 }
 
 @Composable
 private fun PaymentInfoBadge(label: String, value: String) {
 	Surface(
 		shape = RoundedCornerShape(8.dp),
-		color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-		contentColor = MaterialTheme.colorScheme.primary
+		color = colorScheme.primary.copy(alpha = 0.1f),
+		contentColor = colorScheme.primary
 	) {
 		Column(
 			modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+			verticalArrangement = Arrangement.Center,
 			horizontalAlignment = Alignment.CenterHorizontally
 		) {
 			Text(text = label, style = MaterialTheme.typography.labelSmall)
