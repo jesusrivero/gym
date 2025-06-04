@@ -8,16 +8,17 @@ plugins {
 	alias(libs.plugins.ksp)
 	alias(libs.plugins.hilt.android)
 	kotlin("kapt")
+	id("com.google.gms.google-services")
 	
 	
 }
 
 android {
-	namespace = "com.techcode.gymcontrol"
+	namespace = "com.jesus.gymcontrol"
 	compileSdk = 35
 
 	defaultConfig {
-		applicationId = "com.techcode.gymcontrol"
+		applicationId = "com.jesus.gymcontrol"
 		minSdk = 24
 		targetSdk = 35
 		versionCode = 1
@@ -66,6 +67,8 @@ dependencies {
 	implementation(libs.coil.compose)
 	implementation (libs.androidx.material.icons.extended)
 	implementation (libs.guava)
+	implementation(platform("com.google.firebase:firebase-bom:33.14.0"))
+	implementation("com.google.firebase:firebase-analytics")
 	//DEFAULT
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.lifecycle.runtime.ktx)

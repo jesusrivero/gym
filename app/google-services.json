@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "987033547327",
+    "project_id": "gymcontrol-99701",
+    "storage_bucket": "gymcontrol-99701.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:987033547327:android:a4d24e4496026a16393e8a",
+        "android_client_info": {
+          "package_name": "com.jesus.gymcontrol"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "987033547327-rb251p3dqhldlugmovip4k6at3ijbl59.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB14dPOLXpRTeYPXKNUcjeh1JI7nIP42x8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "987033547327-rb251p3dqhldlugmovip4k6at3ijbl59.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
