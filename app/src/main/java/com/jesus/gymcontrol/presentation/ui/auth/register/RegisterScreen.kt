@@ -1,5 +1,6 @@
-package com.techcode.gymcontrol.presentation.ui.auth.register
+package com.jesus.gymcontrol.presentation.ui.auth.register
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -29,6 +30,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -36,11 +38,13 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.techcode.gymcontrol.R
-import com.techcode.gymcontrol.presentation.navegation.AppRoutes
-import com.techcode.gymcontrol.presentation.theme.GymTheme
+import com.jesus.gymcontrol.R
+import com.jesus.gymcontrol.domain.models.AuthViewModel
+import com.jesus.gymcontrol.presentation.navegation.AppRoutes
+import com.jesus.gymcontrol.presentation.theme.GymTheme
 
 @Composable
 fun RegisterScreen(navController: NavController) {
@@ -56,14 +60,29 @@ fun RegisterScreen(navController: NavController) {
 
 @Composable
 fun RegisterContent(navController: NavController) {
+    val context = LocalContext.current
     val colorScheme = MaterialTheme.colorScheme
-
     var name by remember { mutableStateOf("") }
-    var lastname by remember { mutableStateOf("") }
     var emailOrUser by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var termsAccepted by remember { mutableStateOf(false) }
+    val viewModel: AuthViewModel = hiltViewModel()
+    val registerState by viewModel.registerState.collectAsState()
+
+    LaunchedEffect(registerState) {
+        registerState?.let { result ->
+            if (result.isSuccess) {
+                navController.navigate(AppRoutes.LoginScreen)
+            } else {
+                val error = result.exceptionOrNull()?.message ?: "Error desconocido"
+                Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+            }
+            viewModel.clearState()
+        }
+    }
+
+
 
     Column(
         modifier = Modifier
@@ -88,38 +107,37 @@ fun RegisterContent(navController: NavController) {
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            placeholder = { Text("Nombre", color = colorScheme.onSurfaceVariant) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            placeholder = { Text("Nombre y apellido", color = colorScheme.onSurfaceVariant) },
             leadingIcon = {
-                Icon(Icons.Default.Person, contentDescription = null, tint = colorScheme.onSurfaceVariant)
+                Icon(
+                    Icons.Default.Person,
+                    contentDescription = null,
+                    tint = colorScheme.onSurfaceVariant
+                )
             },
             textStyle = LocalTextStyle.current.copy(color = colorScheme.onSurface),
             singleLine = true
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = lastname,
-            onValueChange = { lastname = it },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            placeholder = { Text("Apellido", color = colorScheme.onSurfaceVariant) },
-            leadingIcon = {
-                Icon(Icons.Default.Person, contentDescription = null, tint = colorScheme.onSurfaceVariant)
-            },
-            textStyle = LocalTextStyle.current.copy(color = colorScheme.onSurface),
-            singleLine = true
-        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         OutlinedTextField(
             value = emailOrUser,
             onValueChange = { emailOrUser = it },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
             placeholder = { Text("Correo o usuario", color = colorScheme.onSurfaceVariant) },
             leadingIcon = {
-                Icon(Icons.Default.Email, contentDescription = null, tint = colorScheme.onSurfaceVariant)
+                Icon(
+                    Icons.Default.Email,
+                    contentDescription = null,
+                    tint = colorScheme.onSurfaceVariant
+                )
             },
             textStyle = LocalTextStyle.current.copy(color = colorScheme.onSurface),
             singleLine = true
@@ -130,10 +148,16 @@ fun RegisterContent(navController: NavController) {
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
             placeholder = { Text("Contraseña", color = colorScheme.onSurfaceVariant) },
             leadingIcon = {
-                Icon(Icons.Default.Lock, contentDescription = null, tint = colorScheme.onSurfaceVariant)
+                Icon(
+                    Icons.Default.Lock,
+                    contentDescription = null,
+                    tint = colorScheme.onSurfaceVariant
+                )
             },
             trailingIcon = {
                 val icon =
@@ -174,7 +198,12 @@ fun RegisterContent(navController: NavController) {
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { navController.navigate(AppRoutes.LoginScreen) },
+            onClick = {
+                navController.navigate(AppRoutes.LoginScreen)
+                if (termsAccepted) {
+                    viewModel.registerUser(emailOrUser, password, name)
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -198,7 +227,7 @@ fun RegisterContent(navController: NavController) {
         ) {
             Divider(modifier = Modifier.weight(1f), color = colorScheme.outline)
             Text("  o  ", color = colorScheme.outline, fontSize = 14.sp)
-             Divider(modifier = Modifier.weight(1f), color = colorScheme.outline)
+            Divider(modifier = Modifier.weight(1f), color = colorScheme.outline)
         }
 
         Spacer(modifier = Modifier.height(16.dp))

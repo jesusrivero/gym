@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol
+package com.jesus.gymcontrol
 
 import org.junit.Test
 

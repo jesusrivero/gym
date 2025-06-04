@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol.presentation.ui.settings.details
+package com.jesus.gymcontrol.presentation.ui.settings.details
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -42,8 +42,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.techcode.gymcontrol.R
-import com.techcode.gymcontrol.presentation.theme.GymTheme
+import com.jesus.gymcontrol.R
+import com.jesus.gymcontrol.presentation.theme.GymTheme
 
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol.presentation.ui.main
+package com.jesus.gymcontrol.presentation.ui.main
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -6,7 +6,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,18 +22,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.techcode.gymcontrol.presentation.navegation.AppRoutes
-import com.techcode.gymcontrol.presentation.theme.GymTheme
-import com.techcode.gymcontrol.presentation.ui.commons.BottomNavigationBar
-import com.techcode.gymcontrol.presentation.ui.commons.CarsScreen.MembersCardScreen
-import com.techcode.gymcontrol.presentation.ui.commons.CarsScreen.SumaryCarsScreen
-import com.techcode.gymcontrol.presentation.ui.commons.CarsScreen.MovementsCarScreen
-import com.techcode.gymcontrol.presentation.ui.commons.CarsScreen.WelcomeCard
-import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
+import com.jesus.gymcontrol.presentation.navegation.AppRoutes
+import com.jesus.gymcontrol.presentation.theme.GymTheme
+import com.jesus.gymcontrol.presentation.ui.commons.BottomNavigationBar
+import com.jesus.gymcontrol.presentation.ui.commons.CarsScreen.MembersCardScreen
+import com.jesus.gymcontrol.presentation.ui.commons.CarsScreen.SumaryCarsScreen
+import com.jesus.gymcontrol.presentation.ui.commons.CarsScreen.MovementsCarScreen
+import com.jesus.gymcontrol.presentation.ui.commons.CarsScreen.WelcomeCard
+import com.jesus.gymcontrol.presentation.ui.people.PeopleViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

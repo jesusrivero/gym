@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol.presentation.ui.settings.details
+package com.jesus.gymcontrol.presentation.ui.settings.details
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -28,7 +28,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.Divider
@@ -65,10 +64,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.techcode.gymcontrol.R
-import com.techcode.gymcontrol.domain.model.Person
-import com.techcode.gymcontrol.presentation.theme.GymTheme
-import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
+import com.jesus.gymcontrol.R
+import com.jesus.gymcontrol.domain.model.Person
+import com.jesus.gymcontrol.presentation.theme.GymTheme
+import com.jesus.gymcontrol.presentation.ui.people.PeopleViewModel
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId

@@ -1,6 +1,7 @@
-package com.techcode.gymcontrol.presentation.ui.auth
+package com.jesus.gymcontrol.presentation.ui.auth
 
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,34 +25,53 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.techcode.gymcontrol.presentation.navegation.AppRoutes
-import com.techcode.gymcontrol.presentation.theme.GymTheme
-
-
+import com.jesus.gymcontrol.domain.models.LoginViewModel
+import com.jesus.gymcontrol.presentation.navegation.AppRoutes
+import com.jesus.gymcontrol.presentation.theme.GymTheme
 
 @Composable
 fun LoginScreen(navController: NavController) {
+    val viewModel: LoginViewModel = hiltViewModel()
     GymTheme {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            LoginContent(navController)
+            LoginContent(navController = navController, viewModel = viewModel)
         }
     }
 }
 
 @Composable
-fun LoginContent(navController: NavController) {
+fun LoginContent(
+    navController: NavController,
+    viewModel: LoginViewModel,
+) {
+    val loginState by viewModel.loginState.collectAsState()
+    val context = LocalContext.current
     val colorScheme = MaterialTheme.colorScheme
-    var emailOrUser by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+
+    LaunchedEffect(loginState) {
+        loginState?.let { result ->
+            if (result.isSuccess) {
+                navController.navigate(AppRoutes.MainScreen) {
+                    popUpTo(AppRoutes.LoginScreen) { inclusive = true }
+                }
+            } else {
+                val error = result.exceptionOrNull()?.message ?: "Error desconocido"
+                Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+            }
+            viewModel.clearState()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -60,16 +80,11 @@ fun LoginContent(navController: NavController) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-
         Spacer(modifier = Modifier.height(24.dp))
 
+        Text("Hola,", color = colorScheme.onBackground, fontSize = 24.sp)
         Text(
-            text = "Hola,",
-            color = colorScheme.onBackground,
-            fontSize = 24.sp
-        )
-        Text(
-            text = "Bienvenido de vuelta",
+            "Bienvenido de vuelta",
             color = colorScheme.onBackground,
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold
@@ -78,22 +93,17 @@ fun LoginContent(navController: NavController) {
         Spacer(modifier = Modifier.height(32.dp))
 
         OutlinedTextField(
-            value = emailOrUser,
-            onValueChange = { emailOrUser = it },
+            value = viewModel.email.value,
+            onValueChange = { viewModel.email.value = it },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
             textStyle = LocalTextStyle.current.copy(color = colorScheme.onSurface),
-            placeholder = {
-                Text(
-                    text = "Correo o usuario",
-                    color = colorScheme.onSurfaceVariant
-                )
-            },
+            placeholder = { Text("Correo o usuario", color = colorScheme.onSurfaceVariant) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Email,
-                    contentDescription = "Icono correo",
+                    contentDescription = null,
                     tint = colorScheme.onSurfaceVariant
                 )
             },
@@ -103,29 +113,23 @@ fun LoginContent(navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
+            value = viewModel.password.value,
+            onValueChange = { viewModel.password.value = it },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
             textStyle = LocalTextStyle.current.copy(color = colorScheme.onSurface),
-            placeholder = {
-                Text(
-                    text = "Contraseña",
-                    color = colorScheme.onSurfaceVariant
-                )
-            },
+            placeholder = { Text("Contraseña", color = colorScheme.onSurfaceVariant) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Lock,
-                    contentDescription = "Icono candado",
+                    contentDescription = null,
                     tint = colorScheme.onSurfaceVariant
                 )
             },
             trailingIcon = {
-                val visibilityIcon = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
                 Icon(
-                    imageVector = visibilityIcon,
+                    imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                     contentDescription = "Toggle Visibilidad",
                     tint = colorScheme.onSurfaceVariant,
                     modifier = Modifier.clickable { passwordVisible = !passwordVisible }
@@ -138,26 +142,33 @@ fun LoginContent(navController: NavController) {
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "¿Olvidaste tu contraseña?",
+            "¿Olvidaste tu contraseña?",
             color = colorScheme.outline,
             fontSize = 14.sp,
             modifier = Modifier
                 .align(Alignment.End)
-                .clickable {  navController.navigate(AppRoutes.RecoverPasswordScreen) }
+                .clickable {
+                    navController.navigate(AppRoutes.RecoverPasswordScreen)
+                }
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(
-            onClick = { navController.navigate(AppRoutes.MainScreen) },
+            onClick = {
+                if (viewModel.email.value.isNotBlank() && viewModel.password.value.isNotBlank()) {
+                    viewModel.login(viewModel.email.value.trim(), viewModel.password.value.trim())
+                } else {
+                    Toast.makeText(context, "Rellena todos los campos", Toast.LENGTH_SHORT).show()
+                }
+            },
             colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(28.dp),
         ) {
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Ingresar", fontSize = 16.sp)
+            Text("Ingresar", fontSize = 16.sp)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -166,23 +177,9 @@ fun LoginContent(navController: NavController) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Divider(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(1.dp),
-                color = colorScheme.outline
-            )
-            Text(
-                text = "  o  ",
-                color = colorScheme.outline,
-                fontSize = 14.sp
-            )
-            Divider(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(1.dp),
-                color = colorScheme.outline
-            )
+            Divider(modifier = Modifier.weight(1f), color = colorScheme.outline)
+            Text("  o  ", color = colorScheme.outline, fontSize = 14.sp)
+            Divider(modifier = Modifier.weight(1f), color = colorScheme.outline)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -195,26 +192,18 @@ fun LoginContent(navController: NavController) {
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_google),
+                painter = painterResource(id = com.jesus.gymcontrol.R.drawable.ic_google),
                 contentDescription = "Google Icon",
-                contentScale = ContentScale.Fit,
                 modifier = Modifier.size(32.dp)
             )
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row {
+            Text("¿No tienes una cuenta? ", color = colorScheme.onBackground, fontSize = 14.sp)
             Text(
-                text = "¿No tienes una cuenta? ",
-                color = colorScheme.onBackground,
-                fontSize = 14.sp
-            )
-            Text(
-                text = "Regístrate",
+                "Regístrate",
                 color = colorScheme.primary,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
@@ -223,6 +212,8 @@ fun LoginContent(navController: NavController) {
                 }
             )
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 

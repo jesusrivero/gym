@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol
+package com.jesus.gymcontrol
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

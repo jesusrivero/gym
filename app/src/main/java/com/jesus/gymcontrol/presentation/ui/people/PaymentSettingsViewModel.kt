@@ -1,8 +1,8 @@
-package com.techcode.gymcontrol.presentation.ui.people
+package com.jesus.gymcontrol.presentation.ui.people
 
 import androidx.lifecycle.ViewModel
-import com.techcode.gymcontrol.data.sharedPreferences.PreferencesManager
-import com.techcode.gymcontrol.domain.model.PricesMembership
+import com.jesus.gymcontrol.data.sharedPreferences.PreferencesManager
+import com.jesus.gymcontrol.domain.model.PricesMembership
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

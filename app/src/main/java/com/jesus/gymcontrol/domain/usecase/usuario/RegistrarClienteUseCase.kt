@@ -1,13 +1,13 @@
-package com.techcode.gymcontrol.domain.usecase.usuario
+package com.jesus.gymcontrol.domain.usecase.usuario
 
-import com.techcode.gymcontrol.domain.model.Person
-import com.techcode.gymcontrol.domain.repository.UsuarioRepository
+import com.jesus.gymcontrol.domain.model.Person
+import com.jesus.gymcontrol.domain.repository.UsuarioRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.Dispatcher
 import javax.inject.Inject
 
-class RegistrarUsuarioUseCase @Inject constructor(
+
+class RegistrarClienteUseCase @Inject constructor(
 	private val usuarioRepository: UsuarioRepository
 ) {
 	sealed class Result {

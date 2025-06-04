@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol.presentation.theme
+package com.jesus.gymcontrol.presentation.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

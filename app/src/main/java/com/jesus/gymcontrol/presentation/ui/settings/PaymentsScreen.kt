@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol.presentation.ui.settings
+package com.jesus.gymcontrol.presentation.ui.settings
 
 
 import androidx.compose.foundation.layout.Arrangement
@@ -42,8 +42,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.techcode.gymcontrol.presentation.navegation.AppRoutes
-import com.techcode.gymcontrol.presentation.ui.people.PaymentSettingsViewModel
+import com.jesus.gymcontrol.presentation.navegation.AppRoutes
+import com.jesus.gymcontrol.presentation.ui.people.PaymentSettingsViewModel
 import kotlinx.coroutines.delay
 
 
@@ -116,7 +116,7 @@ fun PaymentsScreenContent(navController: NavController) {
 				navigationIcon = {
 					IconButton(onClick = { navController.navigate(AppRoutes.MainScreen) }) {
 						Icon(
-							painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_back),
+							painter = painterResource(id = com.jesus.gymcontrol.R.drawable.ic_back),
 							contentDescription = "Regresar",
 							tint = colorScheme.onPrimary
 						)

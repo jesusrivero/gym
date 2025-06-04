@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol.presentation.ui.commons
+package com.jesus.gymcontrol.presentation.ui.commons
 
 
 import androidx.compose.material.icons.Icons
@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.techcode.gymcontrol.presentation.navegation.AppRoutes
+import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import androidx.compose.material3.NavigationBarItemDefaults
 
 
@@ -116,7 +116,7 @@ fun BottomNavigationBar(
         NavigationBarItem(
             icon = {
                 Icon(
-                    painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ad_admin),
+                    painter = painterResource(id = com.jesus.gymcontrol.R.drawable.ad_admin),
                     contentDescription = "Preferencias",
                     tint = if (currentRoute == AppRoutes.PreferencesScreen.toString()) {
                         MaterialTheme.colorScheme.primary

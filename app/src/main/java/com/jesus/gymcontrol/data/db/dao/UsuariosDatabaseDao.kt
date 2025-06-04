@@ -1,11 +1,11 @@
-package com.techcode.gymcontrol.data.db.dao
+package com.jesus.gymcontrol.data.db.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.techcode.gymcontrol.data.db.entity.PersonEntity
+import com.jesus.gymcontrol.data.db.entity.PersonEntity
 import kotlinx.coroutines.flow.Flow
 
 

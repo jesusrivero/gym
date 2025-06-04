@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol.domain.model
+package com.jesus.gymcontrol.domain.model
 
 data class PricesMembership(
 		val weekly: String? = null,

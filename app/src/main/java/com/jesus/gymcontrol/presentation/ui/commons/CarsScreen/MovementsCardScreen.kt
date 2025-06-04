@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol.presentation.ui.commons.CarsScreen
+package com.jesus.gymcontrol.presentation.ui.commons.CarsScreen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

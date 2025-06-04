@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol.infraestructure
+package com.jesus.gymcontrol.infraestructure
 
 import android.os.Build
 import android.os.Bundle
@@ -6,8 +6,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
-import com.techcode.gymcontrol.presentation.navegation.NavigationHost
-import com.techcode.gymcontrol.presentation.theme.GymTheme
+import com.google.firebase.FirebaseApp
+import com.jesus.gymcontrol.presentation.navegation.NavigationHost
+import com.jesus.gymcontrol.presentation.theme.GymTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -19,6 +20,7 @@ class MainActivity : ComponentActivity() {
 		setContent {
 			GymTheme {
 				NavigationHost()
+				FirebaseApp.initializeApp(this)
 			}
 		}
 	}

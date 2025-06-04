@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol.presentation.ui.people
+package com.jesus.gymcontrol.presentation.ui.people
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
-import com.techcode.gymcontrol.presentation.ui.commons.BottomNavigationBar
+import com.jesus.gymcontrol.presentation.ui.commons.BottomNavigationBar
 
 
 @OptIn(ExperimentalMaterial3Api::class)

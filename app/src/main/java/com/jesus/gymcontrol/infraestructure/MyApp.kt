@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol.infraestructure
+package com.jesus.gymcontrol.infraestructure
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp

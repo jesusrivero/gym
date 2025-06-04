@@ -64,11 +64,15 @@ dependencies {
 	implementation(libs.hilt.android)                            //Hilt Android
 	implementation (libs.androidx.hilt.navigation.compose)       // Hilt navigation
 	kapt(libs.hilt.compiler)                                     // Hilt compiler
-	implementation(libs.coil.compose)
+	implementation(libs.coil.compose)                            //coil
 	implementation (libs.androidx.material.icons.extended)
 	implementation (libs.guava)
-	implementation(platform("com.google.firebase:firebase-bom:33.14.0"))
-	implementation("com.google.firebase:firebase-analytics")
+	implementation(platform(libs.firebase.bom))
+	implementation (libs.google.firebase.analytics)
+	implementation(libs.firebase.auth.ktx)
+	implementation(libs.firebase.firestore.ktx)
+	implementation(libs.kotlinx.coroutines.play.services)
+
 	//DEFAULT
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.lifecycle.runtime.ktx)

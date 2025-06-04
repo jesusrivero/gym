@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol.presentation.navegation
+package com.jesus.gymcontrol.presentation.navegation
 
 import kotlinx.serialization.Serializable
 

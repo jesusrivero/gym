@@ -1,9 +1,8 @@
-package com.techcode.gymcontrol.data.db.entity
+package com.jesus.gymcontrol.data.db.entity
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.techcode.gymcontrol.domain.model.Person
+import com.jesus.gymcontrol.domain.model.Person
 
 @Entity(tableName = "usuarios")
 data class PersonEntity(

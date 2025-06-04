@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol.presentation.ui.auth.recover
+package com.jesus.gymcontrol.presentation.ui.auth.recover
 
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.clickable
@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.techcode.gymcontrol.presentation.theme.GymTheme
+import com.jesus.gymcontrol.presentation.theme.GymTheme
 
 @Composable
 fun RecoverPasswordScreen(navController: NavController) {

@@ -1,11 +1,11 @@
-package com.techcode.gymcontrol.data.sharedPreferences
+package com.jesus.gymcontrol.data.sharedPreferences
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.techcode.gymcontrol.domain.model.NotificationSettings
-import com.techcode.gymcontrol.domain.model.PricesMembership
-import com.techcode.gymcontrol.extensions.fromJson
-import com.techcode.gymcontrol.extensions.getJson
+import com.jesus.gymcontrol.domain.model.NotificationSettings
+import com.jesus.gymcontrol.domain.model.PricesMembership
+import com.jesus.gymcontrol.extensions.fromJson
+import com.jesus.gymcontrol.extensions.getJson
 
 class PreferencesManager(context: Context) {
 	companion object {

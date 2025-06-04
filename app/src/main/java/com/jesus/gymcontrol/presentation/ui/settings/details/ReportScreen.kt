@@ -1,4 +1,3 @@
-import android.R
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
@@ -51,7 +50,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -103,7 +101,7 @@ fun ReportScreen(
                     navigationIcon = {
                         IconButton(onClick = { navController.popBackStack() }) {
                             Icon(
-                                painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_back),
+                                painter = painterResource(id = com.jesus.gymcontrol.R.drawable.ic_back),
                                 contentDescription = "Regresar",
                                 tint = MaterialTheme.colorScheme.onPrimary
                             )

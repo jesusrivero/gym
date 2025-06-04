@@ -1,15 +1,15 @@
-package com.techcode.gymcontrol.presentation.ui.people
+package com.jesus.gymcontrol.presentation.ui.people
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.techcode.gymcontrol.domain.model.Person
-import com.techcode.gymcontrol.domain.usecase.usuario.DeleteUserUseCase
-import com.techcode.gymcontrol.domain.usecase.usuario.GetUsersUseCase
-import com.techcode.gymcontrol.domain.usecase.usuario.RegistrarUsuarioUseCase
-import com.techcode.gymcontrol.domain.usecase.usuario.UpdateUserUseCase
+import com.jesus.gymcontrol.domain.model.Person
+import com.jesus.gymcontrol.domain.usecase.usuario.DeleteUserUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.GetUsersUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.RegistrarClienteUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.UpdateUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 
 import kotlinx.coroutines.launch
@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PeopleViewModel @Inject constructor(
-	private val registrarUsuarioUseCase: RegistrarUsuarioUseCase,
+	private val registrarUsuarioUseCase: RegistrarClienteUseCase,
 	private val updateUserUseCase: UpdateUserUseCase,
 	private val deleteUserUseCase: DeleteUserUseCase,
 	private val getUsersUseCase: GetUsersUseCase,
@@ -33,11 +33,11 @@ class PeopleViewModel @Inject constructor(
 			try {
 				registrarUsuarioUseCase.invoke(user).let {
 					when (it) {
-						is RegistrarUsuarioUseCase.Result.Success -> {
+						is RegistrarClienteUseCase.Result.Success -> {
 							getUsers()
 						}
 						
-						is RegistrarUsuarioUseCase.Result.Error -> {
+						is RegistrarClienteUseCase.Result.Error -> {
 							state = state.copy(error = it.message)
 						}
 					}
@@ -93,7 +93,7 @@ class PeopleViewModel @Inject constructor(
 			state = state.copy(isLoading = false)
 		}
 	}
-	
+
 	
 	data class PeopleState(
 		val userList: List<Person> = emptyList(),

@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol.extensions
+package com.jesus.gymcontrol.extensions
 
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson

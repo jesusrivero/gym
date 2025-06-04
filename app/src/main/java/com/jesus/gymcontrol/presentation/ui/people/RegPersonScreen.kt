@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol.presentation.ui.people
+package com.jesus.gymcontrol.presentation.ui.people
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,8 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.techcode.gymcontrol.domain.model.Person
-import com.techcode.gymcontrol.presentation.navegation.AppRoutes
+import com.jesus.gymcontrol.domain.model.Person
+import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,7 +71,7 @@ fun RegPersonScreen(
 				navigationIcon = {
 					IconButton(onClick = { navController.popBackStack() }) {
 						Icon(
-							painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_back),
+							painter = painterResource(id = com.jesus.gymcontrol.R.drawable.ic_back),
 							contentDescription = "Regresar",
 							tint = colorScheme.onPrimary
 						)

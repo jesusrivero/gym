@@ -1,6 +1,6 @@
-package com.techcode.gymcontrol.domain.model
+package com.jesus.gymcontrol.domain.model
 
-import com.techcode.gymcontrol.data.db.entity.PersonEntity
+import com.jesus.gymcontrol.data.db.entity.PersonEntity
 
 data class Person(
 	val id: Int? = null,

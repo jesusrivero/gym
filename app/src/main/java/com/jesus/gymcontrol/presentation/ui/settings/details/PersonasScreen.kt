@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol.presentation.ui.settings.details
+package com.jesus.gymcontrol.presentation.ui.settings.details
 
 
 import android.os.Build
@@ -32,7 +32,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -52,10 +51,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.techcode.gymcontrol.R
-import com.techcode.gymcontrol.domain.model.Person
-import com.techcode.gymcontrol.presentation.theme.GymTheme
-import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
+import com.jesus.gymcontrol.R
+import com.jesus.gymcontrol.domain.model.Person
+import com.jesus.gymcontrol.presentation.theme.GymTheme
+import com.jesus.gymcontrol.presentation.ui.people.PeopleViewModel
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId

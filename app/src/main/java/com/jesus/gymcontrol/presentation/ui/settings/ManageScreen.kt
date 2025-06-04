@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol.presentation.ui.settings
+package com.jesus.gymcontrol.presentation.ui.settings
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -34,9 +34,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.techcode.gymcontrol.presentation.navegation.AppRoutes
-import com.techcode.gymcontrol.presentation.theme.GymTheme
-import com.techcode.gymcontrol.presentation.ui.commons.BottomNavigationBar
+import com.jesus.gymcontrol.presentation.navegation.AppRoutes
+import com.jesus.gymcontrol.presentation.theme.GymTheme
+import com.jesus.gymcontrol.presentation.ui.commons.BottomNavigationBar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageScreen(navController: NavController) {
@@ -132,7 +132,7 @@ fun MenuCard(
 		Box(modifier = Modifier.fillMaxSize()) {
 
 			Image(
-				painter = painterResource(id = com.techcode.gymcontrol.R.drawable.ic_background),
+				painter = painterResource(id = com.jesus.gymcontrol.R.drawable.ic_background),
 				contentDescription = null,
 				modifier = Modifier.fillMaxSize(),
 				contentScale = ContentScale.Crop

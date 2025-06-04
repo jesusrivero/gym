@@ -1,4 +1,4 @@
-package com.techcode.gymcontrol.presentation.navegation
+package com.jesus.gymcontrol.presentation.navegation
 
 import ReportScreen
 import android.os.Build
@@ -8,25 +8,25 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.techcode.gymcontrol.presentation.ui.auth.LoginScreen
-import com.techcode.gymcontrol.presentation.ui.auth.recover.RecoverPasswordScreen
-import com.techcode.gymcontrol.presentation.ui.main.MainScreen
-import com.techcode.gymcontrol.presentation.ui.people.EditPersonScreen
-import com.techcode.gymcontrol.presentation.ui.people.ListPersonScreen
-import com.techcode.gymcontrol.presentation.ui.people.PeopleViewModel
-import com.techcode.gymcontrol.presentation.ui.people.RegPersonScreen
-import com.techcode.gymcontrol.presentation.ui.auth.register.RegisterScreen
-import com.techcode.gymcontrol.presentation.ui.settings.details.ContactScreen
-import com.techcode.gymcontrol.presentation.ui.settings.details.ListPaymentsScreen
-import com.techcode.gymcontrol.presentation.ui.settings.ManageScreen
-import com.techcode.gymcontrol.presentation.ui.settings.PreferencesScreen
-import com.techcode.gymcontrol.presentation.ui.settings.PaymentsScreen
-import com.techcode.gymcontrol.presentation.ui.settings.details.AccountScreen
-import com.techcode.gymcontrol.presentation.ui.settings.details.ErrorReportScreen
-import com.techcode.gymcontrol.presentation.ui.settings.details.PersonsScreen
-import com.techcode.gymcontrol.presentation.ui.settings.details.MembershipScreen
-import com.techcode.gymcontrol.presentation.ui.settings.details.NotificationScreen
-import com.techcode.gymcontrol.presentation.ui.settings.details.SecurityScreen
+import com.jesus.gymcontrol.presentation.ui.auth.LoginScreen
+import com.jesus.gymcontrol.presentation.ui.auth.recover.RecoverPasswordScreen
+import com.jesus.gymcontrol.presentation.ui.main.MainScreen
+import com.jesus.gymcontrol.presentation.ui.people.EditPersonScreen
+import com.jesus.gymcontrol.presentation.ui.people.ListPersonScreen
+import com.jesus.gymcontrol.presentation.ui.people.PeopleViewModel
+import com.jesus.gymcontrol.presentation.ui.people.RegPersonScreen
+import com.jesus.gymcontrol.presentation.ui.auth.register.RegisterScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.ContactScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.ListPaymentsScreen
+import com.jesus.gymcontrol.presentation.ui.settings.ManageScreen
+import com.jesus.gymcontrol.presentation.ui.settings.PreferencesScreen
+import com.jesus.gymcontrol.presentation.ui.settings.PaymentsScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.AccountScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.ErrorReportScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.PersonsScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.MembershipScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.NotificationScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.SecurityScreen
 
 
 @RequiresApi(Build.VERSION_CODES.O)
