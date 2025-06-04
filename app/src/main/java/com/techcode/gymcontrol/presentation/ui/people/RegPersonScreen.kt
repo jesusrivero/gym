@@ -1,14 +1,11 @@
 package com.techcode.gymcontrol.presentation.ui.people
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
@@ -23,6 +20,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Snackbar
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.techcode.gymcontrol.domain.model.Person
 import com.techcode.gymcontrol.presentation.navegation.AppRoutes
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,6 +45,15 @@ fun RegPersonScreen(
 	viewModel: PeopleViewModel = hiltViewModel()
 ) {
 	val colorScheme = MaterialTheme.colorScheme
+	var showSnackbar by remember { mutableStateOf(false) }
+	var snackbarMessage by remember { mutableStateOf("") }
+
+	if (showSnackbar) {
+		LaunchedEffect(showSnackbar) {
+			delay(2000)
+			showSnackbar = false
+		}
+	}
 
 	Scaffold(
 		topBar = {
@@ -69,12 +78,25 @@ fun RegPersonScreen(
 					}
 				}
 			)
+		},
+		snackbarHost = {
+			if (showSnackbar) {
+				Snackbar(
+					modifier = Modifier.padding(8.dp)
+				) {
+					Text(text = snackbarMessage)
+				}
+			}
 		}
 	) { paddingValues ->
 		RegPersonContent(
 			modifier = Modifier.padding(paddingValues),
 			viewModel = viewModel,
-			navController = navController
+			navController = navController,
+			onShowSnackbar = { message ->
+				snackbarMessage = message
+				showSnackbar = true
+			}
 		)
 	}
 }
@@ -83,15 +105,20 @@ fun RegPersonScreen(
 fun RegPersonContent(
 	modifier: Modifier = Modifier,
 	viewModel: PeopleViewModel,
-	navController: NavController
+	navController: NavController,
+	onShowSnackbar: (String) -> Unit
 ) {
 	var usuario by remember { mutableStateOf("") }
 	var email by remember { mutableStateOf("") }
 	var cedula by remember { mutableStateOf("") }
 	var numeroTelefono by remember { mutableStateOf("") }
 	val colorScheme = MaterialTheme.colorScheme
-	var isValidEmail by remember(email) { mutableStateOf(false) }
-	isValidEmail = email.trim().matches(Regex("^[A-Za-z0-9+_.-]+@gmail\\.com$"))
+	val isValidEmail = email.trim().matches(Regex("^[A-Za-z0-9+_.-]+@gmail\\.com$"))
+	val formIsValid = usuario.isNotBlank() &&
+			email.isNotBlank() &&
+			cedula.isNotBlank() &&
+			numeroTelefono.isNotBlank() &&
+			isValidEmail
 
 	Column(
 		modifier = modifier
@@ -107,7 +134,7 @@ fun RegPersonContent(
 		)
 
 		Spacer(modifier = Modifier.height(8.dp))
-		
+
 		OutlinedTextField(
 			value = email,
 			onValueChange = { email = it },
@@ -121,7 +148,7 @@ fun RegPersonContent(
 			singleLine = true,
 			isError = email.isNotBlank() && !isValidEmail
 		)
-		
+
 		if (email.isNotBlank() && !isValidEmail) {
 			Text(
 				text = "Debe ser un correo válido de Gmail",
@@ -164,11 +191,15 @@ fun RegPersonContent(
 					numeroTelefono = numeroTelefono
 				)
 				viewModel.saveUser(person)
-				navController.navigate(AppRoutes.PersonasScreen)
+				onShowSnackbar("Cliente registrado correctamente")
+				navController.navigate(AppRoutes.MainScreen)
 			},
+			enabled = formIsValid,
 			colors = ButtonDefaults.buttonColors(
 				containerColor = colorScheme.primary,
-				contentColor = colorScheme.onPrimary
+				contentColor = colorScheme.onPrimary,
+				disabledContainerColor = colorScheme.onSurface.copy(alpha = 0.12f),
+				disabledContentColor = colorScheme.onSurface.copy(alpha = 0.38f)
 			),
 			modifier = Modifier.fillMaxWidth()
 		) {

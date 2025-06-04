@@ -198,7 +198,7 @@ fun RegisterContent(navController: NavController) {
         ) {
             Divider(modifier = Modifier.weight(1f), color = colorScheme.outline)
             Text("  o  ", color = colorScheme.outline, fontSize = 14.sp)
-            Divider(modifier = Modifier.weight(1f), color = colorScheme.outline)
+             Divider(modifier = Modifier.weight(1f), color = colorScheme.outline)
         }
 
         Spacer(modifier = Modifier.height(16.dp))

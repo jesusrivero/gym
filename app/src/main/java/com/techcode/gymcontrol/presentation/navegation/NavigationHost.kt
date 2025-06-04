@@ -74,14 +74,13 @@ fun NavigationHost (
 			PersonsScreen(
 				viewModel = viewModel,
 				navEdit = { navController.navigate(AppRoutes.EditPersonScreen(it)) },
-//				navPag = { navController.navigate(AppRoutes.PaymentsScreen) },
+				navPag = { navController.navigate(AppRoutes.PaymentsScreen) },
 				navBottom = navController)
 		}
 		
 		
 		composable<AppRoutes.PaymentsScreen> {
-		PaymentsScreen(
-				navBottom = navController)
+		PaymentsScreen(navController= navController)
 		}
 		
 		composable<AppRoutes.ContactScreen> {
