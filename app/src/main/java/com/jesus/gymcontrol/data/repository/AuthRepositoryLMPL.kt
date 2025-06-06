@@ -6,7 +6,6 @@ import com.jesus.gymcontrol.domain.repository.AuthRepository
 import kotlinx.coroutines.tasks.await
 
 
-
 class AuthRepositoryImpl(
     private val firebaseAuth: FirebaseAuth
 ) : AuthRepository {
@@ -32,6 +31,17 @@ class AuthRepositoryImpl(
             Result.failure(e)
         }
     }
+
+    override suspend fun recoverPassword(email: String): Result<Unit> {
+        return try {
+            firebaseAuth.sendPasswordResetEmail(email).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+
+    }
+
 }
 
 

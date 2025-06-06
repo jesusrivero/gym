@@ -38,7 +38,7 @@ import com.jesus.gymcontrol.domain.models.AuthViewModel
 //import com.jesus.gymcontrol.domain.models.LoginViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
-//import com.jesus.gymcontrol.presentation.ui.auth.register.LoginContent
+
 
 
 @Composable
@@ -56,10 +56,30 @@ fun LoginContent(
     navController: NavController,
     viewModel: AuthViewModel,
 ) {
-
     val context = LocalContext.current
     val colorScheme = MaterialTheme.colorScheme
     var passwordVisible by remember { mutableStateOf(false) }
+
+    val isSuccess = viewModel.isSuccess
+    val isLoading = viewModel.isLoading
+    val errorMessage= viewModel.errorMessage
+
+   if (isSuccess){
+       LaunchedEffect(Unit) {
+           navController.navigate(AppRoutes.MainScreen) {
+               popUpTo(AppRoutes.LoginScreen)
+               { inclusive = true}
+           }
+           viewModel.clearLoginState()
+       }
+   }
+
+    if (errorMessage !=null){
+        LaunchedEffect(errorMessage) {
+            Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+        }
+
+    }
 
 
 
@@ -148,7 +168,6 @@ fun LoginContent(
             onClick = {
                 if (viewModel.email.isNotBlank() && viewModel.password.isNotBlank()) {
                     viewModel.loginUser(viewModel.email.trim(), viewModel.password.trim())
-                    navController.navigate(AppRoutes.MainScreen)
                 } else {
                     Toast.makeText(context, "Rellena todos los campos", Toast.LENGTH_SHORT).show()
                 }
@@ -160,7 +179,7 @@ fun LoginContent(
                 .height(56.dp),
             shape = RoundedCornerShape(28.dp),
         ) {
-            Text("Ingresar", fontSize = 16.sp)
+            Text(if (isLoading) "Ingresando..." else "Ingresar", fontSize = 16.sp)
         }
 
         Spacer(modifier = Modifier.height(24.dp))

@@ -1,5 +1,6 @@
 package com.jesus.gymcontrol.presentation.ui.auth.recover
 
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,31 +18,56 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.jesus.gymcontrol.domain.models.AuthViewModel
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 
+
 @Composable
-fun RecoverPasswordScreen(navController: NavController) {
+fun RecoverPasswordScreen(navController: NavController){
     GymTheme {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            RecoverPasswordContent(navController)
+        Box(modifier= Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+            RecoverPasswordContent(navController= navController)
         }
     }
 }
 
 @Composable
-fun RecoverPasswordContent(navController: NavController) {
+fun RecoverPasswordContent(navController: NavController, viewModel: AuthViewModel = hiltViewModel()) {
     val colorScheme = MaterialTheme.colorScheme
     var email by remember { mutableStateOf("") }
     var isValidEmail by remember(email) { mutableStateOf(false) }
 
-
     isValidEmail = email.trim().matches(Regex("^[A-Za-z0-9+_.-]+@gmail\\.com$"))
+
+    val context = LocalContext.current
+
+
+    val isLoading = viewModel.isLoading
+    val errorMessage = viewModel.errorMessage
+    val recoverSuccess = viewModel.recoverSuccess
+
+
+    if (recoverSuccess) {
+        LaunchedEffect(Unit) {
+            Toast.makeText(context, "Correo enviado correctamente", Toast.LENGTH_LONG).show()
+            navController.popBackStack()
+        }
+    }
+
+
+    if (errorMessage != null) {
+        LaunchedEffect(errorMessage) {
+            Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -105,17 +131,19 @@ fun RecoverPasswordContent(navController: NavController) {
 
         Button(
             onClick = {
-                // Aquí tengo que colocar la logica para el envio del correo de recuperacion
-                navController.popBackStack()
+                viewModel.recoverPassword(email)
             },
-            enabled = isValidEmail,
+            enabled = isValidEmail && !isLoading,
             colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(28.dp),
         ) {
-            Text(text = "Enviar código", fontSize = 16.sp)
+            Text(
+                text = if (isLoading) "Enviando..." else "Enviar código",
+                fontSize = 16.sp
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -129,11 +157,4 @@ fun RecoverPasswordContent(navController: NavController) {
             }
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun RecoverPreview(){
-    RecoverPasswordContent(navController = rememberNavController())
-
 }
