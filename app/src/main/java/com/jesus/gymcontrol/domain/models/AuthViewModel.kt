@@ -15,6 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val registerUserUseCase: RegisterUserUseCase
+	
 ) : ViewModel() {
 
     private val _registerState = MutableStateFlow<Result<Unit>?>(null)
@@ -30,4 +31,7 @@ class AuthViewModel @Inject constructor(
     fun clearState() {
         _registerState.value = null
     }
+	
+	
+	
 }
