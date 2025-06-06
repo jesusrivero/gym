@@ -1,33 +1,60 @@
 package com.jesus.gymcontrol.domain.models
 
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jesus.gymcontrol.domain.usecase.usuario.RegisterUserUseCase
-
+import com.jesus.gymcontrol.domain.usecase.usuario.LoginUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.RegisterUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val registerUserUseCase: RegisterUserUseCase
+    private val registerUseCase: RegisterUseCase,
+    private val loginUseCase: LoginUseCase
 ) : ViewModel() {
 
-    private val _registerState = MutableStateFlow<Result<Unit>?>(null)
-    val registerState: StateFlow<Result<Unit>?> = _registerState
+    var name by mutableStateOf("")
+    var email by mutableStateOf("")
+    var password by mutableStateOf("")
+    var isLoading by mutableStateOf(false)
+    var errorMessage by mutableStateOf<String?>(null)
+    var isSuccess by mutableStateOf(false)
 
-    fun registerUser(email: String, password: String, name: String) {
+    fun registerUser(email:String, password:String, name:String) {
         viewModelScope.launch {
-            val result = registerUserUseCase(email, password, name)
-            _registerState.value = result
+            isLoading = true
+            errorMessage = null
+            isSuccess = false
+
+            val result = registerUseCase(name.trim(), email.trim(), password.trim())
+            isLoading = false
+            result.onSuccess {
+                isSuccess = true
+            }.onFailure {
+                errorMessage = it.message
+            }
         }
     }
 
-    fun clearState() {
-        _registerState.value = null
+    fun loginUser(email:String, password: String) {
+        viewModelScope.launch {
+            isLoading = true
+            errorMessage = null
+            isSuccess = false
+
+            val result = loginUseCase(email.trim(), password.trim())
+            isLoading = false
+            result.onSuccess {
+                isSuccess = true
+            }.onFailure {
+                errorMessage = it.message
+            }
+        }
     }
 }

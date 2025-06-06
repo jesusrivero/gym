@@ -34,13 +34,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.jesus.gymcontrol.domain.models.LoginViewModel
+import com.jesus.gymcontrol.domain.models.AuthViewModel
+//import com.jesus.gymcontrol.domain.models.LoginViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
+//import com.jesus.gymcontrol.presentation.ui.auth.register.LoginContent
+
 
 @Composable
 fun LoginScreen(navController: NavController) {
-    val viewModel: LoginViewModel = hiltViewModel()
+    val viewModel: AuthViewModel = hiltViewModel()
     GymTheme {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             LoginContent(navController = navController, viewModel = viewModel)
@@ -51,27 +54,14 @@ fun LoginScreen(navController: NavController) {
 @Composable
 fun LoginContent(
     navController: NavController,
-    viewModel: LoginViewModel,
+    viewModel: AuthViewModel,
 ) {
-    val loginState by viewModel.loginState.collectAsState()
+
     val context = LocalContext.current
     val colorScheme = MaterialTheme.colorScheme
     var passwordVisible by remember { mutableStateOf(false) }
 
 
-    LaunchedEffect(loginState) {
-        loginState?.let { result ->
-            if (result.isSuccess) {
-                navController.navigate(AppRoutes.MainScreen) {
-                    popUpTo(AppRoutes.LoginScreen) { inclusive = true }
-                }
-            } else {
-                val error = result.exceptionOrNull()?.message ?: "Error desconocido"
-                Toast.makeText(context, error, Toast.LENGTH_LONG).show()
-            }
-            viewModel.clearState()
-        }
-    }
 
     Column(
         modifier = Modifier
@@ -93,8 +83,8 @@ fun LoginContent(
         Spacer(modifier = Modifier.height(32.dp))
 
         OutlinedTextField(
-            value = viewModel.email.value,
-            onValueChange = { viewModel.email.value = it },
+            value = viewModel.email,
+            onValueChange = { viewModel.email= it },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -113,8 +103,8 @@ fun LoginContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
-            value = viewModel.password.value,
-            onValueChange = { viewModel.password.value = it },
+            value = viewModel.password,
+            onValueChange = { viewModel.password = it },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -156,11 +146,13 @@ fun LoginContent(
 
         Button(
             onClick = {
-                if (viewModel.email.value.isNotBlank() && viewModel.password.value.isNotBlank()) {
-                    viewModel.login(viewModel.email.value.trim(), viewModel.password.value.trim())
+                if (viewModel.email.isNotBlank() && viewModel.password.isNotBlank()) {
+                    viewModel.loginUser(viewModel.email.trim(), viewModel.password.trim())
+                    navController.navigate(AppRoutes.MainScreen)
                 } else {
                     Toast.makeText(context, "Rellena todos los campos", Toast.LENGTH_SHORT).show()
                 }
+
             },
             colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
             modifier = Modifier

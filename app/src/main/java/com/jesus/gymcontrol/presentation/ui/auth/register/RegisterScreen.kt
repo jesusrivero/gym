@@ -1,6 +1,5 @@
 package com.jesus.gymcontrol.presentation.ui.auth.register
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -68,19 +67,6 @@ fun RegisterContent(navController: NavController) {
     var passwordVisible by remember { mutableStateOf(false) }
     var termsAccepted by remember { mutableStateOf(false) }
     val viewModel: AuthViewModel = hiltViewModel()
-    val registerState by viewModel.registerState.collectAsState()
-
-    LaunchedEffect(registerState) {
-        registerState?.let { result ->
-            if (result.isSuccess) {
-                navController.navigate(AppRoutes.LoginScreen)
-            } else {
-                val error = result.exceptionOrNull()?.message ?: "Error desconocido"
-                Toast.makeText(context, error, Toast.LENGTH_LONG).show()
-            }
-            viewModel.clearState()
-        }
-    }
 
 
 
@@ -201,7 +187,7 @@ fun RegisterContent(navController: NavController) {
             onClick = {
                 navController.navigate(AppRoutes.LoginScreen)
                 if (termsAccepted) {
-                    viewModel.registerUser(emailOrUser, password, name)
+                    viewModel.registerUser( emailOrUser, password, name)
                 }
             },
             modifier = Modifier
@@ -271,3 +257,8 @@ fun RegisterContent(navController: NavController) {
 fun RegisterContentPreview() {
     RegisterScreen(navController = rememberNavController())
 }
+
+
+
+
+
