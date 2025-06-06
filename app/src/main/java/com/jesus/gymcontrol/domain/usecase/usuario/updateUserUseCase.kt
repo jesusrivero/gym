@@ -9,6 +9,6 @@ data class UpdateUserUseCase @Inject constructor(
 ){
 	suspend operator fun invoke(usuario: Person) {
 		usuarioRepository.updateUser(usuario)
-	  }
+	}
 }
 
