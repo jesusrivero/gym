@@ -91,7 +91,7 @@ fun PreferencesContent(navController: NavController) {
             SettingsItem(
                 text = "Notificaciones",
                 icon = Icons.Default.Notifications,
-                onClick = { navController.navigate(AppRoutes.NotificationScreen) }
+                onClick = { navController.navigate(AppRoutes.SelectedRolScreen) }
             )
 
             SettingsItem(

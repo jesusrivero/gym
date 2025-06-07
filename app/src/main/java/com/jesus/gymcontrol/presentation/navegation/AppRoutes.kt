@@ -61,4 +61,18 @@ object AppRoutes {
 	@Serializable
 	data object RecoverPasswordScreen
 
+	@Serializable
+	data object SelectedRolScreen
+
+	@Serializable
+	data object ActivateCodeScreen
+
+	@Serializable
+	data object SelectedGymAdmin
+
+	@Serializable
+	data object SelectedGymClient
+
+
+
 }

@@ -41,7 +41,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.jesus.gymcontrol.R
-import com.jesus.gymcontrol.domain.models.AuthViewModel
+import com.jesus.gymcontrol.presentation.ui.auth.AuthViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 

@@ -42,10 +42,10 @@ fun EditPersonScreen(
     navController: NavController,
     viewModel: PeopleViewModel,
     id: Int,
-    usuario: String? = null,
-    email: String? = null,
-    cedula: String? = null,
-    numeroTelefono: String? = null
+//    usuario: String? = null,
+//    email: String? = null,
+//    cedula: String? = null,
+//    numeroTelefono: String? = null
 ) {
     val colorScheme = MaterialTheme.colorScheme
     var showSnackbar by remember { mutableStateOf(false) }
@@ -97,10 +97,10 @@ fun EditPersonScreen(
             viewModel = viewModel,
             navController = navController,
             id = id,
-            initialUsuario = usuario.orEmpty(),
-            initialEmail = email.orEmpty(),
-            initialCedula = cedula.orEmpty(),
-            initialNumeroTelefono = numeroTelefono.orEmpty(),
+//            initialUsuario = usuario.orEmpty(),
+//            initialEmail = email.orEmpty(),
+//            initialCedula = cedula.orEmpty(),
+//            initialNumeroTelefono = numeroTelefono.orEmpty(),
             showSnackbar = { message ->
                 snackbarMessage = message
                 showSnackbar = true
@@ -115,16 +115,21 @@ fun EditPersonContent(
     viewModel: PeopleViewModel,
     navController: NavController,
     id: Int,
-    initialUsuario: String,
-    initialEmail: String,
-    initialCedula: String,
-    initialNumeroTelefono: String,
+//    initialUsuario: String,
+//    initialEmail: String,
+//    initialCedula: String,
+//    initialNumeroTelefono: String,
     showSnackbar: (String) -> Unit
 ) {
-    var usuario by remember { mutableStateOf(initialUsuario) }
-    var email by remember { mutableStateOf(initialEmail) }
-    var cedula by remember { mutableStateOf(initialCedula) }
-    var numeroTelefono by remember { mutableStateOf(initialNumeroTelefono) }
+    var usuario by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var cedula by remember { mutableStateOf("") }
+    var numeroTelefono by remember { mutableStateOf("") }
+
+//    var usuario by remember { mutableStateOf(initialUsuario) }
+//    var email by remember { mutableStateOf(initialEmail) }
+//    var cedula by remember { mutableStateOf(initialCedula) }
+//    var numeroTelefono by remember { mutableStateOf(initialNumeroTelefono) }
 
     var emailTouched by remember { mutableStateOf(false) }
     val isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()

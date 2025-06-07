@@ -22,11 +22,15 @@ import com.jesus.gymcontrol.presentation.ui.settings.ManageScreen
 import com.jesus.gymcontrol.presentation.ui.settings.PreferencesScreen
 import com.jesus.gymcontrol.presentation.ui.settings.PaymentsScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.AccountScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.ActivateCodeScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.ErrorReportScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.PersonsScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.MembershipScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.NotificationScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.SecurityScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.SelectedGymAdmin
+import com.jesus.gymcontrol.presentation.ui.settings.details.SelectedGymClient
+import com.jesus.gymcontrol.presentation.ui.settings.details.SelectedRolScreen
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -37,6 +41,7 @@ fun NavigationHost (
 	val navController = rememberNavController()
 	
 	NavHost(navController = navController, startDestination = AppRoutes.MainScreen) {
+
 		composable<AppRoutes.MainScreen> {
 			MainScreen(
 				navController = navController,
@@ -145,6 +150,22 @@ fun NavigationHost (
 		composable<AppRoutes.NotificationScreen> {
 			NotificationScreen( navController= navController )
 
+		}
+
+		composable<AppRoutes.SelectedRolScreen> {
+			SelectedRolScreen( navController= navController)
+		}
+
+		composable<AppRoutes.ActivateCodeScreen> {
+			ActivateCodeScreen( navController= navController)
+		}
+
+		composable<AppRoutes.SelectedGymAdmin> {
+			SelectedGymAdmin( navController= navController)
+		}
+
+		composable<AppRoutes.SelectedGymClient> {
+			SelectedGymClient( navController= navController)
 		}
 
 

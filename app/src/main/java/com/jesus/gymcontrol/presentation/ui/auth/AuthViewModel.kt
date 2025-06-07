@@ -1,5 +1,4 @@
-package com.jesus.gymcontrol.domain.models
-
+package com.jesus.gymcontrol.presentation.ui.auth
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
