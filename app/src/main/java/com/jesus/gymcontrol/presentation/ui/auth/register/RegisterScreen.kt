@@ -67,6 +67,14 @@ fun RegisterContent(navController: NavController) {
     var passwordVisible by remember { mutableStateOf(false) }
     var termsAccepted by remember { mutableStateOf(false) }
     val viewModel: AuthViewModel = hiltViewModel()
+    var isValidEmail by remember(emailOrUser) { mutableStateOf(false) }
+    val isFromValid = name.trim().isNotBlank() &&
+            emailOrUser.trim().isNotBlank() &&
+            password.trim().isNotBlank() &&
+            password.trim().length >=6 &&
+            termsAccepted
+
+    isValidEmail = emailOrUser.trim().matches(Regex("^[A-Za-z0-9+_.-]+@gmail\\.com$"))
 
 
 
@@ -126,8 +134,19 @@ fun RegisterContent(navController: NavController) {
                 )
             },
             textStyle = LocalTextStyle.current.copy(color = colorScheme.onSurface),
-            singleLine = true
+            singleLine = true,
+            isError = emailOrUser.isNotBlank() && !isValidEmail
         )
+        if (emailOrUser.isNotBlank() && !isValidEmail) {
+            Text(
+                text = "Debe ser un correo válido de Gmail",
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp,
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(top = 4.dp)
+            )
+        }
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -189,7 +208,7 @@ fun RegisterContent(navController: NavController) {
                 if (termsAccepted) {
                     viewModel.registerUser( emailOrUser, password, name)
                 }
-            },
+            },enabled = isFromValid,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),

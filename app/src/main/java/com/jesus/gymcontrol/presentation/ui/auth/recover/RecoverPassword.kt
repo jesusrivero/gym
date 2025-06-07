@@ -20,27 +20,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.jesus.gymcontrol.domain.models.AuthViewModel
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 
 
 @Composable
-fun RecoverPasswordScreen(navController: NavController){
+fun RecoverPasswordScreen(navController: NavController) {
     GymTheme {
-        Box(modifier= Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-            RecoverPasswordContent(navController= navController)
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            RecoverPasswordContent(navController = navController)
         }
     }
 }
 
 @Composable
-fun RecoverPasswordContent(navController: NavController, viewModel: AuthViewModel = hiltViewModel()) {
+fun RecoverPasswordContent(
+    navController: NavController,
+    viewModel: AuthViewModel = hiltViewModel()
+) {
     val colorScheme = MaterialTheme.colorScheme
     var email by remember { mutableStateOf("") }
     var isValidEmail by remember(email) { mutableStateOf(false) }

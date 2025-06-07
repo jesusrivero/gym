@@ -28,6 +28,7 @@ class AuthViewModel @Inject constructor(
     var isSuccess by mutableStateOf(false)
     var recoverSuccess by mutableStateOf(false)
 
+
     fun registerUser(email: String, password: String, name: String) {
         viewModelScope.launch {
             isLoading = true

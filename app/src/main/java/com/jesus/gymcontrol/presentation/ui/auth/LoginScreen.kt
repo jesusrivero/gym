@@ -40,7 +40,6 @@ import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 
 
-
 @Composable
 fun LoginScreen(navController: NavController) {
     val viewModel: AuthViewModel = hiltViewModel()
@@ -59,22 +58,32 @@ fun LoginContent(
     val context = LocalContext.current
     val colorScheme = MaterialTheme.colorScheme
     var passwordVisible by remember { mutableStateOf(false) }
-
     val isSuccess = viewModel.isSuccess
     val isLoading = viewModel.isLoading
-    val errorMessage= viewModel.errorMessage
+    val errorMessage = viewModel.errorMessage
+    var isValidEmail by remember(viewModel.email) { mutableStateOf(false) }
+    val isFromValid =
+        viewModel.email.trim().isNotBlank() &&
+                isValidEmail &&
+                viewModel.password.trim().isNotBlank() &&
+                viewModel.password.trim().length >=6
 
-   if (isSuccess){
-       LaunchedEffect(Unit) {
-           navController.navigate(AppRoutes.MainScreen) {
-               popUpTo(AppRoutes.LoginScreen)
-               { inclusive = true}
-           }
-           viewModel.clearLoginState()
-       }
-   }
 
-    if (errorMessage !=null){
+
+    isValidEmail = viewModel.email.trim().matches(Regex("^[A-Za-z0-9+_.-]+@gmail\\.com$"))
+
+
+    if (isSuccess) {
+        LaunchedEffect(Unit) {
+            navController.navigate(AppRoutes.MainScreen) {
+                popUpTo(AppRoutes.LoginScreen)
+                { inclusive = true }
+            }
+            viewModel.clearLoginState()
+        }
+    }
+
+    if (errorMessage != null) {
         LaunchedEffect(errorMessage) {
             Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
         }
@@ -104,7 +113,7 @@ fun LoginContent(
 
         OutlinedTextField(
             value = viewModel.email,
-            onValueChange = { viewModel.email= it },
+            onValueChange = { viewModel.email = it },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -117,8 +126,19 @@ fun LoginContent(
                     tint = colorScheme.onSurfaceVariant
                 )
             },
-            singleLine = true
+            singleLine = true,
+            isError = viewModel.email.isNotBlank() && !isValidEmail
         )
+        if (viewModel.email.isNotBlank() && !isValidEmail) {
+            Text(
+                text = "Debe ser un correo válido de Gmail",
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp,
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(top = 4.dp)
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -146,8 +166,9 @@ fun LoginContent(
                 )
             },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            singleLine = true
-        )
+            singleLine = true,
+
+            )
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -167,12 +188,20 @@ fun LoginContent(
         Button(
             onClick = {
                 if (viewModel.email.isNotBlank() && viewModel.password.isNotBlank()) {
-                    viewModel.loginUser(viewModel.email.trim(), viewModel.password.trim())
+                    viewModel.loginUser(
+                        viewModel.email.trim(),
+                        viewModel.password.trim()
+                    )
                 } else {
-                    Toast.makeText(context, "Rellena todos los campos", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "Rellena todos los campos",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
 
             },
+            enabled = isFromValid,
             colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
             modifier = Modifier
                 .fillMaxWidth()
@@ -212,7 +241,11 @@ fun LoginContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         Row {
-            Text("¿No tienes una cuenta? ", color = colorScheme.onBackground, fontSize = 14.sp)
+            Text(
+                "¿No tienes una cuenta? ",
+                color = colorScheme.onBackground,
+                fontSize = 14.sp
+            )
             Text(
                 "Regístrate",
                 color = colorScheme.primary,
@@ -227,6 +260,7 @@ fun LoginContent(
         Spacer(modifier = Modifier.height(24.dp))
     }
 }
+
 
 //@Preview(showBackground = true)
 //@Composable
