@@ -26,6 +26,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -33,6 +34,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
@@ -54,6 +56,7 @@ fun LoginContent(
     viewModel: AuthViewModel,
 ) {
     val context = LocalContext.current
+    val lifecycleOverflow = androidx.lifecycle.compose.LocalLifecycleOwner.current
     val colorScheme = MaterialTheme.colorScheme
     var passwordVisible by remember { mutableStateOf(false) }
     val isSuccess = viewModel.isSuccess
@@ -67,13 +70,12 @@ fun LoginContent(
                 viewModel.password.trim().length >=6
 
 
-
     isValidEmail = viewModel.email.trim().matches(Regex("^[A-Za-z0-9+_.-]+@gmail\\.com$"))
 
 
     if (isSuccess) {
         LaunchedEffect(Unit) {
-            navController.navigate(AppRoutes.MainScreen) {
+            navController.navigate(AppRoutes.SelectedRolScreen) {
                 popUpTo(AppRoutes.LoginScreen)
                 { inclusive = true }
             }

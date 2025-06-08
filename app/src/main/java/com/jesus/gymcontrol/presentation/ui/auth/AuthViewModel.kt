@@ -5,9 +5,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.jesus.gymcontrol.domain.usecase.usuario.LoginUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.RecoverPasswordUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.RegisterUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.UpdateRolUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -16,7 +18,8 @@ import javax.inject.Inject
 class AuthViewModel @Inject constructor(
     private val registerUseCase: RegisterUseCase,
     private val loginUseCase: LoginUseCase,
-    private val recoverUseCase: RecoverPasswordUseCase
+    private val recoverUseCase: RecoverPasswordUseCase,
+    private val updateRolUseCase: UpdateRolUseCase
 ) : ViewModel() {
 
     var name by mutableStateOf("")
@@ -27,6 +30,8 @@ class AuthViewModel @Inject constructor(
     var isSuccess by mutableStateOf(false)
     var recoverSuccess by mutableStateOf(false)
 
+    var rol by mutableStateOf("Dueño")
+    var codigo by mutableStateOf("")
 
     fun registerUser(email: String, password: String, name: String) {
         viewModelScope.launch {
@@ -76,8 +81,31 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun clearLoginState(){
+    fun clearLoginState() {
         isSuccess = false
-        errorMessage= null
+        errorMessage = null
+    }
+
+    fun assignRoleAndCode(rol: String, codigo: String) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        if (codigo.isBlank()) {
+            errorMessage = "Debes ingresar un código"
+            return
+        }
+
+        viewModelScope.launch {
+            isLoading = true
+            errorMessage = null
+            isSuccess = false
+
+            val result = updateRolUseCase(uid, rol, codigo)
+            isLoading = false
+            result.onSuccess {
+                isSuccess = true
+            }.onFailure {
+                errorMessage = it.message
+            }
+        }
     }
 }

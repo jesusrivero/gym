@@ -17,5 +17,11 @@ interface AuthRepository {
     suspend fun recoverPassword(
         email:String):
             Result<Unit>
+
+    suspend fun updateRolAndCode(
+        uid: String,
+        rol: String,
+        codigo: String
+    ):  Result<Unit>
 }
 

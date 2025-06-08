@@ -1,5 +1,6 @@
 package com.jesus.gymcontrol.presentation.ui.settings
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 import com.jesus.gymcontrol.presentation.ui.commons.BottomNavigationBar
@@ -115,6 +118,19 @@ fun PreferencesContent(navController: NavController) {
                 icon = Icons.Default.Info,
                 onClick = { navController.navigate(AppRoutes.ContactScreen) }
             )
+
+            Spacer(modifier = Modifier.padding(vertical = 20.dp))
+
+                Button(
+                    onClick = {
+                        FirebaseAuth.getInstance().signOut()
+                        navController.navigate(AppRoutes.LoginScreen)
+                    }, modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = "Cerrar sesion")
+
+            }
+
         }
     }
 }

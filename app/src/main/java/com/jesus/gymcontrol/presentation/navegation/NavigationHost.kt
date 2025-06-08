@@ -40,7 +40,7 @@ fun NavigationHost (
 ) {
 	val navController = rememberNavController()
 	
-	NavHost(navController = navController, startDestination = AppRoutes.MainScreen) {
+	NavHost(navController = navController, startDestination = AppRoutes.LoginScreen) {
 
 		composable<AppRoutes.MainScreen> {
 			MainScreen(

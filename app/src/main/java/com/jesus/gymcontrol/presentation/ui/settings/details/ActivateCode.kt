@@ -1,5 +1,6 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,35 +36,51 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
+import com.jesus.gymcontrol.presentation.ui.auth.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActivateCodeScreen(
     navController: NavController,
+    viewModel: AuthViewModel = hiltViewModel()
 ) {
     GymTheme {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            ActivateCodeContent(navController = navController)
+            ActivateCodeContent(navController = navController, viewModel = viewModel)
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActivateCodeContent(navController: NavController) {
+fun ActivateCodeContent(
+    navController: NavController,
+    viewModel: AuthViewModel
+) {
     val colorScheme = MaterialTheme.colorScheme
-
     var code by remember { mutableStateOf("") }
     var showFields by remember { mutableStateOf(false) }
     var gymName by remember { mutableStateOf("") }
     var gymAddress by remember { mutableStateOf("") }
     var gymPhone by remember { mutableStateOf("") }
+
+    val context = LocalContext.current
+    val errorMessage = viewModel.errorMessage
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -116,11 +134,11 @@ fun ActivateCodeContent(navController: NavController) {
             Button(
                 onClick = {
                     if (code.isNotBlank()) {
+                        viewModel.assignRoleAndCode("Dueño", code)
                         showFields = true
                     }
                 },
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
             ) {
                 Icon(
@@ -193,9 +211,10 @@ fun ActivateCodeContent(navController: NavController) {
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
-                    onClick = { },
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    onClick = {
+                        navController.navigate(AppRoutes.MainScreen)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
                 ) {
                     Text("Guardar Gimnasio")
@@ -204,7 +223,6 @@ fun ActivateCodeContent(navController: NavController) {
         }
     }
 }
-
 //
 //@Preview(showBackground = true)
 //@Composable

@@ -34,18 +34,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
+import com.jesus.gymcontrol.presentation.ui.auth.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectedRolScreen(
     navController: NavController,
+    viewModel: AuthViewModel = hiltViewModel()
 ) {
     GymTheme {
         SelectedRolScreenContent(
             navController = navController,
+            viewModel = viewModel
         )
     }
 }
@@ -54,8 +58,8 @@ fun SelectedRolScreen(
 @Composable
 fun SelectedRolScreenContent(
     navController: NavController,
+    viewModel: AuthViewModel
 ) {
-
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -66,17 +70,6 @@ fun SelectedRolScreenContent(
                         fontWeight = FontWeight.Medium
                     )
                 },
-//                navigationIcon = {
-//                    IconButton(
-//                        onClick = { navBottom.popBackStack() }
-//                    ) {
-//                        Icon(
-//                            painter = painterResource(id = R.drawable.ic_back),
-//                            contentDescription = "Regresar",
-//                            tint = Color.White
-//                        )
-//                    }
-//                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = colorScheme.primary
                 )
@@ -92,14 +85,12 @@ fun SelectedRolScreenContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-
             Row(
                 modifier = Modifier
                     .padding(horizontal = 8.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Column (verticalArrangement = Arrangement.SpaceBetween){
-
+                Column {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -113,7 +104,6 @@ fun SelectedRolScreenContent(
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-
                         Text(
                             text = "Selecciona una de las siguientes opciones para continuar",
                             fontSize = 14.sp,
@@ -122,17 +112,31 @@ fun SelectedRolScreenContent(
                         )
                     }
 
+
                     MenuCardRol(
                         title = "Dueño de Gimnasio",
-                        onClick = { navController.navigate(AppRoutes.ActivateCodeScreen) }
+                        onClick = {
+                            viewModel.rol = "Dueño"
+                            navController.navigate(AppRoutes.ActivateCodeScreen)
+                        }
                     )
+
+
                     MenuCardRol(
                         title = "Administrador de Gimnasio",
-                        onClick = { navController.navigate(AppRoutes.SelectedGymAdmin) }
+                        onClick = {
+                            viewModel.rol = "Administrador"
+                            navController.navigate(AppRoutes.SelectedGymAdmin)
+                        }
                     )
+
+
                     MenuCardRol(
                         title = "Cliente",
-                        onClick = { navController.navigate(AppRoutes.SelectedGymClient) }
+                        onClick = {
+                            viewModel.rol = "Cliente"
+                            navController.navigate(AppRoutes.SelectedGymClient)
+                        }
                     )
 
                     Button(
@@ -148,14 +152,8 @@ fun SelectedRolScreenContent(
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
-
                 }
-
-
-
-
             }
-
         }
     }
 }
@@ -175,7 +173,7 @@ fun MenuCardRol(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
 
-    ) {
+        ) {
         Box(modifier = Modifier.fillMaxSize().background(Color(0xE23F51B5))) {
             Row(
                 modifier = Modifier
@@ -185,7 +183,7 @@ fun MenuCardRol(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
 
-            ) {
+                ) {
                 Column {
                     Text(
                         text = title,
@@ -204,7 +202,6 @@ fun MenuCardRol(
         }
     }
 }
-
 
 //@Preview(showBackground = true)
 //@Composable

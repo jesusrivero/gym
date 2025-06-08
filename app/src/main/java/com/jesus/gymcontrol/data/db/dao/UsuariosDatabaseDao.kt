@@ -8,10 +8,6 @@ import androidx.room.Update
 import com.jesus.gymcontrol.data.db.entity.PersonEntity
 import kotlinx.coroutines.flow.Flow
 
-
-
-
-
 @Dao
 interface UsuariosDatabaseDao {
 	@Query("SELECT * FROM usuarios")
