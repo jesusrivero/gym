@@ -59,6 +59,9 @@ object AppRoutes {
 	data object RegisterScreen
 
 	@Serializable
+	data object StartScreen
+
+	@Serializable
 	data object RecoverPasswordScreen
 
 	@Serializable

@@ -25,6 +25,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 import com.jesus.gymcontrol.presentation.ui.commons.BottomNavigationBar
@@ -38,6 +39,7 @@ import com.jesus.gymcontrol.presentation.ui.people.PeopleViewModel
 @Composable
 fun MainScreen(
 	navController: NavController,
+	sessionManager: SessionManager,
 	viewModel: PeopleViewModel = hiltViewModel()
 ) {
 	GymTheme {

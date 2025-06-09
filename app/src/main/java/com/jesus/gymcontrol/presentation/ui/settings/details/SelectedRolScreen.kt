@@ -107,7 +107,7 @@ fun SelectedRolScreenContent(
                         Text(
                             text = "Selecciona una de las siguientes opciones para continuar",
                             fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                            color = colorScheme.onSurface.copy(alpha = 0.7f),
                             textAlign = TextAlign.Center
                         )
                     }
@@ -140,7 +140,12 @@ fun SelectedRolScreenContent(
                     )
 
                     Button(
-                        onClick = {  },
+                        onClick = {
+                            viewModel.logout()
+                            navController.navigate(AppRoutes.LoginScreen) {
+                                popUpTo(AppRoutes.PreferencesScreen) { inclusive = true }
+                            }
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 16.dp),
@@ -174,7 +179,9 @@ fun MenuCardRol(
         shape = RoundedCornerShape(12.dp),
 
         ) {
-        Box(modifier = Modifier.fillMaxSize().background(Color(0xE23F51B5))) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xE23F51B5))) {
             Row(
                 modifier = Modifier
                     .align(Alignment.BottomStart)

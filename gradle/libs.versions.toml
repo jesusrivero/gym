@@ -2,6 +2,8 @@
 accompanistPager = "0.28.0"
 agp = "8.9.2"
 coilCompose = "2.4.0"
+datastorePreferences = "1.0.0"
+datastorePreferencesVersion = "1.1.7"
 firebaseAnalytics = "22.4.0"
 firebaseAuthKtx = "23.2.1"
 firebaseBom = "33.14.0"
@@ -31,13 +33,16 @@ ksp-compiler = "2.52"
 hilt = "2.51.1"
 benchmarkMacro = "1.3.4"
 compiler = "3.2.0-alpha11"
+datastoreCoreAndroid = "1.1.7"
 
 [libraries]
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferencesVersion" }
 androidx-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "foundation" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+datastore-preferences = { module = "androix.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
@@ -71,6 +76,7 @@ ksp-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "ks
 androidx-benchmark-macro = { group = "androidx.benchmark", name = "benchmark-macro", version.ref = "benchmarkMacro" }
 material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 androidx-compiler = { group = "androidx.databinding", name = "compiler", version.ref = "compiler" }
+androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastoreCoreAndroid" }
 
 
 [plugins]

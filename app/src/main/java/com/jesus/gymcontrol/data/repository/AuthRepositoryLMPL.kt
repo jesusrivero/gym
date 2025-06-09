@@ -38,6 +38,7 @@ class AuthRepositoryImpl(
         }
     }
 
+
     override suspend fun loginUser(email: String, password: String): Result<Unit> {
         return try {
             firebaseAuth.signInWithEmailAndPassword(email, password).await()
@@ -46,6 +47,25 @@ class AuthRepositoryImpl(
             Result.failure(e)
         }
     }
+
+
+    override suspend fun updateRolAndCode(
+        uid: String,
+        rol: String,
+        codigo: String
+    ): Result<Unit> {
+        return try {
+            val updates = mapOf(
+                "rol" to rol,
+                "codigo" to codigo
+            )
+            firestore.collection("users").document(uid).update(updates).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
 
     override suspend fun recoverPassword(email: String): Result<Unit> {
         return try {
@@ -57,22 +77,7 @@ class AuthRepositoryImpl(
 
     }
 
-    override suspend fun updateRolAndCode(
-        uid: String,
-        rol: String,
-        codigo: String
-    ): Result<Unit> {
-       return try {
-           val updates = mapOf(
-               "rol" to rol,
-               "codigo" to codigo
-           )
-           firestore.collection("users").document(uid).update(updates).await()
-           Result.success(Unit)
-       } catch (e: Exception) {
-           Result.failure(e)
-       }
-    }
+
 
 }
 

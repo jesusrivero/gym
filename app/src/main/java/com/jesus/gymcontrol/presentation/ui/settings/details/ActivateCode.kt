@@ -133,10 +133,10 @@ fun ActivateCodeContent(
 
             Button(
                 onClick = {
-                    if (code.isNotBlank()) {
-                        viewModel.assignRoleAndCode("Dueño", code)
+//                    if (code.isNotBlank()) {
+//                        viewModel.assignRoleAndCode("Dueño", code)
                         showFields = true
-                    }
+
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
@@ -212,6 +212,8 @@ fun ActivateCodeContent(
 
                 Button(
                     onClick = {
+                        if (code.isNotBlank()) {
+                            viewModel.assignRoleAndCode("Dueño", code)}
                         navController.navigate(AppRoutes.MainScreen)
                     },
                     modifier = Modifier.fillMaxWidth(),

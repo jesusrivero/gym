@@ -1,6 +1,6 @@
 package com.jesus.gymcontrol.presentation.ui.settings
 
-import android.widget.Toast
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,10 +39,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.google.firebase.auth.FirebaseAuth
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
+import com.jesus.gymcontrol.presentation.ui.auth.AuthViewModel
 import com.jesus.gymcontrol.presentation.ui.commons.BottomNavigationBar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,9 +54,13 @@ fun PreferencesScreen(navController: NavController) {
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PreferencesContent(navController: NavController) {
+fun PreferencesContent(
+    navController: NavController,
+    viewModel: AuthViewModel = hiltViewModel()
+) {
     val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
@@ -121,16 +126,19 @@ fun PreferencesContent(navController: NavController) {
 
             Spacer(modifier = Modifier.padding(vertical = 20.dp))
 
-                Button(
-                    onClick = {
-                        FirebaseAuth.getInstance().signOut()
-                        navController.navigate(AppRoutes.LoginScreen)
-                    }, modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(text = "Cerrar sesion")
-
+            Button(
+                onClick = {
+                    viewModel.logout()
+                    navController.navigate(AppRoutes.LoginScreen) {
+                        popUpTo(AppRoutes.PreferencesScreen) { inclusive = true }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                Text(text = "Cerrar sesión")
             }
-
         }
     }
 }

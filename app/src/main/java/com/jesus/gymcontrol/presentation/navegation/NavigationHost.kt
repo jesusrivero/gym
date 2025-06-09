@@ -4,10 +4,14 @@ import ReportScreen
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.jesus.gymcontrol.data.repository.SessionManager
+import com.jesus.gymcontrol.presentation.splash.StartScreen
 import com.jesus.gymcontrol.presentation.ui.auth.LoginScreen
 import com.jesus.gymcontrol.presentation.ui.auth.recover.RecoverPasswordScreen
 import com.jesus.gymcontrol.presentation.ui.main.MainScreen
@@ -36,21 +40,34 @@ import com.jesus.gymcontrol.presentation.ui.settings.details.SelectedRolScreen
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavigationHost (
-	viewModel: PeopleViewModel= hiltViewModel()
+	viewModel: PeopleViewModel= hiltViewModel(),
+
 ) {
+	val context = LocalContext.current
 	val navController = rememberNavController()
+	val sessionManager = remember { SessionManager(context) }
+
 	
-	NavHost(navController = navController, startDestination = AppRoutes.LoginScreen) {
+	NavHost(navController = navController, startDestination = AppRoutes.StartScreen) {
 
 		composable<AppRoutes.MainScreen> {
 			MainScreen(
 				navController = navController,
-				
+				sessionManager= sessionManager
 				)
 		}
+
+		composable<AppRoutes.StartScreen> {
+			StartScreen(
+                navController = navController)
+		}
+
+
 		composable<AppRoutes.RegPersonScreen> {
 			RegPersonScreen(navController, viewModel)
 		}
+
+
 		composable<AppRoutes.EditPersonScreen> {
 			val idPerson = it.arguments?.getInt("idPerson")
 			
@@ -167,10 +184,6 @@ fun NavigationHost (
 		composable<AppRoutes.SelectedGymClient> {
 			SelectedGymClient( navController= navController)
 		}
-
-
-
-
 
 	}
 }

@@ -26,7 +26,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -34,7 +33,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
@@ -67,7 +65,7 @@ fun LoginContent(
         viewModel.email.trim().isNotBlank() &&
                 isValidEmail &&
                 viewModel.password.trim().isNotBlank() &&
-                viewModel.password.trim().length >=6
+                viewModel.password.trim().length >= 6
 
 
     isValidEmail = viewModel.email.trim().matches(Regex("^[A-Za-z0-9+_.-]+@gmail\\.com$"))
@@ -189,9 +187,19 @@ fun LoginContent(
             onClick = {
                 if (viewModel.email.isNotBlank() && viewModel.password.isNotBlank()) {
                     viewModel.loginUser(
-                        viewModel.email.trim(),
-                        viewModel.password.trim()
-                    )
+                        email = viewModel.email.trim(),
+                        password = viewModel.password.trim()
+                    ) { hasRole ->
+                        if (hasRole) {
+                            navController.navigate(AppRoutes.MainScreen) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        } else {
+                            navController.navigate(AppRoutes.SelectedRolScreen) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    }
                 } else {
                     Toast.makeText(
                         context,
@@ -199,7 +207,6 @@ fun LoginContent(
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-
             },
             enabled = isFromValid,
             colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),

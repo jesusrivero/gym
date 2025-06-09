@@ -1,4 +1,4 @@
-import org.jetbrains.kotlin.gradle.model.Kapt
+
 
 plugins {
 	alias(libs.plugins.android.application)
@@ -57,7 +57,8 @@ dependencies {
 	implementation(libs.kotlinx.serialization.json)              // JSON con Kotlinx
 	implementation(libs.androidx.room.runtime)                   // Room runtime
 	implementation(libs.androidx.room.ktx)
-	implementation(libs.androidx.compiler)                       // Room con corutinas
+	implementation(libs.androidx.compiler)
+	implementation(libs.androidx.datastore.core.android)                       // Room con corutinas
 	ksp(libs.androidx.room.compiler)                             // Room compiler
 	implementation(libs.androidx.lifecycle.viewmodel.compose)    // ViewModel + Compose
 	implementation(libs.androidx.navigation.compose)             // Navigation en Compose
@@ -65,6 +66,8 @@ dependencies {
 	implementation (libs.androidx.hilt.navigation.compose)       // Hilt navigation
 	kapt(libs.hilt.compiler)                                     // Hilt compiler
 	implementation(libs.coil.compose)                            //coil
+//	implementation (libs.datastore.preferences)                  //DataStoe
+	implementation(libs.androidx.datastore.preferences)
 	implementation (libs.androidx.material.icons.extended)
 	implementation (libs.guava)
 	implementation(platform(libs.firebase.bom))
