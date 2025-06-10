@@ -27,6 +27,7 @@ class SessionManager @Inject constructor(@ApplicationContext private val context
     }
 
 
+
     fun clearSession() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         sharedPreferences.edit {

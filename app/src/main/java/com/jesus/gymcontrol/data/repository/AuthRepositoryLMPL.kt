@@ -28,7 +28,13 @@ class AuthRepositoryImpl(
                 "name" to name,
                 "email" to email,
                 "rol" to "",
-                "codigo" to ""
+                "codigo" to "",
+                "gym" to "",
+                "cedula" to "",
+                "edad" to "",
+                "numero" to "",
+                "sexo" to "",
+
             )
             firestore.collection("users").document(uid).set(userData).await()
 
@@ -38,7 +44,6 @@ class AuthRepositoryImpl(
         }
     }
 
-
     override suspend fun loginUser(email: String, password: String): Result<Unit> {
         return try {
             firebaseAuth.signInWithEmailAndPassword(email, password).await()
@@ -47,25 +52,6 @@ class AuthRepositoryImpl(
             Result.failure(e)
         }
     }
-
-
-    override suspend fun updateRolAndCode(
-        uid: String,
-        rol: String,
-        codigo: String
-    ): Result<Unit> {
-        return try {
-            val updates = mapOf(
-                "rol" to rol,
-                "codigo" to codigo
-            )
-            firestore.collection("users").document(uid).update(updates).await()
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
 
     override suspend fun recoverPassword(email: String): Result<Unit> {
         return try {
@@ -77,6 +63,45 @@ class AuthRepositoryImpl(
 
     }
 
+    override suspend fun updateRolAndCode(
+        uid: String,
+        rol: String,
+        codigo: String
+    ): Result<Unit> {
+       return try {
+           val updates = mapOf(
+               "rol" to rol,
+               "codigo" to codigo,
+           )
+           firestore.collection("users").document(uid).update(updates).await()
+           Result.success(Unit)
+       } catch (e: Exception) {
+           Result.failure(e)
+       }
+    }
+
+
+
+    override suspend fun updateDatesUser(
+        uid: String,
+        cedula: String,
+        edad: String,
+        numero: String,
+        sexo: String
+    ): Result<Unit> {
+        return try {
+            val updates = mapOf(
+                "cedula" to cedula,
+                "edad" to edad,
+                "numero" to numero,
+                "sexo" to sexo,
+            )
+            firestore.collection("users").document(uid).update(updates).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
 
 }

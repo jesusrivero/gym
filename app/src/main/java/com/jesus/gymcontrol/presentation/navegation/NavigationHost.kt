@@ -20,21 +20,21 @@ import com.jesus.gymcontrol.presentation.ui.people.ListPersonScreen
 import com.jesus.gymcontrol.presentation.ui.people.PeopleViewModel
 import com.jesus.gymcontrol.presentation.ui.people.RegPersonScreen
 import com.jesus.gymcontrol.presentation.ui.auth.register.RegisterScreen
-import com.jesus.gymcontrol.presentation.ui.settings.details.ContactScreen
-import com.jesus.gymcontrol.presentation.ui.settings.details.ListPaymentsScreen
-import com.jesus.gymcontrol.presentation.ui.settings.ManageScreen
-import com.jesus.gymcontrol.presentation.ui.settings.PreferencesScreen
-import com.jesus.gymcontrol.presentation.ui.settings.PaymentsScreen
-import com.jesus.gymcontrol.presentation.ui.settings.details.AccountScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.ContactScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.manage.ListPaymentsScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.manage.ManageScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.PreferencesScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.payments.PaymentsScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.AccountScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.ActivateCodeScreen
-import com.jesus.gymcontrol.presentation.ui.settings.details.ErrorReportScreen
-import com.jesus.gymcontrol.presentation.ui.settings.details.PersonsScreen
-import com.jesus.gymcontrol.presentation.ui.settings.details.MembershipScreen
-import com.jesus.gymcontrol.presentation.ui.settings.details.NotificationScreen
-import com.jesus.gymcontrol.presentation.ui.settings.details.SecurityScreen
-import com.jesus.gymcontrol.presentation.ui.settings.details.SelectedGymAdmin
-import com.jesus.gymcontrol.presentation.ui.settings.details.SelectedGymClient
-import com.jesus.gymcontrol.presentation.ui.settings.details.SelectedRolScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.ErrorReportScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.manage.PersonsScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.manage.MembershipScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.NotificationScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.SecurityScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.selected.SelectedGymAdmin
+import com.jesus.gymcontrol.presentation.ui.settings.details.selected.SelectedGymClient
+import com.jesus.gymcontrol.presentation.ui.settings.details.selected.SelectedRolScreen
 
 
 @RequiresApi(Build.VERSION_CODES.O)

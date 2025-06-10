@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
-import com.jesus.gymcontrol.presentation.ui.auth.AuthViewModel
+import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import kotlinx.coroutines.delay
 
 @Composable
@@ -19,9 +19,9 @@ fun StartScreen(
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     LaunchedEffect(Unit) {
-        delay(500)
+        delay(100)
         viewModel.loadSessionState()
-        delay(500)
+        delay(100)
 
         val isLoggedIn = viewModel.isLoggedInState
         val hasRole = viewModel.isRoleAssignedState

@@ -1,4 +1,4 @@
-package com.jesus.gymcontrol.presentation.ui.settings.details
+package com.jesus.gymcontrol.presentation.ui.settings.details.preferences
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -192,7 +192,7 @@ fun NotificationOptionItem(
         Text(
             text = title,
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface
+            color = colorScheme.onSurface
         )
 
         Spacer(modifier = Modifier.width(8.dp))
@@ -206,15 +206,15 @@ fun NotificationOptionItem(
                         imageVector = Icons.Filled.Check,
                         contentDescription = null,
                         modifier = Modifier.size(SwitchDefaults.IconSize),
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = colorScheme.primary
                     )
                 }
             } else null,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colorScheme.primary,
-                uncheckedThumbColor = MaterialTheme.colorScheme.outline,
-                checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.54f),
-                uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                checkedThumbColor = colorScheme.primary,
+                uncheckedThumbColor = colorScheme.outline,
+                checkedTrackColor = colorScheme.primary.copy(alpha = 0.54f),
+                uncheckedTrackColor = colorScheme.surfaceVariant
             )
         )
     }

@@ -1,4 +1,4 @@
-package com.jesus.gymcontrol.presentation.ui.settings.details
+package com.jesus.gymcontrol.presentation.ui.settings.details.manage
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -263,7 +264,7 @@ fun MembershipTextField(label: String, value: String, onValueChange: (String) ->
             label = { Text("Valor $label".lowercase()) },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
-                keyboardType = androidx.compose.ui.text.input.KeyboardType.Number,
+                keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Next
             )
         )

@@ -1,4 +1,4 @@
-package com.jesus.gymcontrol.presentation.ui.settings.details
+package com.jesus.gymcontrol.presentation.ui.settings.details.manage
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -229,7 +229,7 @@ fun ListPaymentsScreen(
                 if (filteredList.isEmpty()) {
                     Text(
                         text = if (searchText.isNotEmpty()) "No se encontraron resultados" else "No hay pagos registrados",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = colorScheme.onSurfaceVariant
                     )
                 } else {
                     LazyColumn(
@@ -256,7 +256,7 @@ fun ListPaymentsScreen(
                                             Text(
                                                 text = user.email,
                                                 style = MaterialTheme.typography.bodyMedium,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                color = colorScheme.onSurfaceVariant
                                             )
                                             Spacer(modifier = Modifier.height(8.dp))
                                             Row(
@@ -289,7 +289,7 @@ fun ListPaymentsScreen(
                                             Icon(
                                                 Icons.Default.Delete,
                                                 contentDescription = "Eliminar",
-                                                tint = MaterialTheme.colorScheme.error
+                                                tint = colorScheme.error
                                             )
                                         }
                                     }
@@ -328,7 +328,7 @@ fun PaymentFilters(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surface,
+            color = colorScheme.surface,
             shadowElevation = 4.dp
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
@@ -336,7 +336,7 @@ fun PaymentFilters(
                 Text(
                     text = "Tipo de pago",
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 ExposedDropdownMenuBox(
@@ -373,7 +373,7 @@ fun PaymentFilters(
                 Text(
                     text = "Rango de fechas",
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 Row(
@@ -386,21 +386,21 @@ fun PaymentFilters(
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            contentColor = MaterialTheme.colorScheme.onSurface
+                            containerColor = colorScheme.surface,
+                            contentColor = colorScheme.onSurface
                         )
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 text = "Desde",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = colorScheme.onSurfaceVariant
                             )
                             Text(
                                 text = startDate?.format(dateFormatter) ?: "Seleccionar",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = if (startDate != null) MaterialTheme.colorScheme.onSurface
-                                else MaterialTheme.colorScheme.onSurfaceVariant
+                                color = if (startDate != null) colorScheme.onSurface
+                                else colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -411,21 +411,21 @@ fun PaymentFilters(
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            contentColor = MaterialTheme.colorScheme.onSurface
+                            containerColor = colorScheme.surface,
+                            contentColor = colorScheme.onSurface
                         )
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 text = "Hasta",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = colorScheme.onSurfaceVariant
                             )
                             Text(
                                 text = endDate?.format(dateFormatter) ?: "Seleccionar",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = if (endDate != null) MaterialTheme.colorScheme.onSurface
-                                else MaterialTheme.colorScheme.onSurfaceVariant
+                                color = if (endDate != null) colorScheme.onSurface
+                                else colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -438,10 +438,10 @@ fun PaymentFilters(
                         onClick = onClearFilters,
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.primary
+                            contentColor = colorScheme.primary
                         ),
                         border = BorderStroke(
-                            1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                            1.dp, colorScheme.primary.copy(alpha = 0.5f)
                         )
                     ) {
                         Icon(
@@ -468,17 +468,17 @@ fun PaymentFilters(
                 Icon(
                     Icons.Default.Search,
                     contentDescription = "Buscar",
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = colorScheme.primary
                 )
             },
             shape = RoundedCornerShape(16.dp),
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                focusedContainerColor = colorScheme.surface,
+                unfocusedContainerColor = colorScheme.surface,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
-                focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                unfocusedTextColor = MaterialTheme.colorScheme.onSurface
+                focusedTextColor = colorScheme.onSurface,
+                unfocusedTextColor = colorScheme.onSurface
             ),
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
@@ -493,8 +493,8 @@ fun PaymentFilters(
 private fun PaymentInfoBadge(label: String, value: String) {
     Surface(
         shape = RoundedCornerShape(8.dp),
-        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-        contentColor = MaterialTheme.colorScheme.primary
+        color = colorScheme.primary.copy(alpha = 0.1f),
+        contentColor = colorScheme.primary
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),

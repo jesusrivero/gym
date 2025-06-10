@@ -45,7 +45,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
-import com.jesus.gymcontrol.presentation.ui.auth.AuthViewModel
+import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
+import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,7 +65,8 @@ fun ActivateCodeScreen(
 @Composable
 fun ActivateCodeContent(
     navController: NavController,
-    viewModel: AuthViewModel
+    viewModel: AuthViewModel,
+
 ) {
     val colorScheme = MaterialTheme.colorScheme
     var code by remember { mutableStateOf("") }
@@ -133,8 +135,6 @@ fun ActivateCodeContent(
 
             Button(
                 onClick = {
-//                    if (code.isNotBlank()) {
-//                        viewModel.assignRoleAndCode("Dueño", code)
                         showFields = true
 
                 },
@@ -213,7 +213,7 @@ fun ActivateCodeContent(
                 Button(
                     onClick = {
                         if (code.isNotBlank()) {
-                            viewModel.assignRoleAndCode("Dueño", code)}
+                            viewModel.newDatesUserLogin("Dueño", code)}
                         navController.navigate(AppRoutes.MainScreen)
                     },
                     modifier = Modifier.fillMaxWidth(),

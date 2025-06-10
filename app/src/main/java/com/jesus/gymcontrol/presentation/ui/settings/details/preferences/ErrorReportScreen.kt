@@ -1,4 +1,4 @@
-package com.jesus.gymcontrol.presentation.ui.settings.details
+package com.jesus.gymcontrol.presentation.ui.settings.details.preferences
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -88,7 +88,7 @@ fun ErrorReportContent(
 					}
 				},
 				colors = TopAppBarDefaults.topAppBarColors(
-					containerColor = MaterialTheme.colorScheme.primary
+					containerColor = colorScheme.primary
 				)
 			)
 		}

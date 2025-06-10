@@ -1,4 +1,4 @@
-package com.jesus.gymcontrol.presentation.ui.auth
+package com.jesus.gymcontrol.domain.viewmodels
 
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -12,6 +12,7 @@ import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.usecase.usuario.LoginUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.RecoverPasswordUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.RegisterUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.UpdateDatesUserUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateRolUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -24,7 +25,8 @@ class AuthViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val recoverUseCase: RecoverPasswordUseCase,
     private val updateRolUseCase: UpdateRolUseCase,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+//    private val updateDatesUserUseCase: UpdateDatesUserUseCase,
 ) : ViewModel() {
 
     var name by mutableStateOf("")
@@ -39,6 +41,8 @@ class AuthViewModel @Inject constructor(
     var isRoleAssignedState by mutableStateOf(false)
 
     var rol by mutableStateOf("Dueño")
+    var rol2 by mutableStateOf("Administrador")
+    var rol3 by mutableStateOf("Cliente")
     var codigo by mutableStateOf("")
 
 
@@ -143,7 +147,7 @@ class AuthViewModel @Inject constructor(
         errorMessage = null
     }
 
-    fun assignRoleAndCode(rol: String, codigo: String) {
+    fun newDatesUserLogin(rol: String, codigo: String) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
         if (codigo.isBlank()) {
@@ -161,13 +165,40 @@ class AuthViewModel @Inject constructor(
             result.onSuccess {
                 isSuccess = true
 
-                sessionManager.saveRoleState(true)    // Guardar rol asignado y actualizar estado observable
+                sessionManager.saveRoleState(true)
 
             }.onFailure {
                 errorMessage = it.message
             }
         }
     }
+
+  //ESTA FUNCION VA A ACTUALIZAR LOS DATOS FALTANTES DEL USUARIO
+//    fun updateDatesUser(
+//        cedula: String,
+//        edad: String,
+//        numero: String,
+//        sexo: String
+//    ) {
+//        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+//
+//        viewModelScope.launch {
+//            isLoading = true
+//            errorMessage = null
+//            isSuccess = false
+//
+//            val result: Result<Unit> = updateDatesUserUseCase(uid, cedula, edad, numero, sexo)
+//
+//            isLoading = false
+//            result.onSuccess {
+//                isSuccess = true
+//            }.onFailure {
+//                errorMessage = it.message
+//            }
+//        }
+//    }
+
+
 
     fun logout() {
         viewModelScope.launch {

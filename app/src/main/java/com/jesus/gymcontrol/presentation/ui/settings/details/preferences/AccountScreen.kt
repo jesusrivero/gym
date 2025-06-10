@@ -1,4 +1,4 @@
-package com.jesus.gymcontrol.presentation.ui.settings.details
+package com.jesus.gymcontrol.presentation.ui.settings.details.preferences
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,6 +21,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -84,7 +85,7 @@ fun AccountContent(
 					}
 				},
 				colors = TopAppBarDefaults.topAppBarColors(
-					containerColor = Color(0xBAA7D3DC)
+					containerColor = colorScheme.primary
 				)
 			)
 		}
@@ -155,7 +156,7 @@ fun AccountContent(
 						onClick = { isEditing = true },
 						modifier = Modifier.fillMaxWidth(),
 						colors = ButtonDefaults.buttonColors(
-							containerColor = Color(0xCD4CAF50)
+							containerColor = colorScheme.primary
 						)
 					) {
 						Text("Editar Datos")
@@ -169,7 +170,7 @@ fun AccountContent(
 							onClick = { isEditing = false },
 							modifier = Modifier.weight(1f),
 							colors = ButtonDefaults.buttonColors(
-								containerColor = Color(0xCD4CAF50)
+								containerColor =colorScheme.primary
 							)
 						) {
 							Text("Guardar Cambios")
@@ -184,10 +185,10 @@ fun AccountContent(
 							},
 							modifier = Modifier.weight(1f),
 							colors = ButtonDefaults.buttonColors(
-								containerColor = Color(0xCD4CAF50)
+								containerColor = colorScheme.primary
 							)
 						) {
-							Text("Cancelar")
+							Text("Cancelar" )
 						}
 					}
 				}

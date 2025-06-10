@@ -1,4 +1,4 @@
-package com.jesus.gymcontrol.presentation.ui.settings.details
+package com.jesus.gymcontrol.presentation.ui.settings.details.selected
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -38,7 +38,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
-import com.jesus.gymcontrol.presentation.ui.auth.AuthViewModel
+import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -125,7 +125,7 @@ fun SelectedRolScreenContent(
                     MenuCardRol(
                         title = "Administrador de Gimnasio",
                         onClick = {
-                            viewModel.rol = "Administrador"
+                            viewModel.rol2 = "Administrador"
                             navController.navigate(AppRoutes.SelectedGymAdmin)
                         }
                     )
@@ -134,7 +134,7 @@ fun SelectedRolScreenContent(
                     MenuCardRol(
                         title = "Cliente",
                         onClick = {
-                            viewModel.rol = "Cliente"
+                            viewModel.rol3 = "Cliente"
                             navController.navigate(AppRoutes.SelectedGymClient)
                         }
                     )
@@ -210,10 +210,3 @@ fun MenuCardRol(
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun SelectedRolScreenContentPreview() {
-//    GymTheme {
-//        SelectedRolScreenContent(navController = rememberNavController())
-//    }
-//}

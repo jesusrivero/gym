@@ -23,5 +23,13 @@ interface AuthRepository {
         rol: String,
         codigo: String
     ):  Result<Unit>
+
+    suspend fun updateDatesUser(
+        uid: String,
+        cedula: String,
+        edad: String,
+        numero: String,
+        sexo: String,
+    ):  Result<Unit>
 }
 

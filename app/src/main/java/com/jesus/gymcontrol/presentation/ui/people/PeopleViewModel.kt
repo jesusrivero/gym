@@ -80,8 +80,8 @@ class PeopleViewModel @Inject constructor(
 	fun deleteUser(user: Person) = viewModelScope.launch {
 		state = state.copy(isLoading = true, error = null)
 		try {
-			deleteUserUseCase(user) // Pasamos el usuario a eliminar
-			// Actualizamos la lista completa después de la eliminación
+			deleteUserUseCase(user)
+
 			getUsers()
 			
 			

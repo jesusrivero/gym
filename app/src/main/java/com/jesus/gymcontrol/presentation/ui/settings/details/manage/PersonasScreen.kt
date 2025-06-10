@@ -1,4 +1,4 @@
-package com.jesus.gymcontrol.presentation.ui.settings.details
+package com.jesus.gymcontrol.presentation.ui.settings.details.manage
 
 
 import android.os.Build
@@ -226,7 +226,7 @@ fun PersonsScreen(
             if (filteredList.isEmpty()) {
                 Text(
                     text = if (searchText.isNotEmpty()) "No se encontraron resultados" else "No hay personas registradas",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = colorScheme.onSurfaceVariant
                 )
             } else {
                 LazyColumn(
@@ -240,7 +240,7 @@ fun PersonsScreen(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp),
                             elevation = CardDefaults.cardElevation(2.dp),
-                            colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
+                            colors = CardDefaults.cardColors(colorScheme.surface)
                         ) {
                             Row(
                                 modifier = Modifier

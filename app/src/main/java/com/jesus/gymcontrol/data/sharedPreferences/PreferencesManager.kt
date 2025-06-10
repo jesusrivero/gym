@@ -10,15 +10,6 @@ import com.jesus.gymcontrol.extensions.getJson
 class PreferencesManager(context: Context) {
 	companion object {
 		const val PRICES_MEMBERSHIP = "PricesMembership"
-		// Precios de membresías
-//		const val KEY_WEEKLY_VALUE = "weeklyValue"
-//		const val KEY_BIWEEKLY_VALUE = "biweeklyValue"
-//		const val KEY_MONTHLY_VALUE = "monthlyValue"
-//		const val KEY_QUARTERLY_VALUE = "quarterlyValue"
-//		const val KEY_BINNUAL_VALUE = "binnualValue"
-//		const val KEY_ANNUAL_VALUE = "annualValue"
-
-
 		private const val NOTIFICATION_PREFS = "NotificationPrefs"
 		const val KEY_NEW_CLIENT = "new_client"
 		const val KEY_PAYMENT_REGISTERED = "payment_registered"
@@ -34,16 +25,6 @@ class PreferencesManager(context: Context) {
 
 	val editor = sharedPreferences.edit()
 	private val notificationEditor = notificationPrefs.edit()
-
-//	// Métodos para precios de membresías
-//	fun saveData(Key: String, value: Int) {
-//		editor.putInt(Key, value)
-//		editor.apply()
-//	}
-//
-//	fun getData(Key: String): Int {
-//		return sharedPreferences.getInt(Key, 0)
-//	}
 
 	fun savePrices(value: PricesMembership) {
 		editor.putString(PRICES_MEMBERSHIP, value.getJson()).apply()

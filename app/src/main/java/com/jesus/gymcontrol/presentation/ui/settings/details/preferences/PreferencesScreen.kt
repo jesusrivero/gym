@@ -1,4 +1,4 @@
-package com.jesus.gymcontrol.presentation.ui.settings
+package com.jesus.gymcontrol.presentation.ui.settings.details.preferences
 
 
 import androidx.compose.foundation.layout.Arrangement
@@ -43,7 +43,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
-import com.jesus.gymcontrol.presentation.ui.auth.AuthViewModel
+import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import com.jesus.gymcontrol.presentation.ui.commons.BottomNavigationBar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,13 +93,13 @@ fun PreferencesContent(
             SettingsItem(
                 text = "Cuenta y Datos",
                 icon = Icons.Default.AccountCircle,
-                onClick = { navController.navigate(AppRoutes.LoginScreen) }
+                onClick = { navController.navigate(AppRoutes.AccountScreen) }
             )
 
             SettingsItem(
                 text = "Notificaciones",
                 icon = Icons.Default.Notifications,
-                onClick = { navController.navigate(AppRoutes.SelectedRolScreen) }
+                onClick = { navController.navigate(AppRoutes.NotificationScreen) }
             )
 
             SettingsItem(

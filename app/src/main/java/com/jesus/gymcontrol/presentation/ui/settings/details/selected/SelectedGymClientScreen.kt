@@ -1,4 +1,4 @@
-package com.jesus.gymcontrol.presentation.ui.settings.details
+package com.jesus.gymcontrol.presentation.ui.settings.details.selected
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,23 +21,23 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectedGymAdmin(
+fun SelectedGymClient(
     navController: NavController,
 ) {
     GymTheme {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            SelectedGymAdminContent(navController = navController)
+            SelectedGymClientContent(navController = navController)
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectedGymAdminContent(navController: NavController) {
+fun SelectedGymClientContent(navController: NavController) {
 
 
     Scaffold(
@@ -53,7 +53,7 @@ fun SelectedGymAdminContent(navController: NavController) {
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
-                            painter = painterResource(id = com.jesus.gymcontrol.R.drawable.ic_back),
+                            painter = painterResource(id = R.drawable.ic_back),
                             contentDescription = "Regresar",
                             tint = colorScheme.onPrimary
                         )
@@ -74,7 +74,17 @@ fun SelectedGymAdminContent(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-
+//            Button(
+//                onClick = { navController.navigate(AppRoutes.MainScreen) },
+//                colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+//            )
+//            {
+//                Text(
+//                    text = "GymPrincipal",
+//                    modifier = Modifier.fillMaxWidth(),
+//
+//                    )
+//            }
 
 
         }

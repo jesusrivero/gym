@@ -11,9 +11,12 @@ import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.data.repository.UsuarioRepositoryIMPL
 import com.jesus.gymcontrol.data.sharedPreferences.PreferencesManager
 import com.jesus.gymcontrol.domain.repository.AuthRepository
+import com.jesus.gymcontrol.domain.repository.GymRepository
 import com.jesus.gymcontrol.domain.repository.UsuarioRepository
+import com.jesus.gymcontrol.domain.usecase.usuario.CreateGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.LoginUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.RegisterUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.UpdateDatesUserUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateRolUseCase
 import com.jesus.gymcontrol.infraestructure.MyApp
 import dagger.Module
@@ -22,10 +25,20 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+
+
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
+
+
+
+    @Provides
+    @Singleton
+    fun provideCreateGymUseCase(
+        firestore: GymRepository
+    ): CreateGymUseCase = CreateGymUseCase(firestore)
 
 
     @Provides
@@ -38,7 +51,10 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAuthRepository(firebaseAuth: FirebaseAuth, firestore: FirebaseFirestore): AuthRepository {
+    fun provideAuthRepository(
+        firebaseAuth: FirebaseAuth,
+        firestore: FirebaseFirestore
+    ): AuthRepository {
         return AuthRepositoryImpl(firebaseAuth, firestore)
     }
 
@@ -81,6 +97,11 @@ object AppModule {
     @Provides
     fun provideUpdateUserRolUseCase(repository: AuthRepository): UpdateRolUseCase {
         return UpdateRolUseCase(repository)
+    }
+
+    @Provides
+    fun provideUpdateDatesUserUseCase(repository: AuthRepository): UpdateDatesUserUseCase {
+        return UpdateDatesUserUseCase(repository)
     }
 
     @Provides

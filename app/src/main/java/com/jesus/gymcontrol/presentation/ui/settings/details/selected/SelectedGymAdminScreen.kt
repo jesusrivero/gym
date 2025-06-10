@@ -1,4 +1,4 @@
-package com.jesus.gymcontrol.presentation.ui.settings.details
+package com.jesus.gymcontrol.presentation.ui.settings.details.selected
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,20 +24,21 @@ import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectedGymClient(
+fun SelectedGymAdmin(
     navController: NavController,
 ) {
     GymTheme {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            SelectedGymClientContent(navController = navController)
+            SelectedGymAdminContent(navController = navController)
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectedGymClientContent(navController: NavController) {
+fun SelectedGymAdminContent(navController: NavController) {
 
 
     Scaffold(
@@ -74,17 +75,7 @@ fun SelectedGymClientContent(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-//            Button(
-//                onClick = { navController.navigate(AppRoutes.MainScreen) },
-//                colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
-//            )
-//            {
-//                Text(
-//                    text = "GymPrincipal",
-//                    modifier = Modifier.fillMaxWidth(),
-//
-//                    )
-//            }
+
 
 
         }
