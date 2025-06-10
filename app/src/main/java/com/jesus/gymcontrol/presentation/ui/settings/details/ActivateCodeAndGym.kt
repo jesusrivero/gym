@@ -8,17 +8,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -52,11 +55,16 @@ import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
 @Composable
 fun ActivateCodeScreen(
     navController: NavController,
-    viewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
+    gymViewModel: GymViewModel = hiltViewModel()
 ) {
     GymTheme {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            ActivateCodeContent(navController = navController, viewModel = viewModel)
+            ActivateCodeContent(
+                navController = navController,
+                authViewModel = authViewModel,
+                gymViewModel = gymViewModel
+            )
         }
     }
 }
@@ -65,22 +73,31 @@ fun ActivateCodeScreen(
 @Composable
 fun ActivateCodeContent(
     navController: NavController,
-    viewModel: AuthViewModel,
-
+    authViewModel: AuthViewModel,
+    gymViewModel: GymViewModel
 ) {
     val colorScheme = MaterialTheme.colorScheme
     var code by remember { mutableStateOf("") }
     var showFields by remember { mutableStateOf(false) }
-    var gymName by remember { mutableStateOf("") }
-    var gymAddress by remember { mutableStateOf("") }
-    var gymPhone by remember { mutableStateOf("") }
 
     val context = LocalContext.current
-    val errorMessage = viewModel.errorMessage
+    val authError = authViewModel.errorMessage
+    val gymError = gymViewModel.errorMessage
+    val isLoading = gymViewModel.isLoading
+    val isSuccess = gymViewModel.isSuccess
 
-    LaunchedEffect(errorMessage) {
-        errorMessage?.let {
-            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+
+    LaunchedEffect(authError, gymError) {
+        authError?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
+        gymError?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
+    }
+
+
+    LaunchedEffect(isSuccess) {
+        if (isSuccess) {
+            navController.navigate(AppRoutes.MainScreen) {
+                popUpTo(AppRoutes.StartScreen) { inclusive = true }
+            }
         }
     }
 
@@ -123,10 +140,7 @@ fun ActivateCodeContent(
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("Código de activación") },
                 leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Lock,
-                        contentDescription = null
-                    )
+                    Icon(imageVector = Icons.Default.Lock, contentDescription = null)
                 },
                 singleLine = true
             )
@@ -134,18 +148,11 @@ fun ActivateCodeContent(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = {
-                        showFields = true
-
-                },
+                onClick = { showFields = true },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
             ) {
-                Icon(
-                    imageVector = Icons.Default.VpnKey,
-                    contentDescription = null,
-                    tint = Color.White
-                )
+                Icon(imageVector = Icons.Default.VpnKey, contentDescription = null, tint = Color.White)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Activar", color = Color.White)
             }
@@ -162,8 +169,8 @@ fun ActivateCodeContent(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 OutlinedTextField(
-                    value = gymName,
-                    onValueChange = { gymName = it },
+                    value = gymViewModel.name,
+                    onValueChange = { gymViewModel.name = it },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("Nombre del gimnasio") },
                     leadingIcon = {
@@ -178,15 +185,12 @@ fun ActivateCodeContent(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 OutlinedTextField(
-                    value = gymAddress,
-                    onValueChange = { gymAddress = it },
+                    value = gymViewModel.direction,
+                    onValueChange = { gymViewModel.direction = it },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("Dirección") },
                     leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Build,
-                            contentDescription = null
-                        )
+                        Icon(imageVector = Icons.Default.LocationOn, contentDescription = null)
                     },
                     singleLine = true
                 )
@@ -194,15 +198,12 @@ fun ActivateCodeContent(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 OutlinedTextField(
-                    value = gymPhone,
-                    onValueChange = { gymPhone = it },
+                    value = gymViewModel.phone,
+                    onValueChange = { gymViewModel.phone = it },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("Teléfono") },
                     leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Build,
-                            contentDescription = null
-                        )
+                        Icon(imageVector = Icons.Default.Phone, contentDescription = null)
                     },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Phone)
@@ -213,13 +214,26 @@ fun ActivateCodeContent(
                 Button(
                     onClick = {
                         if (code.isNotBlank()) {
-                            viewModel.newDatesUserLogin("Dueño", code)}
-                        navController.navigate(AppRoutes.MainScreen)
+                            authViewModel.newDatesUserLogin("Dueño", code)
+                            gymViewModel.code = code
+                            gymViewModel.createGym()
+                        } else {
+                            Toast.makeText(context, "Código requerido", Toast.LENGTH_SHORT).show()
+                        }
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
+                    enabled = !isLoading
                 ) {
-                    Text("Guardar Gimnasio")
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    Text("Guardar Gimnasio", color = Color.White)
                 }
             }
         }

@@ -7,6 +7,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.jesus.gymcontrol.data.db.AppDatabase
 import com.jesus.gymcontrol.data.db.dao.UsuariosDatabaseDao
 import com.jesus.gymcontrol.data.repository.AuthRepositoryImpl
+import com.jesus.gymcontrol.data.repository.GymRepositoryImpl
 import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.data.repository.UsuarioRepositoryIMPL
 import com.jesus.gymcontrol.data.sharedPreferences.PreferencesManager
@@ -14,6 +15,7 @@ import com.jesus.gymcontrol.domain.repository.AuthRepository
 import com.jesus.gymcontrol.domain.repository.GymRepository
 import com.jesus.gymcontrol.domain.repository.UsuarioRepository
 import com.jesus.gymcontrol.domain.usecase.usuario.CreateGymUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.GetAllGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.LoginUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.RegisterUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateDatesUserUseCase
@@ -32,13 +34,12 @@ import javax.inject.Singleton
 object AppModule {
 
 
-
-
     @Provides
     @Singleton
-    fun provideCreateGymUseCase(
-        firestore: GymRepository
-    ): CreateGymUseCase = CreateGymUseCase(firestore)
+    fun provideCreateGymUseCase(repository: GymRepository
+    ): CreateGymUseCase {
+        return CreateGymUseCase(repository)
+    }
 
 
     @Provides
@@ -56,6 +57,14 @@ object AppModule {
         firestore: FirebaseFirestore
     ): AuthRepository {
         return AuthRepositoryImpl(firebaseAuth, firestore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGymRepository(
+        firestore: FirebaseFirestore
+    ): GymRepository {
+        return GymRepositoryImpl(firestore)
     }
 
     @Provides
@@ -108,5 +117,11 @@ object AppModule {
     @Singleton
     fun provideSessionManager(@ApplicationContext context: Context): SessionManager {
         return SessionManager(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetAllGymsUseCase(repository: GymRepository): GetAllGymUseCase{
+        return GetAllGymUseCase(repository)
     }
 }

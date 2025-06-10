@@ -1,21 +1,28 @@
 package com.jesus.gymcontrol.domain.viewmodels
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.jesus.gymcontrol.domain.model.Gym
 import com.jesus.gymcontrol.domain.usecase.usuario.CreateGymUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.GetAllGymUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class GymViewModel @Inject constructor(
-    private val createGymUseCase: CreateGymUseCase
+    private val createGymUseCase: CreateGymUseCase,
+    private val getAllGymUseCase: GetAllGymUseCase,
+    private val firebaseAuth: FirebaseAuth
 ) : ViewModel() {
 
+    var gyms by mutableStateOf<List<Gym>> (emptyList())
+    var searchQuery by mutableStateOf("")
     var name by mutableStateOf("")
     var admin by mutableStateOf("")
     var coach by mutableStateOf("")
@@ -28,14 +35,14 @@ class GymViewModel @Inject constructor(
     var errorMessage by mutableStateOf<String?>(null)
 
     fun createGym() {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val uid = firebaseAuth.currentUser?.uid ?: return
 
-        val name = name.trim()
-        val admin = admin.trim()
-        val coach = coach.trim()
-        val direction = direction.trim()
-        val phone = phone.trim()
-        val code = code.trim()
+        val Name = name.trim()
+        val Admin = admin.trim()
+        val Coach = coach.trim()
+        val Direction = direction.trim()
+        val Phone = phone.trim()
+        val Code = code.trim()
 
         viewModelScope.launch {
             isLoading = true
@@ -44,12 +51,12 @@ class GymViewModel @Inject constructor(
 
             val result = createGymUseCase(
                 uid = uid,
-                code = code,
-                name = name,
-                admin = admin,
-                coach = coach,
-                direction = direction,
-                phone = phone
+                code = Code,
+                name = Name,
+                admin = Admin,
+                coach = Coach,
+                direction = Direction,
+                phone = Phone
             )
 
             isLoading = false
@@ -60,4 +67,33 @@ class GymViewModel @Inject constructor(
             }
         }
     }
+
+    fun fetchAllGyms() {
+        viewModelScope.launch {
+            isLoading = true
+            errorMessage = null
+
+            Log.d("GymViewModel", "Iniciando fetchAllGyms...")
+
+            val result = getAllGymUseCase()
+            result.onSuccess {
+                gyms = it
+                Log.d("GymViewModel", "Gimnasios obtenidos: ${it.size}")
+                it.forEach { gym ->
+                    Log.d("GymViewModel", "Gym: ${gym.nombre}, código: ${gym.codigo}")
+                }
+            }.onFailure {
+                errorMessage = it.message
+                Log.e("GymViewModel", "Error al obtener gimnasios: ${it.message}", it)
+            }
+
+            isLoading = false
+            Log.d("GymViewModel", "Finalizó fetchAllGyms. isLoading = $isLoading")
+        }
+    }
+
+    fun filteredGyms(): List<Gym> {
+        return gyms.filter { it.nombre.contains(searchQuery, ignoreCase = true) }
+    }
+
 }
