@@ -9,7 +9,7 @@ import com.google.firebase.auth.FirebaseAuth
 class SessionManager @Inject constructor(@ApplicationContext private val context: Context) {
 
     private val sharedPreferences: SharedPreferences =
-        context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        context.getSharedPreferences("gym_prefs", Context.MODE_PRIVATE)
 
     private fun getSessionKey(key: String): String {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return key
@@ -21,28 +21,53 @@ class SessionManager @Inject constructor(@ApplicationContext private val context
         sharedPreferences.edit { putBoolean(key, isLoggedIn) }
     }
 
+    fun isLoggedIn(): Boolean {
+        val key = getSessionKey("is_logged_in")
+        return sharedPreferences.getBoolean(key, false)
+    }
+
     fun saveRoleState(roleAssigned: Boolean) {
-        val key = getSessionKey("is_role_Assigned")
+        val key = getSessionKey("is_role_assigned")
         sharedPreferences.edit { putBoolean(key, roleAssigned) }
     }
 
-
+    fun isRoleAssigned(): Boolean {
+        val key = getSessionKey("is_role_assigned")
+        return sharedPreferences.getBoolean(key, false)
+    }
 
     fun clearSession() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         sharedPreferences.edit {
             remove("${uid}_is_logged_in")
-            remove("${uid}_is_role_Assigned")
+            remove("${uid}_is_role_assigned")
+            remove("${uid}_role")
+            remove("${uid}_gym_code")
         }
     }
 
-    fun isLoggedIn(): Boolean {
-        val key = getSessionKey("is_logged_in")
-        return sharedPreferences.getBoolean(key, false  )
+    fun setUserSessionData(uid: String, rol: String, gymCode: String) {
+        sharedPreferences.edit()
+            .putString("${uid}_role", rol)
+            .putString("${uid}_gym_code", gymCode)
+            .putBoolean("${uid}_is_role_assigned", true)
+            .apply()
     }
 
-    fun isRoleAssigned(): Boolean {
-        val key = getSessionKey("is_role_Assigned")
-        return sharedPreferences.getBoolean(key, false  )
+    fun getUserRole(uid: String): String? =
+        sharedPreferences.getString("${uid}_role", null)
+
+    fun getUserGymCode(uid: String): String? =
+        sharedPreferences.getString("${uid}_gym_code", null)
+
+    fun isRoleAssigned(uid: String): Boolean =
+        sharedPreferences.getBoolean("${uid}_is_role_assigned", false)
+
+    fun clearUserSession(uid: String) {
+        sharedPreferences.edit()
+            .remove("${uid}_role")
+            .remove("${uid}_gym_code")
+            .remove("${uid}_is_role_assigned")
+            .apply()
     }
 }

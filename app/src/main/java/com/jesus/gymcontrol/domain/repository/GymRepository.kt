@@ -13,4 +13,12 @@ interface GymRepository {
 
     suspend fun getAllGyms():
             Result<List<Gym>>
+
+    suspend fun validateGymCode(code:String):
+        Result<Boolean>
+
+    suspend fun markCodeAsUsed(
+        code: String):
+            Result<Unit>
+
 }

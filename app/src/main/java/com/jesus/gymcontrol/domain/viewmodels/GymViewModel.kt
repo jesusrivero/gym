@@ -10,6 +10,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.jesus.gymcontrol.domain.model.Gym
 import com.jesus.gymcontrol.domain.usecase.usuario.CreateGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetAllGymUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.MarkCodeAsUseUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.ValidateCodeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -18,10 +20,12 @@ import javax.inject.Inject
 class GymViewModel @Inject constructor(
     private val createGymUseCase: CreateGymUseCase,
     private val getAllGymUseCase: GetAllGymUseCase,
-    private val firebaseAuth: FirebaseAuth
+    private val firebaseAuth: FirebaseAuth,
+    private val validateGymCodeUseCase: ValidateCodeUseCase,
+    private val markCodeAsUseUseCase: MarkCodeAsUseUseCase
 ) : ViewModel() {
 
-    var gyms by mutableStateOf<List<Gym>> (emptyList())
+    var gyms by mutableStateOf<List<Gym>>(emptyList())
     var searchQuery by mutableStateOf("")
     var name by mutableStateOf("")
     var direction by mutableStateOf("")
@@ -31,6 +35,10 @@ class GymViewModel @Inject constructor(
     var isLoading by mutableStateOf(false)
     var isSuccess by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
+
+    var isCodeValid by mutableStateOf<Boolean?>(null)
+    var codeValidationError by mutableStateOf<String?>(null)
+
 
     fun createGym() {
         val uid = firebaseAuth.currentUser?.uid ?: return
@@ -89,5 +97,35 @@ class GymViewModel @Inject constructor(
     fun filteredGyms(): List<Gym> {
         return gyms.filter { it.name.contains(searchQuery, ignoreCase = true) }
     }
+
+    fun validateGymCode(code: String) {
+        viewModelScope.launch {
+            isCodeValid = null
+            codeValidationError = null
+
+            val result = validateGymCodeUseCase(code.trim())
+            result.onSuccess {
+                isCodeValid = it
+                if (!it)
+                    codeValidationError = "Codigo invalido o ya usado"
+            }.onFailure {
+                codeValidationError = "Error al validar el codigo: $ {it.message}"
+            }
+        }
+    }
+
+
+    fun markCodeAsUsed(code: String) {
+        viewModelScope.launch {
+            val result = markCodeAsUseUseCase(code)
+            result.onSuccess {
+                Log.d("GymViewModel", "Código marcado como usado exitosamente")
+            }.onFailure {
+                errorMessage = "Error al marcar el código como usado: ${it.message}"
+                Log.e("GymViewModel", errorMessage ?: "Error desconocido")
+            }
+        }
+    }
+
 
 }

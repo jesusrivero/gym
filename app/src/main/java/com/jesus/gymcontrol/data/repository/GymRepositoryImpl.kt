@@ -60,6 +60,42 @@ class GymRepositoryImpl @Inject constructor(
 
 
     }
+
+    override suspend fun validateGymCode(code: String): Result<Boolean> {
+        return try {
+            val querySnapshot = firestore.collection("codigos")
+                .whereEqualTo("codigo", code)
+                .limit(1)
+                .get()
+                .await()
+
+            val doc = querySnapshot.documents.firstOrNull()
+            val isValid = doc != null && !(doc.getBoolean("usado") ?: false)
+            Result.success(isValid)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun markCodeAsUsed(code: String): Result<Unit> {
+        return try {
+            val querySnapshot = firestore.collection("codigos")
+                .whereEqualTo("codigo", code)
+                .limit(1)
+                .get()
+                .await()
+
+            val docRef = querySnapshot.documents.firstOrNull()?.reference
+            if (docRef != null) {
+                docRef.update("usado", true).await()
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Código no encontrado"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
 
 

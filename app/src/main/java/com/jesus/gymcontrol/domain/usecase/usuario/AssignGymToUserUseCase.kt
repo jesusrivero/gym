@@ -8,7 +8,7 @@ import javax.inject.Inject
 class AssignGymToUserUseCase @Inject constructor(
     private val repository: UserRepository
 ) {
-    suspend operator fun invoke(uid: String, gym: Gym): Result<Unit> {
-        return repository.assignGymToUser(uid, gym)
+    suspend operator fun invoke(uid: String, gym: Gym, rol: String): Result<Unit> {
+        return repository.assignGymToUser(uid, gym, rol)
     }
 }

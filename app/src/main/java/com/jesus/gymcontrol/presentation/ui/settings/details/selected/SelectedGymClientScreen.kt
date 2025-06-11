@@ -1,6 +1,5 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details.selected
 
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -43,13 +42,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.google.firebase.auth.FirebaseAuth
 import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.domain.model.Gym
 import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
 import com.jesus.gymcontrol.domain.viewmodels.UserViewModel
-import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 
 
@@ -175,37 +172,12 @@ fun SelectedGymClient(
 
                     Button(
                         onClick = {
-                            val gym = selectedGym!!
-                            if (codeInput.trim() == gym.code) {
-                                val currentUser = FirebaseAuth.getInstance().currentUser
-                                currentUser?.let { user ->
-                                    authViewModel.newDatesUserLogin("Cliente", gym.code)
-                                    userViewModel.assignGymToUser(
-                                        uid = user.uid,
-                                        gym = gym,
-                                        onSuccess = {
-                                            Toast.makeText(
-                                                context,
-                                                "Gimnasio asignado correctamente",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                            navController.navigate(AppRoutes.MainScreen) {
-                                                popUpTo("SelectedGymClient") { inclusive = true }
-                                            }
-                                        },
-                                        onError = { error ->
-                                            Toast.makeText(
-                                                context,
-                                                "Error al asignar: $error",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
-                                    )
-                                }
-                            } else {
-                                Toast.makeText(context, "Código incorrecto", Toast.LENGTH_SHORT).show()
-                            }
-                        },
+                            userViewModel.onConfirmAssignGym(
+                                gym = selectedGym,
+                                codeInput = codeInput,
+                                navController = navController,
+                                context = context
+                            )},
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
                     ) {

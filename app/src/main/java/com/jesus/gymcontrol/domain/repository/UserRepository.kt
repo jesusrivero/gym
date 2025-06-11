@@ -5,6 +5,7 @@ import com.jesus.gymcontrol.domain.model.Gym
 interface UserRepository {
     suspend fun assignGymToUser(
         uid: String,
-        gym: Gym
+        gym: Gym,
+        rol: String
     ): Result<Unit>
 }

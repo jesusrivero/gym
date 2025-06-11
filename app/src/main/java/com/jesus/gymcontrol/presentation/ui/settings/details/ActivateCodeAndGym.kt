@@ -46,24 +46,30 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
+import com.jesus.gymcontrol.domain.model.Gym
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
+import com.jesus.gymcontrol.domain.viewmodels.UserViewModel
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActivateCodeScreen(
     navController: NavController,
     authViewModel: AuthViewModel = hiltViewModel(),
-    gymViewModel: GymViewModel = hiltViewModel()
+    gymViewModel: GymViewModel = hiltViewModel(),
+    userViewModel: UserViewModel = hiltViewModel()
 ) {
     GymTheme {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             ActivateCodeContent(
                 navController = navController,
                 authViewModel = authViewModel,
-                gymViewModel = gymViewModel
+                gymViewModel = gymViewModel,
+                userViewModel = userViewModel
             )
         }
     }
@@ -74,30 +80,55 @@ fun ActivateCodeScreen(
 fun ActivateCodeContent(
     navController: NavController,
     authViewModel: AuthViewModel,
-    gymViewModel: GymViewModel
+    gymViewModel: GymViewModel,
+    userViewModel: UserViewModel
 ) {
     val colorScheme = MaterialTheme.colorScheme
     var code by remember { mutableStateOf("") }
-    var showFields by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val authError = authViewModel.errorMessage
     val gymError = gymViewModel.errorMessage
-    val isLoading = gymViewModel.isLoading
-    val isSuccess = gymViewModel.isSuccess
+    val userError = userViewModel.errorMessage
+    val isLoading = gymViewModel.isLoading || userViewModel.isLoading
+    val isGymCreated = gymViewModel.isSuccess
+    val isCodeValid = gymViewModel.isCodeValid
+    val codeValidationError = gymViewModel.codeValidationError
+    val currentUser = FirebaseAuth.getInstance().currentUser
 
-
-    LaunchedEffect(authError, gymError) {
+    LaunchedEffect(authError, gymError, userError) {
         authError?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
         gymError?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
+        userError?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
     }
 
+    LaunchedEffect(isGymCreated) {
+        if (isGymCreated && currentUser != null) {
+            val gym = Gym(
+                ownerId = currentUser.uid,
+                ownername = authViewModel.name,
+                code = gymViewModel.code,
+                name = gymViewModel.name,
+                direction = gymViewModel.direction,
+                phone = gymViewModel.phone,
+                admin = "",
+                coach = ""
+            )
 
-    LaunchedEffect(isSuccess) {
-        if (isSuccess) {
-            navController.navigate(AppRoutes.MainScreen) {
-                popUpTo(AppRoutes.StartScreen) { inclusive = true }
-            }
+            userViewModel.assignGymToUser(
+                uid = currentUser.uid,
+                gym = gym,
+                rol = "Dueño",
+                onSuccess = {
+
+                    gymViewModel.markCodeAsUsed(code)
+
+                    navController.navigate(AppRoutes.MainScreen) {
+                        popUpTo(AppRoutes.StartScreen) { inclusive = true }
+                    }
+                },
+                onError = {}
+            )
         }
     }
 
@@ -148,18 +179,29 @@ fun ActivateCodeContent(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { showFields = true },
+                onClick = {
+                    if (code.isNotBlank()) {
+                        gymViewModel.validateGymCode(code)
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
             ) {
                 Icon(imageVector = Icons.Default.VpnKey, contentDescription = null, tint = Color.White)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Activar", color = Color.White)
+                Text("Validar código", color = Color.White)
             }
 
-            if (showFields) {
-                Spacer(modifier = Modifier.height(32.dp))
+            codeValidationError?.let {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(it, color = Color.Red, fontWeight = FontWeight.Bold)
+            }
 
+            if (isCodeValid == true) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("✅ Código válido", color = Color.Green, fontWeight = FontWeight.Bold)
+
+                Spacer(modifier = Modifier.height(32.dp))
                 Text(
                     "Datos del gimnasio",
                     style = MaterialTheme.typography.titleMedium,
@@ -213,13 +255,9 @@ fun ActivateCodeContent(
 
                 Button(
                     onClick = {
-                        if (code.isNotBlank()) {
-                            authViewModel.newDatesUserLogin("Dueño", code)
-                            gymViewModel.code = code
-                            gymViewModel.createGym()
-                        } else {
-                            Toast.makeText(context, "Código requerido", Toast.LENGTH_SHORT).show()
-                        }
+                        authViewModel.newDatesUserLogin("Dueño", code)
+                        gymViewModel.code = code
+                        gymViewModel.createGym()
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
