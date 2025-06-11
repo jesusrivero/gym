@@ -9,11 +9,14 @@ import com.jesus.gymcontrol.data.db.dao.UsuariosDatabaseDao
 import com.jesus.gymcontrol.data.repository.AuthRepositoryImpl
 import com.jesus.gymcontrol.data.repository.GymRepositoryImpl
 import com.jesus.gymcontrol.data.repository.SessionManager
+import com.jesus.gymcontrol.data.repository.UserRepositoryImpl
 import com.jesus.gymcontrol.data.repository.UsuarioRepositoryIMPL
 import com.jesus.gymcontrol.data.sharedPreferences.PreferencesManager
 import com.jesus.gymcontrol.domain.repository.AuthRepository
 import com.jesus.gymcontrol.domain.repository.GymRepository
+import com.jesus.gymcontrol.domain.repository.UserRepository
 import com.jesus.gymcontrol.domain.repository.UsuarioRepository
+import com.jesus.gymcontrol.domain.usecase.usuario.AssignGymToUserUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.CreateGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetAllGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.LoginUseCase
@@ -28,19 +31,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-
-
-    @Provides
-    @Singleton
-    fun provideCreateGymUseCase(repository: GymRepository
-    ): CreateGymUseCase {
-        return CreateGymUseCase(repository)
-    }
-
 
     @Provides
     @Singleton
@@ -65,6 +58,32 @@ object AppModule {
         firestore: FirebaseFirestore
     ): GymRepository {
         return GymRepositoryImpl(firestore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(
+        firestore: FirebaseFirestore
+    ): UserRepository {
+        return UserRepositoryImpl(firestore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCreateGymUseCase(repository: GymRepository): CreateGymUseCase {
+        return CreateGymUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetAllGymUseCase(repository: GymRepository): GetAllGymUseCase {
+        return GetAllGymUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAssignGymToUserUseCase(repository: UserRepository): AssignGymToUserUseCase {
+        return AssignGymToUserUseCase(repository)
     }
 
     @Provides
@@ -117,11 +136,5 @@ object AppModule {
     @Singleton
     fun provideSessionManager(@ApplicationContext context: Context): SessionManager {
         return SessionManager(context)
-    }
-
-    @Provides
-    @Singleton
-    fun provideGetAllGymsUseCase(repository: GymRepository): GetAllGymUseCase{
-        return GetAllGymUseCase(repository)
     }
 }

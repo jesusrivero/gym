@@ -29,7 +29,6 @@ class AuthRepositoryImpl(
                 "email" to email,
                 "rol" to "",
                 "codigo" to "",
-                "gym" to "",
                 "cedula" to "",
                 "edad" to "",
                 "numero" to "",

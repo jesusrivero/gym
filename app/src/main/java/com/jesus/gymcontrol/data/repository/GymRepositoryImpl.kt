@@ -25,49 +25,37 @@ class GymRepositoryImpl @Inject constructor(
             val gymData = mapOf(
                 "propietario" to uid,
                 "nombre" to nombre,
-                "admin" to admin,
                 "entrenador" to entrenador,
+                "admin" to admin,
                 "direccion" to direccion,
                 "telefono" to telefono,
                 "codigo" to codigo,
                 "fechaCreacion" to FieldValue.serverTimestamp()
             )
 
-            val userGymRef = firestore
-                .collection("users")
-                .document(uid)
-                .collection("gimnasio")
-                .document("gimnasio")
 
             val globalGymRef = firestore
                 .collection("gimnasios")
                 .document(codigo)
 
+// AQUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+//            val userGymRef = firestore
+//                .collection("users")
+//                .document(uid)
+//                .collection("gimnasios")
+//                .document(codigo)
+
             val batch = firestore.batch()
 
-            batch.set(userGymRef, gymData)
             batch.set(globalGymRef, gymData)
+//            batch.set(userGymRef, gymData)
 
-            // Subcolecciones iniciales con documentos de placeholder
-            val adminRef = globalGymRef.collection("administradores").document("_placeholder")
-            val entrenadorRef = globalGymRef.collection("entrenadores").document("_placeholder")
-            val clientesRef = globalGymRef.collection("clientes").document("_placeholder")
-
-            val placeholderData = mapOf("init" to true)
-
-            batch.set(adminRef, placeholderData)
-            batch.set(entrenadorRef, placeholderData)
-            batch.set(clientesRef, placeholderData)
 
             batch.commit().await()
-
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
-
-
-
     }
 
     override suspend fun getAllGyms(): Result<List<Gym>> {
@@ -86,6 +74,9 @@ class GymRepositoryImpl @Inject constructor(
 
     }
 }
+
+
+
 
 
 
