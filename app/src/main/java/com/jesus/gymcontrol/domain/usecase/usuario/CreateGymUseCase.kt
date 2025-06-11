@@ -8,11 +8,9 @@ class CreateGymUseCase(private val repository: GymRepository
         uid:String,
         code:String,
         name:String,
-        admin:String,
-        coach:String,
         direction:String,
         phone:String,
     ): Result<Unit> {
-        return repository.createGymForUser(uid, code, name, admin, coach, direction, phone)
+        return repository.createGymForUser(uid, code, name, direction, phone)
     }
 }

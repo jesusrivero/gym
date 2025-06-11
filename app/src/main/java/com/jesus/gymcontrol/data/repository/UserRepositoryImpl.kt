@@ -14,29 +14,33 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun assignGymToUser(uid: String, gym: Gym): Result<Unit> {
         return try {
             val userGymData = mapOf(
-                "codigo" to gym.codigo,
-                "nombre" to gym.nombre,
-                "direccion" to gym.direccion,
-                "telefono" to gym.telefono,
-                "estado" to "activo",
-                "fechaRegistro" to System.currentTimeMillis()
+                "code" to gym.code,
+                "name" to gym.name,
+                "direction" to gym.direction,
+                "phone" to gym.phone,
+                "state" to "activo",
+                "registrationDate" to System.currentTimeMillis()
             )
+
+            val userSnapshot = firestore.collection("users").document(uid).get().await()
+            val nameUser= userSnapshot.getString("name") ?: "Desconocido"
 
             val gymUserData = mapOf(
                 "uid" to uid,
+                "nname" to nameUser,
                 "rol" to "cliente",
-                "fechaIngreso" to FieldValue.serverTimestamp()
+                "registrationDate" to FieldValue.serverTimestamp()
             )
 
             val userGymRef = firestore
                 .collection("users")
                 .document(uid)
                 .collection("gimnasios")
-                .document(gym.codigo)
+                .document(gym.name)
 
             val gymUserRef = firestore
                 .collection("gimnasios")
-                .document(gym.codigo)
+                .document(gym.code)
                 .collection("usuarios")
                 .document(uid)
 
@@ -49,7 +53,7 @@ class UserRepositoryImpl @Inject constructor(
 
             batch.update(userRef, mapOf(
                 "rol" to "cliente",
-                "gimnasio" to gym.nombre
+                "gimnasio" to gym.name
             ))
 
             batch.commit().await()

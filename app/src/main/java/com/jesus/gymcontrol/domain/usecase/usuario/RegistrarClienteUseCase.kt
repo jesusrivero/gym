@@ -15,18 +15,18 @@ class RegistrarClienteUseCase @Inject constructor(
 		data class Error(val message: String) : Result()
 	}
 
-	suspend operator fun invoke(usuario: Person): Result = withContext(Dispatchers.IO) {
+	suspend operator fun invoke(user: Person): Result = withContext(Dispatchers.IO) {
 		return@withContext try {
 			
-			if (usuario.usuario.isBlank()) {
+			if (user.usuario.isBlank()) {
 				return@withContext Result.Error("El nombre no puede estar vacío")
 			}
 
-			if (usuario.email.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(usuario.email).matches()) {
+			if (user.email.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(user.email).matches()) {
 				return@withContext Result.Error("Email no válido")
 			}
 			
-			usuarioRepository.agregarUsuario(usuario)
+			usuarioRepository.agregarUsuario(user)
 			Result.Success
 		} catch (e: Exception) {
 			Result.Error(e.message ?: "Error desconocido al registrar usuario")

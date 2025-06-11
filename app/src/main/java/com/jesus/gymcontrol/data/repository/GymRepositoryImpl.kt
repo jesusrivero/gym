@@ -14,42 +14,29 @@ class GymRepositoryImpl @Inject constructor(
 
     override suspend fun createGymForUser(
         uid: String,
-        codigo: String,
-        nombre: String,
-        admin: String,
-        entrenador: String,
-        direccion: String,
-        telefono: String
+        code: String,
+        name: String,
+        direction: String,
+        phone: String
     ): Result<Unit> {
         return try {
             val gymData = mapOf(
-                "propietario" to uid,
-                "nombre" to nombre,
-                "entrenador" to entrenador,
-                "admin" to admin,
-                "direccion" to direccion,
-                "telefono" to telefono,
-                "codigo" to codigo,
-                "fechaCreacion" to FieldValue.serverTimestamp()
+                "owner" to uid,
+                "name" to name,
+                "direction" to direction,
+                "phone" to phone,
+                "code" to code,
+                "creationDate" to FieldValue.serverTimestamp()
             )
 
 
             val globalGymRef = firestore
                 .collection("gimnasios")
-                .document(codigo)
-
-// AQUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-//            val userGymRef = firestore
-//                .collection("users")
-//                .document(uid)
-//                .collection("gimnasios")
-//                .document(codigo)
+                .document(code)
 
             val batch = firestore.batch()
 
             batch.set(globalGymRef, gymData)
-//            batch.set(userGymRef, gymData)
-
 
             batch.commit().await()
             Result.success(Unit)

@@ -28,11 +28,11 @@ class AuthRepositoryImpl(
                 "name" to name,
                 "email" to email,
                 "rol" to "",
-                "codigo" to "",
-                "cedula" to "",
-                "edad" to "",
-                "numero" to "",
-                "sexo" to "",
+                "code" to "",
+                "idcard" to "",
+                "age" to "",
+                "phone" to "",
+                "gender" to "",
 
             )
             firestore.collection("users").document(uid).set(userData).await()
@@ -65,12 +65,12 @@ class AuthRepositoryImpl(
     override suspend fun updateRolAndCode(
         uid: String,
         rol: String,
-        codigo: String
+        code: String
     ): Result<Unit> {
        return try {
            val updates = mapOf(
                "rol" to rol,
-               "codigo" to codigo,
+               "code" to code,
            )
            firestore.collection("users").document(uid).update(updates).await()
            Result.success(Unit)
@@ -83,17 +83,17 @@ class AuthRepositoryImpl(
 
     override suspend fun updateDatesUser(
         uid: String,
-        cedula: String,
-        edad: String,
-        numero: String,
-        sexo: String
+        idcard: String,
+        age: String,
+        phone: String,
+        gender: String
     ): Result<Unit> {
         return try {
             val updates = mapOf(
-                "cedula" to cedula,
-                "edad" to edad,
-                "numero" to numero,
-                "sexo" to sexo,
+                "cedula" to idcard,
+                "edad" to age,
+                "numero" to phone,
+                "sexo" to gender,
             )
             firestore.collection("users").document(uid).update(updates).await()
             Result.success(Unit)

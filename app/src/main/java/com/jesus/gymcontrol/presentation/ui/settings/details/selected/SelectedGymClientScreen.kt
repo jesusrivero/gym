@@ -2,7 +2,6 @@ package com.jesus.gymcontrol.presentation.ui.settings.details.selected
 
 import android.widget.Toast
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,8 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.VpnKey
@@ -142,10 +139,10 @@ fun SelectedGymClient(
                                 )
                             ) {
                                 Column(modifier = Modifier.padding(16.dp)) {
-                                    Text(gym.nombre, fontWeight = FontWeight.Bold)
-                                    Text("Código: ${gym.codigo}")
-                                    Text("Dirección: ${gym.direccion}")
-                                    Text("Teléfono: ${gym.telefono}")
+                                    Text(gym.name, fontWeight = FontWeight.Bold)
+                                    Text("Código: ${gym.code}")
+                                    Text("Dirección: ${gym.direction}")
+                                    Text("Teléfono: ${gym.phone}")
                                 }
                             }
                         }
@@ -179,10 +176,10 @@ fun SelectedGymClient(
                     Button(
                         onClick = {
                             val gym = selectedGym!!
-                            if (codeInput.trim() == gym.codigo) {
+                            if (codeInput.trim() == gym.code) {
                                 val currentUser = FirebaseAuth.getInstance().currentUser
                                 currentUser?.let { user ->
-                                    authViewModel.newDatesUserLogin("Cliente", gym.codigo)
+                                    authViewModel.newDatesUserLogin("Cliente", gym.code)
                                     userViewModel.assignGymToUser(
                                         uid = user.uid,
                                         gym = gym,

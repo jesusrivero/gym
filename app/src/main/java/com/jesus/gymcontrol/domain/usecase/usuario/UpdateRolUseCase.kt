@@ -6,5 +6,5 @@ class UpdateRolUseCase (private val repository: AuthRepository){
     suspend operator fun invoke(
         uid: String,
         rol: String,
-        codigo: String)= repository.updateRolAndCode(uid, rol, codigo)
+        code: String)= repository.updateRolAndCode(uid, rol, code)
 }

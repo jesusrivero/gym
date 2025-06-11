@@ -25,7 +25,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -150,7 +149,7 @@ fun SelectedGymAdmin(
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Text(
-                                            text = gym.nombre,
+                                            text = gym.name,
                                             style = MaterialTheme.typography.titleMedium,
                                             fontWeight = FontWeight.Bold
                                         )
@@ -158,9 +157,9 @@ fun SelectedGymAdmin(
 
                                     Spacer(modifier = Modifier.height(8.dp))
 
-                                    Text("📍 Dirección: ${gym.direccion}", style = MaterialTheme.typography.bodyMedium)
-                                    Text("📞 Teléfono: ${gym.telefono}", style = MaterialTheme.typography.bodyMedium)
-                                    Text("🔑 Código: ${gym.codigo}", style = MaterialTheme.typography.bodyMedium)
+                                    Text("📍 Dirección: ${gym.direction}", style = MaterialTheme.typography.bodyMedium)
+                                    Text("📞 Teléfono: ${gym.phone}", style = MaterialTheme.typography.bodyMedium)
+                                    Text("🔑 Código: ${gym.code}", style = MaterialTheme.typography.bodyMedium)
                                 }
                             }
                         }

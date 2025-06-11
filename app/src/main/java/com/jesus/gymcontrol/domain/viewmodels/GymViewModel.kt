@@ -24,8 +24,6 @@ class GymViewModel @Inject constructor(
     var gyms by mutableStateOf<List<Gym>> (emptyList())
     var searchQuery by mutableStateOf("")
     var name by mutableStateOf("")
-    var admin by mutableStateOf("")
-    var coach by mutableStateOf("")
     var direction by mutableStateOf("")
     var phone by mutableStateOf("")
     var code by mutableStateOf("")
@@ -37,12 +35,10 @@ class GymViewModel @Inject constructor(
     fun createGym() {
         val uid = firebaseAuth.currentUser?.uid ?: return
 
-        val Name = name.trim()
-        val Admin = admin.trim()
-        val Coach = coach.trim()
-        val Direction = direction.trim()
-        val Phone = phone.trim()
-        val Code = code.trim()
+        val name = name.trim()
+        val direction = direction.trim()
+        val phone = phone.trim()
+        val code = code.trim()
 
         viewModelScope.launch {
             isLoading = true
@@ -51,12 +47,10 @@ class GymViewModel @Inject constructor(
 
             val result = createGymUseCase(
                 uid = uid,
-                code = Code,
-                name = Name,
-                admin = Admin,
-                coach = Coach,
-                direction = Direction,
-                phone = Phone
+                code = code,
+                name = name,
+                direction = direction,
+                phone = phone
             )
 
             isLoading = false
@@ -80,7 +74,7 @@ class GymViewModel @Inject constructor(
                 gyms = it
                 Log.d("GymViewModel", "Gimnasios obtenidos: ${it.size}")
                 it.forEach { gym ->
-                    Log.d("GymViewModel", "Gym: ${gym.nombre}, código: ${gym.codigo}")
+                    Log.d("GymViewModel", "Gym: ${gym.name}, código: ${gym.code}")
                 }
             }.onFailure {
                 errorMessage = it.message
@@ -93,7 +87,7 @@ class GymViewModel @Inject constructor(
     }
 
     fun filteredGyms(): List<Gym> {
-        return gyms.filter { it.nombre.contains(searchQuery, ignoreCase = true) }
+        return gyms.filter { it.name.contains(searchQuery, ignoreCase = true) }
     }
 
 }
