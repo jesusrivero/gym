@@ -86,6 +86,7 @@ fun ActivateCodeContent(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     var code by remember { mutableStateOf("") }
+    var rol by remember { mutableStateOf("") }
 
     val context = LocalContext.current
     val authError = authViewModel.errorMessage
@@ -121,7 +122,7 @@ fun ActivateCodeContent(
                 gym = gym,
                 rol = "Dueño",
                 onSuccess = {
-                    gymViewModel.markCodeAsUsed(code)
+                    gymViewModel.markCodeAsUsed(code, rol)
                     gymViewModel.resetValidation()
                     navController.navigate(AppRoutes.MainScreen) {
                         popUpTo(AppRoutes.StartScreen) { inclusive = true }

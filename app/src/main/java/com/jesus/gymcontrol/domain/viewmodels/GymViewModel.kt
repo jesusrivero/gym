@@ -39,6 +39,7 @@ class GymViewModel @Inject constructor(
     var direction by mutableStateOf("")
     var phone by mutableStateOf("")
     var code by mutableStateOf("")
+    val rol by mutableStateOf("")
 
     var isLoading by mutableStateOf(false)
     var isSuccess by mutableStateOf(false)
@@ -73,6 +74,8 @@ class GymViewModel @Inject constructor(
         val direction = direction.trim()
         val phone = phone.trim()
         val code = code.trim()
+        val rol = rol.trim()
+
 
         viewModelScope.launch {
             isLoading = true
@@ -84,13 +87,15 @@ class GymViewModel @Inject constructor(
                 code = code,
                 name = name,
                 direction = direction,
-                phone = phone
+                phone = phone,
+
+
             )
 
             isLoading = false
             result.onSuccess {
                 isSuccess = true
-                markCodeAsUsed(code)
+                markCodeAsUsed(code, rol)
             }.onFailure {
                 errorMessage = it.message
             }
@@ -178,9 +183,9 @@ class GymViewModel @Inject constructor(
         }
     }
 
-    fun markCodeAsUsed(code: String) {
+    fun markCodeAsUsed(code: String, rol: String) {
         viewModelScope.launch {
-            val result = markCodeAsUseUseCase(code)
+            val result = markCodeAsUseUseCase(code, rol)
             result.onSuccess {
                 Log.d("GymViewModel", "Código marcado como usado exitosamente")
             }.onFailure {

@@ -21,8 +21,7 @@ interface GymRepository {
     suspend fun validateClientCode(code:String, gymCode: String):
             Result<Boolean>
 
-    suspend fun markCodeAsUsed(
-        code: String):
+    suspend fun markCodeAsUsed(code: String, rol:String?):
             Result<Unit>
 
 

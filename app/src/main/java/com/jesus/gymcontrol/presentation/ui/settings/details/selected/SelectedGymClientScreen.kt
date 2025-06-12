@@ -80,13 +80,18 @@ fun SelectedGymClient(
         selectedGym?.let { gym ->
             if (isCodeValid == true) {
                 Log.d("Seleccion", "codigo valido y gym")
+
                 userViewModel.onConfirmAssignGym(
                     gym = gym,
                     codeInput = codeInput,
                     navController = navController,
-                    context = context
+                    context = context,
+                    rol = "cliente" // aseguramos que se pase explícitamente el rol
                 )
-                viewModel.markCodeAsUsed(codeInput)
+
+                // Cambiado: ahora incluye el parámetro rol
+                viewModel.markCodeAsUsed(code = codeInput, rol = "cliente")
+
                 codeInput = ""
                 showCodeField = false
             }

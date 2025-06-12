@@ -106,7 +106,7 @@ class GymRepositoryImpl @Inject constructor(
     }
 
 
-    override suspend fun markCodeAsUsed(code: String): Result<Unit> {
+    override suspend fun markCodeAsUsed(code: String, rol: String?): Result<Unit> {
         return try {
             val snapshot = firestore.collection("codigos")
                 .whereEqualTo("codigo", code)
@@ -118,7 +118,15 @@ class GymRepositoryImpl @Inject constructor(
             val docRef = document?.reference
 
             if (docRef != null) {
-                docRef.update("usado", true).await()
+                val updates = mutableMapOf<String, Any>(
+                    "usado" to true
+                )
+
+                rol?.let {
+                    updates["rol"] = it
+                }
+
+                docRef.update(updates).await()
                 Result.success(Unit)
             } else {
                 Result.failure(Exception("Código no encontrado"))
