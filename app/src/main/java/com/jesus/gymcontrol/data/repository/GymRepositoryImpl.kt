@@ -61,31 +61,62 @@ class GymRepositoryImpl @Inject constructor(
 
     }
 
-    override suspend fun validateGymCode(code: String): Result<Boolean> {
+    override suspend fun validateOwnerCode(code: String): Result<Boolean> {
         return try {
-            val querySnapshot = firestore.collection("codigos")
+            val snapshot = firestore.collection("codigos")
                 .whereEqualTo("codigo", code)
                 .limit(1)
                 .get()
                 .await()
 
-            val doc = querySnapshot.documents.firstOrNull()
-            val isValid = doc != null && !(doc.getBoolean("usado") ?: false)
+            val doc = snapshot.documents.firstOrNull()
+
+            val isValid = doc != null &&
+                    (doc.getString("rol") == "dueño") &&
+                    !(doc.getBoolean("usado") ?: false)
+
             Result.success(isValid)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    override suspend fun markCodeAsUsed(code: String): Result<Unit> {
+    override suspend fun validateClientCode(code: String, gymCode: String): Result<Boolean> {
         return try {
-            val querySnapshot = firestore.collection("codigos")
+            val snapshot = firestore.collection("codigos")
                 .whereEqualTo("codigo", code)
                 .limit(1)
                 .get()
                 .await()
 
-            val docRef = querySnapshot.documents.firstOrNull()?.reference
+            val doc = snapshot.documents.firstOrNull()
+
+            val actualCode = doc?.getString("codigo") ?: ""
+            val codeParts = actualCode.split("-")
+
+            val isValid = doc != null &&
+                    (doc.getString("rol").isNullOrBlank()) &&
+                    !(doc.getBoolean("usado") ?: false) &&
+                    codeParts.firstOrNull() == gymCode
+
+            Result.success(isValid)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+
+    override suspend fun markCodeAsUsed(code: String): Result<Unit> {
+        return try {
+            val snapshot = firestore.collection("codigos")
+                .whereEqualTo("codigo", code)
+                .limit(1)
+                .get()
+                .await()
+
+            val document = snapshot.documents.firstOrNull()
+            val docRef = document?.reference
+
             if (docRef != null) {
                 docRef.update("usado", true).await()
                 Result.success(Unit)
@@ -96,6 +127,64 @@ class GymRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
+
+    override suspend fun generateCode(gymCode: String): Result<String> {
+        return try {
+
+            val suffix = generateRandomCode(6)
+
+
+            val fullCode = "$gymCode-$suffix"
+
+
+            val data = mapOf(
+                "codigo" to fullCode,
+                "rol" to "",
+                "usado" to false,
+                "gimnasioCode" to gymCode,
+                "fechaCreacion" to FieldValue.serverTimestamp()
+            )
+
+
+            firestore.collection("codigos")
+                .add(data)
+                .await()
+
+
+            Result.success(fullCode)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override fun generateRandomCode(length: Int): String {
+        val charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+        return (1..length)
+            .map { charset.random() }
+            .joinToString("")
+    }
+
+    override suspend fun getGymByOwnerUid(uid: String): Result<Gym> {
+        return try {
+            val snapshot = firestore.collection("gimnasios")
+                .whereEqualTo("owner", uid)
+                .limit(1)
+                .get()
+                .await()
+
+            val gym = snapshot.documents.firstOrNull()?.toObject(Gym::class.java)
+            if (gym != null) {
+                Result.success(gym)
+            } else {
+                Result.failure(Exception("Gimnasio no encontrado para este dueño"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+
 }
 
 

@@ -45,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.jesus.gymcontrol.domain.model.Gym
@@ -120,9 +121,8 @@ fun ActivateCodeContent(
                 gym = gym,
                 rol = "Dueño",
                 onSuccess = {
-
                     gymViewModel.markCodeAsUsed(code)
-
+                    gymViewModel.resetValidation()
                     navController.navigate(AppRoutes.MainScreen) {
                         popUpTo(AppRoutes.StartScreen) { inclusive = true }
                     }
@@ -181,11 +181,12 @@ fun ActivateCodeContent(
             Button(
                 onClick = {
                     if (code.isNotBlank()) {
-                        gymViewModel.validateGymCode(code)
+                        gymViewModel.validateOwnerCode(code.trim())
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+                colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
+                enabled = code.isNotBlank()
             ) {
                 Icon(imageVector = Icons.Default.VpnKey, contentDescription = null, tint = Color.White)
                 Spacer(modifier = Modifier.width(8.dp))

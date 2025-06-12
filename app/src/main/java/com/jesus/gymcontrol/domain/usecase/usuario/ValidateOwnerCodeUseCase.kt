@@ -3,11 +3,11 @@ package com.jesus.gymcontrol.domain.usecase.usuario
 import com.jesus.gymcontrol.domain.repository.GymRepository
 import javax.inject.Inject
 
-class ValidateCodeUseCase @Inject constructor(
-    private val gymRepository: GymRepository
+class ValidateOwnerCodeUseCase @Inject constructor(
+    private val repository: GymRepository
 ) {
     suspend operator fun invoke(code:String):
-            Result<Boolean>{
-        return gymRepository.validateGymCode(code)
+            Result<Boolean> {
+        return repository.validateOwnerCode(code)
     }
 }

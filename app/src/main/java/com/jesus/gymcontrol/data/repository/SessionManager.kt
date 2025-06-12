@@ -54,20 +54,20 @@ class SessionManager @Inject constructor(@ApplicationContext private val context
             .apply()
     }
 
-    fun getUserRole(uid: String): String? =
-        sharedPreferences.getString("${uid}_role", null)
-
-    fun getUserGymCode(uid: String): String? =
-        sharedPreferences.getString("${uid}_gym_code", null)
-
-    fun isRoleAssigned(uid: String): Boolean =
-        sharedPreferences.getBoolean("${uid}_is_role_assigned", false)
-
-    fun clearUserSession(uid: String) {
-        sharedPreferences.edit()
-            .remove("${uid}_role")
-            .remove("${uid}_gym_code")
-            .remove("${uid}_is_role_assigned")
-            .apply()
-    }
+//    fun getUserRole(uid: String): String? =
+//        sharedPreferences.getString("${uid}_role", null)
+//
+//    fun getUserGymCode(uid: String): String? =
+//        sharedPreferences.getString("${uid}_gym_code", null)
+//
+//    fun isRoleAssigned(uid: String): Boolean =
+//        sharedPreferences.getBoolean("${uid}_is_role_assigned", false)
+//
+//    fun clearUserSession(uid: String) {
+//        sharedPreferences.edit()
+//            .remove("${uid}_role")
+//            .remove("${uid}_gym_code")
+//            .remove("${uid}_is_role_assigned")
+//            .apply()
+//    }
 }

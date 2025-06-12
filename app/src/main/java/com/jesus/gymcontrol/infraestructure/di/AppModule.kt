@@ -18,6 +18,7 @@ import com.jesus.gymcontrol.domain.repository.UserRepository
 import com.jesus.gymcontrol.domain.repository.UsuarioRepository
 import com.jesus.gymcontrol.domain.usecase.usuario.AssignGymToUserUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.CreateGymUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.GenerateCodeUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetAllGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.LoginUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.RegisterUseCase
@@ -136,5 +137,11 @@ object AppModule {
     @Singleton
     fun provideSessionManager(@ApplicationContext context: Context): SessionManager {
         return SessionManager(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGenerateCodeUseCase(repository: GymRepository): GenerateCodeUseCase {
+        return GenerateCodeUseCase(repository)
     }
 }

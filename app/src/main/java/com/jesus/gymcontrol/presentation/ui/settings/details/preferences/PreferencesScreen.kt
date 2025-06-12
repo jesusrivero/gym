@@ -107,6 +107,11 @@ fun PreferencesContent(
                 icon = Icons.Default.Build,
                 onClick = { navController.navigate(AppRoutes.SecurityScreen) }
             )
+            SettingsItem(
+                text = "Generar codigo para clientes",
+                icon = Icons.Default.Info,
+                onClick = { navController.navigate(AppRoutes.CodeClientScreen) }
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 

@@ -11,6 +11,7 @@ import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.model.Gym
+import com.jesus.gymcontrol.domain.repository.GymRepository
 import com.jesus.gymcontrol.domain.usecase.usuario.AssignGymToUserUseCase
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,7 +21,8 @@ import javax.inject.Inject
 @HiltViewModel
 class UserViewModel @Inject constructor(
     private val assignGymToUserUseCase: AssignGymToUserUseCase,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val repository: GymRepository
 ) : ViewModel() {
 
     var isLoading by mutableStateOf(false)
@@ -67,11 +69,6 @@ class UserViewModel @Inject constructor(
             return
         }
 
-        if (codeInput.trim() != gym.code) {
-            Toast.makeText(context, "Código incorrecto", Toast.LENGTH_SHORT).show()
-            return
-        }
-
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser == null) {
             Toast.makeText(context, "Usuario no autenticado", Toast.LENGTH_SHORT).show()
@@ -93,6 +90,5 @@ class UserViewModel @Inject constructor(
             }
         )
     }
-
 
 }

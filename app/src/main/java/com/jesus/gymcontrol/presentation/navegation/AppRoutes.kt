@@ -76,6 +76,8 @@ object AppRoutes {
 	@Serializable
 	data object SelectedGymClient
 
+	@Serializable
+	data object CodeClientScreen
 
 
 }

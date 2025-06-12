@@ -1,11 +1,13 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details.selected
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,7 +24,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -58,8 +59,7 @@ fun SelectedGymClient(
     viewModel: GymViewModel = hiltViewModel(),
     userViewModel: UserViewModel = hiltViewModel()
 ) {
-    val colorScheme = colorScheme
-
+    val colorScheme = MaterialTheme.colorScheme
     val searchQuery = viewModel.searchQuery
     val gyms = viewModel.filteredGyms()
     val isLoading = viewModel.isLoading
@@ -69,8 +69,28 @@ fun SelectedGymClient(
     var codeInput by remember { mutableStateOf("") }
     var selectedGym by remember { mutableStateOf<Gym?>(null) }
 
+    val isCodeValid = viewModel.isCodeValid
+    val codeValidationError = viewModel.codeValidationError
+
     LaunchedEffect(Unit) {
         viewModel.fetchAllGyms()
+    }
+
+    LaunchedEffect(isCodeValid) {
+        selectedGym?.let { gym ->
+            if (isCodeValid == true) {
+                Log.d("Seleccion", "codigo valido y gym")
+                userViewModel.onConfirmAssignGym(
+                    gym = gym,
+                    codeInput = codeInput,
+                    navController = navController,
+                    context = context
+                )
+                viewModel.markCodeAsUsed(codeInput)
+                codeInput = ""
+                showCodeField = false
+            }
+        }
     }
 
     GymTheme {
@@ -97,6 +117,25 @@ fun SelectedGymClient(
                         containerColor = colorScheme.primary
                     )
                 )
+            },
+            bottomBar = {
+                Button(
+                    onClick = {
+                        selectedGym?.let {
+                            viewModel.validateClientCode(
+                                code = codeInput.trim(),
+                                gymCode = it.code.trim()
+                            )
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding(),
+                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
+                    enabled = selectedGym != null && codeInput.isNotBlank()
+                ) {
+                    Text("Validar código", color = Color.White)
+                }
             }
         ) { innerPadding ->
             Column(
@@ -130,6 +169,7 @@ fun SelectedGymClient(
                                     .clickable {
                                         selectedGym = gym
                                         showCodeField = true
+                                        viewModel.resetValidation()
                                     },
                                 colors = CardDefaults.cardColors(
                                     containerColor = colorScheme.surfaceVariant
@@ -165,24 +205,19 @@ fun SelectedGymClient(
                         leadingIcon = {
                             Icon(imageVector = Icons.Default.VpnKey, contentDescription = null)
                         },
-                        singleLine = true
+                        singleLine = true,
+                        isError = codeValidationError != null
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Button(
-                        onClick = {
-                            userViewModel.onConfirmAssignGym(
-                                gym = selectedGym,
-                                codeInput = codeInput,
-                                navController = navController,
-                                context = context
-                            )},
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
-                    ) {
-                        Text("Confirmar", color = Color.White)
+                    if (codeValidationError != null) {
+                        Text(
+                            text = codeValidationError,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }

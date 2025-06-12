@@ -30,6 +30,7 @@ import com.jesus.gymcontrol.presentation.ui.settings.details.ActivateCodeScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.ErrorReportScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.manage.PersonsScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.manage.MembershipScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.CodeClientScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.NotificationScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.SecurityScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.selected.SelectedGymAdmin
@@ -185,6 +186,9 @@ fun NavigationHost (
 			SelectedGymClient( navController= navController)
 		}
 
+		composable<AppRoutes.CodeClientScreen> {
+			CodeClientScreen( navController= navController)
+		}
 	}
 }
 
