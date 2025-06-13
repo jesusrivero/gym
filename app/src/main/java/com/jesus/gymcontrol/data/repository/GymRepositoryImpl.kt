@@ -32,7 +32,7 @@ class GymRepositoryImpl @Inject constructor(
 
             val globalGymRef = firestore
                 .collection("gimnasios")
-                .document(code)
+                .document(uid)
 
             val batch = firestore.batch()
 
@@ -191,7 +191,6 @@ class GymRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
-
 
 }
 

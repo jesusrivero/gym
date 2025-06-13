@@ -33,6 +33,10 @@ class AuthRepositoryImpl(
                 "age" to "",
                 "phone" to "",
                 "gender" to "",
+                "state" to "",
+                "enabled" to "",
+                "last payment" to "",
+                "membership" to ""
 
             )
             firestore.collection("users").document(uid).set(userData).await()
@@ -90,10 +94,10 @@ class AuthRepositoryImpl(
     ): Result<Unit> {
         return try {
             val updates = mapOf(
-                "cedula" to idcard,
-                "edad" to age,
-                "numero" to phone,
-                "sexo" to gender,
+                "idcard" to idcard,
+                "age" to age,
+                "phone" to phone,
+                "gender" to gender,
             )
             firestore.collection("users").document(uid).update(updates).await()
             Result.success(Unit)
