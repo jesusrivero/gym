@@ -6,6 +6,7 @@ interface AuthRepository {
         name:String,
         email: String,
         password: String,
+        idcard: String
     ) : Result<Unit>
 
 

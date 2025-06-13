@@ -12,7 +12,6 @@ import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.usecase.usuario.LoginUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.RecoverPasswordUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.RegisterUseCase
-import com.jesus.gymcontrol.domain.usecase.usuario.UpdateDatesUserUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateRolUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -47,13 +46,13 @@ class AuthViewModel @Inject constructor(
 
 
 
-    fun registerUser(email: String, password: String, name: String) {
+    fun registerUser(email: String, password: String, name: String, idcard:String) {
         viewModelScope.launch {
             isLoading = true
             errorMessage = null
             isSuccess = false
 
-            val result = registerUseCase(name.trim(), email.trim(), password.trim())
+            val result = registerUseCase(name.trim(), email.trim(), password.trim(), idcard.trim())
             isLoading = false
             result.onSuccess {
                 isSuccess = true

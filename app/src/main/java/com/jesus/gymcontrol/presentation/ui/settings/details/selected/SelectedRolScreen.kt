@@ -1,5 +1,6 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details.selected
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -134,6 +135,7 @@ fun SelectedRolScreenContent(
                     MenuCardRol(
                         title = "Cliente",
                         onClick = {
+                            Log.d("cliente", "fallo")
                             viewModel.rol3 = "Cliente"
                             navController.navigate(AppRoutes.SelectedGymClient)
                         }

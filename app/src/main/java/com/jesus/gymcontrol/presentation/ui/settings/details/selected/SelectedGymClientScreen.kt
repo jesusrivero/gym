@@ -1,21 +1,25 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details.selected
 
-import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.VpnKey
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -27,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,7 +41,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,7 +53,6 @@ import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
 import com.jesus.gymcontrol.domain.viewmodels.UserViewModel
 import com.jesus.gymcontrol.presentation.theme.GymTheme
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,9 +68,10 @@ fun SelectedGymClient(
     val isLoading = viewModel.isLoading
     val context = LocalContext.current
 
-    var showCodeField by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
     var codeInput by remember { mutableStateOf("") }
     var selectedGym by remember { mutableStateOf<Gym?>(null) }
+    var isValidatingCode by remember { mutableStateOf(false) }
 
     val isCodeValid = viewModel.isCodeValid
     val codeValidationError = viewModel.codeValidationError
@@ -77,23 +81,21 @@ fun SelectedGymClient(
     }
 
     LaunchedEffect(isCodeValid) {
-        selectedGym?.let { gym ->
-            if (isCodeValid == true) {
-                Log.d("Seleccion", "codigo valido y gym")
-
-                userViewModel.onConfirmAssignGym(
-                    gym = gym,
-                    codeInput = codeInput,
-                    navController = navController,
-                    context = context,
-                    rol = "cliente" // aseguramos que se pase explícitamente el rol
-                )
-
-                // Cambiado: ahora incluye el parámetro rol
-                viewModel.markCodeAsUsed(code = codeInput, rol = "cliente")
-
+        if (isValidatingCode && isCodeValid != null) {
+            isValidatingCode = false
+            if (isCodeValid) {
+                selectedGym?.let { gym ->
+                    userViewModel.onConfirmAssignGym(
+                        gym = gym,
+                        codeInput = codeInput,
+                        navController = navController,
+                        context = context,
+                        rol = "cliente"
+                    )
+                    viewModel.markCodeAsUsed(code = codeInput, rol = "cliente")
+                }
                 codeInput = ""
-                showCodeField = false
+                showDialog = false
             }
         }
     }
@@ -122,25 +124,6 @@ fun SelectedGymClient(
                         containerColor = colorScheme.primary
                     )
                 )
-            },
-            bottomBar = {
-                Button(
-                    onClick = {
-                        selectedGym?.let {
-                            viewModel.validateClientCode(
-                                code = codeInput.trim(),
-                                gymCode = it.code.trim()
-                            )
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding(),
-                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
-                    enabled = selectedGym != null && codeInput.isNotBlank()
-                ) {
-                    Text("Validar código", color = Color.White)
-                }
             }
         ) { innerPadding ->
             Column(
@@ -148,6 +131,7 @@ fun SelectedGymClient(
                     .fillMaxSize()
                     .padding(innerPadding)
                     .padding(16.dp)
+                    .verticalScroll(rememberScrollState())
             ) {
                 OutlinedTextField(
                     value = searchQuery,
@@ -165,65 +149,137 @@ fun SelectedGymClient(
                 if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
                 } else {
-                    LazyColumn {
-                        items(gyms) { gym ->
-                            Card(
+                    gyms.forEach { gym ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                                .clickable {
+                                    selectedGym = gym
+                                    viewModel.resetValidation()
+                                    showDialog = true
+                                }
+                                .border(
+                                    width = 1.dp,
+                                    color = colorScheme.outline.copy(alpha = 0.3f),
+                                    shape = RoundedCornerShape(16.dp)
+                                ),
+                            colors = CardDefaults.cardColors(
+                                containerColor = colorScheme.surfaceVariant
+                            ),
+                            shape = RoundedCornerShape(16.dp),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                        ) {
+                            Row(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                                    .clickable {
-                                        selectedGym = gym
-                                        showCodeField = true
-                                        viewModel.resetValidation()
-                                    },
-                                colors = CardDefaults.cardColors(
-                                    containerColor = colorScheme.surfaceVariant
-                                )
+                                    .padding(16.dp)
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Column(modifier = Modifier.padding(16.dp)) {
+                                Column(modifier = Modifier.weight(1f)) {
                                     Text(gym.name, fontWeight = FontWeight.Bold)
                                     Text("Código: ${gym.code}")
                                     Text("Dirección: ${gym.direction}")
                                     Text("Teléfono: ${gym.phone}")
                                 }
+
+                                IconButton(
+                                    onClick = {  },
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .background(
+                                            color = colorScheme.primary.copy(alpha = 0.1f),
+                                            shape = CircleShape
+                                        )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.QrCode,
+                                        contentDescription = "Ver código QR",
+                                        tint = colorScheme.primary
+                                    )
+                                }
                             }
                         }
                     }
                 }
+            }
 
-                if (showCodeField && selectedGym != null) {
-                    Spacer(modifier = Modifier.height(24.dp))
 
-                    Text(
-                        text = "Ingresa el código del gimnasio seleccionado",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    OutlinedTextField(
-                        value = codeInput,
-                        onValueChange = { codeInput = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Código de validación") },
-                        leadingIcon = {
-                            Icon(imageVector = Icons.Default.VpnKey, contentDescription = null)
-                        },
-                        singleLine = true,
-                        isError = codeValidationError != null
-                    )
-
-                    if (codeValidationError != null) {
-                        Text(
-                            text = codeValidationError,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
+            if (showDialog && selectedGym != null) {
+                AlertDialog(
+                    onDismissRequest = {
+                        if (!isValidatingCode) {
+                            showDialog = false
+                            codeInput = ""
+                            viewModel.resetValidation()
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                isValidatingCode = true
+                                viewModel.validateClientCode(
+                                    code = codeInput.trim(),
+                                    gymCode = selectedGym!!.code.trim()
+                                )
+                            },
+                            enabled = codeInput.isNotBlank() && !isValidatingCode
+                        ) {
+                            if (isValidatingCode) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .size(18.dp)
+                                        .padding(end = 8.dp),
+                                    strokeWidth = 2.dp
+                                )
+                            }
+                            Text("Validar", fontWeight = FontWeight.Bold)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                if (!isValidatingCode) {
+                                    showDialog = false
+                                    codeInput = ""
+                                    viewModel.resetValidation()
+                                }
+                            }
+                        ) {
+                            Text("Cancelar")
+                        }
+                    },
+                    title = {
+                        Text("Código de validación", fontWeight = FontWeight.Bold)
+                    },
+                    text = {
+                        Column {
+                            Text("Ingresa el código de validación para unirte a ${selectedGym!!.name}")
+                            Spacer(modifier = Modifier.height(8.dp))
+                            OutlinedTextField(
+                                value = codeInput,
+                                onValueChange = { codeInput = it },
+                                placeholder = { Text("Código") },
+                                leadingIcon = {
+                                    Icon(Icons.Default.VpnKey, contentDescription = null)
+                                },
+                                singleLine = true,
+                                isError = codeValidationError != null,
+                                enabled = !isValidatingCode,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            if (codeValidationError != null) {
+                                Text(
+                                    text = codeValidationError,
+                                    color = MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
+                    },
+                    containerColor = colorScheme.surface,
+                    shape = RoundedCornerShape(16.dp)
+                )
             }
         }
     }

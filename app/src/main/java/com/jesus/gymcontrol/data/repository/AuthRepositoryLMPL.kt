@@ -12,7 +12,7 @@ class AuthRepositoryImpl(
     private val firestore: FirebaseFirestore
 ) : AuthRepository {
 
-    override suspend fun registerUser(name: String, email: String, password: String): Result<Unit> {
+    override suspend fun registerUser(name: String, email: String, password: String, idcard:String): Result<Unit> {
         return try {
 
             val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
@@ -27,9 +27,9 @@ class AuthRepositoryImpl(
             val userData = mapOf(
                 "name" to name,
                 "email" to email,
+                "idcard" to idcard,
                 "rol" to "",
                 "code" to "",
-                "idcard" to "",
                 "age" to "",
                 "phone" to "",
                 "gender" to "",

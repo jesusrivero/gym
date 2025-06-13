@@ -16,6 +16,7 @@ class UserRepositoryImpl @Inject constructor(
             val userSnapshot = firestore.collection("users").document(uid).get().await()
             val userName = userSnapshot.getString("name") ?: "Desconocido"
 
+             //ESTE CODIGO CREA LA COLECCION DE GIMNASIOS POR USUARIO
             val userGymData = mapOf(
                 "code" to gym.code,
                 "name" to gym.name,
@@ -34,7 +35,7 @@ class UserRepositoryImpl @Inject constructor(
 
             val userGymRef = firestore.collection("users")
                 .document(uid).collection("gimnasios")
-                .document(gym.name)
+                .document(uid)
 
             val gymUserRef = firestore.collection("gimnasios")
                 .document(gym.code).collection("usuarios")
