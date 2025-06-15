@@ -45,12 +45,14 @@ import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 @Composable
 fun SelectedRolScreen(
     navController: NavController,
-    viewModel: AuthViewModel = hiltViewModel()
+    viewModel: AuthViewModel = hiltViewModel(),
 ) {
     GymTheme {
         SelectedRolScreenContent(
             navController = navController,
-            viewModel = viewModel
+            viewModel = viewModel,
+
+
         )
     }
 }
@@ -59,7 +61,7 @@ fun SelectedRolScreen(
 @Composable
 fun SelectedRolScreenContent(
     navController: NavController,
-    viewModel: AuthViewModel
+    viewModel: AuthViewModel,
 ) {
     Scaffold(
         topBar = {
@@ -119,6 +121,7 @@ fun SelectedRolScreenContent(
                         onClick = {
                             viewModel.rol = "Dueño"
                             navController.navigate(AppRoutes.ActivateCodeScreen)
+
                         }
                     )
 

@@ -40,18 +40,8 @@ fun SummaryCardsScreen(
 	val errorMessage = viewModel.errorMessage
 	val scrollState = rememberScrollState()
 
-
-
-	// Llamamos la carga al iniciar
 	LaunchedEffect(Unit) {
 		viewModel.loadGymUserSummary()
-	}
-
-	if (isLoading) {
-		Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-			CircularProgressIndicator()
-		}
-		return
 	}
 
 	if (errorMessage != null) {
@@ -71,23 +61,22 @@ fun SummaryCardsScreen(
 			.padding(horizontal = 16.dp, vertical = 8.dp),
 		horizontalArrangement = Arrangement.spacedBy(16.dp)
 	) {
-
 		SummaryCard(color = Color(0xC92196F3)) {
-			SummaryCardContent(title = "Todos", count = summary.total)
+			SummaryCardContent(title = "Todos", count = summary.total, isLoading = isLoading)
 		}
 
 		SummaryCard(color = Color(0xCD4CAF50)) {
-			SummaryCardContent(title = "Activos", count = summary.activos)
+			SummaryCardContent(title = "Activos", count = summary.activos, isLoading = isLoading)
 		}
 
 		SummaryCard(color = Color(0xB4E33E3E)) {
-			SummaryCardContent(title = "Inactivos", count = summary.inactivos)
+			SummaryCardContent(title = "Inactivos", count = summary.inactivos, isLoading = isLoading)
 		}
 	}
 }
 
 @Composable
-fun SummaryCardContent(title: String, count: Int) {
+fun SummaryCardContent(title: String, count: Int, isLoading: Boolean) {
 	Column(
 		horizontalAlignment = Alignment.CenterHorizontally,
 		verticalArrangement = Arrangement.Center
@@ -98,6 +87,7 @@ fun SummaryCardContent(title: String, count: Int) {
 			fontSize = 16.sp,
 			fontWeight = FontWeight.Bold
 		)
+
 		Row(verticalAlignment = Alignment.CenterVertically) {
 			Icon(
 				imageVector = Icons.Default.Person,
@@ -106,11 +96,20 @@ fun SummaryCardContent(title: String, count: Int) {
 				modifier = Modifier.size(20.dp)
 			)
 			Spacer(modifier = Modifier.width(4.dp))
-			Text(
-				text = count.toString(),
-				color = Color.White,
-				fontSize = 16.sp
-			)
+
+			if (isLoading) {
+				CircularProgressIndicator(
+					color = Color.White,
+					strokeWidth = 2.dp,
+					modifier = Modifier.size(16.dp)
+				)
+			} else {
+				Text(
+					text = count.toString(),
+					color = Color.White,
+					fontSize = 16.sp
+				)
+			}
 		}
 	}
 }

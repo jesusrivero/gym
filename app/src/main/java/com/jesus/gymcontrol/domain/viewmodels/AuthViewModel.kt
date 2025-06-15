@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.jesus.gymcontrol.data.repository.SessionManager
@@ -13,6 +14,7 @@ import com.jesus.gymcontrol.domain.usecase.usuario.LoginUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.RecoverPasswordUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.RegisterUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateRolUseCase
+import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -24,7 +26,7 @@ class AuthViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val recoverUseCase: RecoverPasswordUseCase,
     private val updateRolUseCase: UpdateRolUseCase,
-    private val sessionManager: SessionManager,
+    val sessionManager: SessionManager, // <-- lo hacemos público para acceder desde la UI si es necesario
 ) : ViewModel() {
 
     var name by mutableStateOf("")
@@ -37,15 +39,14 @@ class AuthViewModel @Inject constructor(
 
     var isLoggedInState by mutableStateOf(false)
     var isRoleAssignedState by mutableStateOf(false)
-
+    var sessionLoaded by mutableStateOf(false)
+        private set
     var rol by mutableStateOf("Dueño")
     var rol2 by mutableStateOf("Administrador")
     var rol3 by mutableStateOf("Cliente")
     var codigo by mutableStateOf("")
 
-
-
-    fun registerUser(email: String, password: String, name: String, idcard:String) {
+    fun registerUser(email: String, password: String, name: String, idcard: String) {
         viewModelScope.launch {
             isLoading = true
             errorMessage = null
@@ -64,7 +65,7 @@ class AuthViewModel @Inject constructor(
     fun loginUser(
         email: String,
         password: String,
-        onLoginSuccess: (hasRole: Boolean) -> Unit
+        navController: NavController
     ) {
         viewModelScope.launch {
             isLoading = true
@@ -85,15 +86,9 @@ class AuthViewModel @Inject constructor(
                             .await()
 
                         val userData = userDocSnapshot.data
-                        Log.d("LOGIN", "Documento Firestore completo: $userData")
-
                         val rol = userData?.get("rol") as? String
                         val gymCode = userData?.get("gimnasioCode") as? String
 
-                        Log.d("LOGIN", "Rol: $rol")
-                        Log.d("LOGIN", "GymCode: $gymCode")
-
-                        // Guardamos datos en la sesión
                         sessionManager.setUserSessionData(
                             uid = uid,
                             rol = rol ?: "",
@@ -101,14 +96,15 @@ class AuthViewModel @Inject constructor(
                         )
 
                         sessionManager.saveLoginState(true)
-
                         val hasRole = !rol.isNullOrBlank()
                         sessionManager.saveRoleState(hasRole)
-                        onLoginSuccess(hasRole)
+
+                        // ✅ Lógica centralizada de navegación por rol
+                        navigateBasedOnRole(navController)
 
                     } catch (e: Exception) {
                         errorMessage = "Error al obtener datos del usuario"
-                        Log.e("LOGIN", "Excepción al acceder a Firestore", e)
+                        Log.e("LOGIN", "Firestore Exception", e)
                     }
                 } else {
                     errorMessage = "No se encontró UID"
@@ -116,10 +112,11 @@ class AuthViewModel @Inject constructor(
                 }
             }.onFailure {
                 errorMessage = it.message
-                Log.e("LOGIN", "Error durante login", it)
+                Log.e("LOGIN", "Login failed", it)
             }
         }
     }
+
     fun recoverPassword(email: String) {
         viewModelScope.launch {
             isLoading = true
@@ -136,12 +133,10 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-
-
     fun loadSessionState() {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         isLoggedInState = sessionManager.isLoggedIn()
         isRoleAssignedState = sessionManager.isRoleAssigned()
+        sessionLoaded = true
     }
 
     fun clearLoginState() {
@@ -149,7 +144,11 @@ class AuthViewModel @Inject constructor(
         errorMessage = null
     }
 
-    fun newDatesUserLogin(rol: String, codigo: String) {
+    fun newDatesUserLogin(
+        rol: String,
+        codigo: String,
+        navController: NavController
+    ) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
         if (codigo.isBlank()) {
@@ -167,7 +166,11 @@ class AuthViewModel @Inject constructor(
             result.onSuccess {
                 isSuccess = true
 
+                sessionManager.setUserSessionData(uid, rol, codigo)
+                sessionManager.saveLoginState(true)
                 sessionManager.saveRoleState(true)
+
+
 
             }.onFailure {
                 errorMessage = it.message
@@ -175,7 +178,47 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-  //ESTA FUNCION VA A ACTUALIZAR LOS DATOS FALTANTES DEL USUARIO
+
+    fun navigateBasedOnRole(navController: NavController) {
+        val rol = sessionManager.getRol()
+
+        when (rol?.lowercase()) {
+            "cliente" -> {
+                navController.navigate(AppRoutes.ClientMainScreen) {
+                    popUpTo(AppRoutes.StartScreen) { inclusive = true }
+                }
+            }
+            "administrador" -> {
+                navController.navigate(AppRoutes.MainScreen) {
+                    popUpTo(AppRoutes.StartScreen) { inclusive = true }
+                }
+            }
+            "dueño" -> {
+                navController.navigate(AppRoutes.MainScreen) {
+                    popUpTo(AppRoutes.StartScreen) { inclusive = true }
+                }
+            }
+            else -> {
+                navController.navigate(AppRoutes.StartScreen) {
+                    popUpTo(AppRoutes.StartScreen) { inclusive = true }
+                }
+            }
+        }
+    }
+
+
+    fun getUserRole(): String? {
+        return sessionManager.getRol()
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            sessionManager.clearSession()
+        }
+        FirebaseAuth.getInstance().signOut()
+    }
+
+    //ESTA FUNCION VA A ACTUALIZAR LOS DATOS FALTANTES DEL USUARIO
 //    fun updateDatesUser(
 //        cedula: String,
 //        edad: String,
@@ -200,14 +243,4 @@ class AuthViewModel @Inject constructor(
 //        }
 //    }
 
-    fun getUserRole():String? {
-        return sessionManager.getRol()
-    }
-
-    fun logout() {
-        viewModelScope.launch {
-            sessionManager.clearSession()
-        }
-        FirebaseAuth.getInstance().signOut()
-    }
 }

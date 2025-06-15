@@ -43,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -51,14 +52,19 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.domain.model.Gym
+import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
+import com.jesus.gymcontrol.domain.viewmodels.UserViewModel
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectedGymAdmin(
     navController: NavController,
-    viewModel: GymViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
+    viewModel: GymViewModel = hiltViewModel(),
+    userViewModel: UserViewModel = hiltViewModel(),
+    gymViewModel: GymViewModel,
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val searchQuery = viewModel.searchQuery
@@ -69,8 +75,9 @@ fun SelectedGymAdmin(
 
     var showDialog by remember { mutableStateOf(false) }
     var selectedGym by remember { mutableStateOf<Gym?>(null) }
-    var codeInput by remember { mutableStateOf("") }
+    var code by remember { mutableStateOf("") }
     var isValidatingCode by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.fetchAllGyms()
@@ -79,13 +86,32 @@ fun SelectedGymAdmin(
     LaunchedEffect(isCodeValid) {
         if (isValidatingCode && isCodeValid != null) {
             isValidatingCode = false
+
             if (isCodeValid) {
-                showDialog = false
-                codeInput = ""
+                selectedGym?.let { gym ->
+                    // Solo asigna el gimnasio
+                    userViewModel.onConfirmAssignGym(
+                        gym = gym,
+                        codeInput = code,
+                        context = context,
+                        rol = "administrador",
+                        navController = navController
+                    )
+
+                    // Actualiza sesión y navega según rol
+                    authViewModel.newDatesUserLogin("administrador", code, navController)
+
+                    // Marca código como usado
+                    viewModel.markCodeAsUsed(code = code, rol = "administrador")
+
+                    // Limpia estado
+                    gymViewModel.resetValidation()
+                    code = ""
+                    showDialog = false
+                }
             }
         }
     }
-
     GymTheme {
         Scaffold(
             topBar = {
@@ -204,7 +230,7 @@ fun SelectedGymAdmin(
             AlertDialog(
                 onDismissRequest = {
                     showDialog = false
-                    codeInput = ""
+                    code = ""
                     viewModel.resetValidation()
                 },
                 title = {
@@ -215,8 +241,8 @@ fun SelectedGymAdmin(
                         Text("IIngresa el código de validación para unirte a ${selectedGym!!.name}")
                         Spacer(modifier = Modifier.height(8.dp))
                         OutlinedTextField(
-                            value = codeInput,
-                            onValueChange = { codeInput = it },
+                            value = code,
+                            onValueChange = { code = it },
                             placeholder = { Text("Código") },
                             leadingIcon = {
                                 Icon(Icons.Default.VpnKey, contentDescription = null)
@@ -239,11 +265,11 @@ fun SelectedGymAdmin(
                         onClick = {
                             isValidatingCode = true
                             viewModel.validateClientCode(
-                                code = codeInput.trim(),
+                                code = code.trim(),
                                 gymCode = selectedGym!!.code.trim()
                             )
                         },
-                        enabled = codeInput.isNotBlank() && !isValidatingCode
+                        enabled = code.isNotBlank() && !isValidatingCode
                     ) {
                         if (isValidatingCode) {
                             CircularProgressIndicator(
@@ -259,7 +285,7 @@ fun SelectedGymAdmin(
                     TextButton(
                         onClick = {
                             showDialog = false
-                            codeInput = ""
+                            code = ""
                             viewModel.resetValidation()
                         }
                     ) {

@@ -79,13 +79,10 @@ object AppRoutes {
 	@Serializable
 	data object CodeClientScreen
 
-	// 🚀 Rutas por rol (agregadas)
 
 	@Serializable
 	data object OwnerMainScreen
 
-//	@Serializable
-//	data object AdminMainScreen
 
 	@Serializable
 	data object ClientMainScreen

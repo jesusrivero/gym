@@ -60,7 +60,8 @@ fun SelectedGymClient(
     navController: NavController,
     authViewModel: AuthViewModel = hiltViewModel(),
     viewModel: GymViewModel = hiltViewModel(),
-    userViewModel: UserViewModel = hiltViewModel()
+    userViewModel: UserViewModel = hiltViewModel(),
+    gymViewModel: GymViewModel = hiltViewModel(),
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val searchQuery = viewModel.searchQuery
@@ -69,7 +70,7 @@ fun SelectedGymClient(
     val context = LocalContext.current
 
     var showDialog by remember { mutableStateOf(false) }
-    var codeInput by remember { mutableStateOf("") }
+    var code by remember { mutableStateOf("") }
     var selectedGym by remember { mutableStateOf<Gym?>(null) }
     var isValidatingCode by remember { mutableStateOf(false) }
 
@@ -83,23 +84,36 @@ fun SelectedGymClient(
     LaunchedEffect(isCodeValid) {
         if (isValidatingCode && isCodeValid != null) {
             isValidatingCode = false
+
             if (isCodeValid) {
                 selectedGym?.let { gym ->
+                    // Asignar el gimnasio al usuario
                     userViewModel.onConfirmAssignGym(
                         gym = gym,
-                        codeInput = codeInput,
-                        navController = navController,
+                        codeInput = code,
                         context = context,
-                        rol = "cliente"
+                        rol = "cliente",
+                        navController = navController
                     )
-                    viewModel.markCodeAsUsed(code = codeInput, rol = "cliente")
+
+                    // Actualizar la sesión y navegar desde el ViewModel
+                    authViewModel.newDatesUserLogin(
+                        rol = "cliente",
+                        codigo = code,
+                        navController = navController
+                    )
+
+                    // Marcar código como usado
+                    viewModel.markCodeAsUsed(code = code, rol = "cliente")
+
+                    // Resetear estado
+                    gymViewModel.resetValidation()
+                    code = ""
+                    showDialog = false
                 }
-                codeInput = ""
-                showDialog = false
             }
         }
     }
-
     GymTheme {
         Scaffold(
             topBar = {
@@ -210,7 +224,7 @@ fun SelectedGymClient(
                     onDismissRequest = {
                         if (!isValidatingCode) {
                             showDialog = false
-                            codeInput = ""
+                            code = ""
                             viewModel.resetValidation()
                         }
                     },
@@ -219,11 +233,11 @@ fun SelectedGymClient(
                             onClick = {
                                 isValidatingCode = true
                                 viewModel.validateClientCode(
-                                    code = codeInput.trim(),
+                                    code = code.trim(),
                                     gymCode = selectedGym!!.code.trim()
                                 )
                             },
-                            enabled = codeInput.isNotBlank() && !isValidatingCode
+                            enabled = code.isNotBlank() && !isValidatingCode
                         ) {
                             if (isValidatingCode) {
                                 CircularProgressIndicator(
@@ -241,7 +255,7 @@ fun SelectedGymClient(
                             onClick = {
                                 if (!isValidatingCode) {
                                     showDialog = false
-                                    codeInput = ""
+                                    code = ""
                                     viewModel.resetValidation()
                                 }
                             }
@@ -257,8 +271,8 @@ fun SelectedGymClient(
                             Text("Ingresa el código de validación para unirte a ${selectedGym!!.name}")
                             Spacer(modifier = Modifier.height(8.dp))
                             OutlinedTextField(
-                                value = codeInput,
-                                onValueChange = { codeInput = it },
+                                value = code,
+                                onValueChange = { code = it },
                                 placeholder = { Text("Código") },
                                 leadingIcon = {
                                     Icon(Icons.Default.VpnKey, contentDescription = null)

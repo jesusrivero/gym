@@ -38,7 +38,6 @@ import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 
-
 @Composable
 fun LoginScreen(navController: NavController) {
     val viewModel: AuthViewModel = hiltViewModel()
@@ -55,41 +54,25 @@ fun LoginContent(
     viewModel: AuthViewModel,
 ) {
     val context = LocalContext.current
-    val lifecycleOverflow = androidx.lifecycle.compose.LocalLifecycleOwner.current
     val colorScheme = MaterialTheme.colorScheme
     var passwordVisible by remember { mutableStateOf(false) }
-    val isSuccess = viewModel.isSuccess
     val isLoading = viewModel.isLoading
     val errorMessage = viewModel.errorMessage
     var isValidEmail by remember(viewModel.email) { mutableStateOf(false) }
+
     val isFromValid =
         viewModel.email.trim().isNotBlank() &&
                 isValidEmail &&
                 viewModel.password.trim().isNotBlank() &&
                 viewModel.password.trim().length >= 6
 
-
     isValidEmail = viewModel.email.trim().matches(Regex("^[A-Za-z0-9+_.-]+@gmail\\.com$"))
-
-
-    if (isSuccess) {
-        LaunchedEffect(Unit) {
-            navController.navigate(AppRoutes.SelectedRolScreen) {
-                popUpTo(AppRoutes.LoginScreen)
-                { inclusive = true }
-            }
-            viewModel.clearLoginState()
-        }
-    }
 
     if (errorMessage != null) {
         LaunchedEffect(errorMessage) {
             Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
         }
-
     }
-
-
 
     Column(
         modifier = Modifier
@@ -166,8 +149,7 @@ fun LoginContent(
             },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             singleLine = true,
-
-            )
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -189,18 +171,9 @@ fun LoginContent(
                 if (viewModel.email.isNotBlank() && viewModel.password.isNotBlank()) {
                     viewModel.loginUser(
                         email = viewModel.email.trim(),
-                        password = viewModel.password.trim()
-                    ) { hasRole ->
-                        if (hasRole) {
-                            navController.navigate(AppRoutes.MainScreen) {
-                                popUpTo(0) { inclusive = true }
-                            }
-                        } else {
-                            navController.navigate(AppRoutes.SelectedRolScreen) {
-                                popUpTo(0) { inclusive = true }
-                            }
-                        }
-                    }
+                        password = viewModel.password.trim(),
+                        navController = navController // ✅ navegación centralizada
+                    )
                 } else {
                     Toast.makeText(
                         context,
@@ -268,7 +241,6 @@ fun LoginContent(
         Spacer(modifier = Modifier.height(24.dp))
     }
 }
-
 
 //@Preview(showBackground = true)
 //@Composable

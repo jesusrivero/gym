@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.jesus.gymcontrol.data.repository.SessionManager
+import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
 import com.jesus.gymcontrol.presentation.splash.StartScreen
 import com.jesus.gymcontrol.presentation.ui.auth.LoginScreen
 import com.jesus.gymcontrol.presentation.ui.auth.recover.RecoverPasswordScreen
@@ -49,6 +50,7 @@ fun NavigationHost(
     val context = LocalContext.current
     val navController = rememberNavController()
     val sessionManager = remember { SessionManager(context) }
+    val gymViewModel: GymViewModel = hiltViewModel()
 
 
     NavHost(navController = navController, startDestination = AppRoutes.StartScreen) {
@@ -184,12 +186,20 @@ fun NavigationHost(
             ActivateCodeScreen(navController = navController)
         }
 
+
+
         composable<AppRoutes.SelectedGymAdmin> {
-            SelectedGymAdmin(navController = navController)
+            SelectedGymAdmin(
+                navController = navController,
+                gymViewModel = gymViewModel
+            )
         }
 
         composable<AppRoutes.SelectedGymClient> {
-            SelectedGymClient(navController = navController)
+            SelectedGymClient(
+                navController = navController,
+                gymViewModel = gymViewModel
+            )
         }
 
         composable<AppRoutes.CodeClientScreen> {

@@ -45,7 +45,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.jesus.gymcontrol.domain.model.Gym
@@ -122,8 +121,15 @@ fun ActivateCodeContent(
                 gym = gym,
                 rol = "Dueño",
                 onSuccess = {
+                    // 👉 Guardamos el rol del usuario localmente
+                    authViewModel.newDatesUserLogin("Dueño", code, navController)
+
+                    // Marcamos el código como usado
                     gymViewModel.markCodeAsUsed(code, rol)
+
+                    // Reseteamos validación y navegamos
                     gymViewModel.resetValidation()
+
                     navController.navigate(AppRoutes.MainScreen) {
                         popUpTo(AppRoutes.StartScreen) { inclusive = true }
                     }
@@ -257,7 +263,7 @@ fun ActivateCodeContent(
 
                 Button(
                     onClick = {
-                        authViewModel.newDatesUserLogin("Dueño", code)
+                        authViewModel.newDatesUserLogin("Dueño", code, navController)
                         gymViewModel.code = code
                         gymViewModel.createGym()
                     },
