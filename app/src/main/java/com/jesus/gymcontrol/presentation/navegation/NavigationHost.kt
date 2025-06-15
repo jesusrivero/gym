@@ -43,24 +43,23 @@ import com.jesus.gymcontrol.presentation.ui.settings.details.selected.SelectedRo
 fun NavigationHost (
 	viewModel: PeopleViewModel= hiltViewModel(),
 
-) {
+	) {
 	val context = LocalContext.current
 	val navController = rememberNavController()
 	val sessionManager = remember { SessionManager(context) }
 
-	
+
 	NavHost(navController = navController, startDestination = AppRoutes.StartScreen) {
 
 		composable<AppRoutes.MainScreen> {
 			MainScreen(
 				navController = navController,
-				sessionManager= sessionManager
-				)
+			)
 		}
 
 		composable<AppRoutes.StartScreen> {
 			StartScreen(
-                navController = navController)
+				navController = navController)
 		}
 
 
@@ -71,23 +70,23 @@ fun NavigationHost (
 
 		composable<AppRoutes.EditPersonScreen> {
 			val idPerson = it.arguments?.getInt("idPerson")
-			
-			
+
+
 			EditPersonScreen(
 				navController = navController,
 				viewModel = viewModel,
 				id = idPerson ?: 0
 			)
 		}
-		
+
 		composable<AppRoutes.PreferencesScreen> {
 			PreferencesScreen(
 				navController= navController,
 
-			)
+				)
 		}
-		
-		
+
+
 		composable<AppRoutes.ListPersonScreen> {
 			ListPersonScreen(
 				nav = navController
@@ -100,15 +99,15 @@ fun NavigationHost (
 				navPag = { navController.navigate(AppRoutes.PaymentsScreen) },
 				navBottom = navController)
 		}
-		
-		
+
+
 		composable<AppRoutes.PaymentsScreen> {
-		PaymentsScreen(navController= navController)
+			PaymentsScreen(navController= navController)
 		}
-		
+
 		composable<AppRoutes.ContactScreen> {
 			ContactScreen( navController= navController )
-			
+
 		}
 
 		composable<AppRoutes.ErrorReportScreen> {
@@ -141,7 +140,7 @@ fun NavigationHost (
 		}
 		composable<AppRoutes.AccountScreen> {
 			AccountScreen(navController= navController)
-			
+
 		}
 
 		composable<AppRoutes.LoginScreen> {
@@ -191,4 +190,3 @@ fun NavigationHost (
 		}
 	}
 }
-

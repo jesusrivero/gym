@@ -20,6 +20,7 @@ import com.jesus.gymcontrol.domain.usecase.usuario.AssignGymToUserUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.CreateGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GenerateCodeUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetAllGymUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.GetGymUserSummaryUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.LoginUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.RegisterUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateDatesUserUseCase
@@ -144,4 +145,13 @@ object AppModule {
     fun provideGenerateCodeUseCase(repository: GymRepository): GenerateCodeUseCase {
         return GenerateCodeUseCase(repository)
     }
+
+    @Provides
+    fun provideGetGymUserSummaryUseCase(
+        userRepository: UserRepository
+    ): GetGymUserSummaryUseCase {
+        return GetGymUserSummaryUseCase(userRepository)
+    }
+
+
 }

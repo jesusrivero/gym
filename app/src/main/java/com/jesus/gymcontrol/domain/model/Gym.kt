@@ -10,6 +10,5 @@ data class Gym(
     val phone: String = "",
     val code: String = "",
     val ownerId: String = "",
-
 //    val fechaCreacion: Timestamp? = null
 )

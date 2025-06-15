@@ -54,20 +54,24 @@ class SessionManager @Inject constructor(@ApplicationContext private val context
             .apply()
     }
 
-//    fun getUserRole(uid: String): String? =
-//        sharedPreferences.getString("${uid}_role", null)
-//
-//    fun getUserGymCode(uid: String): String? =
-//        sharedPreferences.getString("${uid}_gym_code", null)
-//
-//    fun isRoleAssigned(uid: String): Boolean =
-//        sharedPreferences.getBoolean("${uid}_is_role_assigned", false)
-//
-//    fun clearUserSession(uid: String) {
-//        sharedPreferences.edit()
-//            .remove("${uid}_role")
-//            .remove("${uid}_gym_code")
-//            .remove("${uid}_is_role_assigned")
-//            .apply()
+
+    fun saveGymCode(gymCode: String) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        sharedPreferences.edit().putString("${uid}_gym_code", gymCode).apply()
+    }
+
+//    CON ESTA FUNCION OBTENGO EL GYMCODE DEL ADMINISTRADOR
+    fun getGymCode():String? {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return null
+        return sharedPreferences.getString("${uid}_gym_code", null)
+    }
+
+
+
+//    CON ESTA FUNCION OBTENGO EL ROL DEL ADMINISTRADOR
+//    fun getUserRol(): String? {
+//        val uid = FirebaseAuth.getInstance().currentUser?.uid ?:return null
+//        return sharedPreferences.getString("${uid}_role", null)
 //    }
 }
+

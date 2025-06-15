@@ -18,7 +18,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import androidx.compose.material3.NavigationBarItemDefaults
 
-
 @Composable
 fun BottomNavigationBar(
     navController: NavController,

@@ -25,7 +25,6 @@ class AuthViewModel @Inject constructor(
     private val recoverUseCase: RecoverPasswordUseCase,
     private val updateRolUseCase: UpdateRolUseCase,
     private val sessionManager: SessionManager,
-//    private val updateDatesUserUseCase: UpdateDatesUserUseCase,
 ) : ViewModel() {
 
     var name by mutableStateOf("")
@@ -89,8 +88,17 @@ class AuthViewModel @Inject constructor(
                         Log.d("LOGIN", "Documento Firestore completo: $userData")
 
                         val rol = userData?.get("rol") as? String
-                        Log.d("LOGIN", "Valor del rol obtenido: $rol")
+                        val gymCode = userData?.get("gimnasioCode") as? String
 
+                        Log.d("LOGIN", "Rol: $rol")
+                        Log.d("LOGIN", "GymCode: $gymCode")
+
+                        // Guardamos datos en la sesión
+                        sessionManager.setUserSessionData(
+                            uid = uid,
+                            rol = rol ?: "",
+                            gymCode = gymCode ?: ""
+                        )
 
                         sessionManager.saveLoginState(true)
 
@@ -98,25 +106,20 @@ class AuthViewModel @Inject constructor(
                         sessionManager.saveRoleState(hasRole)
                         onLoginSuccess(hasRole)
 
-
                     } catch (e: Exception) {
                         errorMessage = "Error al obtener datos del usuario"
                         Log.e("LOGIN", "Excepción al acceder a Firestore", e)
-
                     }
                 } else {
                     errorMessage = "No se encontró UID"
                     Log.e("LOGIN", "UID es null")
-
                 }
             }.onFailure {
                 errorMessage = it.message
                 Log.e("LOGIN", "Error durante login", it)
-
             }
         }
     }
-
     fun recoverPassword(email: String) {
         viewModelScope.launch {
             isLoading = true

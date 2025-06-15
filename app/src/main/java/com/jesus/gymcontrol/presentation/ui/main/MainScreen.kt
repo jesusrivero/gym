@@ -1,5 +1,6 @@
 package com.jesus.gymcontrol.presentation.ui.main
 
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -22,16 +23,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 import com.jesus.gymcontrol.presentation.ui.commons.BottomNavigationBar
 import com.jesus.gymcontrol.presentation.ui.commons.CarsScreen.MembersCardScreen
-import com.jesus.gymcontrol.presentation.ui.commons.CarsScreen.SumaryCarsScreen
 import com.jesus.gymcontrol.presentation.ui.commons.CarsScreen.MovementsCarScreen
+import com.jesus.gymcontrol.presentation.ui.commons.CarsScreen.SummaryCardsScreen
 import com.jesus.gymcontrol.presentation.ui.commons.CarsScreen.WelcomeCard
 import com.jesus.gymcontrol.presentation.ui.people.PeopleViewModel
 
@@ -39,9 +38,9 @@ import com.jesus.gymcontrol.presentation.ui.people.PeopleViewModel
 @Composable
 fun MainScreen(
 	navController: NavController,
-	sessionManager: SessionManager,
-	viewModel: PeopleViewModel = hiltViewModel()
+
 ) {
+
 	GymTheme {
 		MainContent(
 			navBottom = navController,
@@ -106,7 +105,7 @@ fun MainContent(
 				color = colorScheme.onBackground
 			)
 
-			SumaryCarsScreen()
+			SummaryCardsScreen()
 
 			Text(
 				text = "Resumen de Membresias",
@@ -121,6 +120,9 @@ fun MainContent(
 		}
 	}
 }
+
+
+
 
 @Preview(showBackground = true)
 @Composable

@@ -3,6 +3,7 @@ package com.jesus.gymcontrol.data.repository
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.jesus.gymcontrol.domain.model.Gym
+import com.jesus.gymcontrol.domain.model.GymUserSummary
 import com.jesus.gymcontrol.domain.repository.UserRepository
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -17,7 +18,7 @@ class UserRepositoryImpl @Inject constructor(
             val userSnapshot = firestore.collection("users").document(uid).get().await()
             val userName = userSnapshot.getString("name") ?: "Desconocido"
 
-            // 2. Datos para guardar en users/{uid}/gimnasios/{gym.code}
+            // 2. Datos para guardar en users/{uid}/gimnasios/{uid} (o podrías usar gym.code como ID si prefieres)
             val userGymData = mapOf(
                 "code" to gym.code,
                 "name" to gym.name,
@@ -32,14 +33,17 @@ class UserRepositoryImpl @Inject constructor(
                 "uid" to uid,
                 "name" to userName,
                 "rol" to rol,
-                "registrationDate" to FieldValue.serverTimestamp()
+                "registrationDate" to FieldValue.serverTimestamp(),
+                "estado" to "inactivo",           // ⬅️ NUEVO
+                "habilitado" to false,            // ⬅️ NUEVO
+                "fechaUltimoPago" to null         // ⬅️ NUEVO
             )
 
             // 4. Referencias principales
             val userGymRef = firestore.collection("users")
                 .document(uid)
                 .collection("gimnasios")
-                .document(uid) // usamos gym.code como ID único
+                .document(uid) // o usa gym.code si prefieres
 
             val gymUserRef = firestore.collection("gimnasios")
                 .document(gym.code)
@@ -55,7 +59,7 @@ class UserRepositoryImpl @Inject constructor(
             val membresiasRef = firestore.collection("gimnasios")
                 .document(gym.code)
                 .collection("membresias")
-                .document("basica") // puedes cambiar "basica" por un plan inicial
+                .document("basica")
 
             val promocionesRef = firestore.collection("gimnasios")
                 .document(gym.code)
@@ -73,7 +77,7 @@ class UserRepositoryImpl @Inject constructor(
             // Inscripción del usuario al gimnasio
             batch.set(userGymRef, userGymData)
 
-            // Registro del usuario dentro del gimnasio (rol)
+            // Registro del usuario dentro del gimnasio (con nuevos campos)
             batch.set(gymUserRef, gymUserData)
 
             // Actualizar información del usuario en su documento raíz
@@ -92,7 +96,7 @@ class UserRepositoryImpl @Inject constructor(
                 )
             )
 
-            // Crear membresía inicial en el gimnasio (si aún no existe)
+            // Crear membresía inicial
             batch.set(
                 membresiasRef, mapOf(
                     "nombre" to "Membresía Básica",
@@ -102,7 +106,7 @@ class UserRepositoryImpl @Inject constructor(
                 )
             )
 
-            // Crear promoción inicial (si aún no existe)
+            // Crear promoción inicial
             batch.set(
                 promocionesRef, mapOf(
                     "titulo" to "Sin promociones",
@@ -110,7 +114,7 @@ class UserRepositoryImpl @Inject constructor(
                 )
             )
 
-            // Crear mensaje de bienvenida del gimnasio
+            // Crear mensaje de bienvenida
             batch.set(
                 mensajesRef, mapOf(
                     "contenido" to "¡Bienvenido al gimnasio ${gym.name}!",
@@ -118,10 +122,47 @@ class UserRepositoryImpl @Inject constructor(
                 )
             )
 
-            // Ejecutar transacción
+            // Ejecutar la transacción
             batch.commit().await()
 
             Result.success(Unit)
+
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getGymUserSummary(gymCode: String): Result<GymUserSummary> {
+        return try {
+            val usuariosSnapshot = firestore
+                .collection("gimnasios")
+                .document(gymCode)
+                .collection("usuarios")
+                .get()
+                .await()
+
+            var total = 0
+            var activos = 0
+            var inactivos = 0
+
+            for (doc in usuariosSnapshot.documents) {
+                total++
+
+                val estado = doc.getString("estado") ?: "inactivo"
+
+                when (estado.lowercase()) {
+                    "activo" -> activos++
+                    "inactivo", "pendiente" -> inactivos++
+                }
+            }
+
+            val summary = GymUserSummary(
+                total = total,
+                activos = activos,
+                inactivos = inactivos
+            )
+
+            Result.success(summary)
 
         } catch (e: Exception) {
             Result.failure(e)

@@ -46,7 +46,6 @@ class UserViewModel @Inject constructor(
             isLoading = false
 
             result.onSuccess {
-
                 sessionManager.setUserSessionData(uid, rol, gym.code)
                 isSuccess = true
                 onSuccess()

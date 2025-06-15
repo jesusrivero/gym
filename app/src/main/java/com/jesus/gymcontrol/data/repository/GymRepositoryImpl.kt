@@ -32,7 +32,7 @@ class GymRepositoryImpl @Inject constructor(
 
             val globalGymRef = firestore
                 .collection("gimnasios")
-                .document(uid)
+                .document(code)
 
             val batch = firestore.batch()
 
