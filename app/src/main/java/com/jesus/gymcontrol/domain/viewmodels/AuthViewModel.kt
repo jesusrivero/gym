@@ -200,7 +200,9 @@ class AuthViewModel @Inject constructor(
 //        }
 //    }
 
-
+    fun getUserRole():String? {
+        return sessionManager.getRol()
+    }
 
     fun logout() {
         viewModelScope.launch {

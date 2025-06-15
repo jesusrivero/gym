@@ -3,7 +3,6 @@ package com.jesus.gymcontrol.presentation.navegation
 import kotlinx.serialization.Serializable
 
 
-
 object AppRoutes {
 	@Serializable
 	data object MainScreen
@@ -13,7 +12,6 @@ object AppRoutes {
 
 	@Serializable
 	data object PreferencesScreen
-
 
 	@Serializable
 	data class EditPersonScreen(val idPerson: Int? = null)
@@ -81,5 +79,14 @@ object AppRoutes {
 	@Serializable
 	data object CodeClientScreen
 
+	// 🚀 Rutas por rol (agregadas)
 
+	@Serializable
+	data object OwnerMainScreen
+
+//	@Serializable
+//	data object AdminMainScreen
+
+	@Serializable
+	data object ClientMainScreen
 }

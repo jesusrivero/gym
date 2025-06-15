@@ -55,9 +55,9 @@ class SessionManager @Inject constructor(@ApplicationContext private val context
     }
 
 
-    fun saveGymCode(gymCode: String) {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        sharedPreferences.edit().putString("${uid}_gym_code", gymCode).apply()
+    fun getRol(): String? {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid?: return null
+        return sharedPreferences.getString("${uid}_role", null)
     }
 
 //    CON ESTA FUNCION OBTENGO EL GYMCODE DEL ADMINISTRADOR
@@ -66,7 +66,10 @@ class SessionManager @Inject constructor(@ApplicationContext private val context
         return sharedPreferences.getString("${uid}_gym_code", null)
     }
 
-
+//    fun saveGymCode(gymCode: String) {
+//        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+//        sharedPreferences.edit().putString("${uid}_gym_code", gymCode).apply()
+//    }
 
 //    CON ESTA FUNCION OBTENGO EL ROL DEL ADMINISTRADOR
 //    fun getUserRol(): String? {
