@@ -107,7 +107,7 @@ fun SelectedGymClient(
                     )
 											
                     // Marcar código como usado
-                    viewModel.markCodeAsUsed(code = code, rol = "cliente")
+                    viewModel.markCodeAsUsed(code = code, rol = "administrador")
 
                     // Resetear estado
                     gymViewModel.resetValidation()

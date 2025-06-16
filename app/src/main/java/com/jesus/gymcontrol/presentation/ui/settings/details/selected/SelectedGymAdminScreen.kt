@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
+import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.model.Gym
 import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
@@ -60,240 +61,247 @@ import com.jesus.gymcontrol.presentation.theme.GymTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectedGymAdmin(
-    navController: NavController,
-    authViewModel: AuthViewModel = hiltViewModel(),
-    viewModel: GymViewModel = hiltViewModel(),
-    userViewModel: UserViewModel = hiltViewModel(),
-    gymViewModel: GymViewModel,
+	navController: NavController,
+	authViewModel: AuthViewModel = hiltViewModel(),
+	viewModel: GymViewModel = hiltViewModel(),
+	userViewModel: UserViewModel = hiltViewModel(),
+	gymViewModel: GymViewModel,
+	sessionManager: SessionManager,
 ) {
-    val colorScheme = MaterialTheme.colorScheme
-    val searchQuery = viewModel.searchQuery
-    val gyms = viewModel.filteredGyms()
-    val isLoading = viewModel.isLoading
-    val codeValidationError = viewModel.codeValidationError
-    val isCodeValid = viewModel.isCodeValid
-
-    var showDialog by remember { mutableStateOf(false) }
-    var selectedGym by remember { mutableStateOf<Gym?>(null) }
-    var code by remember { mutableStateOf("") }
-    var isValidatingCode by remember { mutableStateOf(false) }
-    val context = LocalContext.current
-
-    LaunchedEffect(Unit) {
-        viewModel.fetchAllGyms()
-    }
-
-    LaunchedEffect(isCodeValid) {
-        if (isValidatingCode && isCodeValid != null) {
-            isValidatingCode = false
-
-            if (isCodeValid) {
-                selectedGym?.let { gym ->
-                    // Solo asigna el gimnasio
-                    userViewModel.onConfirmAssignGym(
-                        gym = gym,
-                        context = context,
-                        rol = "administrador",
-                        navController = navController
-                    )
-
-                    // Actualiza sesión y navega según rol
-                    authViewModel.newDatesUserLogin("administrador", code, navController)
-
-                    // Marca código como usado
-                    viewModel.markCodeAsUsed(code = code, rol = "administrador")
-
-                    // Limpia estado
-                    gymViewModel.resetValidation()
-                    code = ""
-                    showDialog = false
-                }
-            }
-        }
-    }
-    GymTheme {
-        Scaffold(
-            topBar = {
-                CenterAlignedTopAppBar(
-                    title = {
-                        Text(
-                            text = "Selecciona un gimnasio",
-                            color = colorScheme.onPrimary,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_back),
-                                contentDescription = "Regresar",
-                                tint = colorScheme.onPrimary
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = colorScheme.primary
-                    )
-                )
-            }
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-
-            ) {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { viewModel.searchQuery = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Buscar gimnasio...") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = "Buscar")
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    singleLine = true
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                if (isLoading) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
-                } else {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        items(gyms) { gym ->
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                                    .clickable {
-                                        selectedGym = gym
-                                        viewModel.resetValidation()
-                                        showDialog = true
-                                    }
-                                    .border(
-                                        width = 1.dp,
-                                        color = colorScheme.outline.copy(alpha = 0.3f),
-                                        shape = RoundedCornerShape(16.dp)
-                                    ),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = colorScheme.surfaceVariant
-                                ),
-                                shape = RoundedCornerShape(16.dp),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .padding(16.dp)
-                                        .fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(gym.name, fontWeight = FontWeight.Bold)
-                                        Text("Código: ${gym.code}")
-                                        Text("Dirección: ${gym.direction}")
-                                        Text("Teléfono: ${gym.phone}")
-                                    }
-
-                                    IconButton(
-                                        onClick = { },
-                                        modifier = Modifier
-                                            .size(40.dp)
-                                            .background(
-                                                color = colorScheme.primary.copy(alpha = 0.1f),
-                                                shape = CircleShape
-                                            )
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.QrCode,
-                                            contentDescription = "Ver código QR",
-                                            tint = colorScheme.primary
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if (showDialog && selectedGym != null) {
-            AlertDialog(
-                onDismissRequest = {
-                    showDialog = false
-                    code = ""
-                    viewModel.resetValidation()
-                },
-                title = {
-                    Text("Código de validación", fontWeight = FontWeight.Bold)
-                },
-                text = {
-                    Column {
-                        Text("IIngresa el código de validación para unirte a ${selectedGym!!.name}")
-                        Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedTextField(
-                            value = code,
-                            onValueChange = { code = it },
-                            placeholder = { Text("Código") },
-                            leadingIcon = {
-                                Icon(Icons.Default.VpnKey, contentDescription = null)
-                            },
-                            singleLine = true,
-                            isError = codeValidationError != null,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        if (codeValidationError != null) {
-                            Text(
-                                text = codeValidationError,
-                                color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            isValidatingCode = true
-                            viewModel.validateClientCode(
-                                code = code.trim(),
-                                gymCode = selectedGym!!.code.trim()
-                            )
-                        },
-                        enabled = code.isNotBlank() && !isValidatingCode
-                    ) {
-                        if (isValidatingCode) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(16.dp),
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Text("Validar", fontWeight = FontWeight.Bold)
-                        }
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            showDialog = false
-                            code = ""
-                            viewModel.resetValidation()
-                        }
-                    ) {
-                        Text("Cancelar")
-                    }
-                },
-                containerColor = colorScheme.surface,
-                shape = RoundedCornerShape(16.dp)
-            )
-        }
-    }
+	val colorScheme = MaterialTheme.colorScheme
+	val searchQuery = viewModel.searchQuery
+	val gyms = viewModel.filteredGyms()
+	val isLoading = viewModel.isLoading
+	val codeValidationError = viewModel.codeValidationError
+	val isCodeValid = viewModel.isCodeValid
+	
+	var showDialog by remember { mutableStateOf(false) }
+	var selectedGym by remember { mutableStateOf<Gym?>(null) }
+	var code by remember { mutableStateOf("") }
+	var isValidatingCode by remember { mutableStateOf(false) }
+	val rol by remember { mutableStateOf("cliente") }
+	val context = LocalContext.current
+	
+	LaunchedEffect(Unit) {
+		viewModel.fetchAllGyms()
+	}
+	
+	LaunchedEffect(isCodeValid) {
+		if (isValidatingCode && isCodeValid != null) {
+			isValidatingCode = false
+			
+			if (isCodeValid) {
+				selectedGym?.let { gym ->
+					// Asignar el gimnasio al usuario
+					userViewModel.onConfirmAssignGym(
+						gym = gym,
+						context = context,
+						rol = "cliente",
+						navController = navController
+					)
+					
+					// Actualizar la sesión y navegar desde el ViewModel
+					authViewModel.newDatesUserLogin(
+						rol = "cliente",
+						codigo = code,
+						navController = navController
+					)
+					
+					// Marcar código como usado
+					viewModel.markCodeAsUsed(code = code, rol = "cliente")
+					
+					// Resetear estado
+					gymViewModel.resetValidation()
+					code = ""
+					showDialog = false
+				}
+			}
+		}
+	}
+	GymTheme {
+		Scaffold(
+			topBar = {
+				CenterAlignedTopAppBar(
+					title = {
+						Text(
+							text = "Selecciona un gimnasio",
+							color = colorScheme.onPrimary,
+							fontWeight = FontWeight.Bold,
+							fontSize = 20.sp
+						)
+					},
+					navigationIcon = {
+						IconButton(onClick = { navController.popBackStack() }) {
+							Icon(
+								painter = painterResource(id = R.drawable.ic_back),
+								contentDescription = "Regresar",
+								tint = colorScheme.onPrimary
+							)
+						}
+					},
+					colors = TopAppBarDefaults.topAppBarColors(
+						containerColor = colorScheme.primary
+					)
+				)
+			}
+		) { innerPadding ->
+			Column(
+				modifier = Modifier
+					.fillMaxSize()
+					.padding(innerPadding)
+					.padding(horizontal = 16.dp, vertical = 8.dp)
+			
+			) {
+				OutlinedTextField(
+					value = searchQuery,
+					onValueChange = { viewModel.searchQuery = it },
+					modifier = Modifier.fillMaxWidth(),
+					placeholder = { Text("Buscar gimnasio...") },
+					leadingIcon = {
+						Icon(Icons.Default.Search, contentDescription = "Buscar")
+					},
+					shape = RoundedCornerShape(12.dp),
+					singleLine = true
+				)
+				
+				Spacer(modifier = Modifier.height(16.dp))
+				
+				if (isLoading) {
+					Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+						CircularProgressIndicator()
+					}
+				} else {
+					LazyColumn(
+						verticalArrangement = Arrangement.spacedBy(12.dp),
+						modifier = Modifier.fillMaxSize()
+					) {
+						items(gyms) { gym ->
+							Card(
+								modifier = Modifier
+									.fillMaxWidth()
+									.padding(vertical = 8.dp)
+									.clickable {
+										sessionManager.saveRoleState(!rol.isNullOrBlank())
+										selectedGym = gym
+										viewModel.resetValidation()
+										showDialog = true
+									}
+									.border(
+										width = 1.dp,
+										color = colorScheme.outline.copy(alpha = 0.3f),
+										shape = RoundedCornerShape(16.dp)
+									),
+								colors = CardDefaults.cardColors(
+									containerColor = colorScheme.surfaceVariant
+								),
+								shape = RoundedCornerShape(16.dp),
+								elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+							) {
+								Row(
+									modifier = Modifier
+										.padding(16.dp)
+										.fillMaxWidth(),
+									verticalAlignment = Alignment.CenterVertically
+								) {
+									Column(modifier = Modifier.weight(1f)) {
+										Text(gym.name, fontWeight = FontWeight.Bold)
+										Text("Código: ${gym.code}")
+										Text("Dirección: ${gym.direction}")
+										Text("Teléfono: ${gym.phone}")
+									}
+									
+									IconButton(
+										onClick = { },
+										modifier = Modifier
+											.size(40.dp)
+											.background(
+												color = colorScheme.primary.copy(alpha = 0.1f),
+												shape = CircleShape
+											)
+									) {
+										Icon(
+											imageVector = Icons.Default.QrCode,
+											contentDescription = "Ver código QR",
+											tint = colorScheme.primary
+										)
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		if (showDialog && selectedGym != null) {
+			AlertDialog(
+				onDismissRequest = {
+					showDialog = false
+					code = ""
+					viewModel.resetValidation()
+				},
+				title = {
+					Text("Código de validación", fontWeight = FontWeight.Bold)
+				},
+				text = {
+					Column {
+						Text("IIngresa el código de validación para unirte a ${selectedGym!!.name}")
+						Spacer(modifier = Modifier.height(8.dp))
+						OutlinedTextField(
+							value = code,
+							onValueChange = { code = it },
+							placeholder = { Text("Código") },
+							leadingIcon = {
+								Icon(Icons.Default.VpnKey, contentDescription = null)
+							},
+							singleLine = true,
+							isError = codeValidationError != null,
+							modifier = Modifier.fillMaxWidth()
+						)
+						if (codeValidationError != null) {
+							Text(
+								text = codeValidationError,
+								color = MaterialTheme.colorScheme.error,
+								style = MaterialTheme.typography.bodySmall
+							)
+						}
+					}
+				},
+				confirmButton = {
+					TextButton(
+						onClick = {
+							isValidatingCode = true
+							viewModel.validateClientCode(
+								code = code.trim(),
+								gymCode = selectedGym!!.code.trim()
+							)
+						},
+						enabled = code.isNotBlank() && !isValidatingCode
+					) {
+						if (isValidatingCode) {
+							CircularProgressIndicator(
+								modifier = Modifier.size(16.dp),
+								strokeWidth = 2.dp
+							)
+						} else {
+							Text("Validar", fontWeight = FontWeight.Bold)
+						}
+					}
+				},
+				dismissButton = {
+					TextButton(
+						onClick = {
+							showDialog = false
+							code = ""
+							viewModel.resetValidation()
+						}
+					) {
+						Text("Cancelar")
+					}
+				},
+				containerColor = colorScheme.surface,
+				shape = RoundedCornerShape(16.dp)
+			)
+		}
+	}
 }

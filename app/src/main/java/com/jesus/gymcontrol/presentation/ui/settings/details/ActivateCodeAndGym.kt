@@ -119,11 +119,11 @@ fun ActivateCodeContent(
             userViewModel.assignGymToUser(
                 uid = currentUser.uid,
                 gym = gym,
-                rol = "Dueño",
+                rol = "dueño",
 	            navController = navController,
                 onSuccess = {
                     // 👉 Guardamos el rol del usuario localmente
-                    authViewModel.newDatesUserLogin("Dueño", code, navController)
+                    authViewModel.newDatesUserLogin("dueño", code, navController)
 
                     // Marcamos el código como usado
                     gymViewModel.markCodeAsUsed(code, rol)

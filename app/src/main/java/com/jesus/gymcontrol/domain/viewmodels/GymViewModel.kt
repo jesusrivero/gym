@@ -235,10 +235,7 @@ class GymViewModel @Inject constructor(
             }
         }
     }
-    fun seledGym(gym:Gym){
-        selectedGym = gym
-    }
-
-
+  
+	
 
 }

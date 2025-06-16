@@ -191,7 +191,8 @@ fun NavigationHost(
         composable<AppRoutes.SelectedGymAdmin> {
             SelectedGymAdmin(
                 navController = navController,
-                gymViewModel = gymViewModel
+                gymViewModel = gymViewModel,
+							sessionManager = sessionManager
             )
         }
 

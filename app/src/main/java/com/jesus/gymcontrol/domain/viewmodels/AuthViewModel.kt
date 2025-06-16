@@ -193,7 +193,7 @@ class AuthViewModel @Inject constructor(
 			}
 			
 			"dueño" -> {
-				navController.navigate(AppRoutes.MainScreen) {
+				navController.navigate(AppRoutes.OwnerMainScreen) {
 					popUpTo(AppRoutes.StartScreen) { inclusive = true }
 				}
 			}

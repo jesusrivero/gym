@@ -51,6 +51,11 @@ fun ClientMainScreen(
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold
         )
+	    Text(
+		    text = "Aqui podrás ver tu progreso",
+		    style = MaterialTheme.typography.headlineSmall,
+		    fontWeight = FontWeight.Bold
+	    )
 
         Card(
             modifier = Modifier
