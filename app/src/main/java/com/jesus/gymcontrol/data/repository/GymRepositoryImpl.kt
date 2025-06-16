@@ -6,6 +6,7 @@ import com.jesus.gymcontrol.domain.model.Gym
 import com.jesus.gymcontrol.domain.repository.GymRepository
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import kotlin.text.get
 
 
 class GymRepositoryImpl @Inject constructor(
@@ -207,6 +208,7 @@ class GymRepositoryImpl @Inject constructor(
 
     override suspend fun getGymByOwnerUid(uid: String): Result<Gym> {
         return try {
+            // Primero intentamos si es dueño
             val snapshot = firestore.collection("gimnasios")
                 .whereEqualTo("owner", uid)
                 .limit(1)
@@ -214,17 +216,30 @@ class GymRepositoryImpl @Inject constructor(
                 .await()
 
             val gym = snapshot.documents.firstOrNull()?.toObject(Gym::class.java)
-            if (gym != null) {
-                Result.success(gym)
-            } else {
-                Result.failure(Exception("Gimnasio no encontrado para este dueño"))
+            if (gym != null) return Result.success(gym)
+
+            // Si no es dueño, entonces es administrador (obtenemos su código de gimnasio)
+            val userSnapshot = firestore.collection("users").document(uid).get().await()
+            val gymCode = userSnapshot.getString("gimnasioCode")
+
+            if (gymCode != null) {
+                val gymDoc = firestore.collection("gimnasios").document(gymCode).get().await()
+                val gymByCode = gymDoc.toObject(Gym::class.java)
+                if (gymByCode != null) {
+                    return Result.success(gymByCode)
+                }
             }
+
+            Result.failure(Exception("No se encontró gimnasio asociado a este usuario"))
+
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
 }
+
+
 
 
 

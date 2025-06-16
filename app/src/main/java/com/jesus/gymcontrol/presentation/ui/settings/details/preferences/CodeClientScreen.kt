@@ -112,7 +112,8 @@ fun CodeClientContent(
         },
         bottomBar = {
             Button(
-                onClick = { showDialog = true },
+                onClick = {
+                    showDialog = true},
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)

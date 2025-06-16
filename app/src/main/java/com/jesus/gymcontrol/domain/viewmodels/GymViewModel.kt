@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.jesus.gymcontrol.domain.model.Gym
 import com.jesus.gymcontrol.domain.usecase.usuario.CreateGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GenerateCodeUseCase
@@ -18,6 +19,7 @@ import com.jesus.gymcontrol.domain.usecase.usuario.ValidateClientCodeUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.ValidateOwnerCodeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import kotlin.onSuccess
 
@@ -27,6 +29,7 @@ class GymViewModel @Inject constructor(
     private val createGymUseCase: CreateGymUseCase,
     private val getAllGymUseCase: GetAllGymUseCase,
     private val firebaseAuth: FirebaseAuth,
+    private val firestore: FirebaseFirestore,
     private val validateGymCodeUseCase: ValidateClientCodeUseCase,
     private val markCodeAsUseUseCase: MarkCodeAsUseUseCase,
     private val generateCodeUseCase: GenerateCodeUseCase,
@@ -276,14 +279,28 @@ class GymViewModel @Inject constructor(
 
     fun loadCurrentUserGymCode(uid: String) {
         if (uid.isBlank()) {
-            errorMessage = "UID invalido"
+            errorMessage = "UID inválido"
             return
         }
         viewModelScope.launch {
-            val result = getGymByOwnerUseCase(uid)
-            result.onSuccess { gym -> gymCode = gym.code
-            }.onFailure {
-                errorMessage = it.message ?: "Error al cargar el gimnasio"
+            try {
+                val docSnapshot = firestore.collection("users")
+                    .document(uid)
+                    .get()
+                    .await()
+
+                if (docSnapshot.exists()) {
+                    val code = docSnapshot.getString("gimnasioCode") // o como hayas nombrado ese campo
+                    if (!code.isNullOrBlank()) {
+                        gymCode = code
+                    } else {
+                        errorMessage = "Código de gimnasio no encontrado para este administrador"
+                    }
+                } else {
+                    errorMessage = "Administrador no encontrado"
+                }
+            } catch (e: Exception) {
+                errorMessage = e.message ?: "Error al cargar el código del gimnasio"
             }
         }
     }
