@@ -61,6 +61,8 @@ class GymRepositoryImpl @Inject constructor(
 
     }
 
+
+    //    FUNCION PARA VALIDAR CODIGO DE DUE;O
     override suspend fun validateOwnerCode(code: String): Result<Boolean> {
         return try {
             val snapshot = firestore.collection("codigos")
@@ -81,6 +83,7 @@ class GymRepositoryImpl @Inject constructor(
         }
     }
 
+    //    FUNCION PARA VALIDAR CODIGO DE CLIENTE
     override suspend fun validateClientCode(code: String, gymCode: String): Result<Boolean> {
         return try {
             val snapshot = firestore.collection("codigos")
@@ -95,7 +98,7 @@ class GymRepositoryImpl @Inject constructor(
             val codeParts = actualCode.split("-")
 
             val isValid = doc != null &&
-                    (doc.getString("rol").isNullOrBlank()) &&
+                    (doc.getString("rol") == "cliente") &&
                     !(doc.getBoolean("usado") ?: false) &&
                     codeParts.firstOrNull() == gymCode
 
@@ -105,6 +108,30 @@ class GymRepositoryImpl @Inject constructor(
         }
     }
 
+
+    override suspend fun validateAdminCode(code: String, gymCode: String): Result<Boolean> {
+        return try {
+            val snapshot = firestore.collection("codigos")
+                .whereEqualTo("codigo", code)
+                .limit(1)
+                .get()
+                .await()
+
+            val doc = snapshot.documents.firstOrNull()
+
+            val actualCode = doc?.getString("codigo") ?: ""
+            val codeParts = actualCode.split("-")
+
+            val isValid = doc != null &&
+                    (doc.getString("rol") == "administrador") &&
+                    !(doc.getBoolean("usado") ?: false) &&
+                    codeParts.firstOrNull() == gymCode
+
+            Result.success(isValid)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
     override suspend fun markCodeAsUsed(code: String, rol: String?): Result<Unit> {
         return try {
@@ -137,28 +164,33 @@ class GymRepositoryImpl @Inject constructor(
     }
 
 
-    override suspend fun generateCode(gymCode: String): Result<String> {
+    override suspend fun generateCode(gymCode: String, rol: String): Result<String> {
         return try {
+            // Validar rol permitido
+            val validRoles = listOf("dueño", "administrador", "cliente")
+            if (rol !in validRoles) {
+                return Result.failure(Exception("Rol inválido: $rol. Debe ser uno de $validRoles"))
+            }
 
+            // Generar sufijo aleatorio
             val suffix = generateRandomCode(6)
 
-
+            // Concatenar código completo
             val fullCode = "$gymCode-$suffix"
 
-
+            // Preparar datos del código
             val data = mapOf(
                 "codigo" to fullCode,
-                "rol" to "",
+                "rol" to rol,
                 "usado" to false,
                 "gimnasioCode" to gymCode,
                 "fechaCreacion" to FieldValue.serverTimestamp()
             )
 
-
+            // Guardar en Firestore
             firestore.collection("codigos")
                 .add(data)
                 .await()
-
 
             Result.success(fullCode)
         } catch (e: Exception) {

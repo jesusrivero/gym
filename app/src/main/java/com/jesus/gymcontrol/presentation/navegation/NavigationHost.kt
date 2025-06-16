@@ -186,7 +186,7 @@ fun NavigationHost(
             SelectedGymAdmin(
                 navController = navController,
                 gymViewModel = gymViewModel,
-							sessionManager = sessionManager
+                sessionManager = sessionManager
             )
         }
 
@@ -194,7 +194,7 @@ fun NavigationHost(
             SelectedGymClient(
                 navController = navController,
                 gymViewModel = gymViewModel,
-							sessionManager = sessionManager
+                sessionManager = sessionManager
             )
         }
 
@@ -203,12 +203,14 @@ fun NavigationHost(
         }
 
         composable<AppRoutes.ClientMainScreen> {
-            ClientMainScreen(navController= navController)
+            ClientMainScreen(navController = navController)
         }
 
         composable<AppRoutes.OwnerMainScreen> {
-            OwnerMainScreen(navController= navController)
+            OwnerMainScreen(
+                navController = navController,
+                gymViewModel = gymViewModel,)
         }
 
-}
+    }
 }

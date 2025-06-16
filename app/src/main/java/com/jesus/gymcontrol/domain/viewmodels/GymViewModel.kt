@@ -13,12 +13,14 @@ import com.jesus.gymcontrol.domain.usecase.usuario.GenerateCodeUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetAllGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetGymByOwnerUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.MarkCodeAsUseUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.ValidateAdminCodeUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.ValidateClientCodeUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.ValidateOwnerCodeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.onSuccess
+
 
 @HiltViewModel
 class GymViewModel @Inject constructor(
@@ -30,7 +32,8 @@ class GymViewModel @Inject constructor(
     private val generateCodeUseCase: GenerateCodeUseCase,
     private val getGymByOwnerUseCase: GetGymByOwnerUseCase,
     private val validateOwnerCodeUseCase: ValidateOwnerCodeUseCase,
-    private val validateClientCodeUseCase: ValidateClientCodeUseCase
+    private val validateClientCodeUseCase: ValidateClientCodeUseCase,
+    private val validateAdminCodeUseCase: ValidateAdminCodeUseCase
 ) : ViewModel() {
 
     var gyms by mutableStateOf<List<Gym>>(emptyList())
@@ -63,6 +66,38 @@ class GymViewModel @Inject constructor(
     var errorMessage by mutableStateOf<String?>(null)
         private set
 
+    var setSelectedRoleForCode by mutableStateOf("cliente")
+        private set
+
+    fun generateCodeForRole() {
+        val uid = firebaseAuth.currentUser?.uid ?: return
+
+        viewModelScope.launch {
+            isGenerating = true
+            errorMessage = null
+            generatedCode = null
+
+            // Obtener el código del gimnasio del dueño
+            val gymResult = getGymByOwnerUseCase(uid)
+            gymResult.onSuccess { gym ->
+                val gymCode = gym.code
+                val codeResult = generateCodeUseCase(gymCode, setSelectedRoleForCode)
+                codeResult.onSuccess {
+                    generatedCode = it
+                }.onFailure {
+                    errorMessage = it.message
+                }
+            }.onFailure {
+                errorMessage = it.message ?: "No se pudo obtener el gimnasio"
+            }
+
+            isGenerating = false
+        }
+    }
+
+    fun SetSelectedRoleForCode(role:String){
+        setSelectedRoleForCode = role
+    }
 
 
     fun createGym() {
@@ -147,6 +182,23 @@ class GymViewModel @Inject constructor(
 //        }
 //    }
 
+    fun validateAdminCode(code: String, gymCode: String) {
+        viewModelScope.launch {
+            isCodeValid = null
+            codeValidationError = null
+
+            val result = validateAdminCodeUseCase(code.trim(), gymCode.trim())
+            result.onSuccess { isValid ->
+                isCodeValid = isValid
+                if (!isValid) {
+                    codeValidationError = "Código inválido, ya usado o no autorizado"
+                }
+            }.onFailure {
+                codeValidationError = "Error al validar el código: ${it.message}"
+            }
+        }
+    }
+
     fun validateOwnerCode(code: String) {
         viewModelScope.launch {
             isCodeValid = null
@@ -193,24 +245,24 @@ class GymViewModel @Inject constructor(
         }
     }
 
-    fun generateClientCode(gymCode: String) {
-        if (gymCode.isBlank()) {
-            errorMessage = "No se encontró el código del gimnasio"
-            return
-        }
-
-        viewModelScope.launch {
-            isGenerating = true
-            errorMessage = null
-
-            val result = generateCodeUseCase(gymCode)
-            result
-                .onSuccess { generatedCode = it }
-                .onFailure { error -> errorMessage = error.message }
-
-            isGenerating = false
-        }
-    }
+//    fun generateClientCode(gymCode: String, rol: String) {
+//        if (gymCode.isBlank()) {
+//            errorMessage = "No se encontró el código del gimnasio"
+//            return
+//        }
+//
+//        viewModelScope.launch {
+//            isGenerating = true
+//            errorMessage = null
+//
+//            val result = generateCodeUseCase(gymCode, rol)
+//            result
+//                .onSuccess { generatedCode = it }
+//                .onFailure { error -> errorMessage = error.message }
+//
+//            isGenerating = false
+//        }
+//    }
 
 
     fun clearErrorMessage() {

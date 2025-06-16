@@ -85,36 +85,40 @@ fun SelectedGymAdmin(
 	LaunchedEffect(Unit) {
 		viewModel.fetchAllGyms()
 	}
-	
+
 	LaunchedEffect(isCodeValid) {
 		if (isValidatingCode && isCodeValid != null) {
 			isValidatingCode = false
-			
+
 			if (isCodeValid) {
 				selectedGym?.let { gym ->
-					// Asignar el gimnasio al usuario
+					// Asignar el gimnasio al usuario con rol "administrador"
 					userViewModel.onConfirmAssignGym(
 						gym = gym,
 						context = context,
 						rol = "administrador",
 						navController = navController
 					)
-					
-					// Actualizar la sesión y navegar desde el ViewModel
+
+					// Actualizar sesión y navegar
 					authViewModel.newDatesUserLogin(
 						rol = "administrador",
 						code = code,
 						navController = navController
 					)
-					
-					// Marcar código como usado
-					viewModel.markCodeAsUsed(code = code, rol = "administrador")
-					
-					// Resetear estado
+
+					// Marcar el código como usado
+					viewModel.markCodeAsUsed(
+						code = code,
+						rol = "administrador"
+					)
+
+					// Resetear estado y cerrar diálogo
 					gymViewModel.resetValidation()
-					code = ""
 					showDialog = false
 				}
+			} else {
+				// Código inválido, no se hace nada más aquí (opcionalmente podrías notificar)
 			}
 		}
 	}
@@ -271,7 +275,7 @@ fun SelectedGymAdmin(
 					TextButton(
 						onClick = {
 							isValidatingCode = true
-							viewModel.validateClientCode(
+							viewModel.validateAdminCode(
 								code = code.trim(),
 								gymCode = selectedGym!!.code.trim()
 							)

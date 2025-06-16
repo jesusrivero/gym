@@ -1,6 +1,8 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details.preferences
 
 
+import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -9,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.paddingFrom
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -33,10 +34,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -68,7 +70,8 @@ fun CodeClientContent(
 
     val gymCode = viewModel.gymCode
     val userUid = FirebaseAuth.getInstance().currentUser?.uid
-
+    val clipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         userUid?.let {
@@ -140,7 +143,12 @@ fun CodeClientContent(
 
             generatedCode?.let { code ->
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            clipboardManager.setText(AnnotatedString(code))
+                            Toast.makeText(context, "Código copiado al portapapeles", Toast.LENGTH_SHORT).show()
+                        },
                     colors = CardDefaults.cardColors(
                         containerColor = colorScheme.surfaceVariant
                     )
@@ -149,6 +157,8 @@ fun CodeClientContent(
                         Text("Código:", fontWeight = FontWeight.SemiBold)
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(text = code, style = MaterialTheme.typography.headlineSmall)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text("Toca para copiar", style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
@@ -159,12 +169,13 @@ fun CodeClientContent(
             AlertDialog(
                 onDismissRequest = { showDialog = false },
                 title = { Text("Confirmar generación") },
-                text = { Text("¿Estás seguro de que deseas generar un nuevo código de acceso para clientes?") },
+                text = { Text("¿Deseas generar un nuevo código de acceso para clientes?") },
                 confirmButton = {
                     TextButton(
                         onClick = {
                             showDialog = false
-                            viewModel.generateClientCode(gymCode)
+                            viewModel.SetSelectedRoleForCode("cliente")
+                            viewModel.generateCodeForRole()
                         }
                     ) {
                         Text("Aceptar")
@@ -177,13 +188,5 @@ fun CodeClientContent(
                 }
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun CodeClientPreview() {
-    GymTheme {
-        CodeClientScreen(navController = NavController(LocalContext.current))
     }
 }

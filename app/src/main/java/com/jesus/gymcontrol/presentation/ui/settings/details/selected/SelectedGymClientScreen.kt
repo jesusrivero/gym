@@ -90,7 +90,7 @@ fun SelectedGymClient(
 
             if (isCodeValid) {
                 selectedGym?.let { gym ->
-                    // Asignar el gimnasio al usuario
+                    // Asignar el gimnasio al usuario con rol "cliente"
                     userViewModel.onConfirmAssignGym(
                         gym = gym,
                         context = context,
@@ -98,21 +98,25 @@ fun SelectedGymClient(
                         navController = navController
                     )
 
-                    // Actualizar la sesión y navegar desde el ViewModel
+                    // Actualizar sesión y navegar
                     authViewModel.newDatesUserLogin(
                         rol = "cliente",
                         code = code,
                         navController = navController
                     )
 
-                    // Marcar código como usado
-                    viewModel.markCodeAsUsed(code = code, rol = "cliente")
+                    // Marcar el código como usado
+                    viewModel.markCodeAsUsed(
+                        code = code,
+                        rol = "cliente"
+                    )
 
-                    // Resetear estado
+                    // Resetear estado y cerrar diálogo
                     gymViewModel.resetValidation()
-                    code = ""
                     showDialog = false
                 }
+            } else {
+                // Código inválido, no se hace nada más aquí (opcionalmente podrías notificar)
             }
         }
     }
@@ -237,9 +241,8 @@ fun SelectedGymClient(
                                 isValidatingCode = true
                                 viewModel.validateClientCode(
                                     code = code.trim(),
-                                    gymCode = selectedGym!!.code.trim(),
-
-                                    )
+                                    gymCode = selectedGym!!.code.trim()
+                                )
                             },
                             enabled = code.isNotBlank() && !isValidatingCode
                         ) {
