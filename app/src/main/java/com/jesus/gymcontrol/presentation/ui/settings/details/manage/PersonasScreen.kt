@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Payment
 import androidx.compose.material3.AlertDialog
@@ -30,7 +29,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -50,11 +48,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.google.firebase.firestore.auth.User
 import com.jesus.gymcontrol.R
-import com.jesus.gymcontrol.domain.model.Person
+import com.jesus.gymcontrol.domain.model.ListUser
+import com.jesus.gymcontrol.domain.viewmodels.UserListViewModel
 import com.jesus.gymcontrol.presentation.theme.GymTheme
-import com.jesus.gymcontrol.presentation.ui.people.PeopleViewModel
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -66,16 +66,16 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun PersonsScreen(
     navBottom: NavController,
-    viewModel: PeopleViewModel,
-    navEdit: (Int) -> Unit,
-    navPag: (Int) -> Unit
+    viewModel: UserListViewModel = hiltViewModel(),
+    navEdit: (String) -> Unit,
+    navPag: (String) -> Unit
 ) {
     LaunchedEffect(Unit) {
-        viewModel.getUsers()
+        viewModel.loadUsers()
     }
 
     var showUserDialog by remember { mutableStateOf(false) }
-    var selectedUser by remember { mutableStateOf<Person?>(null) }
+    var selectedUser by remember { mutableStateOf<ListUser?>(null) }
     var searchText by remember { mutableStateOf("") }
     var selectedState by remember { mutableStateOf("Todos") }
     var startDate by remember { mutableStateOf<LocalDate?>(null) }
@@ -85,6 +85,9 @@ fun PersonsScreen(
 
     val filterOptions = listOf("Todos", "Activos", "Inactivos", "Próximos a pagar")
     val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
+
+
 
     if (showUserDialog && selectedUser != null) {
         AlertDialog(
@@ -101,22 +104,24 @@ fun PersonsScreen(
             },
             text = {
                 Column {
-                    DetailRow("Nombre:", selectedUser?.usuario ?: "")
+                    DetailRow("Nombre:", selectedUser?.name ?: "")
                     Spacer(modifier = Modifier.height(8.dp))
                     DetailRow("Email:", selectedUser?.email ?: "")
                     Spacer(modifier = Modifier.height(8.dp))
-                    DetailRow("Cédula:", selectedUser?.cedula ?: "")
+                    DetailRow("Cédula:", selectedUser?.idCard ?: "")
                     Spacer(modifier = Modifier.height(8.dp))
-                    DetailRow("Teléfono:", selectedUser?.numeroTelefono ?: "")
+                    DetailRow("Teléfono:", selectedUser?.phone ?: "")
                 }
             },
             confirmButton = {
                 Button(
-                    onClick = { showUserDialog = false },
+                    onClick = {
+                        showUserDialog = true
+                              selectedUser = null},
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = colorScheme.primary,
-                        contentColor = colorScheme.onPrimary
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
                     Text("Cerrar")
@@ -172,7 +177,7 @@ fun PersonsScreen(
                     title = {
                         Text(
                             text = "Listado de personas",
-                            color = colorScheme.onPrimary,
+                            color = MaterialTheme.colorScheme.onPrimary,
                             fontWeight = FontWeight.Bold,
                         )
                     },
@@ -186,7 +191,7 @@ fun PersonsScreen(
                         }
                     },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = colorScheme.primary
+                        containerColor = MaterialTheme.colorScheme.primary
                     )
                 )
                 PaymentFilters(
@@ -209,12 +214,12 @@ fun PersonsScreen(
             }
         }
     ) { innerPadding ->
-        val state = viewModel.state
-        val filteredList = state.userList.filter {
-            (searchText.isBlank() || it.usuario.contains(searchText, true)
+        val users = viewModel.listUsers
+        val filteredList = users.filter {
+            (searchText.isBlank() || it.name.contains(searchText, true)
                     || it.email.contains(searchText, true)
-                    || it.cedula.contains(searchText, true)
-                    || it.numeroTelefono.contains(searchText, true))
+                    || it.idCard.contains(searchText, true)
+                    || it.phone.contains(searchText, true))
         }
 
         Box(
@@ -226,7 +231,7 @@ fun PersonsScreen(
             if (filteredList.isEmpty()) {
                 Text(
                     text = if (searchText.isNotEmpty()) "No se encontraron resultados" else "No hay personas registradas",
-                    color = colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
                 LazyColumn(
@@ -240,7 +245,7 @@ fun PersonsScreen(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp),
                             elevation = CardDefaults.cardElevation(2.dp),
-                            colors = CardDefaults.cardColors(colorScheme.surface)
+                            colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
                         ) {
                             Row(
                                 modifier = Modifier
@@ -250,7 +255,7 @@ fun PersonsScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    text = user.usuario,
+                                    text = user.name,
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.SemiBold,
                                     modifier = Modifier.weight(1f)
@@ -260,25 +265,18 @@ fun PersonsScreen(
                                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    IconButton(onClick = { user.id?.let { navPag(it) } }) {
+                                    IconButton(onClick = { navPag(user.id) }) {
                                         Icon(
                                             Icons.Default.Payment,
                                             "Pagar",
-                                            tint = colorScheme.primary
+                                            tint = MaterialTheme.colorScheme.primary
                                         )
                                     }
-                                    IconButton(onClick = { user.id?.let { navEdit(it) } }) {
+                                    IconButton(onClick = { navEdit(user.id) }) {
                                         Icon(
                                             Icons.Default.Edit,
                                             "Editar",
-                                            tint = colorScheme.primary
-                                        )
-                                    }
-                                    IconButton(onClick = { viewModel.deleteUser(user) }) {
-                                        Icon(
-                                            Icons.Default.Delete,
-                                            "Eliminar",
-                                            tint = colorScheme.error
+                                            tint = MaterialTheme.colorScheme.primary
                                         )
                                     }
                                     IconButton(onClick = {
@@ -287,7 +285,7 @@ fun PersonsScreen(
                                         Icon(
                                             painter = painterResource(id = R.drawable.ic_details),
                                             contentDescription = "Detalles",
-                                            tint = colorScheme.primary
+                                            tint = MaterialTheme.colorScheme.primary
                                         )
                                     }
                                 }
@@ -311,36 +309,12 @@ private fun DetailRow(label: String, value: String) {
             Text(
                 text = label,
                 fontWeight = FontWeight.Bold,
-                color = colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = value,
-                color = colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
-
     }
-
 }
-
-//@Composable
-//private fun PaymentInfoBadge(label: String, value: String) {
-//    Surface(
-//        shape = RoundedCornerShape(8.dp),
-//        color = colorScheme.primary.copy(alpha = 0.1f),
-//        contentColor = colorScheme.primary
-//    ) {
-//        Column(
-//            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-//            verticalArrangement = Arrangement.Center,
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
-//            Text(text = label, style = MaterialTheme.typography.labelSmall)
-//            Text(
-//                text = value,
-//                style = MaterialTheme.typography.bodySmall,
-//                fontWeight = FontWeight.Bold
-//            )
-//        }
-//    }
-//}

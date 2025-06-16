@@ -2,6 +2,7 @@ package com.jesus.gymcontrol.domain.repository
 
 import com.jesus.gymcontrol.domain.model.Gym
 import com.jesus.gymcontrol.domain.model.GymUserSummary
+import com.jesus.gymcontrol.domain.model.ListUser
 
 
 interface UserRepository {
@@ -12,4 +13,8 @@ interface UserRepository {
     ): Result<Unit>
 
     suspend fun getGymUserSummary(gymCode:String): Result<GymUserSummary>
+
+    suspend fun getUserByGym(gymCode: String):
+        Result<List<ListUser>>
+
 }

@@ -4,6 +4,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.jesus.gymcontrol.domain.model.Gym
 import com.jesus.gymcontrol.domain.model.GymUserSummary
+import com.jesus.gymcontrol.domain.model.ListUser
 import com.jesus.gymcontrol.domain.repository.UserRepository
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -169,4 +170,32 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
+
+    override suspend fun getUserByGym(gymCode: String): Result<List<ListUser>> = try {
+        val snapshot = firestore.collection("gimnasios")
+            .document(gymCode)
+            .collection("usuarios")
+            .get()
+            .await()
+
+        val listUsers = snapshot.documents.map { doc ->
+            val data = doc.data ?: emptyMap<String, Any>()
+            ListUser(
+                id = doc.id,
+                name = data["name"] as? String ?: "",
+                idCard = data["idCard"] as? String ?: "",
+                phone = data["phone"] as? String ?: "",
+                email = data["email"] as? String ?: "",
+                isActive = data["isActive"] as? Boolean ?: false,
+                lastPaymentDate = (data["lastPaymentDate"] as? com.google.firebase.Timestamp)?.toDate()?.time
+            )
+        }
+
+        Result.success(listUsers)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+
 }
+

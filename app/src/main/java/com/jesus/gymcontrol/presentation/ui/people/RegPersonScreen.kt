@@ -2,11 +2,13 @@ package com.jesus.gymcontrol.presentation.ui.people
 
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -147,8 +149,6 @@ fun RegPersonContent(
     var rol by remember { mutableStateOf("cliente") }
 
     var showDialog by remember { mutableStateOf(false) }
-    var rolExpanded by remember { mutableStateOf(false) }
-    val roles = listOf("cliente", "admin")
 
     val isEmailValid = email.matches(Regex("^[A-Za-z0-9+_.-]+@gmail\\.com$"))
     val formIsValid = name.isNotBlank() && email.isNotBlank() && password.length >= 6 &&
@@ -202,6 +202,7 @@ fun RegPersonContent(
             label = { Text("Nombre completo") },
             modifier = Modifier.fillMaxWidth()
         )
+
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -209,6 +210,7 @@ fun RegPersonContent(
             isError = email.isNotBlank() && !isEmailValid,
             modifier = Modifier.fillMaxWidth()
         )
+
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -223,26 +225,43 @@ fun RegPersonContent(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth()
         )
-        OutlinedTextField(
-            value = code,
-            onValueChange = { code = it },
-            label = { Text("Código") },
-            modifier = Modifier.fillMaxWidth()
-        )
+
+        // Campo de código + botón de generar
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            OutlinedTextField(
+                value = code,
+                onValueChange = { code = it },
+                label = { Text("Código") },
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+                onClick = {
+                    viewModel.SetSelectedRoleForCode(rol)
+                    viewModel.generateCodeForRoleFromAdmin { generated ->
+                        code = generated
+                    }
+                }
+            ) {
+                Text("Generar")
+            }
+        }
 
         OutlinedTextField(
             value = rol,
             onValueChange = {},
             label = { Text("Rol") },
             readOnly = true,
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
+            enabled = false,
             colors = OutlinedTextFieldDefaults.colors(
                 disabledBorderColor = colorScheme.outline,
                 disabledTextColor = colorScheme.onSurface,
                 disabledLabelColor = colorScheme.onSurfaceVariant
-            ),
-            enabled = false
+            )
         )
 
         Spacer(modifier = Modifier.height(16.dp))

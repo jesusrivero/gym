@@ -93,8 +93,7 @@ fun NavigationHost(
 
         composable<AppRoutes.PersonasScreen> {
             PersonsScreen(
-                viewModel = viewModel,
-                navEdit = { navController.navigate(AppRoutes.EditPersonScreen(it)) },
+                navEdit = { navController.navigate(AppRoutes.EditPersonScreen()) },
                 navPag = { navController.navigate(AppRoutes.PaymentsScreen) },
                 navBottom = navController
             )

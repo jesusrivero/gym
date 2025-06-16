@@ -23,6 +23,7 @@ import com.jesus.gymcontrol.domain.usecase.usuario.CreateGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GenerateCodeUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetAllGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetGymUserSummaryUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.GetUserByGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.LoginUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.RegisterUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateDatesUserUseCase
@@ -164,5 +165,10 @@ object AppModule {
         @ApplicationContext context: Context
     ): UserAdminRepository = UserAdminRepositoryImpl(firestore, context)
 
+    @Provides
+    @Singleton
+    fun provideGetUserByGymUseCase(
+        userRepository: UserRepository
+    ) : GetUserByGymUseCase = GetUserByGymUseCase(userRepository)
 
 }
