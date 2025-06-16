@@ -28,7 +28,7 @@ class AdminViewModel @Inject constructor(
         private set
 
     fun loadGymUserSummary() {
-        val gymCode = sessionManager.getGymCode()  // Aquí lo obtenemos siempre actualizado
+        val gymCode = sessionManager.getGymCode()
         if (gymCode.isNullOrEmpty()) {
             errorMessage = "Código de gimnasio no encontrado"
             return

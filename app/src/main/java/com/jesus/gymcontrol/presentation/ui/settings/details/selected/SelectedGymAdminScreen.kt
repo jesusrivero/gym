@@ -92,7 +92,6 @@ fun SelectedGymAdmin(
                     // Solo asigna el gimnasio
                     userViewModel.onConfirmAssignGym(
                         gym = gym,
-                        codeInput = code,
                         context = context,
                         rol = "administrador",
                         navController = navController

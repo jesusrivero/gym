@@ -50,9 +50,7 @@ class GymViewModel @Inject constructor(
 
     var gymCode by mutableStateOf<String?>(null)
         private set
-
-    var codeGenerationError by mutableStateOf<String?> (null)
-
+	
     var generatedCode by mutableStateOf<String?>(null)
         private set
 
@@ -241,24 +239,6 @@ class GymViewModel @Inject constructor(
         selectedGym = gym
     }
 
-//    fun generateClientCode(gymCode: String) {
-//        viewModelScope.launch {
-//            isGenerating = true
-//            errorMessage = null
-//
-//            val result = generateCodeUseCase(gymCode)
-//
-//            result
-//                .onSuccess { code -> generatedCode = code }
-//                .onFailure { error -> errorMessage = error.message }
-//
-//            isGenerating = false
-//        }
-//    }
-
-//    fun clearGeneratedCode() {
-//        generatedCode = null
-//    }
 
 
 }

@@ -120,6 +120,7 @@ fun ActivateCodeContent(
                 uid = currentUser.uid,
                 gym = gym,
                 rol = "Dueño",
+	            navController = navController,
                 onSuccess = {
                     // 👉 Guardamos el rol del usuario localmente
                     authViewModel.newDatesUserLogin("Dueño", code, navController)

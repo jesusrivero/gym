@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
+import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.model.Gym
 import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
@@ -62,6 +63,7 @@ fun SelectedGymClient(
     viewModel: GymViewModel = hiltViewModel(),
     userViewModel: UserViewModel = hiltViewModel(),
     gymViewModel: GymViewModel = hiltViewModel(),
+		sessionManager: SessionManager,
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val searchQuery = viewModel.searchQuery
@@ -76,6 +78,8 @@ fun SelectedGymClient(
 
     val isCodeValid = viewModel.isCodeValid
     val codeValidationError = viewModel.codeValidationError
+	
+	  val rol by remember { mutableStateOf("cliente") }
 
     LaunchedEffect(Unit) {
         viewModel.fetchAllGyms()
@@ -90,7 +94,6 @@ fun SelectedGymClient(
                     // Asignar el gimnasio al usuario
                     userViewModel.onConfirmAssignGym(
                         gym = gym,
-                        codeInput = code,
                         context = context,
                         rol = "cliente",
                         navController = navController
@@ -102,7 +105,7 @@ fun SelectedGymClient(
                         codigo = code,
                         navController = navController
                     )
-
+											
                     // Marcar código como usado
                     viewModel.markCodeAsUsed(code = code, rol = "cliente")
 
@@ -169,6 +172,7 @@ fun SelectedGymClient(
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp)
                                 .clickable {
+	                                sessionManager.saveRoleState(!rol.isNullOrBlank())
                                     selectedGym = gym
                                     viewModel.resetValidation()
                                     showDialog = true
@@ -234,7 +238,8 @@ fun SelectedGymClient(
                                 isValidatingCode = true
                                 viewModel.validateClientCode(
                                     code = code.trim(),
-                                    gymCode = selectedGym!!.code.trim()
+                                    gymCode = selectedGym!!.code.trim(),
+																	
                                 )
                             },
                             enabled = code.isNotBlank() && !isValidatingCode
