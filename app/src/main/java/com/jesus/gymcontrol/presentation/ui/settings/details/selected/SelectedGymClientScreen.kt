@@ -102,7 +102,7 @@ fun SelectedGymClient(
                     // Actualizar la sesión y navegar desde el ViewModel
                     authViewModel.newDatesUserLogin(
                         rol = "cliente",
-                        codigo = code,
+                        code = code,
                         navController = navController
                     )
 											

@@ -85,7 +85,7 @@ fun ActivateCodeContent(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     var code by remember { mutableStateOf("") }
-    var rol by remember { mutableStateOf("") }
+    var rol by remember { mutableStateOf("dueño") }
 
     val context = LocalContext.current
     val authError = authViewModel.errorMessage
@@ -131,7 +131,7 @@ fun ActivateCodeContent(
                     // Reseteamos validación y navegamos
                     gymViewModel.resetValidation()
 
-                    navController.navigate(AppRoutes.MainScreen) {
+                    navController.navigate(AppRoutes.OwnerMainScreen) {
                         popUpTo(AppRoutes.StartScreen) { inclusive = true }
                     }
                 },
@@ -264,7 +264,7 @@ fun ActivateCodeContent(
 
                 Button(
                     onClick = {
-                        authViewModel.newDatesUserLogin("Dueño", code, navController)
+                        authViewModel.newDatesUserLogin("dueño", code, navController)
                         gymViewModel.code = code
                         gymViewModel.createGym()
                     },

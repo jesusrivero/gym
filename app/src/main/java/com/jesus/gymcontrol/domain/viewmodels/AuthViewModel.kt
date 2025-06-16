@@ -144,12 +144,12 @@ class AuthViewModel @Inject constructor(
 	
 	fun newDatesUserLogin(
 		rol: String,
-		codigo: String,
+		code: String,
 		navController: NavController,
 	) {
 		val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 		
-		if (codigo.isBlank()) {
+		if (code.isBlank()) {
 			errorMessage = "Debes ingresar un código"
 			return
 		}
@@ -159,12 +159,12 @@ class AuthViewModel @Inject constructor(
 			errorMessage = null
 			isSuccess = false
 			
-			val result = updateRolUseCase(uid, rol, codigo)
+			val result = updateRolUseCase(uid, rol, code)
 			isLoading = false
 			result.onSuccess {
 				isSuccess = true
 				
-				sessionManager.setUserSessionData(uid, rol, codigo)
+				sessionManager.setUserSessionData(uid, rol, code)
 				sessionManager.saveLoginState(true)
 				sessionManager.saveRoleState(true)
 				
