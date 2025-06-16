@@ -152,8 +152,7 @@ fun RegPersonContent(
 
     val isEmailValid = email.matches(Regex("^[A-Za-z0-9+_.-]+@gmail\\.com$"))
     val formIsValid = name.isNotBlank() && email.isNotBlank() && password.length >= 6 &&
-            phone.isNotBlank() && idCard.isNotBlank() &&
-            code.isNotBlank() && gimnasioCode.isNotBlank() && rol.isNotBlank() && isEmailValid
+            code.isNotBlank() && rol.isNotBlank() && isEmailValid
 
     if (showDialog) {
         AlertDialog(
@@ -216,13 +215,7 @@ fun RegPersonContent(
             label = { Text("Contraseña (mín. 6 caracteres)") },
             modifier = Modifier.fillMaxWidth()
         )
-        OutlinedTextField(
-            value = phone,
-            onValueChange = { phone = it },
-            label = { Text("Teléfono") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-            modifier = Modifier.fillMaxWidth()
-        )
+
         OutlinedTextField(
             value = idCard,
             onValueChange = { idCard = it },
@@ -234,12 +227,6 @@ fun RegPersonContent(
             value = code,
             onValueChange = { code = it },
             label = { Text("Código") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        OutlinedTextField(
-            value = gimnasioCode,
-            onValueChange = { gimnasioCode = it },
-            label = { Text("Código del gimnasio") },
             modifier = Modifier.fillMaxWidth()
         )
 

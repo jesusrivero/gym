@@ -128,24 +128,24 @@ class GymViewModel @Inject constructor(
         return gyms.filter { it.name.contains(searchQuery, ignoreCase = true) }
     }
 
-    fun validateGymCode(code: String, gymCode: String) {
-        viewModelScope.launch {
-            Log.d("GymViewModel", "validando")
-            isCodeValid = null
-            codeValidationError = null
-
-            val result = validateGymCodeUseCase(code.trim(), gymCode.trim())
-            result.onSuccess {
-                isCodeValid = it
-                Log.d("GymViewModel", "Resultado de validacion: $it")
-                if (!it)
-                    codeValidationError = "Codigo invalido o ya usado"
-            }.onFailure {
-                Log.d("GymViewModel", "Error al validar el codigo")
-                codeValidationError = "Error al validar el codigo: ${it.message}"
-            }
-        }
-    }
+//    fun validateGymCode(code: String, gymCode: String) {
+//        viewModelScope.launch {
+//            Log.d("GymViewModel", "validando")
+//            isCodeValid = null
+//            codeValidationError = null
+//
+//            val result = validateGymCodeUseCase(code.trim(), gymCode.trim())
+//            result.onSuccess {
+//                isCodeValid = it
+//                Log.d("GymViewModel", "Resultado de validacion: $it")
+//                if (!it)
+//                    codeValidationError = "Codigo invalido o ya usado"
+//            }.onFailure {
+//                Log.d("GymViewModel", "Error al validar el codigo")
+//                codeValidationError = "Error al validar el codigo: ${it.message}"
+//            }
+//        }
+//    }
 
     fun validateOwnerCode(code: String) {
         viewModelScope.launch {
