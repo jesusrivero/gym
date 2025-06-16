@@ -9,11 +9,13 @@ import com.jesus.gymcontrol.data.db.dao.UsuariosDatabaseDao
 import com.jesus.gymcontrol.data.repository.AuthRepositoryImpl
 import com.jesus.gymcontrol.data.repository.GymRepositoryImpl
 import com.jesus.gymcontrol.data.repository.SessionManager
+import com.jesus.gymcontrol.data.repository.UserAdminRepositoryImpl
 import com.jesus.gymcontrol.data.repository.UserRepositoryImpl
 import com.jesus.gymcontrol.data.repository.UsuarioRepositoryIMPL
 import com.jesus.gymcontrol.data.sharedPreferences.PreferencesManager
 import com.jesus.gymcontrol.domain.repository.AuthRepository
 import com.jesus.gymcontrol.domain.repository.GymRepository
+import com.jesus.gymcontrol.domain.repository.UserAdminRepository
 import com.jesus.gymcontrol.domain.repository.UserRepository
 import com.jesus.gymcontrol.domain.repository.UsuarioRepository
 import com.jesus.gymcontrol.domain.usecase.usuario.AssignGymToUserUseCase
@@ -152,6 +154,13 @@ object AppModule {
     ): GetGymUserSummaryUseCase {
         return GetGymUserSummaryUseCase(userRepository)
     }
+
+
+    @Provides
+    fun provideUserAdminRepository(
+        firestore: FirebaseFirestore,
+        @ApplicationContext context: Context
+    ): UserAdminRepository = UserAdminRepositoryImpl(firestore, context)
 
 
 }

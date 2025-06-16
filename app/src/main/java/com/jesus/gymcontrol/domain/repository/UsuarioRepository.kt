@@ -7,8 +7,4 @@ interface UsuarioRepository {
 	suspend fun updateUser(usuario: Person)
 	suspend fun deleteUser(usuario: Person)
 	suspend fun obtenerUsuarios(): List<Person>
-
-	
-
-
 }

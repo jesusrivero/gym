@@ -17,7 +17,6 @@ import com.jesus.gymcontrol.presentation.ui.auth.LoginScreen
 import com.jesus.gymcontrol.presentation.ui.auth.recover.RecoverPasswordScreen
 import com.jesus.gymcontrol.presentation.ui.main.MainScreen
 import com.jesus.gymcontrol.presentation.ui.people.EditPersonScreen
-import com.jesus.gymcontrol.presentation.ui.people.ListPersonScreen
 import com.jesus.gymcontrol.presentation.ui.people.PeopleViewModel
 import com.jesus.gymcontrol.presentation.ui.people.RegPersonScreen
 import com.jesus.gymcontrol.presentation.ui.auth.register.RegisterScreen
@@ -69,7 +68,7 @@ fun NavigationHost(
 
 
         composable<AppRoutes.RegPersonScreen> {
-            RegPersonScreen(navController, viewModel)
+            RegPersonScreen(navController)
         }
 
 
@@ -92,11 +91,6 @@ fun NavigationHost(
         }
 
 
-        composable<AppRoutes.ListPersonScreen> {
-            ListPersonScreen(
-                nav = navController
-            )
-        }
         composable<AppRoutes.PersonasScreen> {
             PersonsScreen(
                 viewModel = viewModel,

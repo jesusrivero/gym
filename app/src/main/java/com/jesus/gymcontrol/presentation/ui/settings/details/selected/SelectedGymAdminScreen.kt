@@ -79,7 +79,7 @@ fun SelectedGymAdmin(
 	var selectedGym by remember { mutableStateOf<Gym?>(null) }
 	var code by remember { mutableStateOf("") }
 	var isValidatingCode by remember { mutableStateOf(false) }
-	val rol by remember { mutableStateOf("cliente") }
+	val rol by remember { mutableStateOf("administrador") }
 	val context = LocalContext.current
 	
 	LaunchedEffect(Unit) {
@@ -96,19 +96,19 @@ fun SelectedGymAdmin(
 					userViewModel.onConfirmAssignGym(
 						gym = gym,
 						context = context,
-						rol = "cliente",
+						rol = "administrador",
 						navController = navController
 					)
 					
 					// Actualizar la sesión y navegar desde el ViewModel
 					authViewModel.newDatesUserLogin(
-						rol = "cliente",
+						rol = "administrador",
 						code = code,
 						navController = navController
 					)
 					
 					// Marcar código como usado
-					viewModel.markCodeAsUsed(code = code, rol = "cliente")
+					viewModel.markCodeAsUsed(code = code, rol = "administrador")
 					
 					// Resetear estado
 					gymViewModel.resetValidation()

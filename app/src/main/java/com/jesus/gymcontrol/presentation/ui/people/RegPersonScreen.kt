@@ -1,13 +1,17 @@
 package com.jesus.gymcontrol.presentation.ui.people
+
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -15,12 +19,14 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Snackbar
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,188 +34,244 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.jesus.gymcontrol.domain.model.Person
+import com.jesus.gymcontrol.domain.viewmodels.RegisterUserFromAdminViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegPersonScreen(
-	navController: NavController,
-	viewModel: PeopleViewModel = hiltViewModel()
+    navController: NavController,
+    viewModel:RegisterUserFromAdminViewModel = hiltViewModel()
 ) {
-	val colorScheme = MaterialTheme.colorScheme
-	var showSnackbar by remember { mutableStateOf(false) }
-	var snackbarMessage by remember { mutableStateOf("") }
+    val colorScheme = MaterialTheme.colorScheme
+    val context = LocalContext.current
 
-	if (showSnackbar) {
-		LaunchedEffect(showSnackbar) {
-			delay(2000)
-			showSnackbar = false
-		}
-	}
+    val isRegistering = viewModel.isRegistering
+    val registerSuccess = viewModel.registerSuccess
+    val errorMessage = viewModel.errorMessage
 
-	Scaffold(
-		topBar = {
-			CenterAlignedTopAppBar(
-				title = {
-					Text(
-						text = "Gym Control",
-						color = colorScheme.onPrimary,
-						fontWeight = FontWeight.Bold
-					)
-				},
-				colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-					containerColor = colorScheme.primary
-				),
-				navigationIcon = {
-					IconButton(onClick = { navController.popBackStack() }) {
-						Icon(
-							painter = painterResource(id = com.jesus.gymcontrol.R.drawable.ic_back),
-							contentDescription = "Regresar",
-							tint = colorScheme.onPrimary
-						)
-					}
-				}
-			)
-		},
-		snackbarHost = {
-			if (showSnackbar) {
-				Snackbar(
-					modifier = Modifier.padding(8.dp)
-				) {
-					Text(text = snackbarMessage)
-				}
-			}
-		}
-	) { paddingValues ->
-		RegPersonContent(
-			modifier = Modifier.padding(paddingValues),
-			viewModel = viewModel,
-			navController = navController,
-			onShowSnackbar = { message ->
-				snackbarMessage = message
-				showSnackbar = true
-			}
-		)
-	}
+    var showSnackbar by remember { mutableStateOf(false) }
+    var snackbarMessage by remember { mutableStateOf("") }
+
+    if (showSnackbar) {
+        LaunchedEffect(showSnackbar) {
+            delay(2000)
+            showSnackbar = false
+        }
+    }
+
+    LaunchedEffect(registerSuccess) {
+        if (registerSuccess) {
+            snackbarMessage = "Cliente registrado correctamente"
+            showSnackbar = true
+            viewModel.resetRegisterState()
+            navController.navigate(AppRoutes.MainScreen) {
+                popUpTo(AppRoutes.RegPersonScreen) { inclusive = true }
+            }
+        }
+    }
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let {
+            snackbarMessage = it
+            showSnackbar = true
+            viewModel.resetRegisterState()
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = "Gym Control",
+                        color = colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = colorScheme.primary
+                ),
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            painter = painterResource(id = com.jesus.gymcontrol.R.drawable.ic_back),
+                            contentDescription = "Regresar",
+                            tint = colorScheme.onPrimary
+                        )
+                    }
+                }
+            )
+        },
+        snackbarHost = {
+            if (showSnackbar) {
+                Snackbar(
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Text(text = snackbarMessage)
+                }
+            }
+        }
+    ) { paddingValues ->
+        RegPersonContent(
+            modifier = Modifier.padding(paddingValues),
+            viewModel = viewModel,
+            isLoading = isRegistering
+        )
+    }
 }
 
 @Composable
 fun RegPersonContent(
-	modifier: Modifier = Modifier,
-	viewModel: PeopleViewModel,
-	navController: NavController,
-	onShowSnackbar: (String) -> Unit
+    modifier: Modifier = Modifier,
+    viewModel: RegisterUserFromAdminViewModel,
+    isLoading: Boolean
 ) {
-	var usuario by remember { mutableStateOf("") }
-	var email by remember { mutableStateOf("") }
-	var cedula by remember { mutableStateOf("") }
-	var numeroTelefono by remember { mutableStateOf("") }
-	val colorScheme = MaterialTheme.colorScheme
-	val isValidEmail = email.trim().matches(Regex("^[A-Za-z0-9+_.-]+@gmail\\.com$"))
-	val formIsValid = usuario.isNotBlank() &&
-			email.isNotBlank() &&
-			cedula.isNotBlank() &&
-			numeroTelefono.isNotBlank() &&
-			isValidEmail
+    val colorScheme = MaterialTheme.colorScheme
 
-	Column(
-		modifier = modifier
-			.padding(16.dp)
-			.fillMaxSize(),
-		horizontalAlignment = Alignment.CenterHorizontally
-	) {
-		OutlinedTextField(
-			value = usuario,
-			maxLines = 1,
-			onValueChange = { usuario = it },
-			label = { Text("Nombre y apellido") },
-			modifier = Modifier.fillMaxWidth()
-		)
+    var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
+    var idCard by remember { mutableStateOf("") }
+    var code by remember { mutableStateOf("") }
+    var gimnasioCode by remember { mutableStateOf("") }
+    var rol by remember { mutableStateOf("cliente") }
 
-		Spacer(modifier = Modifier.height(8.dp))
+    var showDialog by remember { mutableStateOf(false) }
+    var rolExpanded by remember { mutableStateOf(false) }
+    val roles = listOf("cliente", "admin")
 
-		OutlinedTextField(
-			value = email,
-			maxLines = 1,
-			onValueChange = { email = it },
-			modifier = Modifier
-				.fillMaxWidth()
-				.height(56.dp),
-			textStyle = LocalTextStyle.current.copy(color = colorScheme.onSurface),
-			placeholder = {
-				Text("Correo electrónico", color = colorScheme.onSurfaceVariant)
-			},
-			singleLine = true,
-			isError = email.isNotBlank() && !isValidEmail
-		)
+    val isEmailValid = email.matches(Regex("^[A-Za-z0-9+_.-]+@gmail\\.com$"))
+    val formIsValid = name.isNotBlank() && email.isNotBlank() && password.length >= 6 &&
+            phone.isNotBlank() && idCard.isNotBlank() &&
+            code.isNotBlank() && gimnasioCode.isNotBlank() && rol.isNotBlank() && isEmailValid
 
-		if (email.isNotBlank() && !isValidEmail) {
-			Text(
-				text = "Debe ser un correo válido de Gmail",
-				color = MaterialTheme.colorScheme.error,
-				fontSize = 12.sp,
-				modifier = Modifier
-					.align(Alignment.Start)
-					.padding(top = 4.dp)
-			)
-		}
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                        viewModel.registerUserAsAdmin(
+                            email = email,
+                            password = password,
+                            name = name,
+                            phone = phone,
+                            idCard = idCard,
+                            gender = "",
+                            age = 0,
+                            membership = "",
+                            code = code,
+                            gimnasioCode = gimnasioCode,
+                            rol = rol
+                        )
+                    }
+                ) {
+                    Text("Confirmar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("Cancelar")
+                }
+            },
+            title = { Text("Confirmar registro") },
+            text = { Text("¿Deseas registrar a esta persona con rol '$rol'?") }
+        )
+    }
 
-		Spacer(modifier = Modifier.height(8.dp))
+    Column(
+        modifier = modifier
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Nombre completo") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Correo Gmail") },
+            isError = email.isNotBlank() && !isEmailValid,
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Contraseña (mín. 6 caracteres)") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = phone,
+            onValueChange = { phone = it },
+            label = { Text("Teléfono") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = idCard,
+            onValueChange = { idCard = it },
+            label = { Text("Cédula") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = code,
+            onValueChange = { code = it },
+            label = { Text("Código") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = gimnasioCode,
+            onValueChange = { gimnasioCode = it },
+            label = { Text("Código del gimnasio") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
-		OutlinedTextField(
-			value = cedula,
-			maxLines = 1,
-			onValueChange = { cedula = it },
-			label = { Text("Cédula de identidad") },
-			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-			modifier = Modifier.fillMaxWidth()
-		)
+        OutlinedTextField(
+            value = rol,
+            onValueChange = {},
+            label = { Text("Rol") },
+            readOnly = true,
+            modifier = Modifier
+                .fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                disabledBorderColor = colorScheme.outline,
+                disabledTextColor = colorScheme.onSurface,
+                disabledLabelColor = colorScheme.onSurfaceVariant
+            ),
+            enabled = false
+        )
 
-		Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-		OutlinedTextField(
-			value = numeroTelefono,
-			maxLines = 1,
-			onValueChange = { numeroTelefono = it },
-			label = { Text("Número de teléfono") },
-			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-			modifier = Modifier.fillMaxWidth()
-		)
-
-		Spacer(modifier = Modifier.height(16.dp))
-
-		Button(
-			onClick = {
-				val person = Person(
-					usuario = usuario,
-					email = email,
-					cedula = cedula,
-					numeroTelefono = numeroTelefono
-				)
-				viewModel.saveUser(person)
-				onShowSnackbar("Cliente registrado correctamente")
-				navController.navigate(AppRoutes.MainScreen)
-			},
-			enabled = formIsValid,
-			colors = ButtonDefaults.buttonColors(
-				containerColor = colorScheme.primary,
-				contentColor = colorScheme.onPrimary,
-				disabledContainerColor = colorScheme.onSurface.copy(alpha = 0.12f),
-				disabledContentColor = colorScheme.onSurface.copy(alpha = 0.38f)
-			),
-			modifier = Modifier.fillMaxWidth()
-		) {
-			Text("Agregar", style = MaterialTheme.typography.labelLarge)
-		}
-	}
+        Button(
+            onClick = { showDialog = true },
+            enabled = formIsValid && !isLoading,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            if (isLoading)
+                CircularProgressIndicator(
+                    color = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+            else
+                Text("Registrar", style = MaterialTheme.typography.labelLarge)
+        }
+    }
 }
-
-
