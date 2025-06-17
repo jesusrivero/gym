@@ -35,7 +35,7 @@ class AuthRepositoryImpl(
                 "gender" to "",
                 "state" to "",
                 "enabled" to "",
-                "last payment" to "",
+                "lastpayment" to "",
                 "membership" to ""
 
             )

@@ -35,9 +35,9 @@ class UserRepositoryImpl @Inject constructor(
                 "name" to userName,
                 "rol" to rol,
                 "registrationDate" to FieldValue.serverTimestamp(),
-                "estado" to "inactivo",           // ⬅️ NUEVO
-                "habilitado" to false,            // ⬅️ NUEVO
-                "fechaUltimoPago" to null         // ⬅️ NUEVO
+                "state" to "inactivo",           // ⬅️ NUEVO
+                "enable" to false,            // ⬅️ NUEVO
+                "lastpayment" to null         // ⬅️ NUEVO
             )
 
             // 4. Referencias principales
@@ -100,26 +100,26 @@ class UserRepositoryImpl @Inject constructor(
             // Crear membresía inicial
             batch.set(
                 membresiasRef, mapOf(
-                    "nombre" to "Membresía Básica",
-                    "descripcion" to "Plan de acceso básico",
-                    "precio" to 0,
-                    "estado" to "activa"
+                    "name" to "Membresía Básica",
+                    "description" to "Plan de acceso básico",
+                    "price" to 0,
+                    "state" to "activa"
                 )
             )
 
             // Crear promoción inicial
             batch.set(
                 promocionesRef, mapOf(
-                    "titulo" to "Sin promociones",
-                    "descripcion" to "Aún no hay promociones activas"
+                    "title" to "Sin promociones",
+                    "description" to "Aún no hay promociones activas"
                 )
             )
 
             // Crear mensaje de bienvenida
             batch.set(
                 mensajesRef, mapOf(
-                    "contenido" to "¡Bienvenido al gimnasio ${gym.name}!",
-                    "fecha" to FieldValue.serverTimestamp()
+                    "content" to "¡Bienvenido al gimnasio ${gym.name}!",
+                    "date" to FieldValue.serverTimestamp()
                 )
             )
 

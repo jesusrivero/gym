@@ -82,9 +82,9 @@ class UserAdminRepositoryImpl @Inject constructor(
             firestore.collection("users").document(uid)
                 .collection("gimnasios").document(gymCode).set(
                     mapOf(
-                        "codigo" to gymCode,
-                        "nombre" to gymName,
-                        "estado" to "inactivo"
+                        "code" to gymCode,
+                        "name" to gymName,
+                        "state" to "inactivo"
                     )
                 ).await()
 
@@ -93,9 +93,12 @@ class UserAdminRepositoryImpl @Inject constructor(
                 .collection("usuarios").document(uid).set(
                     mapOf(
                         "uid" to uid,
-                        "nombre" to name,
+                        "name" to name,
                         "rol" to rol,
-                        "estado" to "inactivo"
+                        "state" to "inactivo",
+                        "email" to email,
+                        "phone" to phone,
+                       "idCard" to idCard
                     )
                 ).await()
 
