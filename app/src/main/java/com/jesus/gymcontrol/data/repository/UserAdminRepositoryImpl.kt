@@ -88,6 +88,7 @@ class UserAdminRepositoryImpl @Inject constructor(
                     )
                 ).await()
 
+
             // Agregar usuario en la colección de usuarios del gimnasio
             firestore.collection("gimnasios").document(gymCode)
                 .collection("usuarios").document(uid).set(

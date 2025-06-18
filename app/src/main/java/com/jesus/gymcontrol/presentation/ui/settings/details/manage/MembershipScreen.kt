@@ -1,141 +1,79 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details.manage
 
-import androidx.compose.foundation.background
+
+import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.jesus.gymcontrol.R
-import com.jesus.gymcontrol.presentation.theme.GymTheme
-import com.jesus.gymcontrol.presentation.ui.people.PaymentSettingsViewModel
-import kotlinx.coroutines.delay
+import com.jesus.gymcontrol.domain.model.Membership
+import com.jesus.gymcontrol.domain.viewmodels.MembershipViewModel
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MembershipScreen(navController: NavController) {
-    val viewModel: PaymentSettingsViewModel = hiltViewModel()
-    val state by viewModel.paymentState.collectAsState()
+fun MembershipScreen(
+    viewModel: MembershipViewModel = hiltViewModel(),
+    navController: NavController
+) {
+    val context = LocalContext.current
+    val isLoading = viewModel.isLoading
+    val memberships = viewModel.memberships
+    val errorMessage = viewModel.errorMessage
+
+    var showCreateDialog by remember { mutableStateOf(false) }
+    var name by remember { mutableStateOf("") }
+    var price by remember { mutableStateOf("") }
+
+    var membershipToDelete by remember { mutableStateOf<Membership?>(null) }
+    var membershipToEdit by remember { mutableStateOf<Membership?>(null) }
 
     LaunchedEffect(Unit) {
-        viewModel.getPricesValue()
-    }
-
-    var showUpdateSnackbar by remember { mutableStateOf(false) }
-    LaunchedEffect(state.PricesMembership) {
-        if (state.PricesMembership != null) {
-            showUpdateSnackbar = true
-        }
-    }
-
-    GymTheme {
-        MembershipContent(
-            navController = navController,
-            navBottom = navController,
-            state = state,
-            onSubmit = { p1, p2, p3, p4, p5, p6 ->
-                viewModel.updatePricesMembership(
-                    WeeklyValue = p1,
-                    BiweeklyValue = p2,
-                    MonthlyValue = p3,
-                    QuarterlyValue = p4,
-                    BiannualValue = p5,
-                    AnnualValue = p6
-                )
-            },
-            showUpdateSnackbar = showUpdateSnackbar,
-            onDismissSnackbar = { showUpdateSnackbar = false }
-        )
-    }
-}
-
-fun allFieldsAreValid(
-    weekly: String,
-    biweekly: String,
-    monthly: String,
-    quarterly: String,
-    biannual: String,
-    annual: String
-): Boolean {
-    return weekly.isNotBlank() && weekly.toDoubleOrNull() != null &&
-            biweekly.isNotBlank() && biweekly.toDoubleOrNull() != null &&
-            monthly.isNotBlank() && monthly.toDoubleOrNull() != null &&
-            quarterly.isNotBlank() && quarterly.toDoubleOrNull() != null &&
-            biannual.isNotBlank() && biannual.toDoubleOrNull() != null &&
-            annual.isNotBlank() && annual.toDoubleOrNull() != null
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MembershipContent(
-    navController: NavController,
-    navBottom: NavController,
-    onSubmit: (String, String, String, String, String, String) -> Unit,
-    state: PaymentSettingsViewModel.PaymentState,
-    showUpdateSnackbar: Boolean = false,
-    onDismissSnackbar: () -> Unit = {}
-) {
-    val colorScheme = MaterialTheme.colorScheme
-    val typography = MaterialTheme.typography
-
-    var showSnackbar by remember { mutableStateOf(false) }
-    var snackbarMessage by remember { mutableStateOf("") }
-
-    var editedWeekly by rememberSaveable { mutableStateOf("") }
-    var editedBiweekly by rememberSaveable { mutableStateOf("") }
-    var editedMonthly by rememberSaveable { mutableStateOf("") }
-    var editedQuarterly by rememberSaveable { mutableStateOf("") }
-    var editedBiannual by rememberSaveable { mutableStateOf("") }
-    var editedAnnual by rememberSaveable { mutableStateOf("") }
-
-    LaunchedEffect(state.PricesMembership) {
-        state.PricesMembership?.let {
-            editedWeekly = it.weekly.orEmpty()
-            editedBiweekly = it.biweekly.orEmpty()
-            editedMonthly = it.monthly.orEmpty()
-            editedQuarterly = it.quarterly.orEmpty()
-            editedBiannual = it.biannual.orEmpty()
-            editedAnnual = it.annual.orEmpty()
-        }
-    }
-
-    if (showSnackbar) {
-        LaunchedEffect(Unit) {
-            delay(2000)
-            showSnackbar = false
-        }
+        viewModel.loadMemberships()
     }
 
     Scaffold(
@@ -143,130 +81,300 @@ fun MembershipContent(
             TopAppBar(
                 title = {
                     Text(
-                        "Listado de membresías",
-                        color = colorScheme.onPrimary,
-                        style = typography.titleLarge,
-                        fontWeight = FontWeight.Bold
+                        text = "Control de Membresías",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navBottom.popBackStack() }) {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_back),
+                            painter = painterResource(id = com.jesus.gymcontrol.R.drawable.ic_back),
                             contentDescription = "Regresar",
-                            tint = colorScheme.onPrimary
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.primary)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
             )
         },
-        snackbarHost = {
-            if (showSnackbar) {
-                Snackbar(
-                    modifier = Modifier.padding(8.dp)
-                ) {
-                    Text(text = snackbarMessage)
-                }
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showCreateDialog = true },
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Crear Membresía")
             }
         }
-    ) { innerPadding ->
+    ) { padding ->
         Column(
             modifier = Modifier
-                .padding(innerPadding)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
+                .padding(padding)
+                .padding(horizontal = 20.dp, vertical = 12.dp)
+                .fillMaxSize()
         ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.medium,
-                elevation = CardDefaults.cardElevation(4.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(colorScheme.background)
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = "Editar valores de pago en dólares",
-                        style = typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = colorScheme.onBackground
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    MembershipTextField("Semanal", editedWeekly) { editedWeekly = it }
-                    MembershipTextField("Quincenal", editedBiweekly) { editedBiweekly = it }
-                    MembershipTextField("Mensual", editedMonthly) { editedMonthly = it }
-                    MembershipTextField("Trimestral", editedQuarterly) { editedQuarterly = it }
-                    MembershipTextField("Semestral", editedBiannual) { editedBiannual = it }
-                    MembershipTextField("Anual", editedAnnual) { editedAnnual = it }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Button(
-                        onClick = {
-                            if (allFieldsAreValid(
-                                    editedWeekly,
-                                    editedBiweekly,
-                                    editedMonthly,
-                                    editedQuarterly,
-                                    editedBiannual,
-                                    editedAnnual
-                                )
-                            ) {
-                                onSubmit(
-                                    editedWeekly,
-                                    editedBiweekly,
-                                    editedMonthly,
-                                    editedQuarterly,
-                                    editedBiannual,
-                                    editedAnnual
-                                )
-                                snackbarMessage = "Cambios guardados correctamente"
-                            } else {
-                                snackbarMessage = "Por favor complete todos los campos"
-                            }
-                            showSnackbar = true
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = allFieldsAreValid(
-                            editedWeekly,
-                            editedBiweekly,
-                            editedMonthly,
-                            editedQuarterly,
-                            editedBiannual,
-                            editedAnnual
-                        ),
-                        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+            when {
+                isLoading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text("Guardar cambios")
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+                memberships.isEmpty() -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "No hay membresías registradas.",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                else -> {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(memberships) { membership ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp),
+                                elevation = CardDefaults.cardElevation(4.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp)
+                                ) {
+                                    Text(
+                                        text = membership.nombre,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = "Precio: $${membership.precio}",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    Text(
+                                        text = "Usuarios registrados: 0",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+
+                                    Spacer(modifier = Modifier.height(12.dp))
+
+                                    Row(
+                                        horizontalArrangement = Arrangement.End,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        IconButton(onClick = {
+                                            membershipToEdit = membership
+                                        }) {
+                                            Icon(Icons.Default.Edit, contentDescription = "Editar")
+                                        }
+
+                                        IconButton(onClick = {
+                                            membershipToDelete = membership
+                                        }) {
+                                            Icon(
+                                                Icons.Default.Delete,
+                                                contentDescription = "Eliminar"
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
-        }
-    }
-}
 
-@Composable
-fun MembershipTextField(label: String, value: String, onValueChange: (String) -> Unit) {
-    val typography = MaterialTheme.typography
-    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-        Text(text = "$label:", style = typography.bodyMedium)
-        OutlinedTextField(
-            value = value,
-	        maxLines = 1,
-            onValueChange = {
-                if (it.isEmpty() || it.toDoubleOrNull() != null) onValueChange(it)
-            },
-            label = { Text("Valor $label".lowercase()) },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Next
-            )
-        )
+
+            if (showCreateDialog) {
+                AlertDialog(
+                    onDismissRequest = { showCreateDialog = false },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                val parsedPrice = price.toDoubleOrNull()
+                                if (name.isBlank() || parsedPrice == null) {
+                                    Toast.makeText(
+                                        context,
+                                        "Complete correctamente los campos",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    return@Button
+                                }
+
+                                val membership = Membership(
+                                    id = "",
+                                    nombre = name.trim(),
+                                    precio = parsedPrice,
+                                    gimnasioCode = ""
+                                )
+
+                                viewModel.createMembership(membership)
+                                showCreateDialog = false
+                                name = ""
+                                price = ""
+                                Toast.makeText(
+                                    context,
+                                    "Membresía creada exitosamente",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                viewModel.loadMemberships()
+                            },
+                            enabled = !isLoading
+                        ) {
+                            if (isLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(16.dp),
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                Text("Guardar")
+                            }
+                        }
+                    },
+                    dismissButton = {
+                        OutlinedButton(onClick = {
+                            showCreateDialog = false
+                            name = ""
+                            price = ""
+                        }) {
+                            Text("Cancelar")
+                        }
+                    },
+                    title = { Text("Nueva Membresía") },
+                    text = {
+                        Column {
+                            OutlinedTextField(
+                                value = name,
+                                onValueChange = { name = it },
+                                label = { Text("Nombre") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            OutlinedTextField(
+                                value = price,
+                                onValueChange = { price = it },
+                                label = { Text("Precio") },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            }
+
+
+            membershipToDelete?.let { membership ->
+                AlertDialog(
+                    onDismissRequest = { membershipToDelete = null },
+                    title = { Text("¿Eliminar membresía?") },
+                    text = {
+                        Text("¿Estás seguro de eliminar la membresía \"${membership.nombre}\"? Esta acción no se puede deshacer.")
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                viewModel.deleteMembership(membership)
+                                membershipToDelete = null
+                            }
+                        ) {
+                            Text("Eliminar")
+                        }
+                    },
+                    dismissButton = {
+                        OutlinedButton(onClick = { membershipToDelete = null }) {
+                            Text("Cancelar")
+                        }
+                    }
+                )
+            }
+
+
+            membershipToEdit?.let { membership ->
+                var editedName by remember { mutableStateOf(membership.nombre) }
+                var editedPrice by remember { mutableStateOf(membership.precio.toString()) }
+
+                AlertDialog(
+                    onDismissRequest = { membershipToEdit = null },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                val parsedPrice = editedPrice.toDoubleOrNull()
+                                if (editedName.isBlank() || parsedPrice == null) {
+                                    Toast.makeText(
+                                        context,
+                                        "Complete correctamente los campos",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    return@Button
+                                }
+
+                                val updatedMembership = membership.copy(
+                                    nombre = editedName.trim(),
+                                    precio = parsedPrice
+                                )
+
+                                viewModel.editMembership(updatedMembership)
+                                membershipToEdit = null
+                            }
+                        ) {
+                            Text("Guardar")
+                        }
+                    },
+                    dismissButton = {
+                        OutlinedButton(onClick = { membershipToEdit = null }) {
+                            Text("Cancelar")
+                        }
+                    },
+                    title = { Text("Editar membresía") },
+                    text = {
+                        Column {
+                            OutlinedTextField(
+                                value = editedName,
+                                onValueChange = { editedName = it },
+                                label = { Text("Nombre") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            OutlinedTextField(
+                                value = editedPrice,
+                                onValueChange = { editedPrice = it },
+                                label = { Text("Precio") },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            }
+
+
+            errorMessage?.let {
+                LaunchedEffect(it) {
+                    Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+                }
+            }
+        }
     }
 }

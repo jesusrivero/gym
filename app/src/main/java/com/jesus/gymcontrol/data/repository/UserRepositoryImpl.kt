@@ -107,6 +107,8 @@ class UserRepositoryImpl @Inject constructor(
                 )
             )
 
+            
+
             // Crear promoción inicial
             batch.set(
                 promocionesRef, mapOf(

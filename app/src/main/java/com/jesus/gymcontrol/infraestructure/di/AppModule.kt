@@ -8,6 +8,8 @@ import com.jesus.gymcontrol.data.db.AppDatabase
 import com.jesus.gymcontrol.data.db.dao.UsuariosDatabaseDao
 import com.jesus.gymcontrol.data.repository.AuthRepositoryImpl
 import com.jesus.gymcontrol.data.repository.GymRepositoryImpl
+import com.jesus.gymcontrol.data.repository.MembershipRepositoryImpl
+import com.jesus.gymcontrol.data.repository.PagoRepositoryImpl
 import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.data.repository.UserAdminRepositoryImpl
 import com.jesus.gymcontrol.data.repository.UserRepositoryImpl
@@ -15,14 +17,22 @@ import com.jesus.gymcontrol.data.repository.UsuarioRepositoryIMPL
 import com.jesus.gymcontrol.data.sharedPreferences.PreferencesManager
 import com.jesus.gymcontrol.domain.repository.AuthRepository
 import com.jesus.gymcontrol.domain.repository.GymRepository
+import com.jesus.gymcontrol.domain.repository.MembershipRepository
+import com.jesus.gymcontrol.domain.repository.PagoRepository
 import com.jesus.gymcontrol.domain.repository.UserAdminRepository
 import com.jesus.gymcontrol.domain.repository.UserRepository
 import com.jesus.gymcontrol.domain.repository.UsuarioRepository
+import com.jesus.gymcontrol.domain.usecase.usuario.AddPaymentUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.AssignGymToUserUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.CreateGymUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.CreateMembershipUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.DeleteMembershipUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.EditMembershipUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GenerateCodeUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetAllGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetGymUserSummaryUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.GetMembershipsUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.GetMembershipsWithUserCountUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetUserByGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.LoginUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.RegisterUseCase
@@ -39,7 +49,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-
 
 
     @Provides
@@ -169,6 +178,51 @@ object AppModule {
     @Singleton
     fun provideGetUserByGymUseCase(
         userRepository: UserRepository
-    ) : GetUserByGymUseCase = GetUserByGymUseCase(userRepository)
+    ): GetUserByGymUseCase = GetUserByGymUseCase(userRepository)
+
+
+    @Provides
+    fun provideMembershipRepository(
+        firestore: FirebaseFirestore,
+        auth: FirebaseAuth
+    ): MembershipRepository = MembershipRepositoryImpl(firestore, auth)
+
+    @Provides
+    fun provideCreateMembershipUseCase(
+        repository: MembershipRepository
+    ): CreateMembershipUseCase = CreateMembershipUseCase(repository)
+
+    @Provides
+    fun provideGetMembershipsUseCase(repository: MembershipRepository) =
+        GetMembershipsUseCase(repository)
+
+    @Provides
+    fun provideDeleteMembershipUseCase(repository: MembershipRepository): DeleteMembershipUseCase {
+        return DeleteMembershipUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetMembershipsWithUserCountUseCase(
+        repository: MembershipRepository
+    ): GetMembershipsWithUserCountUseCase {
+        return GetMembershipsWithUserCountUseCase(repository)
+    }
+
+    @Provides
+    fun provideEditMembership(
+        repository: MembershipRepository
+    ):  EditMembershipUseCase {
+        return  EditMembershipUseCase(repository)
+    }
+
+    @Provides
+    fun providePagoRepository(
+        firestore: FirebaseFirestore
+    ): PagoRepository = PagoRepositoryImpl(firestore)
+
+    @Provides
+    fun provideAddPagoUseCase(
+        repository: PagoRepository
+    ): AddPaymentUseCase = AddPaymentUseCase(repository)
 
 }

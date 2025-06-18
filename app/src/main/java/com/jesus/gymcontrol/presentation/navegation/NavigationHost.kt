@@ -29,9 +29,9 @@ import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.Account
 import com.jesus.gymcontrol.presentation.ui.settings.details.ActivateCodeScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.ClientMainScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.OwnerMainScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.manage.MembershipScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.ErrorReportScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.manage.PersonsScreen
-import com.jesus.gymcontrol.presentation.ui.settings.details.manage.MembershipScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.CodeClientScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.NotificationScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.SecurityScreen
@@ -131,8 +131,10 @@ fun NavigationHost(
 
         composable<AppRoutes.MembershipScreen> {
             MembershipScreen(
-                navController = navController
-            )
+                navController = navController,
+
+
+                )
 
         }
 
@@ -208,7 +210,8 @@ fun NavigationHost(
         composable<AppRoutes.OwnerMainScreen> {
             OwnerMainScreen(
                 navController = navController,
-                gymViewModel = gymViewModel,)
+                gymViewModel = gymViewModel,
+            )
         }
 
     }
