@@ -9,7 +9,7 @@ data class Pago(
     val userCedula: String,
     val membershipId: String,
     val membershipName: String,
-    val tipoPago: String, // "USD", "VES" o "MIXTO"
+    val tipoPago: String,
     val monto: Double,
     val descripcion: String,
     val referencia: String?,

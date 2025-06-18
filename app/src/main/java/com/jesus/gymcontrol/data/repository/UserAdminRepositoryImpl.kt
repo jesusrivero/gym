@@ -72,7 +72,7 @@ class UserAdminRepositoryImpl @Inject constructor(
                 "code" to code,
                 "gimnasioCode" to gymCode,
                 "rol" to rol,
-                "estado" to "inactivo",
+                "state" to "inactivo",
                 "phone" to phone
             )
 

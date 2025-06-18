@@ -137,8 +137,8 @@ class MembershipRepositoryImpl @Inject constructor(
                 .document(id)
                 .update(
                     mapOf(
-                        "nombre" to membership.nombre,
-                        "precio" to membership.precio
+                        "name" to membership.nombre,
+                        "price" to membership.precio
                     )
                 )
                 .await()

@@ -75,7 +75,7 @@ fun MembersCardScreen(
                             )
                             Spacer(modifier = Modifier.width(4.dp))
 //                            Text(
-//                                text = "${membership.totalUsuarios}",
+//                                text = "${membership.}",
 //                                color = Color.White,
 //                                fontSize = 16.sp
 //                            )

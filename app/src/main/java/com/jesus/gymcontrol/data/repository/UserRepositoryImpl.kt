@@ -151,7 +151,7 @@ class UserRepositoryImpl @Inject constructor(
             for (doc in usuariosSnapshot.documents) {
                 total++
 
-                val estado = doc.getString("estado") ?: "inactivo"
+                val estado = doc.getString("state") ?: "inactivo"
 
                 when (estado.lowercase()) {
                     "activo" -> activos++

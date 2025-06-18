@@ -14,15 +14,15 @@ class PagoRepositoryImpl @Inject constructor(
         val pagoMap = mapOf(
             "id" to pago.id,
             "userId" to pago.userId,
-            "userName" to pago.userName,
-            "userCedula" to pago.userCedula,
+            "Name" to pago.userName,
+            "idcard" to pago.userCedula,
             "membershipId" to pago.membershipId,
             "membershipName" to pago.membershipName,
-            "tipoPago" to pago.tipoPago,
-            "monto" to pago.monto,
-            "descripcion" to pago.descripcion,
-            "referencia" to pago.referencia,
-            "fecha" to pago.fecha,
+            "tipepayment" to pago.tipoPago,
+            "amount" to pago.monto,
+            "description" to pago.descripcion,
+            "reference" to pago.referencia,
+            "date" to pago.fecha,
             "gimnasioCode" to pago.gimnasioCode
         )
 
@@ -48,11 +48,11 @@ class PagoRepositoryImpl @Inject constructor(
             batch.set(pagoRef, pagoMap)
             batch.set(userPagoRef, pagoMap)
             batch.set(membresiaUserRef, mapOf(
-                "nombre" to pago.userName,
-                "cedula" to pago.userCedula,
-                "fechaPago" to pago.fecha
+                "name" to pago.userName,
+                "idcard" to pago.userCedula,
+                "paymentdate" to pago.fecha
             ))
-            batch.update(userRef, "activo", true)
+            batch.update(userRef, "state", "activo")
         }.await()
 
         Result.success(Unit)

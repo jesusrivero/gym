@@ -181,11 +181,11 @@ class GymRepositoryImpl @Inject constructor(
 
             // Preparar datos del código
             val data = mapOf(
-                "codigo" to fullCode,
+                "code" to fullCode,
                 "rol" to rol,
-                "usado" to false,
+                "used" to false,
                 "gimnasioCode" to gymCode,
-                "fechaCreacion" to FieldValue.serverTimestamp()
+                "creationdate" to FieldValue.serverTimestamp()
             )
 
             // Guardar en Firestore
