@@ -303,6 +303,7 @@ fun PaymentsScreenContent(
 									viewModel.updatePaymentType(type)
 									isTypeDropdownExpanded = false
 								}
+								
 							)
 						}
 					}
