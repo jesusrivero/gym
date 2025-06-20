@@ -1,9 +1,8 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details.manage
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,455 +12,274 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.Divider
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
-import com.jesus.gymcontrol.domain.model.Person
+import com.jesus.gymcontrol.domain.model.Payment
+import com.jesus.gymcontrol.domain.viewmodels.PaymentsViewModel
 import com.jesus.gymcontrol.presentation.theme.GymTheme
-import com.jesus.gymcontrol.presentation.ui.people.PeopleViewModel
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
+import com.jesus.gymcontrol.presentation.ui.commons.PaymentFilters
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListPaymentsScreen(
-    navBottom: NavController,
-    viewModel: PeopleViewModel,
-    navEdit: (Int?) -> Unit,
-    navPagToScreen: () -> Unit
+	navBottom: NavController,
+	viewModel: PaymentsViewModel = hiltViewModel(),
+	navPagToScreen: () -> Unit
 ) {
-    GymTheme {
-        var showUserDialog by remember { mutableStateOf(false) }
-        var selectedUser by remember { mutableStateOf<Person?>(null) }
-        var searchText by remember { mutableStateOf("") }
-        var selectedPaymentType by remember { mutableStateOf("Todos") }
-        var startDate by remember { mutableStateOf<LocalDate?>(null) }
-        var endDate by remember { mutableStateOf<LocalDate?>(null) }
-        var showStartDatePicker by remember { mutableStateOf(false) }
-        var showEndDatePicker by remember { mutableStateOf(false) }
-
-        val paymentTypeOptions = listOf("Todos", "Dólares", "Bolívares", "Mixtos")
-        val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-
-        if (showUserDialog && selectedUser != null) {
-            AlertDialog(
-                onDismissRequest = { showUserDialog = false },
-                title = {
-                    Text(
-                        "Detalles del pago",
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
-                },
-                text = {
-                    Column {
-                        DetailRow("Nombre:", selectedUser?.usuario ?: "")
-                        Spacer(modifier = Modifier.height(8.dp))
-                        DetailRow("Email:", selectedUser?.email ?: "")
-                        Spacer(modifier = Modifier.height(8.dp))
-                        DetailRow("Tipo de pago:", "Dólares") // Simulado
-                        Spacer(modifier = Modifier.height(8.dp))
-                        DetailRow("Monto:", "$100.00") // Simulado
-                    }
-                },
-                confirmButton = {
-                    Button(
-                        onClick = { showUserDialog = false },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Cerrar")
-                    }
-                }
-            )
-        }
-
-        if (showStartDatePicker) {
-            val datePickerState = rememberDatePickerState()
-            DatePickerDialog(
-                onDismissRequest = { showStartDatePicker = false },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            datePickerState.selectedDateMillis?.let {
-                                startDate = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault())
-                                    .toLocalDate()
-                            }
-                            showStartDatePicker = false
-                        }
-                    ) {
-                        Text("OK")
-                    }
-                }
-            ) {
-                DatePicker(state = datePickerState)
-            }
-        }
-
-        if (showEndDatePicker) {
-            val datePickerState = rememberDatePickerState()
-            DatePickerDialog(
-                onDismissRequest = { showEndDatePicker = false },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            datePickerState.selectedDateMillis?.let {
-                                endDate = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault())
-                                    .toLocalDate()
-                            }
-                            showEndDatePicker = false
-                        }
-                    ) {
-                        Text("OK")
-                    }
-                }
-            ) {
-                DatePicker(state = datePickerState)
-            }
-        }
-
-        Scaffold(
-            topBar = {
-                Column {
-                    TopAppBar(
-                        title = {
-                            Text(
-                                text = "Listado de pagos",
-                                color = colorScheme.onPrimary,
-                                fontWeight = FontWeight.Bold,
-                            )
-                        },
-                        navigationIcon = {
-                            IconButton(onClick = { navBottom.popBackStack() }) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_back),
-                                    contentDescription = "Regresar"
-                                )
-                            }
-                        },colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = colorScheme.primary)
-                    )
-
-                    PaymentFilters(
-                        selectedPaymentType = selectedPaymentType,
-                        paymentTypeOptions = paymentTypeOptions,
-                        onPaymentTypeSelected = { selectedPaymentType = it },
-                        onClearFilters = {
-                            selectedPaymentType = "Todos"
-                            startDate = null
-                            endDate = null
-                        },
-                        searchText = searchText,
-                        onSearchTextChanged = { searchText = it }
-                    )
-                }
-            },
-	        floatingActionButton = {
-		        FloatingActionButton(
-			        onClick = { navPagToScreen() },
-			        containerColor = colorScheme.primary,
-			        contentColor = colorScheme.onPrimary
-		        ) {
-			        Icon(Icons.Default.Add, contentDescription = "Nuevo pago")
-		        }
-	        }
-        ) { innerPadding ->
-            val state = viewModel.state
-            val filteredList = if (searchText.isBlank()) {
-                state.userList
-            } else {
-                state.userList.filter {
-                    it.usuario.contains(searchText, true) || it.email.contains(searchText, true)
-                }
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentAlignment = Alignment.Center
-            ) {
-                if (filteredList.isEmpty()) {
-                    Text(
-                        text = if (searchText.isNotEmpty()) "No se encontraron resultados" else "No hay pagos registrados",
-                        color = colorScheme.onSurfaceVariant
-                    )
-                } else {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(filteredList) { user ->
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp)
-                            ) {
-                                Column(modifier = Modifier.padding(16.dp)) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Text(
-                                                text = user.usuario,
-                                                style = MaterialTheme.typography.titleMedium,
-                                                fontWeight = FontWeight.SemiBold
-                                            )
-                                            Text(
-                                                text = user.email,
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                color = colorScheme.onSurfaceVariant
-                                            )
-                                            Spacer(modifier = Modifier.height(8.dp))
-                                            Row(
-                                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                            ) {
-                                                PaymentInfoBadge("Dólares", "$100.00")
-                                                PaymentInfoBadge("Fecha", "15/06/2023")
-                                            }
-                                        }
-                                        IconButton(onClick = {
-                                            selectedUser = user; showUserDialog = true
-                                        }) {
-                                            Icon(
-                                                painter = painterResource(id = R.drawable.ic_details),
-                                                contentDescription = "Detalles"
-                                            )
-                                        }
-                                    }
-
-                                    Divider(modifier = Modifier.padding(vertical = 8.dp))
-
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.End
-                                    ) {
-                                        IconButton(onClick = { navEdit(user.id) }) {
-                                            Icon(Icons.Default.Edit, contentDescription = "Editar")
-                                        }
-                                        IconButton(onClick = { viewModel.deleteUser(user) }) {
-                                            Icon(
-                                                Icons.Default.Delete,
-                                                contentDescription = "Eliminar",
-                                                tint = colorScheme.error
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun PaymentFilters(
-    selectedPaymentType: String,
-    paymentTypeOptions: List<String>,
-    onPaymentTypeSelected: (String) -> Unit,
-    onClearFilters: () -> Unit,
-    searchText: String,
-    onSearchTextChanged: (String) -> Unit
-) {
-    var expandedFilter by remember { mutableStateOf(false) }
-
-    Column {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            shape = RoundedCornerShape(16.dp),
-            color = colorScheme.surface,
-            shadowElevation = 4.dp
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-
-                Text(
-                    text = "Tipo de pago",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
-                ExposedDropdownMenuBox(
-                    expanded = expandedFilter,
-                    onExpandedChange = { expandedFilter = it }
-                ) {
-                    OutlinedTextField(
-                        value = selectedPaymentType,
-                        onValueChange = {},
-                        readOnly = true,
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedFilter) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    ExposedDropdownMenu(
-                        expanded = expandedFilter,
-                        onDismissRequest = { expandedFilter = false },
-                        modifier = Modifier.background(Color.White)
-                    ) {
-                        paymentTypeOptions.forEach { option ->
-                            DropdownMenuItem(
-                                text = { Text(option, modifier = Modifier.fillMaxWidth()) },
-                                onClick = { onPaymentTypeSelected(option); expandedFilter = false }
-                            )
-                        }
-                    }
-                }
-	            
-	            
-                if (true) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedButton(
-                        onClick = onClearFilters,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = colorScheme.primary
-                        ),
-                        border = BorderStroke(
-                            1.dp, colorScheme.primary.copy(alpha = 0.5f)
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Limpiar",
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(3.dp))
-                        Text("Limpiar filtros")
-                    }
-                }
-            }
-        }
-
-
-        TextField(
-            value = searchText,
-            onValueChange = onSearchTextChanged,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            placeholder = { Text("Buscar por nombre o referencia...") },
-            leadingIcon = {
-                Icon(
-                    Icons.Default.Search,
-                    contentDescription = "Buscar",
-                    tint = colorScheme.primary
-                )
-            },
-            shape = RoundedCornerShape(16.dp),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = colorScheme.surface,
-                unfocusedContainerColor = colorScheme.surface,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedTextColor = colorScheme.onSurface,
-                unfocusedTextColor = colorScheme.onSurface
-            ),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
-        )
-    }
-
-
-}
-
-
-@Composable
-private fun PaymentInfoBadge(label: String, value: String) {
-    Surface(
-        shape = RoundedCornerShape(8.dp),
-        color = colorScheme.primary.copy(alpha = 0.1f),
-        contentColor = colorScheme.primary
-    ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(text = label, style = MaterialTheme.typography.labelSmall)
-            Text(
-                text = value,
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
+	val payments = viewModel.payments
+	val isLoading = viewModel.isLoading
+	
+	var showDialog by remember { mutableStateOf(false) }
+	var selectedPayment by remember { mutableStateOf<Payment?>(null) }
+	var searchText by remember { mutableStateOf("") }
+	var selectedPaymentType by remember { mutableStateOf("Todos") }
+	
+	val paymentTypeOptions = listOf("Todos", "Dólares", "Bolívares", "Mixto")
+	
+	LaunchedEffect(viewModel.payments) {
+		Log.d("ListPaymentsScreen", "Payments: ${viewModel.payments}")
+	}
+	
+	LaunchedEffect(Unit) {
+		viewModel.loadPayments()
+	}
+	
+	GymTheme {
+		Scaffold(
+			topBar = {
+				Column {
+					TopAppBar(
+						title = {
+							Text(
+								text = "Listado de pagos",
+								color = MaterialTheme.colorScheme.onPrimary,
+								fontWeight = FontWeight.Bold
+							)
+						},
+						navigationIcon = {
+							IconButton(onClick = { navBottom.popBackStack() }) {
+								Icon(
+									painter = painterResource(id = R.drawable.ic_back),
+									contentDescription = "Regresar",
+									tint = MaterialTheme.colorScheme.onPrimary
+								)
+							}
+						},
+						colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+							containerColor = MaterialTheme.colorScheme.primary
+						)
+					)
+					
+					PaymentFilters(
+						selectedPaymentType = selectedPaymentType,
+						paymentTypeOptions = paymentTypeOptions,
+						onPaymentTypeSelected = { selectedPaymentType = it },
+						onClearFilters = {
+							selectedPaymentType = "Todos"
+							searchText = ""
+						},
+						searchText = searchText,
+						onSearchTextChanged = { searchText = it }
+					)
+				}
+			},
+			floatingActionButton = {
+				FloatingActionButton(
+					onClick = navPagToScreen,
+					containerColor = MaterialTheme.colorScheme.primary,
+					contentColor = MaterialTheme.colorScheme.onPrimary
+				) {
+					Icon(Icons.Default.Add, contentDescription = "Nuevo pago")
+				}
+			}
+		) { innerPadding ->
+			Box(
+				modifier = Modifier
+					.fillMaxSize()
+					.padding(innerPadding),
+				contentAlignment = Alignment.Center
+			) {
+				if (isLoading) {
+					CircularProgressIndicator()
+				} else {
+					val filteredList = payments.filter {
+						(selectedPaymentType == "Todos" || it.typePayment?.equals(selectedPaymentType, true) == true) &&
+								(searchText.isBlank()
+										|| it.name.contains(searchText, true)
+										|| it.idCard.contains(searchText, true)
+										|| it.reference?.contains(searchText, true) == true)
+					}
+					
+					if (filteredList.isEmpty()) {
+						Text(
+							text = "No hay pagos registrados",
+							color = MaterialTheme.colorScheme.onSurfaceVariant
+						)
+					} else {
+						LazyColumn(
+							modifier = Modifier
+								.fillMaxSize()
+								.padding(16.dp),
+							verticalArrangement = Arrangement.spacedBy(12.dp)
+						) {
+							items(filteredList) { payment ->
+								PaymentCard(payment) {
+									selectedPayment = payment
+									showDialog = true
+								}
+							}
+						}
+					}
+				}
+				
+				if (showDialog && selectedPayment != null) {
+					PaymentDetailDialog(
+						payment = selectedPayment!!,
+						onDismiss = { showDialog = false }
+					)
+				}
+			}
+		}
+	}
 }
 
 @Composable
-private fun DetailRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium
-        )
-    }
+fun PaymentCard(payment: Payment, onViewDetails: () -> Unit) {
+	Card(
+		modifier = Modifier.fillMaxWidth(),
+		shape = RoundedCornerShape(16.dp)
+	) {
+		Column(modifier = Modifier.padding(16.dp)) {
+			Row(verticalAlignment = Alignment.CenterVertically) {
+				Column(modifier = Modifier.weight(1f)) {
+					Text(
+						text = payment.name,
+						style = MaterialTheme.typography.titleMedium,
+						fontWeight = FontWeight.SemiBold
+					)
+					Text(
+						text = payment.idCard,
+						style = MaterialTheme.typography.bodySmall,
+						color = MaterialTheme.colorScheme.onSurfaceVariant
+					)
+					Spacer(modifier = Modifier.height(8.dp))
+					Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+						PaymentInfoBadge("Monto", "${payment.amount} $")
+//						PaymentInfoBadge("Fecha", payment.date.formatAsDate())
+					}
+				}
+				IconButton(onClick = onViewDetails) {
+					Icon(
+						painter = painterResource(id = R.drawable.ic_details),
+						contentDescription = "Detalles"
+					)
+				}
+			}
+		}
+	}
 }
+
+@Composable
+fun PaymentDetailDialog(payment: Payment, onDismiss: () -> Unit) {
+	AlertDialog(
+		onDismissRequest = onDismiss,
+		title = {
+			Text(
+				"Detalles del pago",
+				modifier = Modifier.fillMaxWidth(),
+				textAlign = TextAlign.Center
+			)
+		},
+		text = {
+			Column {
+				DetailRow("Nombre:", payment.name)
+				DetailRow("Cédula:", payment.idCard)
+				DetailRow("Membresía:", payment.membership)
+				DetailRow("Tipo de pago:", payment.typePayment)
+				DetailRow("Monto:", "${payment.amount} $")
+				payment.reference?.let {
+					DetailRow("Referencia:", it)
+				}
+				if (!payment.description.isNullOrBlank()) {
+					DetailRow("Descripción:", payment.description)
+				}
+//				DetailRow("Fecha:", payment.date.formatAsDate())
+			}
+		},
+		confirmButton = {
+			Button(
+				onClick = onDismiss,
+				modifier = Modifier.fillMaxWidth()
+			) {
+				Text("Cerrar")
+			}
+		}
+	)
+}
+
+@Composable
+fun PaymentInfoBadge(label: String, value: String) {
+	Surface(
+		shape = RoundedCornerShape(8.dp),
+		color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+		contentColor = MaterialTheme.colorScheme.primary
+	) {
+		Column(
+			modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+			horizontalAlignment = Alignment.CenterHorizontally
+		) {
+			Text(text = label, style = MaterialTheme.typography.labelSmall)
+			Text(
+				text = value,
+				style = MaterialTheme.typography.bodySmall,
+				fontWeight = FontWeight.Bold
+			)
+		}
+	}
+}
+
+@Composable
+fun DetailRowDetailRow(label: String, value: String) {
+	Row(
+		modifier = Modifier.fillMaxWidth(),
+		horizontalArrangement = Arrangement.SpaceBetween
+	) {
+		Text(label, fontWeight = FontWeight.Bold)
+		Text(value)
+	}
+}
+

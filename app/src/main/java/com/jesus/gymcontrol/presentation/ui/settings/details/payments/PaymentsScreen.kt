@@ -55,7 +55,7 @@ import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.model.Pago
 import com.jesus.gymcontrol.domain.viewmodels.MembershipViewModel
-import com.jesus.gymcontrol.domain.viewmodels.PaymentViewModel
+import com.jesus.gymcontrol.domain.viewmodels.PaymentsViewModel
 import com.jesus.gymcontrol.domain.viewmodels.UserListViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import kotlinx.coroutines.delay
@@ -70,7 +70,7 @@ fun PaymentsScreen(navController: NavController) {
 @Composable
 fun PaymentsScreenContent(
 	navController: NavController,
-	viewModel: PaymentViewModel = hiltViewModel()
+	viewModel: PaymentsViewModel = hiltViewModel()
 ) {
 	val colorScheme = MaterialTheme.colorScheme
 	val usersViewModel: UserListViewModel = hiltViewModel()
@@ -407,15 +407,15 @@ fun PaymentsScreenContent(
 						val pago = Pago(
 							id = UUID.randomUUID().toString(),
 							userId = user.id,
-							userName = user.name,
-							userCedula = user.idCard,
+							name = user.name,
+							idcard = user.idCard,
 							membershipId = membership.id,
 							membershipName = membership.nombre,
-							tipoPago = paymentState.type,
-							monto = monto,
-							descripcion = description,
-							referencia = if (paymentState.type != "Dólares") reference else null,
-							fecha = System.currentTimeMillis(),
+							tipepayment = paymentState.type,
+							amount = monto,
+							description = description,
+							reference = if (paymentState.type != "Dólares") reference else null,
+							date = System.currentTimeMillis(),
 							gimnasioCode = gimnasioCode.toString()
 						)
 						

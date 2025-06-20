@@ -1,28 +1,32 @@
 package com.jesus.gymcontrol.data.repository
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.jesus.gymcontrol.domain.model.Pago
-import com.jesus.gymcontrol.domain.repository.PagoRepository
+import com.jesus.gymcontrol.domain.model.Payment
+import com.jesus.gymcontrol.domain.repository.PaymentRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class PagoRepositoryImpl @Inject constructor(
+class PaymentRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore
-) : PagoRepository {
+) : PaymentRepository {
 	
 	override suspend fun addPago(pago: Pago): Result<Unit> = try {
 		val pagoMap = mapOf(
 			"id" to pago.id,
 			"userId" to pago.userId,
-			"Name" to pago.userName,
-			"idcard" to pago.userCedula,
+			"name" to pago.name,
+			"idcard" to pago.idcard,
 			"membershipId" to pago.membershipId,
 			"membershipName" to pago.membershipName,
-			"tipepayment" to pago.tipoPago,
-			"amount" to pago.monto,
-			"description" to pago.descripcion,
-			"reference" to pago.referencia,
-			"date" to pago.fecha,
+			"typepayment" to pago.tipepayment,
+			"amount" to pago.amount,
+			"description" to pago.description,
+			"reference" to pago.reference,
+			"date" to pago.date,
 			"gimnasioCode" to pago.gimnasioCode
 		)
 		
@@ -63,16 +67,16 @@ class PagoRepositoryImpl @Inject constructor(
 			
 			// Usuario en gym/usuarios/{membershipId}/personas
 			batch.set(membresiaUserRef, mapOf(
-				"name" to pago.userName,
-				"idcard" to pago.userCedula,
-				"paymentdate" to pago.fecha
+				"name" to pago.name,
+				"idcard" to pago.idcard,
+				"paymentdate" to pago.date
 			))
 			
 			// ✅ Usuario en membresía/usuarios con campo state
 			batch.set(membershipUsersRef, mapOf(
-				"name" to pago.userName,
-				"idcard" to pago.userCedula,
-				"paymentdate" to pago.fecha,
+				"name" to pago.name,
+				"idcard" to pago.idcard,
+				"paymentdate" to pago.date,
 				"state" to "activo"
 			))
 			
@@ -86,5 +90,18 @@ class PagoRepositoryImpl @Inject constructor(
 		Result.success(Unit)
 	} catch (e: Exception) {
 		Result.failure(e)
+	}
+	
+	override suspend fun getAllPayments(gymCode: String): List<Payment> = withContext(Dispatchers.IO) {
+		val paymentsSnapshot = firestore
+			.collection("gimnasios")
+			.document(gymCode)
+			.collection("pagos")
+			.get()
+			.await()
+		Log.d("PaymentRepositoryImpl", "getAllPayments: $paymentsSnapshot")
+		return@withContext paymentsSnapshot.documents.mapNotNull { doc ->
+			doc.toObject(Payment::class.java)?.copy(id = doc.id)
+		}
 	}
 }

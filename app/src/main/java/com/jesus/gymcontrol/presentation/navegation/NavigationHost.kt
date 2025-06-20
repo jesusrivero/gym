@@ -117,8 +117,6 @@ fun NavigationHost(
 
         composable<AppRoutes.ListPaymentsScreen> {
             ListPaymentsScreen(
-                viewModel = viewModel,
-                navEdit = { navController.navigate(AppRoutes.EditPersonScreen(it)) },
                 navBottom = navController,
 	            navPagToScreen = { navController.navigate(AppRoutes.PaymentsScreen) }
             )

@@ -5,9 +5,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.model.Membership
 import com.jesus.gymcontrol.domain.model.Pago
+import com.jesus.gymcontrol.domain.model.Payment
 import com.jesus.gymcontrol.domain.usecase.usuario.AddPaymentUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.GetAllPaymentsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,8 +19,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PaymentViewModel @Inject constructor(
+class PaymentsViewModel @Inject constructor(
     private val addPaymentUseCase: AddPaymentUseCase,
+	private val getAllPaymentsUseCase: GetAllPaymentsUseCase,
+	private val sessionManager: SessionManager
 ) : ViewModel() {
 
     data class PaymentState(
@@ -30,6 +35,12 @@ class PaymentViewModel @Inject constructor(
 
     private val _paymentState = MutableStateFlow(PaymentState())
     val paymentState: StateFlow<PaymentState> = _paymentState
+	
+	var payments by mutableStateOf<List<Payment>>(emptyList())
+		private set
+	
+	
+	var selectedPayment by mutableStateOf<Payment?>(null)
 
     var isLoading by mutableStateOf(false)
         private set
@@ -92,6 +103,21 @@ class PaymentViewModel @Inject constructor(
             isLoading = false
         }
     }
+	
+	fun loadPayments() {
+		val gymCode = sessionManager.getGymCode() ?: return
+		
+		viewModelScope.launch {
+			isLoading = true
+			try {
+				payments = getAllPaymentsUseCase(gymCode)
+			} catch (e: Exception) {
+				// Handle error
+			} finally {
+				isLoading = false
+			}
+		}
+	}
 
     /** Limpia estados de éxito y error */
     fun resetState() {

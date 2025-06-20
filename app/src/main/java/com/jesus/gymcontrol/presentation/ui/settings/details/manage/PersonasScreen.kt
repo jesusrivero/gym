@@ -51,6 +51,7 @@ import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.domain.model.ListUser
 import com.jesus.gymcontrol.domain.viewmodels.UserListViewModel
 import com.jesus.gymcontrol.presentation.theme.GymTheme
+import com.jesus.gymcontrol.presentation.ui.commons.PaymentFilters
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -253,7 +254,7 @@ fun PersonsScreen(
 }
 
 @Composable
-private fun DetailRow(label: String, value: String) {
+internal fun DetailRow(label: String, value: String) {
 	GymTheme {
 		Row(
 			modifier = Modifier.fillMaxWidth(),

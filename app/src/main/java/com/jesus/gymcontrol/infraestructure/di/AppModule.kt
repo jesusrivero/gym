@@ -9,7 +9,7 @@ import com.jesus.gymcontrol.data.db.dao.UsuariosDatabaseDao
 import com.jesus.gymcontrol.data.repository.AuthRepositoryImpl
 import com.jesus.gymcontrol.data.repository.GymRepositoryImpl
 import com.jesus.gymcontrol.data.repository.MembershipRepositoryImpl
-import com.jesus.gymcontrol.data.repository.PagoRepositoryImpl
+import com.jesus.gymcontrol.data.repository.PaymentRepositoryImpl
 import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.data.repository.UserAdminRepositoryImpl
 import com.jesus.gymcontrol.data.repository.UserRepositoryImpl
@@ -18,7 +18,7 @@ import com.jesus.gymcontrol.data.sharedPreferences.PreferencesManager
 import com.jesus.gymcontrol.domain.repository.AuthRepository
 import com.jesus.gymcontrol.domain.repository.GymRepository
 import com.jesus.gymcontrol.domain.repository.MembershipRepository
-import com.jesus.gymcontrol.domain.repository.PagoRepository
+import com.jesus.gymcontrol.domain.repository.PaymentRepository
 import com.jesus.gymcontrol.domain.repository.UserAdminRepository
 import com.jesus.gymcontrol.domain.repository.UserRepository
 import com.jesus.gymcontrol.domain.repository.UsuarioRepository
@@ -30,6 +30,7 @@ import com.jesus.gymcontrol.domain.usecase.usuario.DeleteMembershipUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.EditMembershipUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GenerateCodeUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetAllGymUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.GetAllPaymentsUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetGymUserSummaryUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetMembershipsUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetMembershipsWithUserCountUseCase
@@ -218,11 +219,17 @@ object AppModule {
     @Provides
     fun providePagoRepository(
         firestore: FirebaseFirestore
-    ): PagoRepository = PagoRepositoryImpl(firestore)
+    ): PaymentRepository = PaymentRepositoryImpl(firestore)
 
     @Provides
     fun provideAddPagoUseCase(
-        repository: PagoRepository
+        repository: PaymentRepository
     ): AddPaymentUseCase = AddPaymentUseCase(repository)
+	
+
+	@Provides
+	fun provideGetAllPaymentsUseCase(
+		repository: PaymentRepository
+	): GetAllPaymentsUseCase = GetAllPaymentsUseCase(repository)
 
 }
