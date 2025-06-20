@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -35,6 +36,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -79,7 +81,8 @@ import java.time.format.DateTimeFormatter
 fun ListPaymentsScreen(
     navBottom: NavController,
     viewModel: PeopleViewModel,
-    navEdit: (Int?) -> Unit
+    navEdit: (Int?) -> Unit,
+    navPagToScreen: () -> Unit
 ) {
     GymTheme {
         var showUserDialog by remember { mutableStateOf(false) }
@@ -195,21 +198,25 @@ fun ListPaymentsScreen(
                         selectedPaymentType = selectedPaymentType,
                         paymentTypeOptions = paymentTypeOptions,
                         onPaymentTypeSelected = { selectedPaymentType = it },
-                        startDate = startDate,
-                        endDate = endDate,
-                        onStartDateClick = { showStartDatePicker = true },
-                        onEndDateClick = { showEndDatePicker = true },
                         onClearFilters = {
                             selectedPaymentType = "Todos"
                             startDate = null
                             endDate = null
                         },
-                        dateFormatter = dateFormatter,
                         searchText = searchText,
                         onSearchTextChanged = { searchText = it }
                     )
                 }
-            }
+            },
+	        floatingActionButton = {
+		        FloatingActionButton(
+			        onClick = { navPagToScreen() },
+			        containerColor = colorScheme.primary,
+			        contentColor = colorScheme.onPrimary
+		        ) {
+			        Icon(Icons.Default.Add, contentDescription = "Nuevo pago")
+		        }
+	        }
         ) { innerPadding ->
             val state = viewModel.state
             val filteredList = if (searchText.isBlank()) {
@@ -311,12 +318,7 @@ fun PaymentFilters(
     selectedPaymentType: String,
     paymentTypeOptions: List<String>,
     onPaymentTypeSelected: (String) -> Unit,
-    startDate: LocalDate?,
-    endDate: LocalDate?,
-    onStartDateClick: () -> Unit,
-    onEndDateClick: () -> Unit,
     onClearFilters: () -> Unit,
-    dateFormatter: DateTimeFormatter,
     searchText: String,
     onSearchTextChanged: (String) -> Unit
 ) {
@@ -366,73 +368,9 @@ fun PaymentFilters(
                         }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-
-                Text(
-                    text = "Rango de fechas",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-
-                    OutlinedButton(
-                        onClick = onStartDateClick,
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = colorScheme.surface,
-                            contentColor = colorScheme.onSurface
-                        )
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "Desde",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = startDate?.format(dateFormatter) ?: "Seleccionar",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = if (startDate != null) colorScheme.onSurface
-                                else colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-
-
-                    OutlinedButton(
-                        onClick = onEndDateClick,
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = colorScheme.surface,
-                            contentColor = colorScheme.onSurface
-                        )
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "Hasta",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = endDate?.format(dateFormatter) ?: "Seleccionar",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = if (endDate != null) colorScheme.onSurface
-                                else colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-
-
-                if (selectedPaymentType != "Todos" || startDate != null || endDate != null) {
+	            
+	            
+                if (true) {
                     Spacer(modifier = Modifier.height(16.dp))
                     OutlinedButton(
                         onClick = onClearFilters,
@@ -449,7 +387,7 @@ fun PaymentFilters(
                             contentDescription = "Limpiar",
                             modifier = Modifier.size(18.dp)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(3.dp))
                         Text("Limpiar filtros")
                     }
                 }

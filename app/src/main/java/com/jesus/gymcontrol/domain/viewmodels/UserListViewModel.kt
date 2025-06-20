@@ -44,4 +44,5 @@ class UserListViewModel @Inject constructor(
             isLoading = false
         }
     }
+	
 }

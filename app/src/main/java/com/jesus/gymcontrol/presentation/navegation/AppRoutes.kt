@@ -16,8 +16,7 @@ object AppRoutes {
 	@Serializable
 	data class EditPersonScreen(val idPerson: Int? = null)
 
-	@Serializable
-	data object ListPersonScreen
+
 
 	@Serializable
 	data object PaymentsScreen

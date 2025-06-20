@@ -44,7 +44,7 @@ class AuthViewModel @Inject constructor(
 	var rol by mutableStateOf("Dueño")
 	var rol2 by mutableStateOf("Administrador")
 	var rol3 by mutableStateOf("Cliente")
-	var codigo by mutableStateOf("")
+
 	
 	fun registerUser(email: String, password: String, name: String, idcard: String) {
 		viewModelScope.launch {
@@ -214,7 +214,7 @@ class AuthViewModel @Inject constructor(
 		FirebaseAuth.getInstance().signOut()
 	}
 	
-	//ESTA FUNCION VA A ACTUALIZAR LOS DATOS FALTANTES DEL USUARIO
+
 //    fun updateDatesUser(
 //        cedula: String,
 //        edad: String,

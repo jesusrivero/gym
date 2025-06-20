@@ -95,7 +95,8 @@ fun NavigationHost(
             PersonsScreen(
                 navEdit = { navController.navigate(AppRoutes.EditPersonScreen()) },
                 navPag = { navController.navigate(AppRoutes.PaymentsScreen) },
-                navBottom = navController
+                navBottom = navController,
+							
             )
         }
 
@@ -118,7 +119,8 @@ fun NavigationHost(
             ListPaymentsScreen(
                 viewModel = viewModel,
                 navEdit = { navController.navigate(AppRoutes.EditPersonScreen(it)) },
-                navBottom = navController
+                navBottom = navController,
+	            navPagToScreen = { navController.navigate(AppRoutes.PaymentsScreen) }
             )
 
         }
