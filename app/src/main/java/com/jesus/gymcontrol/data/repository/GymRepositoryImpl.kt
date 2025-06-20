@@ -6,7 +6,7 @@ import com.jesus.gymcontrol.domain.model.Gym
 import com.jesus.gymcontrol.domain.repository.GymRepository
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
-import kotlin.text.get
+
 
 
 class GymRepositoryImpl @Inject constructor(
@@ -67,7 +67,7 @@ class GymRepositoryImpl @Inject constructor(
     override suspend fun validateOwnerCode(code: String): Result<Boolean> {
         return try {
             val snapshot = firestore.collection("codigos")
-                .whereEqualTo("codigo", code)
+                .whereEqualTo("code", code)
                 .limit(1)
                 .get()
                 .await()
@@ -88,14 +88,14 @@ class GymRepositoryImpl @Inject constructor(
     override suspend fun validateClientCode(code: String, gymCode: String): Result<Boolean> {
         return try {
             val snapshot = firestore.collection("codigos")
-                .whereEqualTo("codigo", code)
+                .whereEqualTo("code", code)
                 .limit(1)
                 .get()
                 .await()
 
             val doc = snapshot.documents.firstOrNull()
 
-            val actualCode = doc?.getString("codigo") ?: ""
+            val actualCode = doc?.getString("code") ?: ""
             val codeParts = actualCode.split("-")
 
             val isValid = doc != null &&
@@ -113,14 +113,14 @@ class GymRepositoryImpl @Inject constructor(
     override suspend fun validateAdminCode(code: String, gymCode: String): Result<Boolean> {
         return try {
             val snapshot = firestore.collection("codigos")
-                .whereEqualTo("codigo", code)
+                .whereEqualTo("code", code)
                 .limit(1)
                 .get()
                 .await()
 
             val doc = snapshot.documents.firstOrNull()
 
-            val actualCode = doc?.getString("codigo") ?: ""
+            val actualCode = doc?.getString("code") ?: ""
             val codeParts = actualCode.split("-")
 
             val isValid = doc != null &&
@@ -137,7 +137,7 @@ class GymRepositoryImpl @Inject constructor(
     override suspend fun markCodeAsUsed(code: String, rol: String?): Result<Unit> {
         return try {
             val snapshot = firestore.collection("codigos")
-                .whereEqualTo("codigo", code)
+                .whereEqualTo("code", code)
                 .limit(1)
                 .get()
                 .await()

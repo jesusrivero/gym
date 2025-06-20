@@ -57,324 +57,319 @@ import com.jesus.gymcontrol.domain.viewmodels.MembershipViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MembershipScreen(
-    viewModel: MembershipViewModel = hiltViewModel(),
-    navController: NavController
+	viewModel: MembershipViewModel = hiltViewModel(),
+	navController: NavController,
 ) {
-    val context = LocalContext.current
-    val isLoading = viewModel.isLoading
-    val memberships = viewModel.memberships
-    val errorMessage = viewModel.errorMessage
-
-    var showCreateDialog by remember { mutableStateOf(false) }
-    var name by remember { mutableStateOf("") }
-    var price by remember { mutableStateOf("") }
-
-    var membershipToDelete by remember { mutableStateOf<Membership?>(null) }
-    var membershipToEdit by remember { mutableStateOf<Membership?>(null) }
-
-    LaunchedEffect(Unit) {
-        viewModel.loadMemberships()
-    }
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Control de Membresías",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            painter = painterResource(id = com.jesus.gymcontrol.R.drawable.ic_back),
-                            contentDescription = "Regresar",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showCreateDialog = true },
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Crear Membresía")
-            }
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .padding(horizontal = 20.dp, vertical = 12.dp)
-                .fillMaxSize()
-        ) {
-            when {
-                isLoading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-
-                memberships.isEmpty() -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "No hay membresías registradas.",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                else -> {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        items(memberships) { membership ->
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
-                                elevation = CardDefaults.cardElevation(4.dp),
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp)
-                                ) {
-                                    Text(
-                                        text = membership.nombre,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = "Precio: $${membership.precio}",
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                    Text(
-                                        text = "Usuarios registrados: 0",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-
-                                    Spacer(modifier = Modifier.height(12.dp))
-
-                                    Row(
-                                        horizontalArrangement = Arrangement.End,
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        IconButton(onClick = {
-                                            membershipToEdit = membership
-                                        }) {
-                                            Icon(Icons.Default.Edit, contentDescription = "Editar")
-                                        }
-
-                                        IconButton(onClick = {
-                                            membershipToDelete = membership
-                                        }) {
-                                            Icon(
-                                                Icons.Default.Delete,
-                                                contentDescription = "Eliminar"
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-
-            if (showCreateDialog) {
-                AlertDialog(
-                    onDismissRequest = { showCreateDialog = false },
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                val parsedPrice = price.toDoubleOrNull()
-                                if (name.isBlank() || parsedPrice == null) {
-                                    Toast.makeText(
-                                        context,
-                                        "Complete correctamente los campos",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    return@Button
-                                }
-
-                                val membership = Membership(
-                                    id = "",
-                                    nombre = name.trim(),
-                                    precio = parsedPrice,
-                                    gimnasioCode = ""
-                                )
-
-                                viewModel.createMembership(membership)
-                                showCreateDialog = false
-                                name = ""
-                                price = ""
-                                Toast.makeText(
-                                    context,
-                                    "Membresía creada exitosamente",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                viewModel.loadMemberships()
-                            },
-                            enabled = !isLoading
-                        ) {
-                            if (isLoading) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(16.dp),
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    strokeWidth = 2.dp
-                                )
-                            } else {
-                                Text("Guardar")
-                            }
-                        }
-                    },
-                    dismissButton = {
-                        OutlinedButton(onClick = {
-                            showCreateDialog = false
-                            name = ""
-                            price = ""
-                        }) {
-                            Text("Cancelar")
-                        }
-                    },
-                    title = { Text("Nueva Membresía") },
-                    text = {
-                        Column {
-                            OutlinedTextField(
-                                value = name,
-                                onValueChange = { name = it },
-                                label = { Text("Nombre") },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            OutlinedTextField(
-                                value = price,
-                                onValueChange = { price = it },
-                                label = { Text("Precio") },
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    },
-                    shape = RoundedCornerShape(16.dp),
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            }
-
-
-            membershipToDelete?.let { membership ->
-                AlertDialog(
-                    onDismissRequest = { membershipToDelete = null },
-                    title = { Text("¿Eliminar membresía?") },
-                    text = {
-                        Text("¿Estás seguro de eliminar la membresía \"${membership.nombre}\"? Esta acción no se puede deshacer.")
-                    },
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                viewModel.deleteMembership(membership)
-                                membershipToDelete = null
-                            }
-                        ) {
-                            Text("Eliminar")
-                        }
-                    },
-                    dismissButton = {
-                        OutlinedButton(onClick = { membershipToDelete = null }) {
-                            Text("Cancelar")
-                        }
-                    }
-                )
-            }
-
-
-            membershipToEdit?.let { membership ->
-                var editedName by remember { mutableStateOf(membership.nombre) }
-                var editedPrice by remember { mutableStateOf(membership.precio.toString()) }
-
-                AlertDialog(
-                    onDismissRequest = { membershipToEdit = null },
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                val parsedPrice = editedPrice.toDoubleOrNull()
-                                if (editedName.isBlank() || parsedPrice == null) {
-                                    Toast.makeText(
-                                        context,
-                                        "Complete correctamente los campos",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    return@Button
-                                }
-
-                                val updatedMembership = membership.copy(
-                                    nombre = editedName.trim(),
-                                    precio = parsedPrice
-                                )
-
-                                viewModel.editMembership(updatedMembership)
-                                membershipToEdit = null
-                            }
-                        ) {
-                            Text("Guardar")
-                        }
-                    },
-                    dismissButton = {
-                        OutlinedButton(onClick = { membershipToEdit = null }) {
-                            Text("Cancelar")
-                        }
-                    },
-                    title = { Text("Editar membresía") },
-                    text = {
-                        Column {
-                            OutlinedTextField(
-                                value = editedName,
-                                onValueChange = { editedName = it },
-                                label = { Text("Nombre") },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            OutlinedTextField(
-                                value = editedPrice,
-                                onValueChange = { editedPrice = it },
-                                label = { Text("Precio") },
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    },
-                    shape = RoundedCornerShape(16.dp),
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            }
-
-
-            errorMessage?.let {
-                LaunchedEffect(it) {
-                    Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-                }
-            }
-        }
-    }
+	val context = LocalContext.current
+	val isLoading = viewModel.isLoading
+	val membershipsSummary = viewModel.membershipsSummary
+	val errorMessage = viewModel.errorMessage
+	
+	var showCreateDialog by remember { mutableStateOf(false) }
+	var name by remember { mutableStateOf("") }
+	var price by remember { mutableStateOf("") }
+	var duration by remember { mutableStateOf("") }
+	
+	var membershipToDelete by remember { mutableStateOf<Membership?>(null) }
+	var membershipToEdit by remember { mutableStateOf<Membership?>(null) }
+	
+	LaunchedEffect(Unit) {
+		viewModel.loadMembershipsSummary() // Carga la lista con el conteo de usuarios
+	}
+	
+	Scaffold(
+		topBar = {
+			TopAppBar(
+				title = {
+					Text(
+						text = "Control de Membresías",
+						style = MaterialTheme.typography.titleLarge,
+						color = MaterialTheme.colorScheme.onPrimary
+					)
+				},
+				navigationIcon = {
+					IconButton(onClick = { navController.popBackStack() }) {
+						Icon(
+							painter = painterResource(id = com.jesus.gymcontrol.R.drawable.ic_back),
+							contentDescription = "Regresar",
+							tint = MaterialTheme.colorScheme.onPrimary
+						)
+					}
+				},
+				colors = TopAppBarDefaults.topAppBarColors(
+					containerColor = MaterialTheme.colorScheme.primary
+				)
+			)
+		},
+		floatingActionButton = {
+			FloatingActionButton(
+				onClick = { showCreateDialog = true },
+				containerColor = MaterialTheme.colorScheme.primary
+			) {
+				Icon(Icons.Default.Add, contentDescription = "Crear Membresía")
+			}
+		}
+	) { padding ->
+		Column(
+			modifier = Modifier
+				.padding(padding)
+				.padding(horizontal = 20.dp, vertical = 12.dp)
+				.fillMaxSize()
+		) {
+			when {
+				isLoading -> {
+					Box(
+						modifier = Modifier.fillMaxSize(),
+						contentAlignment = Alignment.Center
+					) {
+						CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+					}
+				}
+				
+				membershipsSummary.isEmpty() -> {
+					Box(
+						modifier = Modifier.fillMaxSize(),
+						contentAlignment = Alignment.Center
+					) {
+						Text(
+							"No hay membresías registradas.",
+							style = MaterialTheme.typography.bodyLarge,
+							color = MaterialTheme.colorScheme.onSurfaceVariant
+						)
+					}
+				}
+				
+				else -> {
+					LazyColumn(
+						verticalArrangement = Arrangement.spacedBy(12.dp),
+						modifier = Modifier.fillMaxSize()
+					) {
+						items(membershipsSummary) { membershipWithCount ->
+							val membership = membershipWithCount.membership
+							val userCount = membershipWithCount.userCount
+							
+							Card(
+								modifier = Modifier.fillMaxWidth(),
+								shape = RoundedCornerShape(16.dp),
+								elevation = CardDefaults.cardElevation(4.dp),
+								colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+							) {
+								Column(
+									modifier = Modifier
+										.fillMaxWidth()
+										.padding(16.dp)
+								) {
+									Text(
+										text = membership.nombre,
+										style = MaterialTheme.typography.titleMedium,
+										color = MaterialTheme.colorScheme.primary
+									)
+									Spacer(modifier = Modifier.height(4.dp))
+									Text(
+										text = "Precio: $${membership.precio}",
+										style = MaterialTheme.typography.bodyMedium
+									)
+									Text(
+										text = "Duración: ${membership.duracionDias} días",
+										style = MaterialTheme.typography.bodySmall
+									)
+									Text(
+										text = "Usuarios registrados: $userCount",
+										style = MaterialTheme.typography.labelSmall,
+										color = MaterialTheme.colorScheme.onSurfaceVariant
+									)
+									Spacer(modifier = Modifier.height(12.dp))
+									Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+										IconButton(onClick = { membershipToEdit = membership }) {
+											Icon(Icons.Default.Edit, contentDescription = "Editar")
+										}
+										IconButton(onClick = { membershipToDelete = membership }) {
+											Icon(Icons.Default.Delete, contentDescription = "Eliminar")
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			// Diálogo para crear membresía
+			if (showCreateDialog) {
+				AlertDialog(
+					onDismissRequest = { showCreateDialog = false },
+					confirmButton = {
+						Button(
+							onClick = {
+								val parsedPrice = price.toDoubleOrNull()
+								val parsedDuration = duration.toIntOrNull()
+								if (name.isBlank() || parsedPrice == null || parsedDuration == null) {
+									Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT).show()
+									return@Button
+								}
+								
+								val membership = Membership(
+									id = "",
+									nombre = name.trim(),
+									precio = parsedPrice,
+									gimnasioCode = "",
+									duracionDias = parsedDuration
+								)
+								
+								viewModel.createMembership(membership)
+								showCreateDialog = false
+								name = ""
+								price = ""
+								duration = ""
+								Toast.makeText(context, "Membresía creada exitosamente", Toast.LENGTH_SHORT).show()
+								viewModel.loadMembershipsSummary()
+							},
+							enabled = !isLoading
+						) {
+							if (isLoading) {
+								CircularProgressIndicator(
+									modifier = Modifier.size(16.dp),
+									color = MaterialTheme.colorScheme.onPrimary,
+									strokeWidth = 2.dp
+								)
+							} else {
+								Text("Guardar")
+							}
+						}
+					},
+					dismissButton = {
+						OutlinedButton(onClick = {
+							showCreateDialog = false
+							name = ""
+							price = ""
+							duration = ""
+						}) {
+							Text("Cancelar")
+						}
+					},
+					title = { Text("Nueva Membresía") },
+					text = {
+						Column {
+							OutlinedTextField(
+								value = name,
+								onValueChange = { name = it },
+								label = { Text("Nombre") },
+								modifier = Modifier.fillMaxWidth()
+							)
+							Spacer(modifier = Modifier.height(12.dp))
+							OutlinedTextField(
+								value = price,
+								onValueChange = { price = it },
+								label = { Text("Precio") },
+								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+								modifier = Modifier.fillMaxWidth()
+							)
+							Spacer(modifier = Modifier.height(12.dp))
+							OutlinedTextField(
+								value = duration,
+								onValueChange = { duration = it },
+								label = { Text("Duración (días)") },
+								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+								modifier = Modifier.fillMaxWidth()
+							)
+						}
+					},
+					shape = RoundedCornerShape(16.dp),
+					containerColor = MaterialTheme.colorScheme.surface
+				)
+			}
+			
+			// Diálogo para editar membresía
+			membershipToEdit?.let { membership ->
+				var editedName by remember { mutableStateOf(membership.nombre) }
+				var editedPrice by remember { mutableStateOf(membership.precio.toString()) }
+				var editedDuration by remember { mutableStateOf(membership.duracionDias.toString()) }
+				
+				AlertDialog(
+					onDismissRequest = { membershipToEdit = null },
+					confirmButton = {
+						Button(onClick = {
+							val parsedPrice = editedPrice.toDoubleOrNull()
+							val parsedDuration = editedDuration.toIntOrNull()
+							if (editedName.isBlank() || parsedPrice == null || parsedDuration == null) {
+								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT).show()
+								return@Button
+							}
+							val updatedMembership = membership.copy(
+								nombre = editedName.trim(),
+								precio = parsedPrice,
+								duracionDias = parsedDuration
+							)
+							viewModel.editMembership(updatedMembership)
+							membershipToEdit = null
+						}) {
+							Text("Guardar")
+						}
+					},
+					dismissButton = {
+						OutlinedButton(onClick = { membershipToEdit = null }) {
+							Text("Cancelar")
+						}
+					},
+					title = { Text("Editar membresía") },
+					text = {
+						Column {
+							OutlinedTextField(
+								value = editedName,
+								onValueChange = { editedName = it },
+								label = { Text("Nombre") },
+								modifier = Modifier.fillMaxWidth()
+							)
+							Spacer(modifier = Modifier.height(12.dp))
+							OutlinedTextField(
+								value = editedPrice,
+								onValueChange = { editedPrice = it },
+								label = { Text("Precio") },
+								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+								modifier = Modifier.fillMaxWidth()
+							)
+							Spacer(modifier = Modifier.height(12.dp))
+							OutlinedTextField(
+								value = editedDuration,
+								onValueChange = { editedDuration = it },
+								label = { Text("Duración (días)") },
+								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+								modifier = Modifier.fillMaxWidth()
+							)
+						}
+					},
+					shape = RoundedCornerShape(16.dp),
+					containerColor = MaterialTheme.colorScheme.surface
+				)
+			}
+			
+			// Diálogo para eliminar membresía
+			membershipToDelete?.let { membership ->
+				AlertDialog(
+					onDismissRequest = { membershipToDelete = null },
+					title = { Text("¿Eliminar membresía?") },
+					text = { Text("¿Estás seguro de eliminar la membresía \"${membership.nombre}\"? Esta acción no se puede deshacer.") },
+					confirmButton = {
+						Button(onClick = {
+							viewModel.deleteMembership(membership)
+							membershipToDelete = null
+						}) {
+							Text("Eliminar")
+						}
+					},
+					dismissButton = {
+						OutlinedButton(onClick = { membershipToDelete = null }) {
+							Text("Cancelar")
+						}
+					}
+				)
+			}
+			
+			errorMessage?.let {
+				LaunchedEffect(it) {
+					Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+				}
+			}
+		}
+	}
 }

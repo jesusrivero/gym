@@ -121,31 +121,32 @@ class MembershipRepositoryImpl @Inject constructor(
     } catch (e: Exception) {
         Result.failure(e)
     }
-
-    override suspend fun updateMembership(membership: Membership): Result<Unit> {
-        return try {
-            val gymCode = membership.gimnasioCode
-            val id = membership.id
-
-            if (gymCode.isBlank() || id.isBlank()) {
-                return Result.failure(Exception("Datos incompletos para editar la membresía"))
-            }
-
-            firestore.collection("gimnasios")
-                .document(gymCode)
-                .collection("membresias")
-                .document(id)
-                .update(
-                    mapOf(
-                        "name" to membership.nombre,
-                        "price" to membership.precio
-                    )
-                )
-                .await()
-
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
+	
+	override suspend fun updateMembership(membership: Membership): Result<Unit> {
+		return try {
+			val gymCode = membership.gimnasioCode
+			val id = membership.id
+			
+			if (gymCode.isBlank() || id.isBlank()) {
+				return Result.failure(Exception("Datos incompletos para editar la membresía"))
+			}
+			
+			firestore.collection("gimnasios")
+				.document(gymCode)
+				.collection("membresias")
+				.document(id)
+				.update(
+					mapOf(
+						"nombre" to membership.nombre,
+						"precio" to membership.precio,
+						"duracionDias" to membership.duracionDias
+					)
+				)
+				.await()
+			
+			Result.success(Unit)
+		} catch (e: Exception) {
+			Result.failure(e)
+		}
+	}
 }

@@ -33,7 +33,7 @@ class UserAdminRepositoryImpl @Inject constructor(
         try {
             // VALIDAR CÓDIGO antes de crear el usuario
             val codigoSnapshot = firestore.collection("codigos")
-                .whereEqualTo("codigo", code)
+                .whereEqualTo("code", code)
                 .limit(1)
                 .get()
                 .await()
@@ -54,7 +54,7 @@ class UserAdminRepositoryImpl @Inject constructor(
                 ?: return@withContext Result.failure(Exception("El administrador no tiene gimnasioCode registrado"))
             val gymName = adminDoc.getString("gimnasio") ?: "Gimnasio"
 
-            // ✅ Ahora sí: crear usuario con instancia secundaria
+            // crear usuario con instancia secundaria
             val secondaryAuth = SecondaryFirebase.getSecondaryAuth(context)
             val result = secondaryAuth.createUserWithEmailAndPassword(email, password).await()
             val uid = result.user?.uid
