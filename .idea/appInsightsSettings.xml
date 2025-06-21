@@ -20,14 +20,6 @@
         <entry key="Firebase Crashlytics">
           <value>
             <InsightsFilterSettings>
-              <option name="connection">
-                <ConnectionSetting>
-                  <option name="appId" value="com.jesus.gymcontrol" />
-                  <option name="mobileSdkAppId" value="1:987033547327:android:a4d24e4496026a16393e8a" />
-                  <option name="projectId" value="gymcontrol-99701" />
-                  <option name="projectNumber" value="987033547327" />
-                </ConnectionSetting>
-              </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
               <option name="timeIntervalDays" value="THIRTY_DAYS" />
               <option name="visibilityType" value="ALL" />
