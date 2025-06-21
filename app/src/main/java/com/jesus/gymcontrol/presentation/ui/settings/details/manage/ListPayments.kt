@@ -49,9 +49,10 @@ import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.domain.model.Payment
 import com.jesus.gymcontrol.domain.viewmodels.PaymentsViewModel
-import com.jesus.gymcontrol.presentation.theme.GymTheme
 import com.jesus.gymcontrol.presentation.ui.commons.PaymentFilters
-
+import com.jesus.gymcontrol.presentation.ui.commons.formatMonto
+import java.text.NumberFormat
+import java.util.Locale
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -60,7 +61,7 @@ import com.jesus.gymcontrol.presentation.ui.commons.PaymentFilters
 fun ListPaymentsScreen(
 	navBottom: NavController,
 	viewModel: PaymentsViewModel = hiltViewModel(),
-	navPagToScreen: () -> Unit
+	navPagToScreen: () -> Unit,
 ) {
 	val payments = viewModel.payments
 	val isLoading = viewModel.isLoading
@@ -188,31 +189,10 @@ fun PaymentCard(payment: Payment, onViewDetails: () -> Unit) {
 		elevation = CardDefaults.cardElevation(2.dp),
 		colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
 	) {
-		Row(
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(horizontal = 16.dp, vertical = 12.dp),
-			verticalAlignment = Alignment.CenterVertically,
-			horizontalArrangement = Arrangement.SpaceBetween
-		) {
-			Column(modifier = Modifier.weight(1f)) {
-				Text(
-					text = payment.name,
-					style = MaterialTheme.typography.titleMedium,
-					fontWeight = FontWeight.SemiBold
-				)
-				Spacer(modifier = Modifier.height(4.dp))
-				Text(
-					text = payment.membershipName,
-					style = MaterialTheme.typography.bodySmall,
-					color = MaterialTheme.colorScheme.onSurfaceVariant
-				)
-				Spacer(modifier = Modifier.height(8.dp))
-				Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-					PaymentInfoBadge("Monto", "${payment.amount} $")
-					PaymentInfoBadge("Tipo", payment.paymentType)
-				}
-			}
+		Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+			PaymentInfoBadge("Monto", formatMonto(payment))
+			PaymentInfoBadge("Tipo", payment.paymentType)
+		}
 			IconButton(onClick = onViewDetails) {
 				Icon(
 					painter = painterResource(id = R.drawable.ic_details),
@@ -222,7 +202,7 @@ fun PaymentCard(payment: Payment, onViewDetails: () -> Unit) {
 			}
 		}
 	}
-}
+
 
 @Composable
 fun PaymentInfoBadge(label: String, value: String) {
@@ -245,7 +225,18 @@ fun PaymentInfoBadge(label: String, value: String) {
 	}
 }
 
+
 @Composable
+fun formatAmount(value: Double): String {
+	val locale = Locale("es", "VE")
+	val formatter = NumberFormat.getNumberInstance(locale).apply {
+		minimumFractionDigits = 2
+		maximumFractionDigits = 2
+	}
+	return formatter.format(value)
+}
+@Composable
+
 fun PaymentDetailDialog(payment: Payment, onDismiss: () -> Unit) {
 	AlertDialog(
 		onDismissRequest = onDismiss,
@@ -264,7 +255,17 @@ fun PaymentDetailDialog(payment: Payment, onDismiss: () -> Unit) {
 				Spacer(modifier = Modifier.height(8.dp))
 				DetailRow("Tipo de pago:", payment.paymentType)
 				Spacer(modifier = Modifier.height(8.dp))
-				DetailRow("Monto:", "${payment.amount} $")
+				DetailRow("Monto:", formatMonto(payment))
+				if (payment.paymentType != "Dólares") {
+					payment.amountBs?.let {
+						DetailRow("Bolívares:", "Bs. ${formatAmount(it)}")
+					}
+				}
+				if (payment.paymentType != "Bolívares") {
+					payment.amountDollar?.let {
+						DetailRow("Dólares:", "$${formatAmount(it)}")
+					}
+				}
 				payment.reference?.let {
 					Spacer(modifier = Modifier.height(8.dp))
 					DetailRow("Referencia:", it)

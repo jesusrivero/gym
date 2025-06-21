@@ -10,6 +10,7 @@ import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.model.Membership
 import com.jesus.gymcontrol.domain.model.Pago
 import com.jesus.gymcontrol.domain.model.Payment
+import com.jesus.gymcontrol.domain.model.PaymentState
 import com.jesus.gymcontrol.domain.usecase.usuario.AddPaymentUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetAllPaymentsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,13 +27,7 @@ class PaymentsViewModel @Inject constructor(
 	private val sessionManager: SessionManager
 ) : ViewModel() {
 
-    data class PaymentState(
-        val frequency: String = "",
-        val type: String = "",
-        val amountDollar: String = "",
-        val amountBs: String = "",
-        val listMembership: Map<String, Double> = emptyMap()  // aquí minúscula inicial
-    )
+   
 
     private val _paymentState = MutableStateFlow(PaymentState())
     val paymentState: StateFlow<PaymentState> = _paymentState

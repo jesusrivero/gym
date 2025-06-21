@@ -397,11 +397,13 @@ fun PaymentsScreenContent(
 					val user = users.find { it.id == selectedUserId }
 					val membership = memberships.find { it.nombre == paymentState.frequency }
 					if (user != null && membership != null) {
-						val monto = when (paymentState.type) {
+						val montoDolares = paymentState.amountDollar.toDoubleOrNull() ?: 0.0
+						val montoBs = paymentState.amountBs.toDoubleOrNull() ?: 0.0
+						
+						val montoTotal = when (paymentState.type) {
 							"Dólares" -> paymentState.listMembership[paymentState.frequency] ?: 0.0
-							"Bolívares" -> paymentState.amountBs.toDoubleOrNull() ?: 0.0
-							"Mixto" -> (paymentState.amountDollar.toDoubleOrNull() ?: 0.0) +
-									(paymentState.amountBs.toDoubleOrNull() ?: 0.0)
+							"Bolívares" -> montoBs
+							"Mixto" -> montoDolares + montoBs
 							else -> 0.0
 						}
 						
@@ -413,7 +415,9 @@ fun PaymentsScreenContent(
 							membershipId = membership.id,
 							membershipName = membership.nombre,
 							tipepayment = paymentState.type,
-							amount = monto,
+							amount = montoTotal,
+							amountDollar = if (paymentState.type != "Bolívares") montoDolares else null,
+							amountBs = if (paymentState.type != "Dólares") montoBs else null,
 							description = description,
 							reference = if (paymentState.type != "Dólares") reference else null,
 							date = System.currentTimeMillis(),
@@ -425,18 +429,10 @@ fun PaymentsScreenContent(
 						snackbarMessage = "Error: datos de usuario o membresía no encontrados"
 						showSnackbar = true
 					}
-				},
-				enabled = formIsValid,
-				colors = ButtonDefaults.buttonColors(
-					containerColor = colorScheme.primary,
-					contentColor = colorScheme.onPrimary,
-					disabledContainerColor = colorScheme.onSurface.copy(alpha = 0.12f),
-					disabledContentColor = colorScheme.onSurface.copy(alpha = 0.38f)
-				),
-				modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+				}
 			) {
-				Text(text = "Guardar")
-			}
+			Text(text="Guardar")
+		}
 		}
 	}
 }

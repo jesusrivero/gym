@@ -9,6 +9,8 @@ data class Payment(
 	val membershipName: String = "",
 	val paymentType: String = "",
 	val amount: Double = 0.0,
+	val amountDollar: Double = 0.0,
+	val amountBs: Double = 0.0,
 	val description: String = "",
 	val reference: String? = null,
 	val date: Long = 0L,
