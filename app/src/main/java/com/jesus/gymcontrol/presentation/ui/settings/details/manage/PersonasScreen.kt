@@ -157,11 +157,22 @@ fun PersonsScreen(
 		val users = viewModel.listUsers
 		val isLoading = viewModel.isLoading
 		
-		val filteredList = users.filter {
-			(searchText.isBlank() || it.name.contains(searchText, true)
-					|| it.email.contains(searchText, true)
-					|| it.idCard.contains(searchText, true)
-					|| it.phone.contains(searchText, true))
+		val filteredList = users.filter { user ->
+			val matchesSearch = searchText.isBlank() ||
+					user.name.contains(searchText, ignoreCase = true) ||
+					user.email.contains(searchText, ignoreCase = true) ||
+					user.idCard.contains(searchText, ignoreCase = true) ||
+					user.phone.contains(searchText, ignoreCase = true)
+			
+			val matchesState = when (selectedState) {
+				"Todos" -> true
+				"Activos" -> user.state.equals("activo", ignoreCase = true)
+				"Inactivos" -> user.state.equals("inactivo", ignoreCase = true)
+				"Próximos a pagar" -> user.state.equals("pendiente", ignoreCase = true)
+				else -> true
+			}
+			
+			matchesSearch && matchesState
 		}
 		
 		Box(
@@ -254,22 +265,20 @@ fun PersonsScreen(
 }
 
 @Composable
-internal fun DetailRow(label: String, value: String) {
-	GymTheme {
-		Row(
-			modifier = Modifier.fillMaxWidth(),
-			horizontalArrangement = Arrangement.SpaceBetween,
-			verticalAlignment = Alignment.CenterVertically,
-		) {
-			Text(
-				text = label,
-				fontWeight = FontWeight.Bold,
-				color = MaterialTheme.colorScheme.onSurfaceVariant
-			)
-			Text(
-				text = value,
-				color = MaterialTheme.colorScheme.onSurface
-			)
-		}
+fun DetailRow(label: String, value: String) {
+	Row(
+		modifier = Modifier.fillMaxWidth(),
+		horizontalArrangement = Arrangement.SpaceBetween,
+		verticalAlignment = Alignment.CenterVertically
+	) {
+		Text(
+			text = label,
+			fontWeight = FontWeight.Bold,
+			color = MaterialTheme.colorScheme.onSurfaceVariant
+		)
+		Text(
+			text = value,
+			color = MaterialTheme.colorScheme.onSurface
+		)
 	}
 }

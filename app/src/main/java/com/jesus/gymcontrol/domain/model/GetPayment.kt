@@ -2,12 +2,15 @@ package com.jesus.gymcontrol.domain.model
 
 data class Payment(
 	val id: String = "",
+	val userId: String = "",
 	val name: String = "",
 	val idCard: String = "",
-	val membership: String = "",
-	val typePayment: String = "",
+	val membershipId: String = "",
+	val membershipName: String = "",
+	val paymentType: String = "",
 	val amount: Double = 0.0,
-	val reference: String = "",
 	val description: String = "",
-	val date: Long = 0L // Epoch millis
+	val reference: String? = null,
+	val date: Long = 0L,
+	val gymCode: String = ""
 )

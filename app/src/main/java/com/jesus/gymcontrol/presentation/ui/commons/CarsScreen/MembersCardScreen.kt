@@ -32,98 +32,103 @@ import com.jesus.gymcontrol.domain.viewmodels.MembershipViewModel
 
 @Composable
 fun MembersCardScreen(
-    viewModel: MembershipViewModel = hiltViewModel()
+	viewModel: MembershipViewModel = hiltViewModel(),
 ) {
-    val scrollState = rememberScrollState()
-    val memberships = viewModel.memberships
-    val isLoading = viewModel.isLoading
-
-    // Cargar membresías al abrir
-    LaunchedEffect(Unit) {
-        viewModel.loadMemberships()
-    }
-
-    Row(
-        modifier = Modifier
-            .horizontalScroll(scrollState)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        if (isLoading && memberships.isEmpty()) {
-            repeat(3) {
-                LoadingMemberCard()
-            }
-        } else {
-            memberships.forEach { membership ->
-                MembersCard(color = Color(0xCE447A9C)) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = membership.nombre,
-                            color = Color.White,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "Clientes",
-                                tint = Color.White,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-//                            Text(
-//                                text = "${membership.}",
-//                                color = Color.White,
-//                                fontSize = 16.sp
-//                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
+	val scrollState = rememberScrollState()
+	val memberships = viewModel.memberships
+	val isLoading = viewModel.isLoading
+	val membershipsSummary = viewModel.membershipsSummary
+	
+	// Cargar membresías al abrir
+	LaunchedEffect(Unit) {
+		viewModel.loadMemberships()
+		viewModel.loadMembershipsSummary()
+	}
+	
+	Row(
+		modifier = Modifier
+			.horizontalScroll(scrollState)
+			.padding(horizontal = 16.dp, vertical = 8.dp),
+		horizontalArrangement = Arrangement.spacedBy(16.dp)
+	) {
+		if (isLoading && memberships.isEmpty()) {
+			repeat(3) {
+				LoadingMemberCard()
+			}
+		} else {
+			membershipsSummary.forEach { membershipWithCount ->
+				val membership = membershipWithCount.membership
+				val userCount = membershipWithCount.userCount
+				
+				MembersCard(color = Color(0xCE447A9C)) {
+					Column(
+						horizontalAlignment = Alignment.CenterHorizontally,
+						verticalArrangement = Arrangement.Center
+					) {
+						Text(
+							text = membership.nombre,
+							color = Color.White,
+							fontSize = 16.sp,
+							fontWeight = FontWeight.Bold
+						)
+						Row(verticalAlignment = Alignment.CenterVertically) {
+							Icon(
+								imageVector = Icons.Default.Person,
+								contentDescription = "Clientes",
+								tint = Color.White,
+								modifier = Modifier.size(20.dp)
+							)
+							Spacer(modifier = Modifier.width(4.dp))
+							Text(
+								text = "$userCount",
+								color = Color.White,
+								fontSize = 16.sp
+							)
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 @Composable
 fun MembersCard(
-    color: Color,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
+	color: Color,
+	modifier: Modifier = Modifier,
+	content: @Composable () -> Unit,
 ) {
-    Card(
-        modifier = modifier
-            .width(150.dp)
-            .height(100.dp),
-        colors = CardDefaults.cardColors(containerColor = color),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            content()
-        }
-    }
+	Card(
+		modifier = modifier
+			.width(150.dp)
+			.height(100.dp),
+		colors = CardDefaults.cardColors(containerColor = color),
+		elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+	) {
+		Box(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(16.dp),
+			contentAlignment = Alignment.Center
+		) {
+			content()
+		}
+	}
 }
 
 @Composable
 fun LoadingMemberCard() {
-    MembersCard(color = Color(0xCE447A9C)) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            CircularProgressIndicator(
-                color = Color.White,
-                strokeWidth = 2.dp,
-                modifier = Modifier.size(24.dp)
-            )
-        }
-    }
+	MembersCard(color = Color(0xCE447A9C)) {
+		Column(
+			horizontalAlignment = Alignment.CenterHorizontally,
+			verticalArrangement = Arrangement.Center
+		) {
+			CircularProgressIndicator(
+				color = Color.White,
+				strokeWidth = 2.dp,
+				modifier = Modifier.size(24.dp)
+			)
+		}
+	}
 }
 

@@ -99,9 +99,28 @@ class PaymentRepositoryImpl @Inject constructor(
 			.collection("pagos")
 			.get()
 			.await()
-		Log.d("PaymentRepositoryImpl", "getAllPayments: $paymentsSnapshot")
+		
 		return@withContext paymentsSnapshot.documents.mapNotNull { doc ->
-			doc.toObject(Payment::class.java)?.copy(id = doc.id)
+			try {
+				val data = doc.data ?: return@mapNotNull null
+				Payment(
+					id = data["id"] as? String ?: "",
+					userId = data["userId"] as? String ?: "",
+					name = data["name"] as? String ?: "",
+					idCard = data["idcard"] as? String ?: "",
+					membershipId = data["membershipId"] as? String ?: "",
+					membershipName = data["membershipName"] as? String ?: "",
+					paymentType = data["typepayment"] as? String ?: "",
+					amount = (data["amount"] as? Number)?.toDouble() ?: 0.0,
+					description = data["description"] as? String ?: "",
+					reference = data["reference"] as? String,
+					date = (data["date"] as? Number)?.toLong() ?: 0L,
+					gymCode = data["gimnasioCode"] as? String ?: ""
+				)
+			} catch (e: Exception) {
+				Log.e("getAllPayments", "Error parsing document ${doc.id}", e)
+				null
+			}
 		}
 	}
 }

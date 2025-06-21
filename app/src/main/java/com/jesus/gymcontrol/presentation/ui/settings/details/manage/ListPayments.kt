@@ -1,7 +1,6 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details.manage
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,7 +18,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -52,6 +53,7 @@ import com.jesus.gymcontrol.presentation.theme.GymTheme
 import com.jesus.gymcontrol.presentation.ui.commons.PaymentFilters
 
 
+
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,107 +72,108 @@ fun ListPaymentsScreen(
 	
 	val paymentTypeOptions = listOf("Todos", "Dólares", "Bolívares", "Mixto")
 	
-	LaunchedEffect(viewModel.payments) {
-		Log.d("ListPaymentsScreen", "Payments: ${viewModel.payments}")
-	}
-	
 	LaunchedEffect(Unit) {
 		viewModel.loadPayments()
 	}
 	
-	GymTheme {
-		Scaffold(
-			topBar = {
-				Column {
-					TopAppBar(
-						title = {
-							Text(
-								text = "Listado de pagos",
-								color = MaterialTheme.colorScheme.onPrimary,
-								fontWeight = FontWeight.Bold
-							)
-						},
-						navigationIcon = {
-							IconButton(onClick = { navBottom.popBackStack() }) {
-								Icon(
-									painter = painterResource(id = R.drawable.ic_back),
-									contentDescription = "Regresar",
-									tint = MaterialTheme.colorScheme.onPrimary
-								)
-							}
-						},
-						colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-							containerColor = MaterialTheme.colorScheme.primary
-						)
-					)
-					
-					PaymentFilters(
-						selectedPaymentType = selectedPaymentType,
-						paymentTypeOptions = paymentTypeOptions,
-						onPaymentTypeSelected = { selectedPaymentType = it },
-						onClearFilters = {
-							selectedPaymentType = "Todos"
-							searchText = ""
-						},
-						searchText = searchText,
-						onSearchTextChanged = { searchText = it }
-					)
-				}
-			},
-			floatingActionButton = {
-				FloatingActionButton(
-					onClick = navPagToScreen,
-					containerColor = MaterialTheme.colorScheme.primary,
-					contentColor = MaterialTheme.colorScheme.onPrimary
-				) {
-					Icon(Icons.Default.Add, contentDescription = "Nuevo pago")
-				}
-			}
-		) { innerPadding ->
-			Box(
-				modifier = Modifier
-					.fillMaxSize()
-					.padding(innerPadding),
-				contentAlignment = Alignment.Center
-			) {
-				if (isLoading) {
-					CircularProgressIndicator()
-				} else {
-					val filteredList = payments.filter {
-						(selectedPaymentType == "Todos" || it.typePayment?.equals(selectedPaymentType, true) == true) &&
-								(searchText.isBlank()
-										|| it.name.contains(searchText, true)
-										|| it.idCard.contains(searchText, true)
-										|| it.reference?.contains(searchText, true) == true)
-					}
-					
-					if (filteredList.isEmpty()) {
+	if (showDialog && selectedPayment != null) {
+		PaymentDetailDialog(payment = selectedPayment!!, onDismiss = {
+			showDialog = false
+			selectedPayment = null
+		})
+	}
+	
+	Scaffold(
+		topBar = {
+			Column {
+				TopAppBar(
+					title = {
 						Text(
-							text = "No hay pagos registrados",
-							color = MaterialTheme.colorScheme.onSurfaceVariant
+							text = "Listado de pagos",
+							color = MaterialTheme.colorScheme.onPrimary,
+							fontWeight = FontWeight.Bold
 						)
-					} else {
-						LazyColumn(
-							modifier = Modifier
-								.fillMaxSize()
-								.padding(16.dp),
-							verticalArrangement = Arrangement.spacedBy(12.dp)
-						) {
-							items(filteredList) { payment ->
-								PaymentCard(payment) {
-									selectedPayment = payment
-									showDialog = true
-								}
-							}
+					},
+					navigationIcon = {
+						IconButton(onClick = { navBottom.popBackStack() }) {
+							Icon(
+								painter = painterResource(id = R.drawable.ic_back),
+								contentDescription = "Regresar",
+								tint = MaterialTheme.colorScheme.onPrimary
+							)
 						}
+					},
+					colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+						containerColor = MaterialTheme.colorScheme.primary
+					)
+				)
+				PaymentFilters(
+					selectedPaymentType = selectedPaymentType,
+					paymentTypeOptions = paymentTypeOptions,
+					onPaymentTypeSelected = { selectedPaymentType = it },
+					onClearFilters = {
+						selectedPaymentType = "Todos"
+						searchText = ""
+					},
+					searchText = searchText,
+					onSearchTextChanged = { searchText = it }
+				)
+			}
+		},
+		floatingActionButton = {
+			FloatingActionButton(
+				onClick = navPagToScreen,
+				containerColor = MaterialTheme.colorScheme.primary,
+				contentColor = MaterialTheme.colorScheme.onPrimary
+			) {
+				Icon(Icons.Default.Add, contentDescription = "Nuevo pago")
+			}
+		}
+	) { innerPadding ->
+		val filteredList = payments.filter {
+			(selectedPaymentType == "Todos" || it.paymentType.equals(selectedPaymentType, true)) &&
+					(searchText.isBlank()
+							|| it.name.contains(searchText, true)
+							|| it.reference?.contains(searchText, true) == true
+							|| it.membershipName.contains(searchText, true))
+		}
+		
+		Box(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(innerPadding),
+			contentAlignment = Alignment.Center
+		) {
+			when {
+				isLoading -> {
+					Column(horizontalAlignment = Alignment.CenterHorizontally) {
+						CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+						Spacer(modifier = Modifier.height(12.dp))
+						Text("Cargando pagos...", color = MaterialTheme.colorScheme.onSurfaceVariant)
 					}
 				}
 				
-				if (showDialog && selectedPayment != null) {
-					PaymentDetailDialog(
-						payment = selectedPayment!!,
-						onDismiss = { showDialog = false }
+				filteredList.isEmpty() -> {
+					Text(
+						text = if (searchText.isNotEmpty()) "No se encontraron resultados" else "No hay pagos registrados",
+						color = MaterialTheme.colorScheme.onSurfaceVariant
 					)
+				}
+				
+				else -> {
+					LazyColumn(
+						modifier = Modifier
+							.fillMaxSize()
+							.padding(horizontal = 16.dp),
+						verticalArrangement = Arrangement.spacedBy(12.dp)
+					) {
+						items(filteredList) { payment ->
+							PaymentCard(payment) {
+								selectedPayment = payment
+								showDialog = true
+							}
+						}
+					}
 				}
 			}
 		}
@@ -181,74 +184,44 @@ fun ListPaymentsScreen(
 fun PaymentCard(payment: Payment, onViewDetails: () -> Unit) {
 	Card(
 		modifier = Modifier.fillMaxWidth(),
-		shape = RoundedCornerShape(16.dp)
+		shape = RoundedCornerShape(16.dp),
+		elevation = CardDefaults.cardElevation(2.dp),
+		colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
 	) {
-		Column(modifier = Modifier.padding(16.dp)) {
-			Row(verticalAlignment = Alignment.CenterVertically) {
-				Column(modifier = Modifier.weight(1f)) {
-					Text(
-						text = payment.name,
-						style = MaterialTheme.typography.titleMedium,
-						fontWeight = FontWeight.SemiBold
-					)
-					Text(
-						text = payment.idCard,
-						style = MaterialTheme.typography.bodySmall,
-						color = MaterialTheme.colorScheme.onSurfaceVariant
-					)
-					Spacer(modifier = Modifier.height(8.dp))
-					Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-						PaymentInfoBadge("Monto", "${payment.amount} $")
-//						PaymentInfoBadge("Fecha", payment.date.formatAsDate())
-					}
+		Row(
+			modifier = Modifier
+				.fillMaxWidth()
+				.padding(horizontal = 16.dp, vertical = 12.dp),
+			verticalAlignment = Alignment.CenterVertically,
+			horizontalArrangement = Arrangement.SpaceBetween
+		) {
+			Column(modifier = Modifier.weight(1f)) {
+				Text(
+					text = payment.name,
+					style = MaterialTheme.typography.titleMedium,
+					fontWeight = FontWeight.SemiBold
+				)
+				Spacer(modifier = Modifier.height(4.dp))
+				Text(
+					text = payment.membershipName,
+					style = MaterialTheme.typography.bodySmall,
+					color = MaterialTheme.colorScheme.onSurfaceVariant
+				)
+				Spacer(modifier = Modifier.height(8.dp))
+				Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+					PaymentInfoBadge("Monto", "${payment.amount} $")
+					PaymentInfoBadge("Tipo", payment.paymentType)
 				}
-				IconButton(onClick = onViewDetails) {
-					Icon(
-						painter = painterResource(id = R.drawable.ic_details),
-						contentDescription = "Detalles"
-					)
-				}
+			}
+			IconButton(onClick = onViewDetails) {
+				Icon(
+					painter = painterResource(id = R.drawable.ic_details),
+					contentDescription = "Detalles",
+					tint = MaterialTheme.colorScheme.primary
+				)
 			}
 		}
 	}
-}
-
-@Composable
-fun PaymentDetailDialog(payment: Payment, onDismiss: () -> Unit) {
-	AlertDialog(
-		onDismissRequest = onDismiss,
-		title = {
-			Text(
-				"Detalles del pago",
-				modifier = Modifier.fillMaxWidth(),
-				textAlign = TextAlign.Center
-			)
-		},
-		text = {
-			Column {
-				DetailRow("Nombre:", payment.name)
-				DetailRow("Cédula:", payment.idCard)
-				DetailRow("Membresía:", payment.membership)
-				DetailRow("Tipo de pago:", payment.typePayment)
-				DetailRow("Monto:", "${payment.amount} $")
-				payment.reference?.let {
-					DetailRow("Referencia:", it)
-				}
-				if (!payment.description.isNullOrBlank()) {
-					DetailRow("Descripción:", payment.description)
-				}
-//				DetailRow("Fecha:", payment.date.formatAsDate())
-			}
-		},
-		confirmButton = {
-			Button(
-				onClick = onDismiss,
-				modifier = Modifier.fillMaxWidth()
-			) {
-				Text("Cerrar")
-			}
-		}
-	)
 }
 
 @Composable
@@ -273,13 +246,44 @@ fun PaymentInfoBadge(label: String, value: String) {
 }
 
 @Composable
-fun DetailRowDetailRow(label: String, value: String) {
-	Row(
-		modifier = Modifier.fillMaxWidth(),
-		horizontalArrangement = Arrangement.SpaceBetween
-	) {
-		Text(label, fontWeight = FontWeight.Bold)
-		Text(value)
-	}
+fun PaymentDetailDialog(payment: Payment, onDismiss: () -> Unit) {
+	AlertDialog(
+		onDismissRequest = onDismiss,
+		title = {
+			Text(
+				text = "Detalles del pago",
+				modifier = Modifier.fillMaxWidth(),
+				textAlign = TextAlign.Center
+			)
+		},
+		text = {
+			Column {
+				DetailRow("Nombre:", payment.name)
+				Spacer(modifier = Modifier.height(8.dp))
+				DetailRow("Membresía:", payment.membershipName)
+				Spacer(modifier = Modifier.height(8.dp))
+				DetailRow("Tipo de pago:", payment.paymentType)
+				Spacer(modifier = Modifier.height(8.dp))
+				DetailRow("Monto:", "${payment.amount} $")
+				payment.reference?.let {
+					Spacer(modifier = Modifier.height(8.dp))
+					DetailRow("Referencia:", it)
+				}
+			}
+		},
+		confirmButton = {
+			Button(
+				onClick = onDismiss,
+				modifier = Modifier.fillMaxWidth(),
+				colors = ButtonDefaults.buttonColors(
+					containerColor = MaterialTheme.colorScheme.primary,
+					contentColor = MaterialTheme.colorScheme.onPrimary
+				)
+			) {
+				Text("Cerrar")
+			}
+		}
+	)
 }
+
 

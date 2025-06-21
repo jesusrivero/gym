@@ -1,5 +1,6 @@
 package com.jesus.gymcontrol.domain.viewmodels
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -106,13 +107,12 @@ class PaymentsViewModel @Inject constructor(
 	
 	fun loadPayments() {
 		val gymCode = sessionManager.getGymCode() ?: return
-		
 		viewModelScope.launch {
 			isLoading = true
 			try {
 				payments = getAllPaymentsUseCase(gymCode)
 			} catch (e: Exception) {
-				// Handle error
+				Log.e("PaymentsViewModel", "Error loading payments", e)
 			} finally {
 				isLoading = false
 			}
