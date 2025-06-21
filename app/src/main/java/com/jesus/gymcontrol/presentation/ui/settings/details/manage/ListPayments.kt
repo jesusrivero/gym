@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -184,15 +185,45 @@ fun ListPaymentsScreen(
 @Composable
 fun PaymentCard(payment: Payment, onViewDetails: () -> Unit) {
 	Card(
-		modifier = Modifier.fillMaxWidth(),
+		modifier = Modifier
+			.fillMaxWidth()
+			.wrapContentHeight()
+			.padding(horizontal = 4.dp),
 		shape = RoundedCornerShape(16.dp),
 		elevation = CardDefaults.cardElevation(2.dp),
 		colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
 	) {
-		Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-			PaymentInfoBadge("Monto", formatMonto(payment))
-			PaymentInfoBadge("Tipo", payment.paymentType)
-		}
+		Row(
+			modifier = Modifier
+				.fillMaxWidth()
+				.padding(horizontal = 16.dp, vertical = 12.dp),
+			verticalAlignment = Alignment.CenterVertically,
+			horizontalArrangement = Arrangement.SpaceBetween
+		) {
+			Column(
+				modifier = Modifier.weight(1f)
+			) {
+				Text(
+					text = payment.name,
+					style = MaterialTheme.typography.titleMedium,
+					fontWeight = FontWeight.SemiBold
+				)
+				Spacer(modifier = Modifier.height(4.dp))
+				Text(
+					text = payment.membershipName,
+					style = MaterialTheme.typography.bodySmall,
+					color = MaterialTheme.colorScheme.onSurfaceVariant
+				)
+				Spacer(modifier = Modifier.height(8.dp))
+				Row(
+					horizontalArrangement = Arrangement.spacedBy(8.dp),
+					verticalAlignment = Alignment.CenterVertically
+				) {
+					PaymentInfoBadge("Monto", formatMonto(payment))
+					PaymentInfoBadge("Tipo", payment.paymentType)
+				}
+			}
+			
 			IconButton(onClick = onViewDetails) {
 				Icon(
 					painter = painterResource(id = R.drawable.ic_details),
@@ -202,7 +233,7 @@ fun PaymentCard(payment: Payment, onViewDetails: () -> Unit) {
 			}
 		}
 	}
-
+}
 
 @Composable
 fun PaymentInfoBadge(label: String, value: String) {
@@ -235,6 +266,7 @@ fun formatAmount(value: Double): String {
 	}
 	return formatter.format(value)
 }
+
 @Composable
 
 fun PaymentDetailDialog(payment: Payment, onDismiss: () -> Unit) {
