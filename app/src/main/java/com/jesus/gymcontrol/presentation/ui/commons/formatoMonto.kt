@@ -13,19 +13,19 @@ fun formatMonto(payment: Payment): String {
 	
 	return when (payment.paymentType) {
 		"Dólares" -> {
-			val amount = payment.amountDollar ?: 0.0
+			val amount = payment.amountDollar?.takeIf { it > 0 } ?: payment.amount ?: 0.0
 			"$${formatter.format(amount)}"
 		}
 		
 		"Bolívares" -> {
-			val amount = payment.amountBs ?: 0.0
+			val amount = payment.amountBs?.takeIf { it > 0 } ?: payment.amount ?: 0.0
 			"Bs. ${formatter.format(amount)}"
 		}
 		
 		"Mixto" -> {
-			val dolar = formatter.format(payment.amountDollar ?: 0.0)
-			val bs = formatter.format(payment.amountBs ?: 0.0)
-			"$$dolar + Bs. $bs"
+			val dolar = payment.amountDollar?.takeIf { it > 0 } ?: 0.0
+			val bs = payment.amountBs?.takeIf { it > 0 } ?: 0.0
+			"$${formatter.format(dolar)} + Bs. ${formatter.format(bs)}"
 		}
 		
 		else -> {
