@@ -2,6 +2,7 @@ package com.jesus.gymcontrol.data.repository
 
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.jesus.gymcontrol.domain.model.Pago
 import com.jesus.gymcontrol.domain.model.Payment
 import com.jesus.gymcontrol.domain.repository.PaymentRepository
@@ -11,7 +12,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class PaymentRepositoryImpl @Inject constructor(
-    private val firestore: FirebaseFirestore
+	private val firestore: FirebaseFirestore,
 ) : PaymentRepository {
 	
 	override suspend fun addPago(pago: Pago): Result<Unit> = try {
@@ -68,25 +69,42 @@ class PaymentRepositoryImpl @Inject constructor(
 			batch.set(userPagoRef, pagoMap)
 			
 			// Usuario en gym/usuarios/{membershipId}/personas
-			batch.set(membresiaUserRef, mapOf(
-				"name" to pago.name,
-				"idcard" to pago.idcard,
-				"paymentdate" to pago.date
-			))
+			batch.set(
+				membresiaUserRef, mapOf(
+					"name" to pago.name,
+					"idcard" to pago.idcard,
+					"paymentdate" to pago.date
+				)
+			)
 			
 			// ✅ Usuario en membresía/usuarios con campo state
-			batch.set(membershipUsersRef, mapOf(
+			batch.set(
+				membershipUsersRef, mapOf(
+					"name" to pago.name,
+					"idcard" to pago.idcard,
+					"paymentdate" to pago.date,
+					"state" to "activo"
+				)
+			)
+			
+			// ✅ Actualiza el estado del usuario en gimnasios/{gimnasioCode}/usuarios/{userId}
+			val gymUserRef = gymRef.collection("usuarios").document(pago.userId)
+			
+			batch.set(gymUserRef, mapOf(
 				"name" to pago.name,
 				"idcard" to pago.idcard,
+				"state" to "activo",
 				"paymentdate" to pago.date,
-				"state" to "activo"
-			))
+				"membership" to pago.membershipName
+			), SetOptions.merge())
 			
 			// ✅ Actualización del estado del usuario y su membresía
-			batch.update(userRef, mapOf(
-				"state" to "activo",
-				"membership" to pago.membershipName
-			))
+			batch.update(
+				userRef, mapOf(
+					"state" to "activo",
+					"membership" to pago.membershipName
+				)
+			)
 		}.await()
 		
 		Result.success(Unit)
@@ -94,37 +112,38 @@ class PaymentRepositoryImpl @Inject constructor(
 		Result.failure(e)
 	}
 	
-	override suspend fun getAllPayments(gymCode: String): List<Payment> = withContext(Dispatchers.IO) {
-		val paymentsSnapshot = firestore
-			.collection("gimnasios")
-			.document(gymCode)
-			.collection("pagos")
-			.get()
-			.await()
-		
-		return@withContext paymentsSnapshot.documents.mapNotNull { doc ->
-			try {
-				val data = doc.data ?: return@mapNotNull null
-				Payment(
-					id = data["id"] as? String ?: "",
-					userId = data["userId"] as? String ?: "",
-					name = data["name"] as? String ?: "",
-					idCard = data["idcard"] as? String ?: "",
-					membershipId = data["membershipId"] as? String ?: "",
-					membershipName = data["membershipName"] as? String ?: "",
-					paymentType = data["typepayment"] as? String ?: "",
-					amount = (data["amount"] as? Number)?.toDouble() ?: 0.0,
-					amountDollar = (data["amountDollar"] as? Number)?.toDouble() ?: 0.0,
-					amountBs = (data["amountBs"] as? Number)?.toDouble() ?: 0.0,
-					description = data["description"] as? String ?: "",
-					reference = data["reference"] as? String,
-					date = (data["date"] as? Number)?.toLong() ?: 0L,
-					gymCode = data["gimnasioCode"] as? String ?: ""
-				)
-			} catch (e: Exception) {
-				Log.e("getAllPayments", "Error parsing document ${doc.id}", e)
-				null
+	override suspend fun getAllPayments(gymCode: String): List<Payment> =
+		withContext(Dispatchers.IO) {
+			val paymentsSnapshot = firestore
+				.collection("gimnasios")
+				.document(gymCode)
+				.collection("pagos")
+				.get()
+				.await()
+			
+			return@withContext paymentsSnapshot.documents.mapNotNull { doc ->
+				try {
+					val data = doc.data ?: return@mapNotNull null
+					Payment(
+						id = data["id"] as? String ?: "",
+						userId = data["userId"] as? String ?: "",
+						name = data["name"] as? String ?: "",
+						idCard = data["idcard"] as? String ?: "",
+						membershipId = data["membershipId"] as? String ?: "",
+						membershipName = data["membershipName"] as? String ?: "",
+						paymentType = data["typepayment"] as? String ?: "",
+						amount = (data["amount"] as? Number)?.toDouble() ?: 0.0,
+						amountDollar = (data["amountDollar"] as? Number)?.toDouble() ?: 0.0,
+						amountBs = (data["amountBs"] as? Number)?.toDouble() ?: 0.0,
+						description = data["description"] as? String ?: "",
+						reference = data["reference"] as? String,
+						date = (data["date"] as? Number)?.toLong() ?: 0L,
+						gymCode = data["gimnasioCode"] as? String ?: ""
+					)
+				} catch (e: Exception) {
+					Log.e("getAllPayments", "Error parsing document ${doc.id}", e)
+					null
+				}
 			}
 		}
-	}
 }

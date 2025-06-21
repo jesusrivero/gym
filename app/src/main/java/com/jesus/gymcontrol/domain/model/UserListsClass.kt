@@ -3,7 +3,7 @@ package com.jesus.gymcontrol.domain.model
 data class ListUser(
 	val id: String = "",
 	val name: String = "",
-	val idCard: String = "",
+	val idcard: String = "",
 	val phone: String = "",
 	val email: String = "",
 	val enabled: Boolean = false,

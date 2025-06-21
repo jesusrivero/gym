@@ -5,7 +5,7 @@ import java.text.NumberFormat
 import java.util.Locale
 
 fun formatMonto(payment: Payment): String {
-	val locale = Locale("es", "VE") // Estilo de Venezuela (latino)
+	val locale = Locale("es", "VE")
 	val formatter = NumberFormat.getNumberInstance(locale).apply {
 		minimumFractionDigits = 2
 		maximumFractionDigits = 2
@@ -13,12 +13,12 @@ fun formatMonto(payment: Payment): String {
 	
 	return when (payment.paymentType) {
 		"Dólares" -> {
-			val amount = payment.amountDollar ?: payment.amount
+			val amount = payment.amountDollar ?: 0.0
 			"$${formatter.format(amount)}"
 		}
 		
 		"Bolívares" -> {
-			val amount = payment.amountBs ?: payment.amount
+			val amount = payment.amountBs ?: 0.0
 			"Bs. ${formatter.format(amount)}"
 		}
 		
@@ -28,6 +28,9 @@ fun formatMonto(payment: Payment): String {
 			"$$dolar + Bs. $bs"
 		}
 		
-		else -> "${formatter.format(payment.amount)}"
+		else -> {
+			val amount = payment.amount ?: 0.0
+			formatter.format(amount)
+		}
 	}
 }

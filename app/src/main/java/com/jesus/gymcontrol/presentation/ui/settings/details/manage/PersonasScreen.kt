@@ -50,7 +50,6 @@ import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.domain.model.ListUser
 import com.jesus.gymcontrol.domain.viewmodels.UserListViewModel
-import com.jesus.gymcontrol.presentation.theme.GymTheme
 import com.jesus.gymcontrol.presentation.ui.commons.PaymentFilters
 
 
@@ -93,7 +92,9 @@ fun PersonsScreen(
 					Spacer(modifier = Modifier.height(8.dp))
 					DetailRow("Email:", selectedUser?.email ?: "")
 					Spacer(modifier = Modifier.height(8.dp))
-					DetailRow("Cédula:", selectedUser?.idCard ?: "")
+					DetailRow("Cédula:", selectedUser?.idcard ?: "")
+					Spacer(modifier = Modifier.height(8.dp))
+					DetailRow("Estado:", selectedUser?.state ?: "")
 					Spacer(modifier = Modifier.height(8.dp))
 					DetailRow("Teléfono:", selectedUser?.phone ?: "")
 				}
@@ -161,7 +162,7 @@ fun PersonsScreen(
 			val matchesSearch = searchText.isBlank() ||
 					user.name.contains(searchText, ignoreCase = true) ||
 					user.email.contains(searchText, ignoreCase = true) ||
-					user.idCard.contains(searchText, ignoreCase = true) ||
+					user.idcard.contains(searchText, ignoreCase = true) ||
 					user.phone.contains(searchText, ignoreCase = true)
 			
 			val matchesState = when (selectedState) {

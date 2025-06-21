@@ -18,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -98,7 +97,7 @@ fun PaymentsScreenContent(
 	val filteredUsers = if (nameUser.isBlank()) emptyList() else {
 		users.filter {
 			it.name.contains(nameUser, true) ||
-					it.idCard.contains(nameUser, true) ||
+					it.idcard.contains(nameUser, true) ||
 					it.email.contains(nameUser, true) ||
 					it.phone.contains(nameUser, true)
 		}
@@ -231,7 +230,7 @@ fun PaymentsScreenContent(
 						) {
 							Column {
 								Text(user.name, fontWeight = FontWeight.Bold)
-								Text(user.idCard, fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
+								Text(user.idcard, fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
 							}
 							Icon(Icons.Default.Person, contentDescription = null)
 						}
@@ -411,7 +410,7 @@ fun PaymentsScreenContent(
 							id = UUID.randomUUID().toString(),
 							userId = user.id,
 							name = user.name,
-							idcard = user.idCard,
+							idcard = user.idcard,
 							membershipId = membership.id,
 							membershipName = membership.nombre,
 							tipepayment = paymentState.type,

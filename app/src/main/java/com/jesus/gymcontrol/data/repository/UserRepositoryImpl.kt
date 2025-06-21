@@ -18,6 +18,8 @@ class UserRepositoryImpl @Inject constructor(
 			// 1. Obtener datos básicos del usuario
 			val userSnapshot = firestore.collection("users").document(uid).get().await()
 			val userName = userSnapshot.getString("name") ?: "Desconocido"
+			val email = userSnapshot.getString("email") ?: "Desconocido"
+			val idcard = userSnapshot.getString("idcard") ?: "Desconocido"
 			
 			// 2. Datos para guardar en users/{uid}/gimnasios/{uid} (o podrías usar gym.code como ID si prefieres)
 			val userGymData = mapOf(
@@ -34,6 +36,8 @@ class UserRepositoryImpl @Inject constructor(
 				"uid" to uid,
 				"name" to userName,
 				"rol" to rol,
+				"email" to email,
+				"idcard" to idcard,
 				"registrationDate" to FieldValue.serverTimestamp(),
 				"state" to "inactivo",           // ⬅️ NUEVO
 				"enable" to false,            // ⬅️ NUEVO
@@ -150,7 +154,7 @@ class UserRepositoryImpl @Inject constructor(
 			for (doc in usuariosSnapshot.documents) {
 				total++
 				
-				val estado = doc.getString("estado") ?: "inactivo"
+				val estado = doc.getString("state") ?: "inactivo"
 				
 				when (estado.lowercase()) {
 					"activo" -> activos++
@@ -184,7 +188,7 @@ class UserRepositoryImpl @Inject constructor(
 			ListUser(
 				id = doc.id,
 				name = data["name"] as? String ?: "",
-				idCard = data["idCard"] as? String ?: "",
+				idcard = data["idcard"] as? String ?: "",
 				phone = data["phone"] as? String ?: "",
 				email = data["email"] as? String ?: "",
 				state = data["state"] as? String ?: "",
