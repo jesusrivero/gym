@@ -3,18 +3,20 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -65,6 +67,8 @@ fun PromotionScreen(
 	var description by remember { mutableStateOf("") }
 	var discount by remember { mutableStateOf("") }
 	var duration by remember { mutableStateOf("") }
+	var promotionToEdit by remember { mutableStateOf<Promotion?>(null) }
+	var promotionToDelete by remember { mutableStateOf<Promotion?>(null) }
 	
 	LaunchedEffect(Unit) {
 		viewModel.loadPromotions()
@@ -135,7 +139,18 @@ fun PromotionScreen(
 									Text("${promo.duracionDias} días de duración")
 									Spacer(modifier = Modifier.height(8.dp))
 									Text(promo.descripcion, style = MaterialTheme.typography.bodySmall)
+									
+									Spacer(modifier = Modifier.height(12.dp))
+									Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+										IconButton(onClick = { promotionToEdit = promo }) {
+											Icon(Icons.Default.Edit, contentDescription = "Editar promoción")
+										}
+										IconButton(onClick = { promotionToDelete = promo }) {
+											Icon(Icons.Default.Delete, contentDescription = "Eliminar promoción")
+										}
+									}
 								}
+								
 							}
 						}
 					}
@@ -214,6 +229,101 @@ fun PromotionScreen(
 				)
 			}
 			
+			promotionToEdit?.let { promo ->
+				var editedName by remember { mutableStateOf(promo.nombre) }
+				var editedDescription by remember { mutableStateOf(promo.descripcion) }
+				var editedDiscount by remember { mutableStateOf(promo.porcentajeDescuento.toString()) }
+				var editedDuration by remember { mutableStateOf(promo.duracionDias.toString()) }
+				
+				AlertDialog(
+					onDismissRequest = { promotionToEdit = null },
+					confirmButton = {
+						Button(onClick = {
+							val discountVal = editedDiscount.toDoubleOrNull()
+							val durationVal = editedDuration.toIntOrNull()
+							
+							if (editedName.isBlank() || editedDescription.isBlank() || discountVal == null || durationVal == null) {
+								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT).show()
+								return@Button
+							}
+							
+							val updatedPromo = promo.copy(
+								nombre = editedName.trim(),
+								descripcion = editedDescription.trim(),
+								porcentajeDescuento = discountVal,
+								duracionDias = durationVal
+							)
+							
+							viewModel.updatePromotion(updatedPromo)
+							promotionToEdit = null
+							Toast.makeText(context, "Promoción actualizada", Toast.LENGTH_SHORT).show()
+						}) {
+							Text("Guardar")
+						}
+					},
+					dismissButton = {
+						OutlinedButton(onClick = { promotionToEdit = null }) {
+							Text("Cancelar")
+						}
+					},
+					title = { Text("Editar Promoción") },
+					text = {
+						Column {
+							OutlinedTextField(
+								value = editedName,
+								onValueChange = { editedName = it },
+								label = { Text("Nombre") },
+								modifier = Modifier.fillMaxWidth()
+							)
+							OutlinedTextField(
+								value = editedDescription,
+								onValueChange = { editedDescription = it },
+								label = { Text("Descripción") },
+								modifier = Modifier.fillMaxWidth()
+							)
+							OutlinedTextField(
+								value = editedDiscount,
+								onValueChange = { editedDiscount = it },
+								label = { Text("Descuento (%)") },
+								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+								modifier = Modifier.fillMaxWidth()
+							)
+							OutlinedTextField(
+								value = editedDuration,
+								onValueChange = { editedDuration = it },
+								label = { Text("Duración (días)") },
+								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+								modifier = Modifier.fillMaxWidth()
+							)
+						}
+					},
+					shape = RoundedCornerShape(16.dp),
+					containerColor = MaterialTheme.colorScheme.surface
+				)
+			}
+			
+			// Diálogo para eliminar promoción
+			promotionToDelete?.let { promo ->
+				AlertDialog(
+					onDismissRequest = { promotionToDelete = null },
+					title = { Text("¿Eliminar promoción?") },
+					text = { Text("¿Estás seguro de eliminar la promoción \"${promo.nombre}\"? Esta acción no se puede deshacer.") },
+					confirmButton = {
+						Button(onClick = {
+							viewModel.deletePromotion(promo)
+							promotionToDelete = null
+						}) {
+							Text("Eliminar")
+						}
+					},
+					dismissButton = {
+						OutlinedButton(onClick = { promotionToDelete = null }) {
+							Text("Cancelar")
+						}
+					}
+				)
+			}
+			
 			errorMessage?.let {
 				LaunchedEffect(it) {
 					Toast.makeText(context, it, Toast.LENGTH_LONG).show()
@@ -222,4 +332,3 @@ fun PromotionScreen(
 		}
 	}
 }
-

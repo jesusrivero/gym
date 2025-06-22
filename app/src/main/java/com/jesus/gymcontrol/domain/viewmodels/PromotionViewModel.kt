@@ -8,7 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.model.Promotion
 import com.jesus.gymcontrol.domain.usecase.usuario.CreatePromotionUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.DeletePromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetPromotionUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.UpdatePromotionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -17,6 +19,8 @@ import javax.inject.Inject
 class PromotionViewModel @Inject constructor(
 	private val createPromotionUseCase: CreatePromotionUseCase,
 	private val getPromotionsUseCase: GetPromotionUseCase,
+	private val updatePromotionUseCase: UpdatePromotionUseCase,
+	private val deletePromotionUseCase: DeletePromotionUseCase,
 	private val sessionManager: SessionManager
 ) : ViewModel() {
 	
@@ -25,6 +29,7 @@ class PromotionViewModel @Inject constructor(
 	
 	var successMessage by mutableStateOf<String?>(null)
 		private set
+	
 	
 	var errorMessage by mutableStateOf<String?>(null)
 		private set
@@ -63,6 +68,32 @@ class PromotionViewModel @Inject constructor(
 			}
 		}
 	}
+	
+	fun updatePromotion(promotion: Promotion) {
+		viewModelScope.launch {
+			isLoading = true
+			errorMessage = null
+			
+			val result = updatePromotionUseCase(promotion)
+			isLoading = false
+			
+			result.onFailure {
+				errorMessage = it.message
+			}
+			
+			loadPromotions()
+			}
+		}
+	
+	fun deletePromotion(promotion: Promotion) {
+		viewModelScope.launch {
+			isLoading = true
+			val result = deletePromotionUseCase(promotion)
+			isLoading = false
+			result.onFailure { errorMessage = it.message }
+			loadPromotions()
+			}
+		}
 	
 	
 }

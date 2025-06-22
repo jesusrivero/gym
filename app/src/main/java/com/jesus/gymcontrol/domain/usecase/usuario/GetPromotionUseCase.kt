@@ -5,9 +5,9 @@ import com.jesus.gymcontrol.domain.repository.PromotionRepository
 import javax.inject.Inject
 
 class GetPromotionUseCase @Inject constructor(
-	private val promotionRepository: PromotionRepository,
+	private val Repository: PromotionRepository,
 ) {
 	suspend operator fun invoke(): Result<List<Promotion>> {
-		return promotionRepository.getPromotions()
+		return Repository.getPromotions()
 	}
 }

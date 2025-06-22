@@ -16,7 +16,6 @@ import com.jesus.gymcontrol.data.repository.UserAdminRepositoryImpl
 import com.jesus.gymcontrol.data.repository.UserRepositoryImpl
 import com.jesus.gymcontrol.data.repository.UsuarioRepositoryIMPL
 import com.jesus.gymcontrol.data.sharedPreferences.PreferencesManager
-import com.jesus.gymcontrol.domain.model.Promotion
 import com.jesus.gymcontrol.domain.repository.AuthRepository
 import com.jesus.gymcontrol.domain.repository.GymRepository
 import com.jesus.gymcontrol.domain.repository.MembershipRepository
@@ -31,6 +30,7 @@ import com.jesus.gymcontrol.domain.usecase.usuario.CreateGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.CreateMembershipUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.CreatePromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.DeleteMembershipUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.DeletePromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.EditMembershipUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GenerateCodeUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetAllGymUseCase
@@ -43,6 +43,7 @@ import com.jesus.gymcontrol.domain.usecase.usuario.GetUserByGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.LoginUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.RegisterUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateDatesUserUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.UpdatePromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateRolUseCase
 import com.jesus.gymcontrol.infraestructure.MyApp
 import dagger.Module
@@ -259,4 +260,21 @@ object AppModule {
 		repository: PromotionRepository
 	): GetPromotionUseCase = GetPromotionUseCase(repository
 	)
+	
+	@Provides
+	@Singleton
+	fun provideUpdatePromotionUseCase(
+		repository: PromotionRepository
+	): UpdatePromotionUseCase {
+		return UpdatePromotionUseCase(repository)
+	}
+	
+	@Provides
+	@Singleton
+	fun provideDeletePromotionUseCase(
+		repository: PromotionRepository
+	): DeletePromotionUseCase {
+		return DeletePromotionUseCase(repository)
+	}
+	
 }

@@ -7,7 +7,8 @@ interface PromotionRepository {
 
 suspend fun getPromotions(): Result<List<Promotion>>
 
-	suspend fun updatePromotion(promotion: Promotion)
-//	suspend fun deletePromotion(promotion: Promotion)
+	suspend fun updatePromotion(promotion: Promotion) : Result<Unit>
+	
+	suspend fun deletePromotion(promotion: Promotion) : Result<Unit>
 
 }
