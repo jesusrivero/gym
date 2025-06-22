@@ -16,7 +16,9 @@ class PaymentRepositoryImpl @Inject constructor(
 ) : PaymentRepository {
 	
 	override suspend fun addPago(pago: Pago): Result<Unit> = try {
-		val pagoMap = mapOf(
+		Log.d("addPago", "== INICIO DE addPago ==")
+		
+		val pagoMap = mutableMapOf(
 			"id" to pago.id,
 			"userId" to pago.userId,
 			"name" to pago.name,
@@ -30,8 +32,12 @@ class PaymentRepositoryImpl @Inject constructor(
 			"description" to pago.description,
 			"reference" to pago.reference,
 			"date" to pago.date,
-			"gimnasioCode" to pago.gimnasioCode
-		)
+			"gimnasioCode" to pago.gimnasioCode,
+			"promocionId" to pago.promocionId,
+			"promocionNombre" to pago.promocionNombre,
+			"promocionDescripcion" to pago.promocionDescripcion,
+			"promocionPorcentajeDescuento" to pago.promocionDescuento
+		).filterValues { it != null }
 		
 		val gymRef = firestore.collection("gimnasios").document(pago.gimnasioCode)
 		
@@ -44,40 +50,43 @@ class PaymentRepositoryImpl @Inject constructor(
 			.collection("pagos")
 			.document(pago.id)
 		
-		// Usuario en gym/usuarios/{membershipId}/personas/{userId}
 		val membresiaUserRef = gymRef
 			.collection("usuarios")
 			.document(pago.membershipId)
-			.collection("personas")
+			.collection("usuarios")
 			.document(pago.userId)
 		
-		// ✅ Usuario en gym/membresias/{membershipId}/usuarios/{userId}
 		val membershipUsersRef = gymRef
 			.collection("membresias")
 			.document(pago.membershipId)
 			.collection("usuarios")
 			.document(pago.userId)
 		
-		// Documento del usuario
 		val userRef = firestore.collection("users").document(pago.userId)
 		
+		// 🔍 LOG: Verifica si la promoción existe
+		if (pago.promocionId != null) {
+			Log.d("addPago", "Promoción asignada: ${pago.promocionId}")
+		} else {
+			Log.d("addPago", "NO se asignó promoción")
+		}
+		
+		// 👇 Referencia a la subcolección usuarios de la promoción (si aplica)
+		val promoUserRef = pago.promocionId?.let { promoId ->
+			val ref = gymRef.collection("promociones")
+				.document(promoId)
+				.collection("usuarios")
+				.document(pago.userId)
+			Log.d("addPago", "Ruta promoUserRef: ${ref.path}")
+			ref
+		}
+		
 		firestore.runBatch { batch ->
-			// Registro de pago en gimnasio
 			batch.set(pagoRef, pagoMap)
-			
-			// Registro de pago en usuario
 			batch.set(userPagoRef, pagoMap)
 			
-			// Usuario en gym/usuarios/{membershipId}/personas
-			batch.set(
-				membresiaUserRef, mapOf(
-					"name" to pago.name,
-					"idcard" to pago.idcard,
-					"paymentdate" to pago.date
-				)
-			)
 			
-			// ✅ Usuario en membresía/usuarios con campo state
+			
 			batch.set(
 				membershipUsersRef, mapOf(
 					"name" to pago.name,
@@ -87,28 +96,47 @@ class PaymentRepositoryImpl @Inject constructor(
 				)
 			)
 			
-			// ✅ Actualiza el estado del usuario en gimnasios/{gimnasioCode}/usuarios/{userId}
 			val gymUserRef = gymRef.collection("usuarios").document(pago.userId)
 			
-			batch.set(gymUserRef, mapOf(
-				"name" to pago.name,
-				"idcard" to pago.idcard,
-				"state" to "activo",
-				"paymentdate" to pago.date,
-				"membership" to pago.membershipName
-			), SetOptions.merge())
+			batch.set(
+				gymUserRef, mapOf(
+					"name" to pago.name,
+					"idcard" to pago.idcard,
+					"state" to "activo",
+					"paymentdate" to pago.date,
+					"membership" to pago.membershipName
+				), SetOptions.merge()
+			)
 			
-			// ✅ Actualización del estado del usuario y su membresía
 			batch.update(
 				userRef, mapOf(
 					"state" to "activo",
-					"membership" to pago.membershipName
+					"membership" to pago.membershipName,
+					"promocion" to pago.promocionNombre // ✅ actualiza promoción en user
 				)
 			)
+			
+			// 👇 Solo se ejecuta si hay promoción asociada
+			promoUserRef?.let {
+				Log.d("addPago", "Agregando usuario en promoción: ${it.path}")
+				batch.set(
+					it, mapOf(
+						"userId" to pago.userId,
+						"name" to pago.name,
+						"idcard" to pago.idcard,
+						"paymentdate" to pago.date,
+						"state" to "activo",
+						"membershipId" to pago.membershipId,
+						"membershipName" to pago.membershipName
+					)
+				)
+			}
 		}.await()
 		
+		Log.d("addPago", "✅ Pago agregado correctamente")
 		Result.success(Unit)
 	} catch (e: Exception) {
+		Log.e("addPago", "❌ Error al agregar pago: ${e.localizedMessage}", e)
 		Result.failure(e)
 	}
 	

@@ -309,7 +309,7 @@ fun PaymentDetailDialog(payment: Payment, onDismiss: () -> Unit) {
 				onClick = onDismiss,
 				modifier = Modifier.fillMaxWidth(),
 				colors = ButtonDefaults.buttonColors(
-					containerColor = MaterialTheme.colorScheme.primary,
+					containerColor = MaterialTheme.colorScheme.surface,
 					contentColor = MaterialTheme.colorScheme.onPrimary
 				)
 			) {

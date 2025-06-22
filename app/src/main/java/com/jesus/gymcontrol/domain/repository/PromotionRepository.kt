@@ -10,5 +10,7 @@ suspend fun getPromotions(): Result<List<Promotion>>
 	suspend fun updatePromotion(promotion: Promotion) : Result<Unit>
 	
 	suspend fun deletePromotion(promotion: Promotion) : Result<Unit>
+	
+	suspend fun getUsersCountByPromotion(gymCode: String): Result<Map<String, Int>>
 
 }

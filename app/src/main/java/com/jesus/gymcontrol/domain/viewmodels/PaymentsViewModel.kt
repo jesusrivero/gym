@@ -11,6 +11,7 @@ import com.jesus.gymcontrol.domain.model.Membership
 import com.jesus.gymcontrol.domain.model.Pago
 import com.jesus.gymcontrol.domain.model.Payment
 import com.jesus.gymcontrol.domain.model.PaymentState
+import com.jesus.gymcontrol.domain.model.Promotion
 import com.jesus.gymcontrol.domain.usecase.usuario.AddPaymentUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetAllPaymentsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,83 +23,88 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PaymentsViewModel @Inject constructor(
-    private val addPaymentUseCase: AddPaymentUseCase,
+	private val addPaymentUseCase: AddPaymentUseCase,
 	private val getAllPaymentsUseCase: GetAllPaymentsUseCase,
-	private val sessionManager: SessionManager
+	private val sessionManager: SessionManager,
 ) : ViewModel() {
-
-   
-
-    private val _paymentState = MutableStateFlow(PaymentState())
-    val paymentState: StateFlow<PaymentState> = _paymentState
+	
+	private val _paymentState = MutableStateFlow(PaymentState())
+	val paymentState: StateFlow<PaymentState> = _paymentState
 	
 	var payments by mutableStateOf<List<Payment>>(emptyList())
 		private set
 	
 	
 	var selectedPayment by mutableStateOf<Payment?>(null)
-
-    var isLoading by mutableStateOf(false)
-        private set
-
-    var isSuccess by mutableStateOf(false)
-        private set
-
-    var errorMessage by mutableStateOf<String?>(null)
-        private set
-
-    /** Carga el mapa completo de membresías y precios */
-    fun setMemberships(memberships: List<Membership>) {
-        val membershipMap = memberships.associate { it.nombre to it.precio }
-        _paymentState.value = _paymentState.value.copy(listMembership = membershipMap)
-    }
-
-    /** Solo actualiza la frecuencia seleccionada, sin tocar el mapa */
-    fun updatePaymentFrequency(frequency: String) {
-        _paymentState.update {
-            it.copy(frequency = frequency)
-        }
-    }
-
-    /** Actualiza el tipo de pago */
-    fun updatePaymentType(type: String) {
-        _paymentState.update {
-            it.copy(type = type)
-        }
-    }
-
-    /** Actualiza el monto en dólares */
-    fun updateAmountDollar(amount: String) {
-        _paymentState.update {
-            it.copy(amountDollar = amount)
-        }
-    }
-
-    /** Actualiza el monto en bolívares */
-    fun updateAmountBs(amount: String) {
-        _paymentState.update {
-            it.copy(amountBs = amount)
-        }
-    }
-
-    /** Agrega un pago usando el caso de uso */
-    fun addPago(pago: Pago) {
-        viewModelScope.launch {
-            isLoading = true
-            isSuccess = false
-            errorMessage = null
-
-            val result = addPaymentUseCase(pago)
-
-            result.onSuccess {
-                isSuccess = true
-            }.onFailure {
-                errorMessage = it.message
-            }
-
-            isLoading = false
-        }
-    }
+	
+	var selectedPromotion by mutableStateOf<Promotion?>(null)
+		private set
+	
+	var isLoading by mutableStateOf(false)
+		private set
+	
+	var isSuccess by mutableStateOf(false)
+		private set
+	
+	var errorMessage by mutableStateOf<String?>(null)
+		private set
+	
+	fun selectedPromotion (promotion: Promotion) {
+		selectedPromotion = promotion
+	}
+	
+	/** Carga el mapa completo de membresías y precios */
+	fun setMemberships(memberships: List<Membership>) {
+		val membershipMap = memberships.associate { it.nombre to it.precio }
+		_paymentState.value = _paymentState.value.copy(listMembership = membershipMap)
+	}
+	
+	/** Solo actualiza la frecuencia seleccionada, sin tocar el mapa */
+	fun updatePaymentFrequency(frequency: String) {
+		_paymentState.update {
+			it.copy(frequency = frequency)
+		}
+	}
+	
+	/** Actualiza el tipo de pago */
+	fun updatePaymentType(type: String) {
+		_paymentState.update {
+			it.copy(type = type)
+		}
+	}
+	
+	/** Actualiza el monto en dólares */
+	fun updateAmountDollar(amount: String) {
+		_paymentState.update {
+			it.copy(amountDollar = amount)
+		}
+	}
+	
+	/** Actualiza el monto en bolívares */
+	fun updateAmountBs(amount: String) {
+		_paymentState.update {
+			it.copy(amountBs = amount)
+		}
+	}
+	
+	/** Agrega un pago usando el caso de uso */
+	fun addPago(pago: Pago) {
+		viewModelScope.launch {
+			isLoading = true
+			isSuccess = false
+			errorMessage = null
+			
+			val result = addPaymentUseCase(pago)
+			
+			result.onSuccess {
+				isSuccess = true
+			}.onFailure {
+				errorMessage = it.message
+			}
+			
+			isLoading = false
+		}
+	}
 	
 	fun loadPayments() {
 		val gymCode = sessionManager.getGymCode() ?: return
@@ -113,10 +119,10 @@ class PaymentsViewModel @Inject constructor(
 			}
 		}
 	}
-
-    /** Limpia estados de éxito y error */
-    fun resetState() {
-        isSuccess = false
-        errorMessage = null
-    }
+	
+	/** Limpia estados de éxito y error */
+	fun resetState() {
+		isSuccess = false
+		errorMessage = null
+	}
 }

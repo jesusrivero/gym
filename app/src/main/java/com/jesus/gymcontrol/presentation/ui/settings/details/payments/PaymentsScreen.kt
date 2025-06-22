@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Person
@@ -69,8 +70,10 @@ import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.model.Pago
+import com.jesus.gymcontrol.domain.model.Promotion
 import com.jesus.gymcontrol.domain.viewmodels.MembershipViewModel
 import com.jesus.gymcontrol.domain.viewmodels.PaymentsViewModel
+import com.jesus.gymcontrol.domain.viewmodels.PromotionViewModel
 import com.jesus.gymcontrol.domain.viewmodels.UserListViewModel
 import kotlinx.coroutines.delay
 import java.util.UUID
@@ -80,11 +83,13 @@ fun PaymentsScreen(navController: NavController) {
 	PaymentsScreenContent(navController = navController)
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentsScreenContent(
 	navController: NavController,
 	viewModel: PaymentsViewModel = hiltViewModel(),
+	promotionViewModel: PromotionViewModel = hiltViewModel(),
 ) {
 	val colorScheme = MaterialTheme.colorScheme
 	val usersViewModel: UserListViewModel = hiltViewModel()
@@ -93,25 +98,26 @@ fun PaymentsScreenContent(
 	val memberships = membershipViewModel.memberships
 	val users by remember { derivedStateOf { usersViewModel.listUsers } }
 	
-	// Estados
+	// Estados locales
 	var description by remember { mutableStateOf("") }
 	var nameUser by remember { mutableStateOf("") }
 	var reference by remember { mutableStateOf("") }
-	var isDropdownExpanded by remember { mutableStateOf(false) }
+	var isMembershipDropdownExpanded by remember { mutableStateOf(false) }
 	var isTypeDropdownExpanded by remember { mutableStateOf(false) }
 	var showSnackbar by remember { mutableStateOf(false) }
 	var snackbarMessage by remember { mutableStateOf("") }
 	var selectedUserId by remember { mutableStateOf<String?>(null) }
+	var isPromoDropdownExpanded by remember { mutableStateOf(false) }
+	val selectedPromotion = viewModel.selectedPromotion
+	val promotions = promotionViewModel.promotions
 	
 	val paymentTypes = listOf("Dólares", "Bolívares", "Mixto")
 	val isPaymentTypeEnabled = paymentState.frequency.isNotEmpty()
 	
-	// Contexto y sesión
 	val context = LocalContext.current
 	val sessionManager = remember { SessionManager(context) }
 	val gimnasioCode = sessionManager.getGymCode()
 	
-	// Filtrado de usuarios
 	val filteredUsers = if (nameUser.isBlank()) emptyList() else {
 		users.filter {
 			it.name.contains(nameUser, true) ||
@@ -121,23 +127,21 @@ fun PaymentsScreenContent(
 		}
 	}
 	
-	// Validación del formulario
 	val formIsValid = selectedUserId != null &&
 			paymentState.frequency.isNotBlank() &&
 			paymentState.type.isNotBlank() &&
 			when (paymentState.type) {
-				"Dólares" -> paymentState.listMembership[paymentState.frequency]?.let { it > 0 } == true
-				"Bolívares" -> paymentState.amountBs.toFloatOrNull()
+				"Dólares" -> paymentState.amountDollar.toDoubleOrNull()?.let { it > 0 } == true
+				"Bolívares" -> paymentState.amountBs.toDoubleOrNull()
 					?.let { it > 0 } == true && reference.isNotBlank()
 				
-				"Mixto" -> paymentState.amountDollar.toFloatOrNull()?.let { it > 0 } == true &&
-						paymentState.amountBs.toFloatOrNull()?.let { it > 0 } == true &&
+				"Mixto" -> paymentState.amountDollar.toDoubleOrNull()?.let { it > 0 } == true &&
+						paymentState.amountBs.toDoubleOrNull()?.let { it > 0 } == true &&
 						reference.isNotBlank()
 				
 				else -> false
 			}
 	
-	// Efectos
 	LaunchedEffect(viewModel.isSuccess) {
 		if (viewModel.isSuccess) {
 			snackbarMessage = "Pago registrado correctamente"
@@ -158,6 +162,7 @@ fun PaymentsScreenContent(
 	LaunchedEffect(Unit) {
 		membershipViewModel.loadMemberships()
 		usersViewModel.loadUsers()
+		promotionViewModel.loadPromotions()
 	}
 	
 	LaunchedEffect(memberships) {
@@ -219,7 +224,7 @@ fun PaymentsScreenContent(
 								val montoBs = paymentState.amountBs.toDoubleOrNull() ?: 0.0
 								
 								val montoTotal = when (paymentState.type) {
-									"Dólares" -> paymentState.listMembership[paymentState.frequency] ?: 0.0
+									"Dólares" -> montoDolares
 									"Bolívares" -> montoBs
 									"Mixto" -> montoDolares + montoBs
 									else -> 0.0
@@ -239,7 +244,11 @@ fun PaymentsScreenContent(
 									description = description,
 									reference = if (paymentState.type != "Dólares") reference else null,
 									date = System.currentTimeMillis(),
-									gimnasioCode = gimnasioCode.toString()
+									gimnasioCode = gimnasioCode.toString(),
+									promocionId = selectedPromotion?.id,
+									promocionNombre = selectedPromotion?.nombre ?: "",
+									promocionDescripcion = selectedPromotion?.descripcion ?: "",
+									promocionDescuento = selectedPromotion?.porcentajeDescuento ?: 0.0
 								)
 								
 								viewModel.addPago(pago)
@@ -278,7 +287,7 @@ fun PaymentsScreenContent(
 				
 				Spacer(modifier = Modifier.height(16.dp))
 				
-				// Sección de búsqueda de usuario
+				// Sección búsqueda usuario
 				Card(
 					modifier = Modifier.fillMaxWidth(),
 					elevation = CardDefaults.cardElevation(4.dp),
@@ -356,14 +365,6 @@ fun PaymentsScreenContent(
 												color = colorScheme.onSurfaceVariant
 											)
 										}
-//										if (user.activeMembership) {
-//											Badge(
-//												containerColor = colorScheme.primaryContainer,
-//												contentColor = colorScheme.onPrimaryContainer
-//											) {
-//												Text("ACTIVO", fontSize = 10.sp)
-//											}
-//										}
 									}
 									Divider(modifier = Modifier.padding(horizontal = 12.dp))
 								}
@@ -374,163 +375,201 @@ fun PaymentsScreenContent(
 				
 				Spacer(modifier = Modifier.height(16.dp))
 				
-				// Sección de detalles del pago
+				// Detalles del pago
 				Card(
 					modifier = Modifier.fillMaxWidth(),
 					elevation = CardDefaults.cardElevation(4.dp),
 					colors = CardDefaults.cardColors(containerColor = colorScheme.background)
 				) {
-				Column(modifier = Modifier.padding(16.dp)) {
-					Text(
-						text = "Detalles del Pago",
-						style = MaterialTheme.typography.titleSmall,
-						color = colorScheme.primary,
-						modifier = Modifier.padding(bottom = 8.dp)
-					)
-					
-					// Selector de membresía
-					ExposedDropdownMenuBox(
-						expanded = isDropdownExpanded,
-						onExpandedChange = { isDropdownExpanded = it }
-					) {
-						OutlinedTextField(
-							value = paymentState.frequency,
-							onValueChange = {},
-							label = { Text("Tipo de membresía") },
-							modifier = Modifier
-								.fillMaxWidth()
-								.menuAnchor(),
-							readOnly = true,
-							leadingIcon = {
-								Icon(
-									Icons.Default.FitnessCenter,
-									contentDescription = "Membresía"
-								)
-							},
-							trailingIcon = {
-								ExposedDropdownMenuDefaults.TrailingIcon(expanded = isDropdownExpanded)
-							}
+					Column(modifier = Modifier.padding(16.dp)) {
+						Text(
+							text = "Detalles del Pago",
+							style = MaterialTheme.typography.titleSmall,
+							color = colorScheme.primary,
+							modifier = Modifier.padding(bottom = 8.dp)
 						)
-						ExposedDropdownMenu(
-							expanded = isDropdownExpanded,
-							onDismissRequest = { isDropdownExpanded = false }
+						
+						// Selector de membresía
+						ExposedDropdownMenuBox(
+							expanded = isMembershipDropdownExpanded,
+							onExpandedChange = { isMembershipDropdownExpanded = it }
 						) {
-							memberships.forEach { membership ->
-								DropdownMenuItem(
-									text = {
-										Column {
-											Text(membership.nombre)
-											Text(
-												"Valor: ${membership.precio} $",
-												fontSize = 12.sp,
-												color = colorScheme.onSurfaceVariant
-											)
-										}
-									},
-									onClick = {
-										viewModel.updatePaymentFrequency(membership.nombre)
-										isDropdownExpanded = false
-									}
-								)
-							}
-						}
-					}
-					
-					Spacer(modifier = Modifier.height(16.dp))
-					
-					// Selector de tipo de pago
-					ExposedDropdownMenuBox(
-						expanded = isTypeDropdownExpanded && isPaymentTypeEnabled,
-						onExpandedChange = { if (isPaymentTypeEnabled) isTypeDropdownExpanded = it }
-					) {
-						OutlinedTextField(
-							value = paymentState.type,
-							onValueChange = {},
-							label = { Text("Método de pago") },
-							modifier = Modifier
-								.fillMaxWidth()
-								.menuAnchor(),
-							readOnly = true,
-							leadingIcon = {
-								Icon(
-									Icons.Default.Payments,
-									contentDescription = "Tipo de pago"
-								)
-							},
-							trailingIcon = {
-								ExposedDropdownMenuDefaults.TrailingIcon(
-									expanded = isTypeDropdownExpanded && isPaymentTypeEnabled
-								)
-							},
-							enabled = isPaymentTypeEnabled
-						)
-						if (isPaymentTypeEnabled) {
+							OutlinedTextField(
+								value = paymentState.frequency,
+								onValueChange = {},
+								label = { Text("Tipo de membresía") },
+								modifier = Modifier
+									.fillMaxWidth()
+									.menuAnchor(),
+								readOnly = true,
+								leadingIcon = {
+									Icon(
+										Icons.Default.FitnessCenter,
+										contentDescription = "Membresía"
+									)
+								},
+								trailingIcon = {
+									ExposedDropdownMenuDefaults.TrailingIcon(expanded = isMembershipDropdownExpanded)
+								}
+							)
 							ExposedDropdownMenu(
-								expanded = isTypeDropdownExpanded,
-								onDismissRequest = { isTypeDropdownExpanded = false }
+								expanded = isMembershipDropdownExpanded,
+								onDismissRequest = { isMembershipDropdownExpanded = false }
 							) {
-								paymentTypes.forEach { type ->
+								memberships.forEach { membership ->
 									DropdownMenuItem(
-										text = { Text(type) },
+										text = {
+											Column {
+												Text(membership.nombre)
+												Text(
+													"Valor: ${membership.precio} $",
+													fontSize = 12.sp,
+													color = colorScheme.onSurfaceVariant
+												)
+											}
+										},
 										onClick = {
-											viewModel.updatePaymentType(type)
-											isTypeDropdownExpanded = false
+											viewModel.updatePaymentFrequency(membership.nombre)
+											
+											// Si el tipo de pago es "Dólares", actualizar montoDollar automáticamente
+											if (paymentState.type == "Dólares") {
+												viewModel.updateAmountDollar(membership.precio.toString())
+											}
+											
+											isMembershipDropdownExpanded = false
 										}
 									)
 								}
 							}
 						}
-					}
-					
-					Spacer(modifier = Modifier.height(16.dp))
-					
-					// Campos de monto según tipo de pago
-					when (paymentState.type) {
-						"Dólares" -> {
-							val price = paymentState.listMembership[paymentState.frequency]?.toString() ?: "0"
+						
+						
+						Spacer(modifier = Modifier.height(16.dp))
+						
+//						 Dropdown promociones
+						ExposedDropdownMenuBox(
+							expanded = isPromoDropdownExpanded,
+							onExpandedChange = { isPromoDropdownExpanded = it }
+						) {
 							OutlinedTextField(
-								value = price,
+								value = selectedPromotion?.nombre ?: "Sin promoción",
 								onValueChange = {},
-								label = { Text("Monto en dólares") },
+								label = { Text("Promoción (opcional)") },
+								modifier = Modifier
+									.fillMaxWidth()
+									.menuAnchor(),
 								readOnly = true,
-								modifier = Modifier.fillMaxWidth(),
-								leadingIcon = {
-									Icon(
-										Icons.Default.AttachMoney,
-										contentDescription = "Monto en dólares"
-									)
-								},
-								colors = OutlinedTextFieldDefaults.colors(
-									disabledBorderColor = colorScheme.outline,
-									disabledTextColor = colorScheme.onSurface,
-									disabledLabelColor = colorScheme.onSurfaceVariant
-								),
-								enabled = false
+								leadingIcon = { Icon(Icons.Default.LocalOffer, contentDescription = "Promoción") },
+								trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isPromoDropdownExpanded) }
 							)
+							ExposedDropdownMenu(
+								expanded = isPromoDropdownExpanded,
+								onDismissRequest = { isPromoDropdownExpanded = false }
+							) {
+								DropdownMenuItem(
+									text = { Text("Sin promoción") },
+									onClick = {
+								   viewModel.selectedPromotion(null?: Promotion())
+										isPromoDropdownExpanded = false
+									}
+								)
+								promotions.filter { it.activo && it.gimnasioCode == gimnasioCode }
+									.forEach { promo ->
+										DropdownMenuItem(
+											text = {
+												Column {
+													Text(promo.nombre)
+													if (promo.descripcion.isNotBlank()) {
+														Text(
+															promo.descripcion,
+															fontSize = 12.sp,
+															color = colorScheme.onSurfaceVariant
+														)
+													}
+													Text(
+														"Descuento: ${promo.porcentajeDescuento}%",
+														fontSize = 12.sp,
+														color = colorScheme.primary
+													)
+												}
+											},
+											onClick = {
+												
+												
+												viewModel.selectedPromotion(promo)
+												isPromoDropdownExpanded = false
+											}
+										)
+									}
+							}
 						}
 						
-						"Bolívares" -> {
+						Spacer(modifier = Modifier.height(16.dp))
+						
+						// Selector tipo de pago
+						ExposedDropdownMenuBox(
+							expanded = isTypeDropdownExpanded && isPaymentTypeEnabled,
+							onExpandedChange = { if (isPaymentTypeEnabled) isTypeDropdownExpanded = it }
+						) {
 							OutlinedTextField(
-								value = paymentState.amountBs,
-								onValueChange = { viewModel.updateAmountBs(it) },
-								label = { Text("Monto en bolívares") },
-								modifier = Modifier.fillMaxWidth(),
+								value = paymentState.type,
+								onValueChange = {},
+								label = { Text("Método de pago") },
+								modifier = Modifier
+									.fillMaxWidth()
+									.menuAnchor(),
+								readOnly = true,
 								leadingIcon = {
 									Icon(
-										painterResource(id = R.drawable.ic_details),
-										contentDescription = "Monto en bolívares"
+										Icons.Default.Payments,
+										contentDescription = "Tipo de pago"
 									)
 								},
-								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+								trailingIcon = {
+									ExposedDropdownMenuDefaults.TrailingIcon(
+										expanded = isTypeDropdownExpanded && isPaymentTypeEnabled
+									)
+								},
+								enabled = isPaymentTypeEnabled
 							)
+							if (isPaymentTypeEnabled) {
+								ExposedDropdownMenu(
+									expanded = isTypeDropdownExpanded,
+									onDismissRequest = { isTypeDropdownExpanded = false }
+								) {
+									paymentTypes.forEach { type ->
+										DropdownMenuItem(
+											text = { Text(type) },
+											onClick = {
+												viewModel.updatePaymentType(type)
+												
+												// Autocompletar montoDollar si es "Dólares"
+												if (type == "Dólares") {
+													val monto =
+														viewModel.paymentState.value.listMembership[viewModel.paymentState.value.frequency]
+															?: 0.0
+													viewModel.updateAmountDollar(monto.toString())
+												}
+												
+												isTypeDropdownExpanded = false
+											}
+										)
+									}
+								}
+							}
 						}
 						
-						"Mixto" -> {
-							Column {
+						Spacer(modifier = Modifier.height(16.dp))
+						
+						// Campos monto según tipo de pago
+						when (paymentState.type) {
+							"Dólares" -> {
+								val price = paymentState.amountDollar.takeIf { it.isNotBlank() } ?: "0"
 								OutlinedTextField(
-									value = paymentState.amountDollar,
-									onValueChange = { viewModel.updateAmountDollar(it) },
+									value = price,
+									onValueChange = {},
 									label = { Text("Monto en dólares") },
+									readOnly = true,
 									modifier = Modifier.fillMaxWidth(),
 									leadingIcon = {
 										Icon(
@@ -538,9 +577,16 @@ fun PaymentsScreenContent(
 											contentDescription = "Monto en dólares"
 										)
 									},
-									keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+									colors = OutlinedTextFieldDefaults.colors(
+										disabledBorderColor = colorScheme.outline,
+										disabledTextColor = colorScheme.onSurface,
+										disabledLabelColor = colorScheme.onSurfaceVariant
+									),
+									enabled = false
 								)
-								Spacer(modifier = Modifier.height(8.dp))
+							}
+							
+							"Bolívares" -> {
 								OutlinedTextField(
 									value = paymentState.amountBs,
 									onValueChange = { viewModel.updateAmountBs(it) },
@@ -555,45 +601,76 @@ fun PaymentsScreenContent(
 									keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
 								)
 							}
+							
+							"Mixto" -> {
+								Column {
+									OutlinedTextField(
+										value = paymentState.amountDollar,
+										onValueChange = { viewModel.updateAmountDollar(it) },
+										label = { Text("Monto en dólares") },
+										modifier = Modifier.fillMaxWidth(),
+										leadingIcon = {
+											Icon(
+												Icons.Default.AttachMoney,
+												contentDescription = "Monto en dólares"
+											)
+										},
+										keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+									)
+									Spacer(modifier = Modifier.height(8.dp))
+									OutlinedTextField(
+										value = paymentState.amountBs,
+										onValueChange = { viewModel.updateAmountBs(it) },
+										label = { Text("Monto en bolívares") },
+										modifier = Modifier.fillMaxWidth(),
+										leadingIcon = {
+											Icon(
+												painterResource(id = R.drawable.ic_details),
+												contentDescription = "Monto en bolívares"
+											)
+										},
+										keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+									)
+								}
+							}
 						}
-					}
-					
-					Spacer(modifier = Modifier.height(16.dp))
-					
-					// Campo de referencia (excepto para dólares)
-					if (paymentState.type != "Dólares") {
+						
+						Spacer(modifier = Modifier.height(16.dp))
+						
+						// Campo de referencia (excepto dólares)
+						if (paymentState.type != "Dólares") {
+							OutlinedTextField(
+								value = reference,
+								onValueChange = { reference = it },
+								label = { Text("Número de referencia") },
+								modifier = Modifier.fillMaxWidth(),
+								leadingIcon = {
+									Icon(
+										Icons.Default.Numbers,
+										contentDescription = "Referencia"
+									)
+								},
+								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+							)
+							Spacer(modifier = Modifier.height(16.dp))
+						}
+						
+						// Campo de descripción
 						OutlinedTextField(
-							value = reference,
-							onValueChange = { reference = it },
-							label = { Text("Número de referencia") },
+							value = description,
+							onValueChange = { description = it },
+							label = { Text("Notas adicionales") },
 							modifier = Modifier.fillMaxWidth(),
 							leadingIcon = {
 								Icon(
-									Icons.Default.Numbers,
-									contentDescription = "Referencia"
+									Icons.Default.AlternateEmail,
+									contentDescription = "Descripción"
 								)
 							},
-							keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+							maxLines = 3
 						)
-						Spacer(modifier = Modifier.height(16.dp))
 					}
-					
-					// Campo de descripción
-					OutlinedTextField(
-						value = description,
-						onValueChange = { description = it },
-						label = { Text("Notas adicionales") },
-						modifier = Modifier.fillMaxWidth(),
-						leadingIcon = {
-							Icon(
-								Icons.Default.AlternateEmail,
-								contentDescription = "Descripción"
-							)
-						},
-						maxLines = 3
-					)
 				}
-			}
 			}
 		}
 	}

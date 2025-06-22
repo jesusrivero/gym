@@ -40,6 +40,7 @@ import com.jesus.gymcontrol.domain.usecase.usuario.GetMembershipsUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetMembershipsWithUserCountUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetPromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetUserByGymUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.GetUsersCountByPromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.LoginUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.RegisterUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateDatesUserUseCase
@@ -56,186 +57,186 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-
-
-    @Provides
-    @Singleton
-    fun provideFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
-
-    @Provides
-    @Singleton
-    fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
-
-    @Provides
-    @Singleton
-    fun provideAuthRepository(
-        firebaseAuth: FirebaseAuth,
-        firestore: FirebaseFirestore
-    ): AuthRepository {
-        return AuthRepositoryImpl(firebaseAuth, firestore)
-    }
-
-    @Provides
-    @Singleton
-    fun provideGymRepository(
-        firestore: FirebaseFirestore
-    ): GymRepository {
-        return GymRepositoryImpl(firestore)
-    }
-
-    @Provides
-    @Singleton
-    fun provideUserRepository(
-        firestore: FirebaseFirestore
-    ): UserRepository {
-        return UserRepositoryImpl(firestore)
-    }
-
-    @Provides
-    @Singleton
-    fun provideCreateGymUseCase(repository: GymRepository): CreateGymUseCase {
-        return CreateGymUseCase(repository)
-    }
-
-    @Provides
-    @Singleton
-    fun provideGetAllGymUseCase(repository: GymRepository): GetAllGymUseCase {
-        return GetAllGymUseCase(repository)
-    }
-
-    @Provides
-    @Singleton
-    fun provideAssignGymToUserUseCase(repository: UserRepository): AssignGymToUserUseCase {
-        return AssignGymToUserUseCase(repository)
-    }
-
-    @Provides
-    @Singleton
-    fun provideRegisterUseCase(repository: AuthRepository): RegisterUseCase {
-        return RegisterUseCase(repository)
-    }
-
-    @Provides
-    @Singleton
-    fun provideLoginUseCase(repository: AuthRepository): LoginUseCase {
-        return LoginUseCase(repository)
-    }
-
-    @Provides
-    fun provideAppDatabase(): AppDatabase {
-        return Room.databaseBuilder(
-            MyApp.myApp.baseContext,
-            AppDatabase::class.java,
-            "db_usuarios"
-        ).build()
-    }
-
-    @Provides
-    fun provideUsuariosDao(database: AppDatabase): UsuariosDatabaseDao {
-        return database.usuariosDao()
-    }
-
-    @Provides
-    fun provideUsuarioRepository(dao: UsuariosDatabaseDao): UsuarioRepository {
-        return UsuarioRepositoryIMPL(dao)
-    }
-
-    @Provides
-    fun provideSharedManager(): PreferencesManager {
-        return PreferencesManager(MyApp.myApp.baseContext)
-    }
-
-    @Provides
-    fun provideUpdateUserRolUseCase(repository: AuthRepository): UpdateRolUseCase {
-        return UpdateRolUseCase(repository)
-    }
-
-    @Provides
-    fun provideUpdateDatesUserUseCase(repository: AuthRepository): UpdateDatesUserUseCase {
-        return UpdateDatesUserUseCase(repository)
-    }
-
-    @Provides
-    @Singleton
-    fun provideSessionManager(@ApplicationContext context: Context): SessionManager {
-        return SessionManager(context)
-    }
-
-    @Provides
-    @Singleton
-    fun provideGenerateCodeUseCase(repository: GymRepository): GenerateCodeUseCase {
-        return GenerateCodeUseCase(repository)
-    }
-
-    @Provides
-    fun provideGetGymUserSummaryUseCase(
-        userRepository: UserRepository
-    ): GetGymUserSummaryUseCase {
-        return GetGymUserSummaryUseCase(userRepository)
-    }
-
-
-    @Provides
-    fun provideUserAdminRepository(
-        firestore: FirebaseFirestore,
-        @ApplicationContext context: Context
-    ): UserAdminRepository = UserAdminRepositoryImpl(firestore, context)
-
-    @Provides
-    @Singleton
-    fun provideGetUserByGymUseCase(
-        userRepository: UserRepository
-    ): GetUserByGymUseCase = GetUserByGymUseCase(userRepository)
-
-
-    @Provides
-    fun provideMembershipRepository(
-        firestore: FirebaseFirestore,
-        auth: FirebaseAuth
-    ): MembershipRepository = MembershipRepositoryImpl(firestore, auth)
-
-    @Provides
-    fun provideCreateMembershipUseCase(
-        repository: MembershipRepository
-    ): CreateMembershipUseCase = CreateMembershipUseCase(repository)
-
-    @Provides
-    fun provideGetMembershipsUseCase(repository: MembershipRepository) =
-        GetMembershipsUseCase(repository)
-
-    @Provides
-    fun provideDeleteMembershipUseCase(repository: MembershipRepository): DeleteMembershipUseCase {
-        return DeleteMembershipUseCase(repository)
-    }
-
-    @Provides
-    fun provideGetMembershipsWithUserCountUseCase(
-        repository: MembershipRepository
-    ): GetMembershipsWithUserCountUseCase {
-        return GetMembershipsWithUserCountUseCase(repository)
-    }
-
-    @Provides
-    fun provideEditMembership(
-        repository: MembershipRepository
-    ):  EditMembershipUseCase {
-        return  EditMembershipUseCase(repository)
-    }
-
-    @Provides
-    fun providePagoRepository(
-        firestore: FirebaseFirestore
-    ): PaymentRepository = PaymentRepositoryImpl(firestore)
-
-    @Provides
-    fun provideAddPagoUseCase(
-        repository: PaymentRepository
-    ): AddPaymentUseCase = AddPaymentUseCase(repository)
 	
-
+	
+	@Provides
+	@Singleton
+	fun provideFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
+	
+	@Provides
+	@Singleton
+	fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
+	
+	@Provides
+	@Singleton
+	fun provideAuthRepository(
+		firebaseAuth: FirebaseAuth,
+		firestore: FirebaseFirestore,
+	): AuthRepository {
+		return AuthRepositoryImpl(firebaseAuth, firestore)
+	}
+	
+	@Provides
+	@Singleton
+	fun provideGymRepository(
+		firestore: FirebaseFirestore,
+	): GymRepository {
+		return GymRepositoryImpl(firestore)
+	}
+	
+	@Provides
+	@Singleton
+	fun provideUserRepository(
+		firestore: FirebaseFirestore,
+	): UserRepository {
+		return UserRepositoryImpl(firestore)
+	}
+	
+	@Provides
+	@Singleton
+	fun provideCreateGymUseCase(repository: GymRepository): CreateGymUseCase {
+		return CreateGymUseCase(repository)
+	}
+	
+	@Provides
+	@Singleton
+	fun provideGetAllGymUseCase(repository: GymRepository): GetAllGymUseCase {
+		return GetAllGymUseCase(repository)
+	}
+	
+	@Provides
+	@Singleton
+	fun provideAssignGymToUserUseCase(repository: UserRepository): AssignGymToUserUseCase {
+		return AssignGymToUserUseCase(repository)
+	}
+	
+	@Provides
+	@Singleton
+	fun provideRegisterUseCase(repository: AuthRepository): RegisterUseCase {
+		return RegisterUseCase(repository)
+	}
+	
+	@Provides
+	@Singleton
+	fun provideLoginUseCase(repository: AuthRepository): LoginUseCase {
+		return LoginUseCase(repository)
+	}
+	
+	@Provides
+	fun provideAppDatabase(): AppDatabase {
+		return Room.databaseBuilder(
+			MyApp.myApp.baseContext,
+			AppDatabase::class.java,
+			"db_usuarios"
+		).build()
+	}
+	
+	@Provides
+	fun provideUsuariosDao(database: AppDatabase): UsuariosDatabaseDao {
+		return database.usuariosDao()
+	}
+	
+	@Provides
+	fun provideUsuarioRepository(dao: UsuariosDatabaseDao): UsuarioRepository {
+		return UsuarioRepositoryIMPL(dao)
+	}
+	
+	@Provides
+	fun provideSharedManager(): PreferencesManager {
+		return PreferencesManager(MyApp.myApp.baseContext)
+	}
+	
+	@Provides
+	fun provideUpdateUserRolUseCase(repository: AuthRepository): UpdateRolUseCase {
+		return UpdateRolUseCase(repository)
+	}
+	
+	@Provides
+	fun provideUpdateDatesUserUseCase(repository: AuthRepository): UpdateDatesUserUseCase {
+		return UpdateDatesUserUseCase(repository)
+	}
+	
+	@Provides
+	@Singleton
+	fun provideSessionManager(@ApplicationContext context: Context): SessionManager {
+		return SessionManager(context)
+	}
+	
+	@Provides
+	@Singleton
+	fun provideGenerateCodeUseCase(repository: GymRepository): GenerateCodeUseCase {
+		return GenerateCodeUseCase(repository)
+	}
+	
+	@Provides
+	fun provideGetGymUserSummaryUseCase(
+		userRepository: UserRepository,
+	): GetGymUserSummaryUseCase {
+		return GetGymUserSummaryUseCase(userRepository)
+	}
+	
+	
+	@Provides
+	fun provideUserAdminRepository(
+		firestore: FirebaseFirestore,
+		@ApplicationContext context: Context,
+	): UserAdminRepository = UserAdminRepositoryImpl(firestore, context)
+	
+	@Provides
+	@Singleton
+	fun provideGetUserByGymUseCase(
+		userRepository: UserRepository,
+	): GetUserByGymUseCase = GetUserByGymUseCase(userRepository)
+	
+	
+	@Provides
+	fun provideMembershipRepository(
+		firestore: FirebaseFirestore,
+		auth: FirebaseAuth,
+	): MembershipRepository = MembershipRepositoryImpl(firestore, auth)
+	
+	@Provides
+	fun provideCreateMembershipUseCase(
+		repository: MembershipRepository,
+	): CreateMembershipUseCase = CreateMembershipUseCase(repository)
+	
+	@Provides
+	fun provideGetMembershipsUseCase(repository: MembershipRepository) =
+		GetMembershipsUseCase(repository)
+	
+	@Provides
+	fun provideDeleteMembershipUseCase(repository: MembershipRepository): DeleteMembershipUseCase {
+		return DeleteMembershipUseCase(repository)
+	}
+	
+	@Provides
+	fun provideGetMembershipsWithUserCountUseCase(
+		repository: MembershipRepository,
+	): GetMembershipsWithUserCountUseCase {
+		return GetMembershipsWithUserCountUseCase(repository)
+	}
+	
+	@Provides
+	fun provideEditMembership(
+		repository: MembershipRepository,
+	): EditMembershipUseCase {
+		return EditMembershipUseCase(repository)
+	}
+	
+	@Provides
+	fun providePagoRepository(
+		firestore: FirebaseFirestore,
+	): PaymentRepository = PaymentRepositoryImpl(firestore)
+	
+	@Provides
+	fun provideAddPagoUseCase(
+		repository: PaymentRepository,
+	): AddPaymentUseCase = AddPaymentUseCase(repository)
+	
+	
 	@Provides
 	fun provideGetAllPaymentsUseCase(
-		repository: PaymentRepository
+		repository: PaymentRepository,
 	): GetAllPaymentsUseCase = GetAllPaymentsUseCase(repository)
 	
 	
@@ -243,28 +244,29 @@ object AppModule {
 	@Singleton
 	fun providePromotionRepository(
 		firestore: FirebaseFirestore,
-		auth: FirebaseAuth
+		auth: FirebaseAuth,
 	): PromotionRepository = PromotionRepositoryImpl(firestore, auth)
 	
 	
 	@Provides
 	@Singleton
 	fun provideCreatePromotionUseCase(
-		repository: PromotionRepository
+		repository: PromotionRepository,
 	): CreatePromotionUseCase = CreatePromotionUseCase(repository)
 	
 	
 	@Provides
-  @Singleton
+	@Singleton
 	fun provideGetPromotionUseCase(
-		repository: PromotionRepository
-	): GetPromotionUseCase = GetPromotionUseCase(repository
+		repository: PromotionRepository,
+	): GetPromotionUseCase = GetPromotionUseCase(
+		repository
 	)
 	
 	@Provides
 	@Singleton
 	fun provideUpdatePromotionUseCase(
-		repository: PromotionRepository
+		repository: PromotionRepository,
 	): UpdatePromotionUseCase {
 		return UpdatePromotionUseCase(repository)
 	}
@@ -272,9 +274,17 @@ object AppModule {
 	@Provides
 	@Singleton
 	fun provideDeletePromotionUseCase(
-		repository: PromotionRepository
+		repository: PromotionRepository,
 	): DeletePromotionUseCase {
 		return DeletePromotionUseCase(repository)
+	}
+	
+	@Provides
+	@Singleton
+	fun provideGetUsersCountByPromotionUseCase(
+		repository: PromotionRepository,
+	): GetUsersCountByPromotionUseCase {
+		return GetUsersCountByPromotionUseCase(repository)
 	}
 	
 }

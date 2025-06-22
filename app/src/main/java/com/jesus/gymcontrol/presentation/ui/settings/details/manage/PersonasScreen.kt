@@ -107,9 +107,10 @@ fun PersonsScreen(
 					},
 					modifier = Modifier.fillMaxWidth(),
 					colors = ButtonDefaults.buttonColors(
-						containerColor = MaterialTheme.colorScheme.primary,
+						containerColor = MaterialTheme.colorScheme.surface,
 						contentColor = MaterialTheme.colorScheme.onPrimary
-					)
+					),
+					
 				) {
 					Text("Cerrar")
 				}

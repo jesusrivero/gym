@@ -103,5 +103,28 @@ class PromotionRepositoryImpl @Inject constructor(
 		Result.failure(e)
 	}
 	
+	override suspend fun getUsersCountByPromotion(gymCode: String): Result<Map<String, Int>> = try {
+		val promotionsRef = firestore.collection("gimnasios")
+			.document(gymCode)
+			.collection("promociones")
+		
+		val promotionsSnapshot = promotionsRef.get().await()
+		
+		val counts = mutableMapOf<String, Int>()
+		
+		for (promoDoc in promotionsSnapshot.documents) {
+			val promoId = promoDoc.id
+			val usersSnapshot = promotionsRef
+				.document(promoId)
+				.collection("usuarios")
+				.get()
+				.await()
+			counts[promoId] = usersSnapshot.size()
+		}
+		
+		Result.success(counts)
+	} catch (e: Exception) {
+		Result.failure(e)
+	}
 	
 }

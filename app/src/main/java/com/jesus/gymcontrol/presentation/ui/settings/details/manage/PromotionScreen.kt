@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -50,6 +51,9 @@ import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.domain.model.Promotion
 import com.jesus.gymcontrol.domain.viewmodels.PromotionViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,9 +73,12 @@ fun PromotionScreen(
 	var duration by remember { mutableStateOf("") }
 	var promotionToEdit by remember { mutableStateOf<Promotion?>(null) }
 	var promotionToDelete by remember { mutableStateOf<Promotion?>(null) }
+	var promotionToShow by remember { mutableStateOf<Promotion?>(null) }
+	
 	
 	LaunchedEffect(Unit) {
 		viewModel.loadPromotions()
+		viewModel.loadUserCountByPromotion()
 	}
 	
 	Scaffold(
@@ -101,7 +108,8 @@ fun PromotionScreen(
 			) {
 				Icon(Icons.Default.Add, contentDescription = "Nueva promoción")
 			}
-		}
+		},
+		
 	) { padding ->
 		Column(
 			modifier = Modifier
@@ -135,13 +143,23 @@ fun PromotionScreen(
 										style = MaterialTheme.typography.titleMedium,
 										color = MaterialTheme.colorScheme.primary
 									)
-									Text("${promo.porcentajeDescuento}% de descuento")
-									Text("${promo.duracionDias} días de duración")
-									Spacer(modifier = Modifier.height(8.dp))
-									Text(promo.descripcion, style = MaterialTheme.typography.bodySmall)
+									
+									Spacer(modifier = Modifier.height(4.dp))
+									
+									Text(
+										"Usuarios: ${viewModel.userCountByPromotion[promo.id] ?: 0}",
+										style = MaterialTheme.typography.bodySmall
+									)
 									
 									Spacer(modifier = Modifier.height(12.dp))
-									Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+									
+									Row(
+										modifier = Modifier.fillMaxWidth(),
+										horizontalArrangement = Arrangement.End
+									) {
+										IconButton(onClick = { promotionToShow = promo }) {
+											Icon(Icons.Default.Info, contentDescription = "Ver detalles")
+										}
 										IconButton(onClick = { promotionToEdit = promo }) {
 											Icon(Icons.Default.Edit, contentDescription = "Editar promoción")
 										}
@@ -150,11 +168,38 @@ fun PromotionScreen(
 										}
 									}
 								}
-								
 							}
 						}
 					}
 				}
+			}
+			promotionToShow?.let { promo ->
+				AlertDialog(
+					onDismissRequest = { promotionToShow = null },
+					title = { Text("Detalles de promoción") },
+					text = {
+						Column {
+							Text("Nombre: ${promo.nombre}")
+							Spacer(modifier = Modifier.height(4.dp))
+							Text("Descripción: ${promo.descripcion}")
+							Spacer(modifier = Modifier.height(4.dp))
+							Text("Duración: ${promo.duracionDias} días")
+							Spacer(modifier = Modifier.height(4.dp))
+							Text("Descuento: ${promo.porcentajeDescuento}%")
+							Spacer(modifier = Modifier.height(4.dp))
+							Text("Estado: ${if (promo.activo) "Activa" else "Inactiva"}")
+							Spacer(modifier = Modifier.height(4.dp))
+							Text("Fecha de creación: ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(promo.fechaCreacion))}")
+						}
+					},
+					confirmButton = {
+						Button(onClick = { promotionToShow = null }) {
+							Text("Cerrar")
+						}
+					},
+					shape = RoundedCornerShape(16.dp),
+					containerColor = MaterialTheme.colorScheme.surface
+				)
 			}
 			
 			if (showCreateDialog) {
@@ -225,7 +270,8 @@ fun PromotionScreen(
 							)
 						}
 					},
-					shape = RoundedCornerShape(16.dp)
+					shape = RoundedCornerShape(16.dp),
+					containerColor = MaterialTheme.colorScheme.surface
 				)
 			}
 			

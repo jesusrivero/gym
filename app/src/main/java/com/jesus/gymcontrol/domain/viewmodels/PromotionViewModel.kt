@@ -1,5 +1,6 @@
 package com.jesus.gymcontrol.domain.viewmodels
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,6 +11,7 @@ import com.jesus.gymcontrol.domain.model.Promotion
 import com.jesus.gymcontrol.domain.usecase.usuario.CreatePromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.DeletePromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetPromotionUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.GetUsersCountByPromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdatePromotionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -21,21 +23,23 @@ class PromotionViewModel @Inject constructor(
 	private val getPromotionsUseCase: GetPromotionUseCase,
 	private val updatePromotionUseCase: UpdatePromotionUseCase,
 	private val deletePromotionUseCase: DeletePromotionUseCase,
+	private val getUsersCountByPromotionUseCase:GetUsersCountByPromotionUseCase,
 	private val sessionManager: SessionManager
 ) : ViewModel() {
 	
 	var isLoading by mutableStateOf(false)
 		private set
-	
-	var successMessage by mutableStateOf<String?>(null)
-		private set
-	
+
 	
 	var errorMessage by mutableStateOf<String?>(null)
 		private set
 	
 	var promotions by mutableStateOf<List<Promotion>>(emptyList())
 		private set
+	
+	var userCountByPromotion by mutableStateOf<Map<String, Int>>(emptyMap())
+		private set
+	
 	
 	
 	
@@ -94,6 +98,18 @@ class PromotionViewModel @Inject constructor(
 			loadPromotions()
 			}
 		}
+	
+	fun loadUserCountByPromotion() {
+		val gymCode = sessionManager.getGymCode() ?: return
+		viewModelScope.launch {
+			val result = getUsersCountByPromotionUseCase(gymCode)
+			result.onSuccess {
+				userCountByPromotion = it
+			}.onFailure {
+				Log.e("PromotionViewModel", "Error obteniendo conteo de usuarios", it)
+			}
+		}
+	}
 	
 	
 }
