@@ -10,15 +10,18 @@ import com.jesus.gymcontrol.data.repository.AuthRepositoryImpl
 import com.jesus.gymcontrol.data.repository.GymRepositoryImpl
 import com.jesus.gymcontrol.data.repository.MembershipRepositoryImpl
 import com.jesus.gymcontrol.data.repository.PaymentRepositoryImpl
+import com.jesus.gymcontrol.data.repository.PromotionRepositoryImpl
 import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.data.repository.UserAdminRepositoryImpl
 import com.jesus.gymcontrol.data.repository.UserRepositoryImpl
 import com.jesus.gymcontrol.data.repository.UsuarioRepositoryIMPL
 import com.jesus.gymcontrol.data.sharedPreferences.PreferencesManager
+import com.jesus.gymcontrol.domain.model.Promotion
 import com.jesus.gymcontrol.domain.repository.AuthRepository
 import com.jesus.gymcontrol.domain.repository.GymRepository
 import com.jesus.gymcontrol.domain.repository.MembershipRepository
 import com.jesus.gymcontrol.domain.repository.PaymentRepository
+import com.jesus.gymcontrol.domain.repository.PromotionRepository
 import com.jesus.gymcontrol.domain.repository.UserAdminRepository
 import com.jesus.gymcontrol.domain.repository.UserRepository
 import com.jesus.gymcontrol.domain.repository.UsuarioRepository
@@ -26,6 +29,7 @@ import com.jesus.gymcontrol.domain.usecase.usuario.AddPaymentUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.AssignGymToUserUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.CreateGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.CreateMembershipUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.CreatePromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.DeleteMembershipUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.EditMembershipUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GenerateCodeUseCase
@@ -34,6 +38,7 @@ import com.jesus.gymcontrol.domain.usecase.usuario.GetAllPaymentsUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetGymUserSummaryUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetMembershipsUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetMembershipsWithUserCountUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.GetPromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetUserByGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.LoginUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.RegisterUseCase
@@ -231,5 +236,27 @@ object AppModule {
 	fun provideGetAllPaymentsUseCase(
 		repository: PaymentRepository
 	): GetAllPaymentsUseCase = GetAllPaymentsUseCase(repository)
-
+	
+	
+	@Provides
+	@Singleton
+	fun providePromotionRepository(
+		firestore: FirebaseFirestore,
+		auth: FirebaseAuth
+	): PromotionRepository = PromotionRepositoryImpl(firestore, auth)
+	
+	
+	@Provides
+	@Singleton
+	fun provideCreatePromotionUseCase(
+		repository: PromotionRepository
+	): CreatePromotionUseCase = CreatePromotionUseCase(repository)
+	
+	
+	@Provides
+  @Singleton
+	fun provideGetPromotionUseCase(
+		repository: PromotionRepository
+	): GetPromotionUseCase = GetPromotionUseCase(repository
+	)
 }

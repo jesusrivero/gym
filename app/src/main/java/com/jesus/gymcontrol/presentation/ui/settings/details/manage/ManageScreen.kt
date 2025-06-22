@@ -106,6 +106,11 @@ fun ManagerContent(
 						onClick = { navController.navigate(AppRoutes.MembershipScreen) }
 					)
 					MenuCard(
+						title = "Promociones",
+						subtitle = "Listado de membresías",
+						onClick = { navController.navigate(AppRoutes.PromotionsScreen) }
+					)
+					MenuCard(
 						title = "Reportes",
 						subtitle = "Listado de reportes",
 						onClick = { navController.navigate(AppRoutes.ReportScreen) }
