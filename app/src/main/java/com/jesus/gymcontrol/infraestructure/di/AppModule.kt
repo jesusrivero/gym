@@ -15,6 +15,7 @@ import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.data.repository.UserAdminRepositoryImpl
 import com.jesus.gymcontrol.data.repository.UserRepositoryImpl
 import com.jesus.gymcontrol.data.repository.UsuarioRepositoryIMPL
+import com.jesus.gymcontrol.data.repository.report.ReportesRepositoryImpl
 import com.jesus.gymcontrol.data.sharedPreferences.PreferencesManager
 import com.jesus.gymcontrol.domain.repository.AuthRepository
 import com.jesus.gymcontrol.domain.repository.GymRepository
@@ -24,6 +25,7 @@ import com.jesus.gymcontrol.domain.repository.PromotionRepository
 import com.jesus.gymcontrol.domain.repository.UserAdminRepository
 import com.jesus.gymcontrol.domain.repository.UserRepository
 import com.jesus.gymcontrol.domain.repository.UsuarioRepository
+import com.jesus.gymcontrol.domain.repository.report.ReportesRepository
 import com.jesus.gymcontrol.domain.usecase.usuario.AddPaymentUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.AssignGymToUserUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.CreateGymUseCase
@@ -46,6 +48,10 @@ import com.jesus.gymcontrol.domain.usecase.usuario.RegisterUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateDatesUserUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdatePromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateRolUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.report.GenerateClientsReportUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.report.GenerateMembershipsReportUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.report.GeneratePaymentsReportUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.report.GeneratePromotionsReportUseCase
 import com.jesus.gymcontrol.infraestructure.MyApp
 import dagger.Module
 import dagger.Provides
@@ -286,5 +292,39 @@ object AppModule {
 	): GetUsersCountByPromotionUseCase {
 		return GetUsersCountByPromotionUseCase(repository)
 	}
+	
+	
+	//REPORTES
+	@Provides
+	fun provideReportesRepository(
+		firestore: FirebaseFirestore
+	): ReportesRepository = ReportesRepositoryImpl(firestore)
+	
+	@Provides
+	fun provideGeneratePaymentsReportUseCase(
+		repository: ReportesRepository
+	): GeneratePaymentsReportUseCase = GeneratePaymentsReportUseCase(repository)
+	
+	@Provides
+	fun provideGenerateClientsReportUseCase(
+		repository: ReportesRepository
+	): GenerateClientsReportUseCase = GenerateClientsReportUseCase(repository)
+	
+	
+	@Provides
+	fun provideGenerateMembershipsReportUseCase(
+		repository: ReportesRepository
+	): GenerateMembershipsReportUseCase = GenerateMembershipsReportUseCase(repository)
+	
+	
+	@Provides
+	fun provideGeneratePromotionsReportUseCase(
+		repository: ReportesRepository
+	): GeneratePromotionsReportUseCase = GeneratePromotionsReportUseCase(repository)
+	
+	
+	
+	
+	
 	
 }

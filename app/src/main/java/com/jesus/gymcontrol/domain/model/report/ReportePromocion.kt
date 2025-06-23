@@ -1,0 +1,11 @@
+package com.jesus.gymcontrol.domain.model.report
+
+
+
+data class ReportePromocion(
+	val nombre: String,
+	val descripcion: String,
+	val porcentaje: Double,
+	val activa: Boolean,
+	val duracion: Int = 0
+)
