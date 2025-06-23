@@ -72,7 +72,7 @@ fun ListPaymentsScreen(
 	var searchText by remember { mutableStateOf("") }
 	var selectedPaymentType by remember { mutableStateOf("Todos") }
 	
-	val paymentTypeOptions = listOf("Todos", "Dólares", "Bolívares", "Mixto")
+	val paymentTypeOptions = listOf("Todos", "Dólares", "Bolívares", "Mixto", "Promociones")
 	
 	LaunchedEffect(Unit) {
 		viewModel.loadPayments()
@@ -182,6 +182,8 @@ fun ListPaymentsScreen(
 	}
 }
 
+
+
 @Composable
 fun PaymentCard(payment: Payment, onViewDetails: () -> Unit) {
 	Card(
@@ -267,8 +269,9 @@ fun formatAmount(value: Double): String {
 	return formatter.format(value)
 }
 
-@Composable
 
+
+@Composable
 fun PaymentDetailDialog(payment: Payment, onDismiss: () -> Unit) {
 	AlertDialog(
 		onDismissRequest = onDismiss,
@@ -283,33 +286,56 @@ fun PaymentDetailDialog(payment: Payment, onDismiss: () -> Unit) {
 			Column {
 				DetailRow("Nombre:", payment.name)
 				Spacer(modifier = Modifier.height(8.dp))
+				
 				DetailRow("Membresía:", payment.membershipName)
 				Spacer(modifier = Modifier.height(8.dp))
+				
 				DetailRow("Tipo de pago:", payment.paymentType)
 				Spacer(modifier = Modifier.height(8.dp))
-				DetailRow("Monto:", formatMonto(payment))
-				if (payment.paymentType != "Dólares") {
-					payment.amountBs?.let {
-						DetailRow("Bolívares:", "Bs. ${formatAmount(it)}")
+				
+				// 💰 Mostrar Monto según tipo de pago
+				when (payment.paymentType) {
+					"Mixto" -> {
+						DetailRow("Monto total:", formatMonto(payment))
+						payment.amountDollar.takeIf { it > 0 }?.let {
+							DetailRow("Dólares:", "$${formatAmount(it)}")
+						}
+						payment.amountBs.takeIf { it > 0 }?.let {
+							DetailRow("Bolívares:", "Bs. ${formatAmount(it)}")
+						}
+					}
+					"Dólares" -> {
+						DetailRow("Monto:", "$${formatAmount(payment.amountDollar)}")
+					}
+					"Bolívares" -> {
+						DetailRow("Monto:", "Bs. ${formatAmount(payment.amountBs)}")
 					}
 				}
-				if (payment.paymentType != "Bolívares") {
-					payment.amountDollar?.let {
-						DetailRow("Dólares:", "$${formatAmount(it)}")
-					}
-				}
+				
+				// 🔢 Referencia (si aplica)
 				payment.reference?.let {
 					Spacer(modifier = Modifier.height(8.dp))
 					DetailRow("Referencia:", it)
 				}
+				
+				// 🎯 Promoción (si aplica)
+				if (!payment.promocionNombre.isNullOrBlank()) {
+					Spacer(modifier = Modifier.height(12.dp))
+					DetailRow("Promoción:", payment.promocionNombre ?: "")
+				}
+				if (payment.promocionPorcentajeDescuento != null) {
+					Spacer(modifier = Modifier.height(8.dp))
+					DetailRow("Descuento aplicado:", "${payment.promocionPorcentajeDescuento}%")
+				}
 			}
 		},
+		containerColor = MaterialTheme.colorScheme.surface,
 		confirmButton = {
 			Button(
 				onClick = onDismiss,
 				modifier = Modifier.fillMaxWidth(),
 				colors = ButtonDefaults.buttonColors(
-					containerColor = MaterialTheme.colorScheme.surface,
+					containerColor = MaterialTheme.colorScheme.primary,
 					contentColor = MaterialTheme.colorScheme.onPrimary
 				)
 			) {

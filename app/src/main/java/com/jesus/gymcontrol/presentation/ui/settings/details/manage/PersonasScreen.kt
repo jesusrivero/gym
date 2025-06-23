@@ -99,6 +99,7 @@ fun PersonsScreen(
 					DetailRow("Teléfono:", selectedUser?.phone ?: "")
 				}
 			},
+			containerColor = MaterialTheme.colorScheme.surface,
 			confirmButton = {
 				Button(
 					onClick = {
@@ -107,7 +108,7 @@ fun PersonsScreen(
 					},
 					modifier = Modifier.fillMaxWidth(),
 					colors = ButtonDefaults.buttonColors(
-						containerColor = MaterialTheme.colorScheme.surface,
+						containerColor = MaterialTheme.colorScheme.primary,
 						contentColor = MaterialTheme.colorScheme.onPrimary
 					),
 					

@@ -1,4 +1,5 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details.manage
+
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -110,7 +110,7 @@ fun PromotionScreen(
 			}
 		},
 		
-	) { padding ->
+		) { padding ->
 		Column(
 			modifier = Modifier
 				.padding(padding)
@@ -123,16 +123,20 @@ fun PromotionScreen(
 						CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
 					}
 				}
+				
 				promotions.isEmpty() -> {
 					Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
 						Text("No hay promociones registradas")
 					}
 				}
+				
 				else -> {
 					LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
 						items(promotions) { promo ->
 							Card(
-								modifier = Modifier.fillMaxWidth(),
+								modifier = Modifier
+									.fillMaxWidth()
+									.padding(vertical = 4.dp),
 								shape = RoundedCornerShape(16.dp),
 								elevation = CardDefaults.cardElevation(4.dp),
 								colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -157,13 +161,22 @@ fun PromotionScreen(
 										modifier = Modifier.fillMaxWidth(),
 										horizontalArrangement = Arrangement.End
 									) {
-										IconButton(onClick = { promotionToShow = promo }) {
-											Icon(Icons.Default.Info, contentDescription = "Ver detalles")
+										IconButton(onClick = {
+											promotionToShow = promo
+										}) {
+											Icon(
+												painterResource(id = R.drawable.ic_details),
+												contentDescription = "Detalles"
+											)
 										}
-										IconButton(onClick = { promotionToEdit = promo }) {
+										IconButton(onClick = {
+											promotionToEdit = promo
+										}) {
 											Icon(Icons.Default.Edit, contentDescription = "Editar promoción")
 										}
-										IconButton(onClick = { promotionToDelete = promo }) {
+										IconButton(onClick = {
+											promotionToDelete = promo
+										}) {
 											Icon(Icons.Default.Delete, contentDescription = "Eliminar promoción")
 										}
 									}
@@ -189,7 +202,13 @@ fun PromotionScreen(
 							Spacer(modifier = Modifier.height(4.dp))
 							Text("Estado: ${if (promo.activo) "Activa" else "Inactiva"}")
 							Spacer(modifier = Modifier.height(4.dp))
-							Text("Fecha de creación: ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(promo.fechaCreacion))}")
+							Text(
+								"Fecha de creación: ${
+									SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(
+										Date(promo.fechaCreacion)
+									)
+								}"
+							)
 						}
 					},
 					confirmButton = {
@@ -211,7 +230,8 @@ fun PromotionScreen(
 							val durationValue = duration.toIntOrNull()
 							
 							if (name.isBlank() || description.isBlank() || discountValue == null || durationValue == null) {
-								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT).show()
+								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT)
+									.show()
 								return@Button
 							}
 							
@@ -289,7 +309,8 @@ fun PromotionScreen(
 							val durationVal = editedDuration.toIntOrNull()
 							
 							if (editedName.isBlank() || editedDescription.isBlank() || discountVal == null || durationVal == null) {
-								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT).show()
+								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT)
+									.show()
 								return@Button
 							}
 							
@@ -366,7 +387,7 @@ fun PromotionScreen(
 						OutlinedButton(onClick = { promotionToDelete = null }) {
 							Text("Cancelar")
 						}
-					}
+					}, containerColor = MaterialTheme.colorScheme.surface
 				)
 			}
 			

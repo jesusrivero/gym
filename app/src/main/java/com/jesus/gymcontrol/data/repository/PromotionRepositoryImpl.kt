@@ -83,24 +83,40 @@ class PromotionRepositoryImpl @Inject constructor(
 		Result.failure(e)
 	}
 	
-	override suspend fun deletePromotion(promotion: Promotion): Result<Unit> = try {
-		val uid = auth.currentUser?.uid
-			?: return Result.failure(Exception("Usuario no autenticado"))
-		
-		val userDoc = firestore.collection("users").document(uid).get().await()
-		val gymCode = userDoc.getString("gimnasioCode")
-			?: return Result.failure(Exception("No se encontró el gimnasioCode del usuario"))
-		
-		firestore.collection("gimnasios")
-			.document(gymCode)
-			.collection("promociones")
-			.document(promotion.id)
-			.delete()
-			.await()
-		
-		Result.success(Unit)
-	} catch (e: Exception) {
-		Result.failure(e)
+	override suspend fun deletePromotion(promotion: Promotion): Result<Unit> {
+		return try {
+			val uid = auth.currentUser?.uid
+				?: return Result.failure(Exception("Usuario no autenticado"))
+			
+			val userDoc = firestore.collection("users").document(uid).get().await()
+			val gymCode = userDoc.getString("gimnasioCode")
+				?: return Result.failure(Exception("No se encontró el gimnasioCode del usuario"))
+			
+			// Verifica si hay usuarios inscritos a la promoción
+			val usersSnapshot = firestore.collection("gimnasios")
+				.document(gymCode)
+				.collection("promociones")
+				.document(promotion.id)
+				.collection("usuarios")
+				.get()
+				.await()
+			
+			if (!usersSnapshot.isEmpty) {
+				return Result.failure(Exception("No se puede eliminar: tiene usuarios inscritos"))
+			}
+			
+			// Elimina la promoción si no hay usuarios
+			firestore.collection("gimnasios")
+				.document(gymCode)
+				.collection("promociones")
+				.document(promotion.id)
+				.delete()
+				.await()
+			
+			Result.success(Unit)
+		} catch (e: Exception) {
+			Result.failure(e)
+		}
 	}
 	
 	override suspend fun getUsersCountByPromotion(gymCode: String): Result<Map<String, Int>> = try {

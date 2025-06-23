@@ -166,7 +166,9 @@ class PaymentRepositoryImpl @Inject constructor(
 						description = data["description"] as? String ?: "",
 						reference = data["reference"] as? String,
 						date = (data["date"] as? Number)?.toLong() ?: 0L,
-						gymCode = data["gimnasioCode"] as? String ?: ""
+						gymCode = data["gimnasioCode"] as? String ?: "",
+						promocionNombre = data["promocionNombre"] as? String,
+						promocionPorcentajeDescuento = (data["promocionPorcentajeDescuento"] as? Number)?.toDouble()
 					)
 				} catch (e: Exception) {
 					Log.e("getAllPayments", "Error parsing document ${doc.id}", e)

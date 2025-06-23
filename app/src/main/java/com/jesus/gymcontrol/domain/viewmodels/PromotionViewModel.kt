@@ -40,6 +40,18 @@ class PromotionViewModel @Inject constructor(
 	var userCountByPromotion by mutableStateOf<Map<String, Int>>(emptyMap())
 		private set
 	
+	var precioBaseMembresia by mutableStateOf(0.0)
+		private set
+	
+	var tipoPagoSeleccionado by mutableStateOf("Dólares")
+		private set
+	
+	var promocionSeleccionada by mutableStateOf<Promotion?>(null)
+		private set
+	
+	var montoCalculado by mutableStateOf(0.0)
+		private set
+	
 	
 	
 	
@@ -110,6 +122,42 @@ class PromotionViewModel @Inject constructor(
 			}
 		}
 	}
+	
+	
+	fun setTipoPago(tipo: String) {
+		tipoPagoSeleccionado = tipo
+		recalcularMontoFinal()
+	}
+	
+	fun setPromocion(promocion: Promotion?) {
+		promocionSeleccionada = promocion
+		recalcularMontoFinal()
+	}
+	
+	fun setPrecioBase(precio: Double) {
+		precioBaseMembresia = precio
+		recalcularMontoFinal()
+	}
+	
+	private fun recalcularMontoFinal() {
+		montoCalculado = calcularMontoConPromocion(
+			precioMembresia = precioBaseMembresia,
+			promocion = promocionSeleccionada,
+			tipoPago = tipoPagoSeleccionado
+		)
+	}
+	
+	fun calcularMontoConPromocion(
+		precioMembresia: Double,
+		promocion: Promotion?,
+		tipoPago: String
+	): Double {
+		if (tipoPago != "Dólares" || promocion == null) return precioMembresia
+		val descuento = promocion.porcentajeDescuento
+		val montoFinal = precioMembresia - (precioMembresia * descuento / 100)
+		return String.format("%.2f", montoFinal).toDouble()
+	}
+	
 	
 	
 }

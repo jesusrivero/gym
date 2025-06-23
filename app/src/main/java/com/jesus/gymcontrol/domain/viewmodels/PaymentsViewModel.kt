@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -117,6 +118,27 @@ class PaymentsViewModel @Inject constructor(
 			} finally {
 				isLoading = false
 			}
+		}
+	}
+	
+	fun calculateDiscountedAmountIfApplicable() {
+		val type = _paymentState.value.type
+		val frequency = _paymentState.value.frequency
+		val membershipPrice = _paymentState.value.listMembership[frequency] ?: return
+		
+		if (type != "Dólares") {
+			selectedPromotion = null
+			_paymentState.update {
+				it.copy(amountDollar = membershipPrice.toString())
+			}
+			return
+		}
+		
+		val discount = selectedPromotion?.porcentajeDescuento ?: 0.0
+		val discountedPrice = membershipPrice - (membershipPrice * (discount / 100.0))
+		
+		_paymentState.update {
+			it.copy(amountDollar = String.format(Locale.US, "%.2f", discountedPrice))
 		}
 	}
 	

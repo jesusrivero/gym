@@ -14,5 +14,7 @@ data class Payment(
 	val description: String = "",
 	val reference: String? = null,
 	val date: Long = 0L,
-	val gymCode: String = ""
+	val gymCode: String = "",
+	val promocionNombre: String? = null,
+	val promocionPorcentajeDescuento: Double? = null,
 )

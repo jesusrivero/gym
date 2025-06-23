@@ -430,13 +430,8 @@ fun PaymentsScreenContent(
 										},
 										onClick = {
 											viewModel.updatePaymentFrequency(membership.nombre)
-											
-											// Si el tipo de pago es "Dólares", actualizar montoDollar automáticamente
-											if (paymentState.type == "Dólares") {
-												viewModel.updateAmountDollar(membership.precio.toString())
-											}
-											
-											isMembershipDropdownExpanded = false
+											viewModel.calculateDiscountedAmountIfApplicable()
+											isMembershipDropdownExpanded=false
 										}
 									)
 								}
@@ -445,7 +440,7 @@ fun PaymentsScreenContent(
 						
 						
 						Spacer(modifier = Modifier.height(16.dp))
-						
+
 //						 Dropdown promociones
 						ExposedDropdownMenuBox(
 							expanded = isPromoDropdownExpanded,
@@ -469,7 +464,7 @@ fun PaymentsScreenContent(
 								DropdownMenuItem(
 									text = { Text("Sin promoción") },
 									onClick = {
-								   viewModel.selectedPromotion(null?: Promotion())
+										viewModel.selectedPromotion(null?: Promotion())
 										isPromoDropdownExpanded = false
 									}
 								)
@@ -494,10 +489,9 @@ fun PaymentsScreenContent(
 												}
 											},
 											onClick = {
-												
-												
 												viewModel.selectedPromotion(promo)
-												isPromoDropdownExpanded = false
+												viewModel.calculateDiscountedAmountIfApplicable()
+												isPromoDropdownExpanded=false
 											}
 										)
 									}
@@ -542,16 +536,8 @@ fun PaymentsScreenContent(
 											text = { Text(type) },
 											onClick = {
 												viewModel.updatePaymentType(type)
-												
-												// Autocompletar montoDollar si es "Dólares"
-												if (type == "Dólares") {
-													val monto =
-														viewModel.paymentState.value.listMembership[viewModel.paymentState.value.frequency]
-															?: 0.0
-													viewModel.updateAmountDollar(monto.toString())
-												}
-												
-												isTypeDropdownExpanded = false
+												viewModel.calculateDiscountedAmountIfApplicable()
+												isTypeDropdownExpanded=false
 											}
 										)
 									}
@@ -675,7 +661,6 @@ fun PaymentsScreenContent(
 		}
 	}
 }
-
 
 /*@Preview(showBackground = true)
 @Composable
