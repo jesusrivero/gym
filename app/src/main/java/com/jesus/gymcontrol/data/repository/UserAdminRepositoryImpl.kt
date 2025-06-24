@@ -3,6 +3,7 @@ package com.jesus.gymcontrol.data.repository
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.jesus.gymcontrol.domain.model.UserRegistrationData
 import com.jesus.gymcontrol.domain.repository.UserAdminRepository
 import com.jesus.gymcontrol.infraestructure.di.SecondaryFirebase
 
@@ -17,21 +18,11 @@ class UserAdminRepositoryImpl @Inject constructor(
 	private val context: Context,
 ) : UserAdminRepository {
 	
-	override suspend fun registerUserFromAdmin(
-		email: String,
-		password: String,
-		name: String,
-		phone: String,
-		idcard: String,
-		gender: String,
-		age: Int,
-		rol: String,
-		membership: String,
-		code: String,
-		gimnasioCode: String, // ya no se usa como parámetro directo
-	): Result<Unit> = withContext(Dispatchers.IO) {
+	override suspend fun registerUserFromAdmin(userData: UserRegistrationData): Result<Unit> = withContext(Dispatchers.IO) {
 		try {
-			// VALIDAR CÓDIGO antes de crear el usuario
+			val code = userData.code
+			
+			// Validar código antes de crear el usuario
 			val codigoSnapshot = firestore.collection("codigos")
 				.whereEqualTo("code", code)
 				.limit(1)
@@ -54,26 +45,27 @@ class UserAdminRepositoryImpl @Inject constructor(
 				?: return@withContext Result.failure(Exception("El administrador no tiene gimnasioCode registrado"))
 			val gymName = adminDoc.getString("gimnasio") ?: "Gimnasio"
 			
-			// crear usuario con instancia secundaria
+			// Crear usuario con instancia secundaria
 			val secondaryAuth = SecondaryFirebase.getSecondaryAuth(context)
-			val result = secondaryAuth.createUserWithEmailAndPassword(email, password).await()
+			val result = secondaryAuth.createUserWithEmailAndPassword(userData.email, userData.password).await()
 			val uid = result.user?.uid
 				?: return@withContext Result.failure(Exception("No se pudo obtener UID del nuevo usuario"))
 			
 			// Crear documento principal del usuario
 			val userMap = mapOf(
 				"uid" to uid,
-				"email" to email,
-				"name" to name,
-				"idcard" to idcard,
-				"gender" to gender,
-				"age" to age,
-				"membership" to membership,
-				"code" to code,
+				"email" to userData.email,
+				"name" to userData.name,
+				"idcard" to userData.idCard,
+				"gender" to userData.gender,
+				"age" to userData.age,
+				"membership" to userData.membership,
+				"code" to userData.code,
 				"gimnasioCode" to gymCode,
-				"rol" to rol,
+				"rol" to userData.rol,
 				"state" to "inactivo",
-				"phone" to phone
+				"phone" to userData.phone,
+				"date" to userData.date,
 			)
 			
 			firestore.collection("users").document(uid).set(userMap).await()
@@ -84,22 +76,22 @@ class UserAdminRepositoryImpl @Inject constructor(
 					mapOf(
 						"code" to gymCode,
 						"name" to gymName,
-						"state" to "inactivo"
+						"state" to "inactivo"       //ESTADO DEL GIMNASIO
 					)
 				).await()
-			
 			
 			// Agregar usuario en la colección de usuarios del gimnasio
 			firestore.collection("gimnasios").document(gymCode)
 				.collection("usuarios").document(uid).set(
 					mapOf(
 						"uid" to uid,
-						"name" to name,
-						"rol" to rol,
+						"name" to userData.name,
+						"rol" to userData.rol,
 						"state" to "inactivo",
-						"email" to email,
-						"phone" to phone,
-						"idcard" to idcard
+						"email" to userData.email,
+						"phone" to userData.phone,
+						"idcard" to userData.idCard,
+						"date" to userData.date
 					)
 				).await()
 			

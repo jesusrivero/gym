@@ -43,6 +43,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.jesus.gymcontrol.domain.model.UserRegistrationData
 import com.jesus.gymcontrol.domain.viewmodels.RegisterUserFromAdminViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import kotlinx.coroutines.delay
@@ -145,11 +146,13 @@ fun RegPersonContent(
 	var phone by remember { mutableStateOf("") }
 	var idCard by remember { mutableStateOf("") }
 	var code by remember { mutableStateOf("") }
-	var gimnasioCode by remember { mutableStateOf("") }
+	var gimnasioCode by remember { mutableStateOf("") } // Se ignora en backend pero aún puedes mantenerlo visible si quieres
 	var rol by remember { mutableStateOf("cliente") }
+	val date by remember { mutableStateOf(System.currentTimeMillis()) }
 	
 	var showDialog by remember { mutableStateOf(false) }
 	
+	// Puedes luego mover esto a un validador aparte
 	val isNameValid = name.isNotBlank()
 	val isEmailValid = email.matches(Regex("^[A-Za-z0-9+_.-]+@gmail\\.com$"))
 	val isPasswordValid = password.length >= 6
@@ -165,19 +168,21 @@ fun RegPersonContent(
 				TextButton(
 					onClick = {
 						showDialog = false
-						viewModel.registerUserAsAdmin(
+						val user = UserRegistrationData(
 							email = email,
 							password = password,
 							name = name,
 							phone = phone,
 							idCard = idCard,
-							gender = "",
-							age = 0,
+							gender = "", // Puedes añadir campo luego si lo deseas
+							age = 0, // Igual
+							rol = rol,
 							membership = "",
 							code = code,
 							gimnasioCode = gimnasioCode,
-							rol = rol
+							date = date
 						)
+						viewModel.registerUserAsAdmin(user)
 					}
 				) {
 					Text("Confirmar")
@@ -189,7 +194,7 @@ fun RegPersonContent(
 				}
 			},
 			title = { Text("Confirmar registro") },
-			text = { Text("¿Deseas registrar a esta persona con rol '$rol'?") }
+			text = { Text("¿Deseas registrar a esta persona con rol '$rol'?")}
 		)
 	}
 	

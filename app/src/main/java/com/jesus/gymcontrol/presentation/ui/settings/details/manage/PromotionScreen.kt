@@ -202,13 +202,7 @@ fun PromotionScreen(
 							Spacer(modifier = Modifier.height(4.dp))
 							Text("Estado: ${if (promo.activo) "Activa" else "Inactiva"}")
 							Spacer(modifier = Modifier.height(4.dp))
-							Text(
-								"Fecha de creación: ${
-									SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(
-										Date(promo.fechaCreacion)
-									)
-								}"
-							)
+							Text("Fecha de creación: ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(promo.fechaCreacion))}")
 						}
 					},
 					confirmButton = {

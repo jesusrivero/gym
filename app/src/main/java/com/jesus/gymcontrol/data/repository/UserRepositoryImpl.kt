@@ -20,6 +20,7 @@ class UserRepositoryImpl @Inject constructor(
 			val userName = userSnapshot.getString("name") ?: "Desconocido"
 			val email = userSnapshot.getString("email") ?: "Desconocido"
 			val idcard = userSnapshot.getString("idcard") ?: "Desconocido"
+			val date = userSnapshot.getTimestamp("date")
 			
 			// 2. Datos para guardar en users/{uid}/gimnasios/{uid} (o podrías usar gym.code como ID si prefieres)
 			val userGymData = mapOf(
@@ -28,7 +29,7 @@ class UserRepositoryImpl @Inject constructor(
 				"direction" to gym.direction,
 				"phone" to gym.phone,
 				"state" to "activo",
-				"registrationDate" to FieldValue.serverTimestamp()
+				"date" to date
 			)
 			
 			// 3. Datos para guardar en gimnasios/{gym.code}/usuarios/{uid}
@@ -38,10 +39,10 @@ class UserRepositoryImpl @Inject constructor(
 				"rol" to rol,
 				"email" to email,
 				"idcard" to idcard,
-				"registrationDate" to FieldValue.serverTimestamp(),
 				"state" to "inactivo",           // ⬅️ NUEVO
 				"enable" to false,            // ⬅️ NUEVO
-				"lastpayment" to null         // ⬅️ NUEVO
+				"lastpayment" to null,
+				"date" to date ,               // ⬅️ NUEVO
 			)
 			
 			// 4. Referencias principales
@@ -193,9 +194,16 @@ class UserRepositoryImpl @Inject constructor(
 				email = data["email"] as? String ?: "",
 				state = data["state"] as? String ?: "",
 				enabled = data["isActive"] as? Boolean ?: false,
-				lastPaymentDate = (data["lastPaymentDate"] as? com.google.firebase.Timestamp)?.toDate()?.time
+				date = when(val d = data["date"]) {
+					is Long -> d
+					is Double -> d.toLong()  // En caso que venga como Double
+					else -> null
+				}
 			)
 		}
+		
+		
+		
 		
 		Result.success(listUsers)
 	} catch (e: Exception) {

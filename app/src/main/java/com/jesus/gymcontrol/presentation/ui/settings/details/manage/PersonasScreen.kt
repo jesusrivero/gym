@@ -51,6 +51,9 @@ import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.domain.model.ListUser
 import com.jesus.gymcontrol.domain.viewmodels.UserListViewModel
 import com.jesus.gymcontrol.presentation.ui.commons.PaymentFilters
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,7 +63,7 @@ fun PersonsScreen(
 	navBottom: NavController,
 	viewModel: UserListViewModel = hiltViewModel(),
 	navEdit: (String) -> Unit,
-	navPag: (String) -> Unit
+	navPag: (String) -> Unit,
 ) {
 	LaunchedEffect(Unit) {
 		viewModel.loadUsers()
@@ -71,9 +74,14 @@ fun PersonsScreen(
 	var searchText by remember { mutableStateOf("") }
 	var selectedState by remember { mutableStateOf("Todos") }
 	
+	
+	
 	val filterOptions = listOf("Todos", "Activos", "Inactivos", "Próximos a pagar")
 	
 	if (showUserDialog && selectedUser != null) {
+		val formattedDate = selectedUser?.date?.takeIf { it > 0L }?.let {
+			SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(it))
+		} ?: "No disponible"
 		AlertDialog(
 			onDismissRequest = {
 				showUserDialog = false
@@ -97,6 +105,9 @@ fun PersonsScreen(
 					DetailRow("Estado:", selectedUser?.state ?: "")
 					Spacer(modifier = Modifier.height(8.dp))
 					DetailRow("Teléfono:", selectedUser?.phone ?: "")
+					DetailRow("Fecha de registro:",formattedDate)
+					
+					
 				}
 			},
 			containerColor = MaterialTheme.colorScheme.surface,
@@ -112,7 +123,7 @@ fun PersonsScreen(
 						contentColor = MaterialTheme.colorScheme.onPrimary
 					),
 					
-				) {
+					) {
 					Text("Cerrar")
 				}
 			}

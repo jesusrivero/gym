@@ -53,6 +53,8 @@ import com.jesus.gymcontrol.domain.viewmodels.PaymentsViewModel
 import com.jesus.gymcontrol.presentation.ui.commons.PaymentFilters
 import com.jesus.gymcontrol.presentation.ui.commons.formatMonto
 import java.text.NumberFormat
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 
@@ -183,7 +185,6 @@ fun ListPaymentsScreen(
 }
 
 
-
 @Composable
 fun PaymentCard(payment: Payment, onViewDetails: () -> Unit) {
 	Card(
@@ -270,7 +271,6 @@ fun formatAmount(value: Double): String {
 }
 
 
-
 @Composable
 fun PaymentDetailDialog(payment: Payment, onDismiss: () -> Unit) {
 	AlertDialog(
@@ -304,9 +304,11 @@ fun PaymentDetailDialog(payment: Payment, onDismiss: () -> Unit) {
 							DetailRow("Bolívares:", "Bs. ${formatAmount(it)}")
 						}
 					}
+					
 					"Dólares" -> {
 						DetailRow("Monto:", "$${formatAmount(payment.amountDollar)}")
 					}
+					
 					"Bolívares" -> {
 						DetailRow("Monto:", "Bs. ${formatAmount(payment.amountBs)}")
 					}
@@ -327,6 +329,13 @@ fun PaymentDetailDialog(payment: Payment, onDismiss: () -> Unit) {
 					Spacer(modifier = Modifier.height(8.dp))
 					DetailRow("Descuento aplicado:", "${payment.promocionPorcentajeDescuento}%")
 				}
+				
+				// 📅 Fecha de pago
+				Spacer(modifier = Modifier.height(8.dp))
+				DetailRow(
+					"Fecha de pago: ${
+						SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(payment.date))}",""
+				)
 			}
 		},
 		containerColor = MaterialTheme.colorScheme.surface,

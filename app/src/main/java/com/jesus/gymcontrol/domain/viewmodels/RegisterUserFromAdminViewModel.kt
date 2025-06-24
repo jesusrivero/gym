@@ -3,9 +3,11 @@ package com.jesus.gymcontrol.domain.viewmodels
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.datastore.dataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.jesus.gymcontrol.domain.model.UserRegistrationData
 import com.jesus.gymcontrol.domain.usecase.usuario.GenerateCodeUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GetGymByOwnerUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.RegisterUserFromAdminUseCase
@@ -32,48 +34,24 @@ class RegisterUserFromAdminViewModel @Inject constructor(
         private set
 
     private var selectedRoleForCode: String = "cliente"
-
-    fun registerUserAsAdmin(
-        email: String,
-        password: String,
-        name: String,
-        phone: String,
-        idCard: String,
-        gender: String,
-        age: Int,
-        rol: String,
-        membership: String,
-        code: String,
-        gimnasioCode: String
-    ) {
-        viewModelScope.launch {
-            isRegistering = true
-            errorMessage = null
-            registerSuccess = false
-
-            val result = registerUserFromAdminUseCase(
-                email = email,
-                password = password,
-                name = name,
-                phone = phone,
-                idCard = idCard,
-                gender = gender,
-                age = age,
-                rol = rol,
-                membership = membership,
-                code = code,
-                gimnasioCode = gimnasioCode
-            )
-
-            result.onSuccess {
-                registerSuccess = true
-            }.onFailure {
-                errorMessage = it.message
-            }
-
-            isRegistering = false
-        }
-    }
+	
+	fun registerUserAsAdmin(userData: UserRegistrationData) {
+		viewModelScope.launch {
+			isRegistering = true
+			errorMessage = null
+			registerSuccess = false
+			
+			val result = registerUserFromAdminUseCase(userData)
+			
+			result.onSuccess {
+				registerSuccess = true
+			}.onFailure {
+				errorMessage = it.message
+			}
+			
+			isRegistering=false
+			}
+	}
 
     fun resetRegisterState() {
         registerSuccess = false
