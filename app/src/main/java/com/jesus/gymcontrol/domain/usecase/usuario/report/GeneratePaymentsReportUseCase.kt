@@ -1,6 +1,6 @@
 package com.jesus.gymcontrol.domain.usecase.usuario.report
 
-import com.jesus.gymcontrol.domain.model.report.ReportePago
+import com.jesus.gymcontrol.domain.model.reportModel.ReportePago
 import com.jesus.gymcontrol.domain.repository.report.ReportesRepository
 import javax.inject.Inject
 

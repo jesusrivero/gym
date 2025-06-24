@@ -6,10 +6,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jesus.gymcontrol.data.repository.SessionManager
-import com.jesus.gymcontrol.domain.model.report.ReporteCliente
-import com.jesus.gymcontrol.domain.model.report.ReporteMembresia
-import com.jesus.gymcontrol.domain.model.report.ReportePago
-import com.jesus.gymcontrol.domain.model.report.ReportePromocion
+import com.jesus.gymcontrol.domain.model.reportModel.ReporteCliente
+import com.jesus.gymcontrol.domain.model.reportModel.ReporteMembresia
+import com.jesus.gymcontrol.domain.model.reportModel.ReportePago
+import com.jesus.gymcontrol.domain.model.reportModel.ReportePromocion
 import com.jesus.gymcontrol.domain.usecase.usuario.report.GenerateClientsReportUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.report.GenerateMembershipsReportUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.report.GeneratePaymentsReportUseCase

@@ -1,5 +1,4 @@
-package com.jesus.gymcontrol.domain.model.report
-
+package com.jesus.gymcontrol.domain.model.reportModel
 
 
 data class ReportePromocion(

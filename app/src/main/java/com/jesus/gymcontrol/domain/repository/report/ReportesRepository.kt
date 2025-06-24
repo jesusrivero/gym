@@ -1,9 +1,9 @@
 package com.jesus.gymcontrol.domain.repository.report
 
-import com.jesus.gymcontrol.domain.model.report.ReporteCliente
-import com.jesus.gymcontrol.domain.model.report.ReporteMembresia
-import com.jesus.gymcontrol.domain.model.report.ReportePago
-import com.jesus.gymcontrol.domain.model.report.ReportePromocion
+import com.jesus.gymcontrol.domain.model.reportModel.ReporteCliente
+import com.jesus.gymcontrol.domain.model.reportModel.ReporteMembresia
+import com.jesus.gymcontrol.domain.model.reportModel.ReportePago
+import com.jesus.gymcontrol.domain.model.reportModel.ReportePromocion
 
 interface ReportesRepository {
 	
