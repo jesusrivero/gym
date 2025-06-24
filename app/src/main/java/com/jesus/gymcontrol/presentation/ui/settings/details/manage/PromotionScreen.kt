@@ -155,8 +155,6 @@ fun PromotionScreen(
 										style = MaterialTheme.typography.bodySmall
 									)
 									
-									Spacer(modifier = Modifier.height(12.dp))
-									
 									Row(
 										modifier = Modifier.fillMaxWidth(),
 										horizontalArrangement = Arrangement.End

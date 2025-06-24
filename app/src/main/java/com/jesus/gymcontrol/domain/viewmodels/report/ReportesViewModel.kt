@@ -31,7 +31,7 @@ class ReportesViewModel @Inject constructor(
 	var pagosReport by mutableStateOf<List<ReportePago>>(emptyList())
 		private set
 	
-	var clientesReport by mutableStateOf<List<ReporteCliente>>(emptyList()) // ✅ nuevo
+	var clientesReport by mutableStateOf<List<ReporteCliente>>(emptyList())
 		private set
 	
 	var membresiasReport by mutableStateOf<List<ReporteMembresia>>(emptyList())
@@ -47,29 +47,47 @@ class ReportesViewModel @Inject constructor(
 	var errorMessage by mutableStateOf<String?>(null)
 		private set
 	
-	fun cargarReportePagos() {
+	fun cargarReportePagos(filtro: String) {
 		val gymCode = sessionManager.getGymCode() ?: return
 		
 		viewModelScope.launch {
 			isLoading = true
+			errorMessage = null
 			try {
-				pagosReport = generatePaymentsReportUseCase(gymCode)
+				val todosPagos = generatePaymentsReportUseCase(gymCode)
+				pagosReport = when (filtro.lowercase()) {
+					"dólares", "dolares" -> todosPagos.filter { it.tipoPago.equals("dólares", ignoreCase = true) }
+					"bolívares", "bolivares" -> todosPagos.filter { it.tipoPago.equals("bolívares", ignoreCase = true) }
+					"mixtos" -> todosPagos.filter { it.tipoPago.equals("mixtos", ignoreCase = true) }
+//					"con promociones" -> todosPagos.filter { it.promocionNombre == true }
+					"todos" -> todosPagos
+					else -> todosPagos
+				}
 			} catch (e: Exception) {
-				errorMessage = e.localizedMessage
+				errorMessage = e.localizedMessage ?: "Error desconocido"
 			} finally {
 				isLoading = false
 			}
 		}
 	}
 	
-	fun cargarReporteClientes() {
+	fun cargarReporteClientes(filtro: String) {
 		val gymCode = sessionManager.getGymCode() ?: return
+		
 		viewModelScope.launch {
 			isLoading = true
+			errorMessage = null
 			try {
-				clientesReport = generateClientsReportUseCase(gymCode)
+				val todosClientes = generateClientsReportUseCase(gymCode)
+				clientesReport = when (filtro.lowercase()) {
+					"activos" -> todosClientes.filter { it.activo.equals("activo", ignoreCase = true) }
+					"inactivos" -> todosClientes.filter { it.activo.equals("inactivo", ignoreCase = true) }
+					"pendientes" -> todosClientes.filter { it.activo.equals("pendiente", ignoreCase = true) }
+					"todos" -> todosClientes
+					else -> todosClientes
+				}
 			} catch (e: Exception) {
-				errorMessage = e.localizedMessage
+				errorMessage = e.localizedMessage ?: "Error desconocido"
 			} finally {
 				isLoading = false
 			}
@@ -82,10 +100,11 @@ class ReportesViewModel @Inject constructor(
 		
 		viewModelScope.launch {
 			isLoading = true
+			errorMessage = null
 			try {
 				membresiasReport = generateMembershipsReportUseCase(gymCode)
 			} catch (e: Exception) {
-				errorMessage = e.localizedMessage
+				errorMessage = e.localizedMessage ?: "Error desconocido"
 			} finally {
 				isLoading = false
 			}
@@ -95,22 +114,21 @@ class ReportesViewModel @Inject constructor(
 	
 	fun cargarReportePromociones() {
 		val gymCode = sessionManager.getGymCode() ?: return
+		
 		viewModelScope.launch {
 			isLoading = true
+			errorMessage = null
 			try {
 				promocionesReport = generatePromotionsReportUseCase(gymCode)
 			} catch (e: Exception) {
-				errorMessage = e.localizedMessage
+				errorMessage = e.localizedMessage ?: "Error desconocido"
 			} finally {
 				isLoading = false
 			}
 		}
 	}
 	
-	
-	
-	// En ViewModel, agrega esta función para limpiar pagos (o estado según necesidad)
-	fun ReportesViewModel.clearPagos() {
+	fun clearPagos() {
 		pagosReport = emptyList()
 		errorMessage = null
 		isLoading = false

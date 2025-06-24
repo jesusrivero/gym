@@ -29,6 +29,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -50,7 +51,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -67,6 +67,7 @@ import com.jesus.gymcontrol.domain.viewmodels.report.ReportesViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,9 +76,14 @@ fun ReportScreen(
 	viewModel: ReportesViewModel = hiltViewModel(),
 ) {
 	val snackbarHostState = remember { SnackbarHostState() }
-	var selectedReportType by remember { mutableStateOf("Todos") }
 	
-	val reportTypes = listOf("Todos", "Clientes", "Pagos", "Membresías", "Próximos Pagos", "Promociones", "Vencimientos")
+	var selectedReportType by remember { mutableStateOf("Todos") }
+	var selectedSubFilter by remember { mutableStateOf("Todos") }
+	
+	val reportTypes = listOf("Todos", "Clientes", "Pagos", "Membresías", "Promociones")
+	
+	val clientesFilters = listOf("Todos", "Activos", "Inactivos", "Pendientes")
+	val pagosFilters = listOf("Todos", "Dólares", "Bolívares", "Mixtos", "Con promociones")
 	
 	val pagos by remember { derivedStateOf { viewModel.pagosReport } }
 	val clientes by remember { derivedStateOf { viewModel.clientesReport } }
@@ -89,12 +95,13 @@ fun ReportScreen(
 	
 	val context = LocalContext.current
 	
-	LaunchedEffect(selectedReportType) {
+	LaunchedEffect(selectedReportType, selectedSubFilter) {
 		when (selectedReportType) {
-			"Pagos" -> viewModel.cargarReportePagos()
-			"Clientes" -> viewModel.cargarReporteClientes()
+			"Pagos" -> viewModel.cargarReportePagos(filtro = selectedSubFilter)
+			"Clientes" -> viewModel.cargarReporteClientes(filtro = selectedSubFilter)
 			"Membresías" -> viewModel.cargarReporteMembresias()
 			"Promociones" -> viewModel.cargarReportePromociones()
+			else -> { /* no hacer nada */ }
 		}
 	}
 	
@@ -123,19 +130,110 @@ fun ReportScreen(
 				ReportFilters(
 					selectedReportType = selectedReportType,
 					reportTypes = reportTypes,
-					onReportTypeSelected = { selectedReportType = it },
+					onReportTypeSelected = {
+						selectedReportType = it
+						selectedSubFilter = "Todos" // reset filtro secundario al cambiar tipo
+					},
+					selectedSubFilter = selectedSubFilter,
+					onSubFilterSelected = { selectedSubFilter = it },
+					clientesFilters = clientesFilters,
+					pagosFilters = pagosFilters,
 					startDate = null,
 					endDate = null,
 					onStartDateClick = {},
 					onEndDateClick = {},
 					onClearFilters = {
 						selectedReportType = "Todos"
+						selectedSubFilter = "Todos"
 					},
 					dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy"),
 					context = context,
 					pagos = pagos,
 					clientes = clientes
 				)
+			}
+		},
+		floatingActionButton = {
+			if (selectedReportType != "Todos") {
+				FloatingActionButton(
+					onClick = {
+						val (reportTitle, headers, rows) = when (selectedReportType) {
+							"Pagos" -> Triple(
+								"Reporte de Pagos",
+								listOf("Cliente", "Membresía", "Monto", "Tipo", "Ref."),
+								pagos.map {
+									listOf(
+										it.nombreCliente,
+										it.membresia,
+										"%.2f".format(it.monto),
+										it.tipoPago,
+										it.referencia ?: "-"
+									)
+								}
+							)
+							"Clientes" -> Triple(
+								"Reporte de Clientes",
+								listOf("Nombre", "Cédula", "Correo", "Teléfono", "Estado"),
+								clientes.map {
+									listOf(
+										it.nombre,
+										it.cedula,
+										it.correo,
+										it.telefono,
+										it.activo?.uppercase() ?: "Desconocido"
+									)
+								}
+							)
+							"Membresías" -> Triple(
+								"Reporte de Membresías",
+								listOf("Nombre", "Precio", "Duración"),
+								membresias.map {
+									listOf(
+										it.name,
+										"%.2f".format(it.price),
+										"${it.duracionDias} días"
+									)
+								}
+							)
+							"Promociones" -> Triple(
+								"Reporte de Promociones",
+								listOf("Nombre", "Porcentaje", "Duración", "Activa"),
+								promociones.map {
+									listOf(
+										it.nombre,
+										"${it.porcentaje}%",
+										"${it.duracion} días",
+										if (it.activa) "Sí" else "No"
+									)
+								}
+							)
+							else -> Triple("Reporte", emptyList(), emptyList())
+						}
+						
+						if (headers.isEmpty() || rows.isEmpty()) return@FloatingActionButton
+						
+						val file = PdfReportGenerator.generateReportPdf(
+							context = context,
+							reportTitle = reportTitle,
+							headers = headers,
+							rows = rows
+						)
+						
+						file?.let {
+							val uri = PdfReportGenerator.getUriFromFile(context, it)
+							val intent = Intent(Intent.ACTION_SEND).apply {
+								type = "application/pdf"
+								putExtra(Intent.EXTRA_STREAM, uri)
+								addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+							}
+							context.startActivity(Intent.createChooser(intent, "Compartir reporte PDF"))
+						}
+					},
+					containerColor = MaterialTheme.colorScheme.primary,
+					contentColor = MaterialTheme.colorScheme.onPrimary,
+				) {
+					Icon(Icons.Default.Share, contentDescription = "Exportar reporte PDF")
+				}
 			}
 		}
 	) { innerPadding ->
@@ -182,17 +280,6 @@ fun ReportScreen(
 							}
 						}
 					}
-					ExportReportButton(
-						context = context,
-						clientes= clientes,
-						pagos = pagos,
-						membresias = membresias,
-						promociones = promociones,
-						selectedReportType = selectedReportType,
-						modifier = Modifier
-							.fillMaxWidth()
-							.padding(bottom = 16.dp)
-					)
 				}
 				
 				selectedReportType == "Clientes" -> {
@@ -209,19 +296,7 @@ fun ReportScreen(
 							}
 						}
 					}
-					ExportReportButton(
-						context = context,
-						pagos = pagos,
-						clientes = clientes,
-						membresias = membresias,
-						promociones = promociones,
-						selectedReportType = selectedReportType,
-						modifier = Modifier
-							.fillMaxWidth()
-							.padding(bottom = 16.dp)
-					)
 				}
-				
 				
 				selectedReportType == "Membresías" -> {
 					if (membresias.isEmpty()) {
@@ -238,17 +313,6 @@ fun ReportScreen(
 							}
 						}
 					}
-					ExportReportButton(
-						context = context,
-						pagos = pagos,
-						clientes = clientes,
-						membresias = membresias,
-						promociones = promociones,
-						selectedReportType = selectedReportType,
-						modifier = Modifier
-							.fillMaxWidth()
-							.padding(bottom = 16.dp)
-					)
 				}
 				
 				selectedReportType == "Promociones" -> {
@@ -267,17 +331,6 @@ fun ReportScreen(
 							}
 						}
 					}
-					ExportReportButton(
-						context = context,
-						pagos = pagos,
-						clientes = clientes,
-						membresias = membresias,
-						promociones = promociones,
-						selectedReportType = selectedReportType,
-						modifier = Modifier
-							.fillMaxWidth()
-							.padding(bottom = 16.dp)
-					)
 				}
 				
 				else -> {
@@ -293,7 +346,6 @@ fun ReportScreen(
 }
 
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -301,6 +353,10 @@ fun ReportFilters(
 	selectedReportType: String,
 	reportTypes: List<String>,
 	onReportTypeSelected: (String) -> Unit,
+	selectedSubFilter: String,
+	onSubFilterSelected: (String) -> Unit,
+	clientesFilters: List<String>,
+	pagosFilters: List<String>,
 	startDate: LocalDate?,
 	endDate: LocalDate?,
 	onStartDateClick: () -> Unit,
@@ -309,24 +365,26 @@ fun ReportFilters(
 	dateFormatter: DateTimeFormatter,
 	context: Context,
 	pagos: List<ReportePago>,
-	clientes: List<ReporteCliente>
+	clientes: List<ReporteCliente>,
 ) {
 	var expandedFilter by remember { mutableStateOf(false) }
+	var expandedSubFilter by remember { mutableStateOf(false) }
 	
 	Surface(
 		modifier = Modifier
 			.fillMaxWidth()
-			.padding(horizontal = 16.dp, vertical = 8.dp),
-		shape = RoundedCornerShape(16.dp),
+			.padding(horizontal = 8.dp, vertical = 4.dp),
+		shape = RoundedCornerShape(12.dp),
 		color = MaterialTheme.colorScheme.surface,
-		shadowElevation = 4.dp
+		shadowElevation = 2.dp
 	) {
-		Column(modifier = Modifier.padding(16.dp)) {
+		Column(modifier = Modifier.padding(12.dp)) {
+			
+			// Tipo de reporte
 			Text(
-				text = "Tipo de Reporte",
-				style = MaterialTheme.typography.labelMedium,
-				color = MaterialTheme.colorScheme.onSurfaceVariant,
-				modifier = Modifier.padding(bottom = 4.dp)
+				text = "Tipos de reportes",
+				style = MaterialTheme.typography.labelSmall,
+				color = MaterialTheme.colorScheme.onSurfaceVariant
 			)
 			
 			ExposedDropdownMenuBox(
@@ -343,17 +401,19 @@ fun ReportFilters(
 					modifier = Modifier
 						.fillMaxWidth()
 						.menuAnchor(),
-					shape = RoundedCornerShape(12.dp),
+					textStyle = MaterialTheme.typography.bodySmall,
+					shape = RoundedCornerShape(10.dp),
+					singleLine = true
 				)
 				
 				ExposedDropdownMenu(
 					expanded = expandedFilter,
 					onDismissRequest = { expandedFilter = false },
-					modifier = Modifier.background(Color.White)
+					modifier = Modifier.background(MaterialTheme.colorScheme.surface)
 				) {
 					reportTypes.forEach { type ->
 						DropdownMenuItem(
-							text = { Text(type) },
+							text = { Text(type, style = MaterialTheme.typography.bodySmall) },
 							onClick = {
 								onReportTypeSelected(type)
 								expandedFilter = false
@@ -363,55 +423,107 @@ fun ReportFilters(
 				}
 			}
 			
-			Spacer(modifier = Modifier.height(16.dp))
-			
-			Text(
-				text = "Rango de Fechas",
-				style = MaterialTheme.typography.labelMedium,
-				color = MaterialTheme.colorScheme.onSurfaceVariant,
-				modifier = Modifier.padding(bottom = 4.dp)
-			)
-			
-			Row(
-				modifier = Modifier.fillMaxWidth(),
-				horizontalArrangement = Arrangement.spacedBy(8.dp)
-			) {
-				DateSelectorButton("Desde", startDate, dateFormatter, onStartDateClick, Modifier.weight(1f))
-				DateSelectorButton("Hasta", endDate, dateFormatter, onEndDateClick, Modifier.weight(1f))
+			// Filtro secundario dinámico según tipo de reporte
+			if (selectedReportType == "Clientes" || selectedReportType == "Pagos") {
+				Spacer(modifier = Modifier.height(8.dp))
+				Text(
+					text = "Filtros",
+					style = MaterialTheme.typography.labelSmall,
+					color = MaterialTheme.colorScheme.onSurfaceVariant
+				)
+				
+				val filters = when (selectedReportType) {
+					"Clientes" -> clientesFilters
+					"Pagos" -> pagosFilters
+					else -> emptyList()
+				}
+				
+				ExposedDropdownMenuBox(
+					expanded = expandedSubFilter,
+					onExpandedChange = { expandedSubFilter = it }
+				) {
+					OutlinedTextField(
+						value = selectedSubFilter,
+						onValueChange = {},
+						readOnly = true,
+						trailingIcon = {
+							ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSubFilter)
+						},
+						modifier = Modifier
+							.fillMaxWidth()
+							.menuAnchor(),
+						textStyle = MaterialTheme.typography.bodySmall,
+						shape = RoundedCornerShape(10.dp),
+						singleLine = true
+					)
+					
+					ExposedDropdownMenu(
+						expanded = expandedSubFilter,
+						onDismissRequest = { expandedSubFilter = false },
+						modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+					) {
+						filters.forEach { filter ->
+							DropdownMenuItem(
+								text = { Text(filter, style = MaterialTheme.typography.bodySmall) },
+								onClick = {
+									onSubFilterSelected(filter)
+									expandedSubFilter = false
+								}
+							)
+						}
+					}
+				}
 			}
 			
+			// Rango de fechas (para todos excepto "Todos")
+			if (selectedReportType != "Todos") {
+				Spacer(modifier = Modifier.height(8.dp))
+				
+				Text(
+					text = "Fechas",
+					style = MaterialTheme.typography.labelSmall,
+					color = MaterialTheme.colorScheme.onSurfaceVariant
+				)
+				
+				Row(
+					modifier = Modifier.fillMaxWidth(),
+					horizontalArrangement = Arrangement.spacedBy(8.dp)
+				) {
+					DateSelectorButton(
+						label = "Desde",
+						date = startDate,
+						formatter = dateFormatter,
+						onClick = onStartDateClick,
+						modifier = Modifier.weight(1f)
+					)
+					DateSelectorButton(
+						label = "Hasta",
+						date = endDate,
+						formatter = dateFormatter,
+						onClick = onEndDateClick,
+						modifier = Modifier.weight(1f)
+					)
+				}
+			}
+			
+			// Botón limpiar
 			Row(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(top = 16.dp),
-				horizontalArrangement = Arrangement.spacedBy(8.dp)
+					.padding(top = 8.dp),
+				horizontalArrangement = Arrangement.End
 			) {
-//				Button(
-//					onClick = { /* Lógica para aplicar filtros */ },
-//					enabled = selectedReportType != "Todos" || startDate != null || endDate != null,
-//					modifier = Modifier.weight(1f)
-//				) {
-//					Text("Generar Reporte")
-//				}
-				
 				OutlinedButton(
 					onClick = onClearFilters,
-					modifier = Modifier.fillMaxWidth()
-						.padding(15.dp),
-					border = BorderStroke(
-						1.dp,
-						MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-					)
+					modifier = Modifier
+						.height(36.dp)
+						.fillMaxWidth()
+						.padding(horizontal = 8.dp),
+					border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
 				) {
-					Row(verticalAlignment = Alignment.CenterVertically) {
-						Icon(
-							Icons.Default.Close,
-							contentDescription = "Limpiar",
-							modifier = Modifier.size(18.dp)
-						)
-						Spacer(modifier = Modifier.width(8.dp))
-						Text("Limpiar")
-					}
+					Icon(Icons.Default.Close, contentDescription = "Limpiar", modifier = Modifier.size(16.dp))
+					Spacer(modifier = Modifier.width(4.dp))
+					Text("Limpiar", style = MaterialTheme.typography.labelSmall)
 				}
 			}
 		}
@@ -458,7 +570,7 @@ fun ExportReportButton(
 	clientes: List<ReporteCliente> = emptyList(),
 	membresias: List<ReporteMembresia> = emptyList(),
 	promociones: List<ReportePromocion> = emptyList(),
-	modifier: Modifier = Modifier
+	modifier: Modifier = Modifier,
 ) {
 	Button(
 		onClick = {

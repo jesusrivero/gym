@@ -134,12 +134,20 @@ fun ListPaymentsScreen(
 			}
 		}
 	) { innerPadding ->
-		val filteredList = payments.filter {
-			(selectedPaymentType == "Todos" || it.paymentType.equals(selectedPaymentType, true)) &&
-					(searchText.isBlank()
-							|| it.name.contains(searchText, true)
-							|| it.reference?.contains(searchText, true) == true
-							|| it.membershipName.contains(searchText, true))
+		val filteredList = payments.filter { payment ->
+			val matchesSearch = searchText.isBlank() ||
+					payment.name.contains(searchText, ignoreCase = true) ||
+					payment.reference?.contains(searchText, ignoreCase = true) == true ||
+					payment.membershipName.contains(searchText, ignoreCase = true)
+			
+			val matchesFilter = when (selectedPaymentType) {
+				"Todos" -> true
+				"Dólares", "Bolívares", "Mixto" -> payment.paymentType.equals(selectedPaymentType, ignoreCase = true)
+				"Promociones" -> !payment.promocionNombre.isNullOrBlank()
+				else -> true
+			}
+			
+			matchesSearch && matchesFilter
 		}
 		
 		Box(

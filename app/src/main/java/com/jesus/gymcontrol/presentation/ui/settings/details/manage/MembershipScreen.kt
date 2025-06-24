@@ -151,7 +151,7 @@ fun MembershipScreen(
 									style = MaterialTheme.typography.labelSmall,
 									color = MaterialTheme.colorScheme.onSurfaceVariant
 								)
-								Spacer(Modifier.height(12.dp))
+//								Spacer(Modifier.height(6.dp))
 								Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
 									IconButton(onClick = { membershipToView = membership }) {
 										Icon(
