@@ -58,8 +58,8 @@ class ReportesViewModel @Inject constructor(
 				pagosReport = when (filtro.lowercase()) {
 					"dólares", "dolares" -> todosPagos.filter { it.tipoPago.equals("dólares", ignoreCase = true) }
 					"bolívares", "bolivares" -> todosPagos.filter { it.tipoPago.equals("bolívares", ignoreCase = true) }
-					"mixtos" -> todosPagos.filter { it.tipoPago.equals("mixtos", ignoreCase = true) }
-//					"con promociones" -> todosPagos.filter { it.promocionNombre == true }
+					"mixtos" -> todosPagos.filter { it.tipoPago.equals("mixto", ignoreCase = true) }
+					"con promociones" -> todosPagos.filter { !it.promocionNombre.isNullOrBlank() }
 					"todos" -> todosPagos
 					else -> todosPagos
 				}

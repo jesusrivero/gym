@@ -35,7 +35,7 @@ class ReportesRepositoryImpl @Inject constructor(
 					fecha = (data["date"] as? Number)?.toLong() ?: 0L,
 					referencia = data["reference"] as? String,
 					promocionNombre = data["promocionNombre"] as? String,
-					descuentoAplicado = (data["promocionPorcentajeDescuento"] as? Number)?.toDouble()
+			
 				)
 			}
 		}

@@ -9,5 +9,4 @@ data class ReportePago(
 	val fecha: Long,
 	val referencia: String?,
 	val promocionNombre: String?,
-	val descuentoAplicado: Double?
 )

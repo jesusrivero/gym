@@ -21,10 +21,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -51,18 +51,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.domain.helpers.PdfReportGenerator
 import com.jesus.gymcontrol.domain.model.reportModel.ReporteCliente
-import com.jesus.gymcontrol.domain.model.reportModel.ReporteMembresia
 import com.jesus.gymcontrol.domain.model.reportModel.ReportePago
-import com.jesus.gymcontrol.domain.model.reportModel.ReportePromocion
 import com.jesus.gymcontrol.domain.viewmodels.report.ReportesViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -80,7 +82,7 @@ fun ReportScreen(
 	var selectedReportType by remember { mutableStateOf("Todos") }
 	var selectedSubFilter by remember { mutableStateOf("Todos") }
 	
-	val reportTypes = listOf("Todos", "Clientes", "Pagos", "Membresías", "Promociones")
+	val reportTypes = listOf("Todos", "Clientes", "Pagos", "Membresías", "Promociones", "Descuento")
 	
 	val clientesFilters = listOf("Todos", "Activos", "Inactivos", "Pendientes")
 	val pagosFilters = listOf("Todos", "Dólares", "Bolívares", "Mixtos", "Con promociones")
@@ -171,6 +173,7 @@ fun ReportScreen(
 									)
 								}
 							)
+							
 							"Clientes" -> Triple(
 								"Reporte de Clientes",
 								listOf("Nombre", "Cédula", "Correo", "Teléfono", "Estado"),
@@ -184,6 +187,7 @@ fun ReportScreen(
 									)
 								}
 							)
+							
 							"Membresías" -> Triple(
 								"Reporte de Membresías",
 								listOf("Nombre", "Precio", "Duración"),
@@ -195,6 +199,7 @@ fun ReportScreen(
 									)
 								}
 							)
+							
 							"Promociones" -> Triple(
 								"Reporte de Promociones",
 								listOf("Nombre", "Porcentaje", "Duración", "Activa"),
@@ -207,6 +212,7 @@ fun ReportScreen(
 									)
 								}
 							)
+							
 							else -> Triple("Reporte", emptyList(), emptyList())
 						}
 						
@@ -266,71 +272,52 @@ fun ReportScreen(
 				}
 				
 				selectedReportType == "Pagos" -> {
-					if (pagos.isEmpty()) {
-						Text("No hay pagos para mostrar", textAlign = TextAlign.Center)
-					} else {
-						LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-							items(pagos) { pago ->
-								Column(modifier = Modifier.fillMaxWidth()) {
-									Text("${pago.nombreCliente} - ${pago.membresia}")
-									Text("Tipo: ${pago.tipoPago} - Monto: ${pago.monto}")
-									pago.referencia?.let { Text("Ref: $it") }
-									Divider()
-								}
-							}
-						}
-					}
+					SimpleReportList(
+						items = pagos,
+						field1 = { it.nombreCliente },
+						field2 = { it.membresia },
+						extraField = { "$${"%.2f".format(it.monto)}" },
+						extraFieldColor = { if (it.monto > 0) Color(0xFF2E7D32) else Color.Red },
+						emptyMessage = "No hay pagos para mostrar"
+					)
 				}
 				
 				selectedReportType == "Clientes" -> {
-					if (clientes.isEmpty()) {
-						Text("No hay clientes para mostrar", textAlign = TextAlign.Center)
-					} else {
-						LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-							items(clientes) { cliente ->
-								Column(modifier = Modifier.fillMaxWidth()) {
-									Text("${cliente.nombre} - C.I: ${cliente.cedula}")
-									Text("Correo: ${cliente.correo}")
-									Text("Estado: ${(cliente.activo ?: "Desconocido").uppercase()}")
-								}
+					SimpleReportList(
+						items = clientes,
+						field1 = { it.nombre },
+						field2 = { "C.I: ${it.cedula}" },
+						extraField = { (it.activo ?: "Desconocido").uppercase() },
+						extraFieldColor = {
+							when ((it.activo ?: "").lowercase()) {
+								"activo" -> Color(0xFF2E7D32)
+								"inactivo" -> Color.Red
+								"pendiente" -> Color(0xFFF9A825)
+								else -> MaterialTheme.colorScheme.onSurface
 							}
-						}
-					}
+						},
+						emptyMessage = "No hay clientes para mostrar"
+					)
 				}
 				
 				selectedReportType == "Membresías" -> {
-					if (membresias.isEmpty()) {
-						Text("No hay membresías para mostrar", textAlign = TextAlign.Center)
-					} else {
-						LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-							items(membresias) { item ->
-								Column(modifier = Modifier.fillMaxWidth()) {
-									Text("Nombre: ${item.name}")
-									Text("Precio: $${item.price}")
-									Text("Duracion: ${item.duracionDias} días")
-									Divider()
-								}
-							}
-						}
-					}
+					SimpleReportList(
+						items = membresias,
+						field1 = { it.name },
+						field2 = { "${"%.2f".format(it.price)} $" },
+						emptyMessage = "No hay membresías para mostrar"
+					)
 				}
 				
 				selectedReportType == "Promociones" -> {
-					if (promociones.isEmpty()) {
-						Text("No hay promociones para mostrar", textAlign = TextAlign.Center)
-					} else {
-						LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-							items(promociones) { promo ->
-								Column(modifier = Modifier.fillMaxWidth()) {
-									Text("Nombre: ${promo.nombre}")
-									Text("Porcentaje: ${promo.porcentaje}%")
-									Text("Activa: ${if (promo.activa) "Sí" else "No"}")
-									Text("Duración: ${promo.duracion} días")
-									Divider()
-								}
-							}
-						}
-					}
+					SimpleReportList(
+						items = promociones,
+						field1 = { it.nombre },
+						field2 = { "${it.porcentaje}%" },
+						extraField = { if (it.activa) "Activa" else "Inactiva" },
+						extraFieldColor = { if (it.activa) Color(0xFF2E7D32) else Color.Red },
+						emptyMessage = "No hay promociones para mostrar"
+					)
 				}
 				
 				else -> {
@@ -345,6 +332,78 @@ fun ReportScreen(
 	}
 }
 
+// Componente reutilizable para mostrar listas de reportes
+@Composable
+fun <T> SimpleReportList(
+	items: List<T>,
+	modifier: Modifier = Modifier,
+	field1: (T) -> String,
+	field2: (T) -> String,
+	extraField: ((T) -> String)? = null,
+	extraFieldColor: @Composable ((T) -> Color)? = null,
+	emptyMessage: String = "No hay datos para mostrar"
+) {
+	if (items.isEmpty()) {
+		Text(
+			emptyMessage,
+			modifier = Modifier.fillMaxWidth(),
+			textAlign = TextAlign.Center,
+			style = MaterialTheme.typography.bodyMedium
+		)
+		return
+	}
+	
+	LazyColumn(
+		modifier = modifier,
+		verticalArrangement = Arrangement.spacedBy(8.dp)
+	) {
+		items(items) { item ->
+			Card(
+				modifier = Modifier
+					.fillMaxWidth()
+					.shadow(2.dp, RoundedCornerShape(8.dp)),
+				shape = RoundedCornerShape(8.dp),
+				colors = CardDefaults.cardColors(
+					containerColor = MaterialTheme.colorScheme.surface
+				)
+			) {
+				Row(
+					modifier = Modifier
+						.padding(16.dp),
+					verticalAlignment = Alignment.CenterVertically,
+					horizontalArrangement = Arrangement.SpaceBetween
+				) {
+					Column(modifier = Modifier.weight(1f)) {
+						Text(
+							text = field1(item),
+							style = MaterialTheme.typography.titleMedium,
+							maxLines = 1,
+							overflow = TextOverflow.Ellipsis
+						)
+						Text(
+							text = field2(item),
+							style = MaterialTheme.typography.bodyMedium,
+							maxLines = 1,
+							overflow = TextOverflow.Ellipsis,
+							color = MaterialTheme.colorScheme.onSurfaceVariant
+						)
+					}
+					
+					extraField?.let { ef ->
+						val color = extraFieldColor?.invoke(item) ?: MaterialTheme.colorScheme.onSurface
+						Text(
+							text = ef(item),
+							color = color,
+							fontWeight = FontWeight.Bold,
+							style = MaterialTheme.typography.bodyMedium,
+							modifier = Modifier.padding(start = 8.dp)
+						)
+					}
+				}
+			}
+			}
+		}
+}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -562,99 +621,4 @@ private fun DateSelectorButton(
 }
 
 
-@Composable
-fun ExportReportButton(
-	context: Context,
-	selectedReportType: String,
-	pagos: List<ReportePago> = emptyList(),
-	clientes: List<ReporteCliente> = emptyList(),
-	membresias: List<ReporteMembresia> = emptyList(),
-	promociones: List<ReportePromocion> = emptyList(),
-	modifier: Modifier = Modifier,
-) {
-	Button(
-		onClick = {
-			val (reportTitle, headers, rows) = when (selectedReportType) {
-				"Pagos" -> Triple(
-					"Reporte de Pagos",
-					listOf("Cliente", "Membresía", "Monto", "Tipo", "Ref."),
-					pagos.map {
-						listOf(
-							it.nombreCliente,
-							it.membresia,
-							"%.2f".format(it.monto),
-							it.tipoPago,
-							it.referencia ?: "-"
-						)
-					}
-				)
-				
-				"Clientes" -> Triple(
-					"Reporte de Clientes",
-					listOf("Nombre", "Cédula", "Correo", "Teléfono", "Estado"),
-					clientes.map {
-						listOf(
-							it.nombre,
-							it.cedula,
-							it.correo,
-							it.telefono,
-							it.activo?.uppercase() ?: "Desconocido"
-						)
-					}
-				)
-				
-				"Membresías" -> Triple(
-					"Reporte de Membresías",
-					listOf("Nombre", "Precio", "Duración"),
-					membresias.map {
-						listOf(
-							it.name,
-							"%.2f".format(it.price),
-							"${it.duracionDias} días"
-						)
-					}
-				)
-				
-				"Promociones" -> Triple(
-					"Reporte de Promociones",
-					listOf("Nombre", "Porcentaje", "Duración", "Activa"),
-					promociones.map {
-						listOf(
-							it.nombre,
-							"${it.porcentaje}%",
-							"${it.duracion} días",
-							if (it.activa) "Sí" else "No"
-						)
-					}
-				)
-				
-				else -> Triple("Reporte", emptyList(), emptyList())
-			}
-			
-			if (headers.isEmpty() || rows.isEmpty()) return@Button
-			
-			val file = PdfReportGenerator.generateReportPdf(
-				context = context,
-				reportTitle = reportTitle,
-				headers = headers,
-				rows = rows
-			)
-			
-			file?.let {
-				val uri = PdfReportGenerator.getUriFromFile(context, it)
-				val intent = Intent(Intent.ACTION_SEND).apply {
-					type = "application/pdf"
-					putExtra(Intent.EXTRA_STREAM, uri)
-					addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-				}
-				context.startActivity(Intent.createChooser(intent, "Compartir reporte PDF"))
-			}
-		},
-		modifier = modifier
-	) {
-		Icon(Icons.Default.Share, contentDescription = null)
-		Spacer(modifier = Modifier.width(8.dp))
-		Text("Exportar PDF")
-	}
-}
 
