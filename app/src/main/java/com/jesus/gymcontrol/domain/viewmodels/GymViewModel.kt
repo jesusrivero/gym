@@ -11,12 +11,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.jesus.gymcontrol.domain.model.Gym
 import com.jesus.gymcontrol.domain.usecase.usuario.CreateGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GenerateCodeUseCase
-import com.jesus.gymcontrol.domain.usecase.usuario.GetAllGymUseCase
-import com.jesus.gymcontrol.domain.usecase.usuario.GetGymByOwnerUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetAllGymUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetGymByOwnerUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.MarkCodeAsUseUseCase
-import com.jesus.gymcontrol.domain.usecase.usuario.ValidateAdminCodeUseCase
-import com.jesus.gymcontrol.domain.usecase.usuario.ValidateClientCodeUseCase
-import com.jesus.gymcontrol.domain.usecase.usuario.ValidateOwnerCodeUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.validateCode.ValidateAdminCodeUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.validateCode.ValidateClientCodeUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.validateCode.ValidateOwnerCodeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await

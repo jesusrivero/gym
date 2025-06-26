@@ -3,14 +3,13 @@ package com.jesus.gymcontrol.domain.viewmodels
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.datastore.dataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.jesus.gymcontrol.domain.model.UserRegistrationData
 import com.jesus.gymcontrol.domain.usecase.usuario.GenerateCodeUseCase
-import com.jesus.gymcontrol.domain.usecase.usuario.GetGymByOwnerUseCase
-import com.jesus.gymcontrol.domain.usecase.usuario.RegisterUserFromAdminUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetGymByOwnerUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.auth.RegisterUserFromAdminUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

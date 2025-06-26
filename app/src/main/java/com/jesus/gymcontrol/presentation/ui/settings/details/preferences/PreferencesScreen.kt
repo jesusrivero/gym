@@ -41,188 +41,189 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
-import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import com.jesus.gymcontrol.presentation.ui.commons.BottomNavigationBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreferencesScreen(navController: NavController) {
-    GymTheme {
-        PreferencesContent(navController = navController)
-    }
+	GymTheme {
+		PreferencesContent(navController = navController)
+	}
 }
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreferencesContent(
-    navController: NavController,
-    viewModel: AuthViewModel = hiltViewModel()
+	navController: NavController,
+	viewModel: AuthViewModel = hiltViewModel(),
 ) {
-    val colorScheme = MaterialTheme.colorScheme
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Panel de administración",
-                        color = colorScheme.onPrimary,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = colorScheme.primary
-                )
-            )
-        },
-        bottomBar = {
-            BottomNavigationBar(navController = navController)
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-        ) {
-            SettingsSectionTitle("General")
-
-            SettingsItem(
-                text = "Cuenta y Datos",
-                icon = Icons.Default.AccountCircle,
-                onClick = { navController.navigate(AppRoutes.AccountScreen) }
-            )
-
-            SettingsItem(
-                text = "Notificaciones",
-                icon = Icons.Default.Notifications,
-                onClick = { navController.navigate(AppRoutes.NotificationScreen) }
-            )
-
-            SettingsItem(
-                text = "Seguridad",
-                icon = Icons.Default.Build,
-                onClick = { navController.navigate(AppRoutes.SecurityScreen) }
-            )
-            SettingsItem(
-                text = "Generar codigo para clientes",
-                icon = Icons.Default.Info,
-                onClick = { navController.navigate(AppRoutes.CodeClientScreen) }
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            SettingsSectionTitle("Soporte")
-
-            SettingsItem(
-                text = "Reportar errores",
-                icon = Icons.Default.Email,
-                onClick = { navController.navigate(AppRoutes.ErrorReportScreen) }
-            )
-
-            SettingsItem(
-                text = "Sobre nosotros",
-                icon = Icons.Default.Info,
-                onClick = { navController.navigate(AppRoutes.ContactScreen) }
-            )
-
-            Spacer(modifier = Modifier.padding(vertical = 20.dp))
-
-            Button(
-                onClick = {
-                    viewModel.logout()
-                    navController.navigate(AppRoutes.LoginScreen) {
-                        popUpTo(AppRoutes.PreferencesScreen) { inclusive = true }
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            ) {
-                Text(text = "Cerrar sesión")
-            }
-        }
-    }
+	val colorScheme = MaterialTheme.colorScheme
+	
+	Scaffold(
+		topBar = {
+			TopAppBar(
+				title = {
+					Text(
+						text = "Panel de administración",
+						color = colorScheme.onPrimary,
+						fontWeight = FontWeight.Bold
+					)
+				},
+				colors = TopAppBarDefaults.topAppBarColors(
+					containerColor = colorScheme.primary
+				)
+			)
+		},
+		bottomBar = {
+			BottomNavigationBar(navController = navController)
+		}
+	) { innerPadding ->
+		Column(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(innerPadding)
+				.padding(horizontal = 4.dp)
+				.verticalScroll(rememberScrollState())
+		) {
+			SettingsSectionTitle("General")
+			
+			SettingsItem(
+				text = "Cuenta y Datos",
+				icon = Icons.Default.AccountCircle,
+				onClick = { navController.navigate(AppRoutes.AccountScreen) }
+			)
+			
+			SettingsItem(
+				text = "Notificaciones",
+				icon = Icons.Default.Notifications,
+				onClick = { navController.navigate(AppRoutes.NotificationScreen) }
+			)
+			
+			SettingsItem(
+				text = "Seguridad",
+				icon = Icons.Default.Build,
+				onClick = { navController.navigate(AppRoutes.SecurityScreen) }
+			)
+			SettingsItem(
+				text = "Generar codigo para clientes",
+				icon = Icons.Default.Info,
+				onClick = { navController.navigate(AppRoutes.CodeClientScreen) }
+			)
+			
+			Spacer(modifier = Modifier.height(24.dp))
+			
+			SettingsSectionTitle("Soporte")
+			
+			SettingsItem(
+				text = "Reportar errores",
+				icon = Icons.Default.Email,
+				onClick = { navController.navigate(AppRoutes.ErrorReportScreen) }
+			)
+			
+			SettingsItem(
+				text = "Sobre nosotros",
+				icon = Icons.Default.Info,
+				onClick = { navController.navigate(AppRoutes.ContactScreen) }
+			)
+			
+			Spacer(modifier = Modifier.padding(vertical = 20.dp))
+			
+			Button(
+				onClick = {
+					viewModel.logout()
+					navController.navigate(AppRoutes.LoginScreen) {
+						popUpTo(AppRoutes.PreferencesScreen) { inclusive = true }
+					}
+				},
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(horizontal = 16.dp)
+			) {
+				Text(text = "Cerrar sesión")
+			}
+		}
+	}
 }
 
 @Composable
 fun SettingsSectionTitle(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.headlineSmall.copy(
-            fontWeight = FontWeight.Bold
-        ),
-        color = MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-    )
+	Text(
+		text = title,
+		style = MaterialTheme.typography.headlineSmall.copy(
+			fontWeight = FontWeight.Bold
+		),
+		color = MaterialTheme.colorScheme.onSurface,
+		modifier = Modifier
+			.padding(horizontal = 16.dp, vertical = 12.dp)
+	)
 }
 
 @Composable
 fun SettingsItem(
-    text: String,
-    icon: ImageVector,
-    onClick: () -> Unit
+	text: String,
+	icon: ImageVector,
+	onClick: () -> Unit,
 ) {
-    val colorScheme = MaterialTheme.colorScheme
-
-    Column {
-        TextButton(
-            onClick = onClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            colors = ButtonDefaults.textButtonColors(
-                contentColor = colorScheme.onSurface
-            )
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = colorScheme.onSurface.copy(alpha = 0.7f),
-                    modifier = Modifier.size(24.dp)
-                )
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Text(
-                    text = text,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.weight(1f)
-                )
-
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowRight,
-                    contentDescription = "Navegar",
-                    tint = colorScheme.onSurface.copy(alpha = 0.5f)
-                )
-            }
-        }
-
-        Divider(
-            color = colorScheme.onSurface.copy(alpha = 0.1f),
-            thickness = 1.dp,
-            modifier = Modifier.padding(start = 56.dp, end = 16.dp)
-        )
-    }
+	val colorScheme = MaterialTheme.colorScheme
+	
+	Column {
+		TextButton(
+			onClick = onClick,
+			modifier = Modifier
+				.fillMaxWidth()
+				.padding(horizontal = 8.dp),
+			colors = ButtonDefaults.textButtonColors(
+				contentColor = colorScheme.onSurface
+			)
+		) {
+			Row(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(vertical = 8.dp),
+				verticalAlignment = Alignment.CenterVertically,
+				horizontalArrangement = Arrangement.Start
+			) {
+				Icon(
+					imageVector = icon,
+					contentDescription = null,
+					tint = colorScheme.onSurface.copy(alpha = 0.7f),
+					modifier = Modifier.size(24.dp)
+				)
+				
+				Spacer(modifier = Modifier.width(12.dp))
+				
+				Text(
+					text = text,
+					style = MaterialTheme.typography.bodyLarge,
+					modifier = Modifier.weight(1f)
+				)
+				
+				Icon(
+					imageVector = Icons.Default.KeyboardArrowRight,
+					contentDescription = "Navegar",
+					tint = colorScheme.onSurface.copy(alpha = 0.5f)
+				)
+			}
+		}
+		
+		Divider(
+			color = colorScheme.onSurface.copy(alpha = 0.1f),
+			thickness = 1.dp,
+			modifier = Modifier.padding(start = 56.dp, end = 16.dp)
+		)
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 fun PreferencesPreview() {
-    GymTheme {
-        PreferencesContent(
-            navController = NavController(LocalContext.current)
-        )
-    }
+	GymTheme {
+		PreferencesContent(
+			navController = NavController(LocalContext.current)
+		)
+	}
 }

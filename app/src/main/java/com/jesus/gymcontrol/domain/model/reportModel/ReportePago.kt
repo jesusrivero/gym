@@ -6,6 +6,8 @@ data class ReportePago(
 	val membresia: String,
 	val tipoPago: String,
 	val monto: Double,
+	val montoDolar: Double,
+	val montoBolivares: Double,
 	val fecha: Long,
 	val referencia: String?,
 	val promocionNombre: String?,

@@ -7,8 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jesus.gymcontrol.domain.model.Person
 import com.jesus.gymcontrol.domain.usecase.usuario.DeleteUserUseCase
-import com.jesus.gymcontrol.domain.usecase.usuario.GetUsersUseCase
-import com.jesus.gymcontrol.domain.usecase.usuario.RegistrarClienteUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetUsersUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.auth.RegistrarClienteUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 

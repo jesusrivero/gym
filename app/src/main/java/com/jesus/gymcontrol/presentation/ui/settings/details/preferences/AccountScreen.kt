@@ -36,9 +36,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.jesus.gymcontrol.R
+import com.jesus.gymcontrol.domain.viewmodels.AdminViewModel
+import com.jesus.gymcontrol.domain.viewmodels.UserViewModel
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,11 +60,14 @@ fun AccountScreen(
 @Composable
 fun AccountContent(
 	navBottom: NavController,
+	viewModel: AdminViewModel = hiltViewModel()
 ) {
 	var isEditing by remember { mutableStateOf(false) }
 	var name by remember { mutableStateOf("") }
 	var email by remember { mutableStateOf("") }
 	var phone by remember { mutableStateOf("") }
+	var age by remember { mutableStateOf("") }
+	var gender by remember { mutableStateOf("") }
 
 	Scaffold(
 		topBar = {
@@ -147,6 +153,36 @@ fun AccountContent(
 					enabled = isEditing,
 					singleLine = true,
 					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+				)
+				
+				Text(
+					text = "Genero",
+					style = MaterialTheme.typography.labelLarge
+				)
+				
+				OutlinedTextField(
+					value = gender,
+					onValueChange = { gender = it },
+					label = { Text("Genero") },
+					modifier = Modifier.fillMaxWidth(),
+					enabled = isEditing,
+					singleLine = true,
+					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+				)
+				
+				Text(
+					text = "Edad",
+					style = MaterialTheme.typography.labelLarge
+				)
+				
+				OutlinedTextField(
+					value = age,
+					onValueChange = {  age = it },
+					label = { Text("Edad") },
+					modifier = Modifier.fillMaxWidth(),
+					enabled = isEditing,
+					singleLine = true,
+					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
 				)
 
 				Spacer(modifier = Modifier.height(16.dp))

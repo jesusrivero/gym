@@ -10,9 +10,9 @@ import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.jesus.gymcontrol.data.repository.SessionManager
-import com.jesus.gymcontrol.domain.usecase.usuario.LoginUseCase
-import com.jesus.gymcontrol.domain.usecase.usuario.RecoverPasswordUseCase
-import com.jesus.gymcontrol.domain.usecase.usuario.RegisterUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.auth.LoginUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.auth.RecoverPasswordUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.auth.RegisterUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateRolUseCase
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import dagger.hilt.android.lifecycle.HiltViewModel

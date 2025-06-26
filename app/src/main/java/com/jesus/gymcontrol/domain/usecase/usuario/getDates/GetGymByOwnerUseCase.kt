@@ -1,4 +1,4 @@
-package com.jesus.gymcontrol.domain.usecase.usuario
+package com.jesus.gymcontrol.domain.usecase.usuario.getDates
 
 import com.jesus.gymcontrol.domain.model.Gym
 import com.jesus.gymcontrol.domain.repository.GymRepository

@@ -66,8 +66,10 @@ import com.jesus.gymcontrol.domain.helpers.PdfReportGenerator
 import com.jesus.gymcontrol.domain.model.reportModel.ReporteCliente
 import com.jesus.gymcontrol.domain.model.reportModel.ReportePago
 import com.jesus.gymcontrol.domain.viewmodels.report.ReportesViewModel
+import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -82,7 +84,7 @@ fun ReportScreen(
 	var selectedReportType by remember { mutableStateOf("Todos") }
 	var selectedSubFilter by remember { mutableStateOf("Todos") }
 	
-	val reportTypes = listOf("Todos", "Clientes", "Pagos", "Membresías", "Promociones", "Descuento")
+	val reportTypes = listOf("Todos", "Clientes", "Pagos", "Membresías", "Promociones",)
 	
 	val clientesFilters = listOf("Todos", "Activos", "Inactivos", "Pendientes")
 	val pagosFilters = listOf("Todos", "Dólares", "Bolívares", "Mixtos", "Con promociones")
@@ -162,14 +164,19 @@ fun ReportScreen(
 						val (reportTitle, headers, rows) = when (selectedReportType) {
 							"Pagos" -> Triple(
 								"Reporte de Pagos",
-								listOf("Cliente", "Membresía", "Monto", "Tipo", "Ref."),
+								listOf("Cliente", "Membresía", "Tipo", "Ref.", "Monto"),
 								pagos.map {
 									listOf(
 										it.nombreCliente,
 										it.membresia,
-										"%.2f".format(it.monto),
 										it.tipoPago,
-										it.referencia ?: "-"
+										it.referencia ?: "-",
+										when (it.tipoPago.lowercase()) {
+											"dólares" -> formatDollars(it.montoDolar)
+											"bolívares" -> formatBolivares(it.montoBolivares)
+											"mixto" -> "${formatDollars(it.montoDolar)} - ${formatBolivares(it.montoBolivares)}"
+											else -> formatDollars(it.monto)
+										},
 									)
 								}
 							)
@@ -181,21 +188,22 @@ fun ReportScreen(
 									listOf(
 										it.nombre,
 										it.cedula,
-										it.correo,
+										it.activo?.uppercase() ?: "Desconocido",
 										it.telefono,
-										it.activo?.uppercase() ?: "Desconocido"
+										it.correo,
 									)
 								}
 							)
 							
 							"Membresías" -> Triple(
 								"Reporte de Membresías",
-								listOf("Nombre", "Precio", "Duración"),
+								listOf("Nombre", "Precio", "Duración", "Cantidad de Clientes"),
 								membresias.map {
 									listOf(
 										it.name,
 										"%.2f".format(it.price),
-										"${it.duracionDias} días"
+										"${it.duracionDias} días",
+										it.userCount.toString()
 									)
 								}
 							)
@@ -271,12 +279,20 @@ fun ReportScreen(
 					)
 				}
 				
+				
 				selectedReportType == "Pagos" -> {
 					SimpleReportList(
 						items = pagos,
 						field1 = { it.nombreCliente },
 						field2 = { it.membresia },
-						extraField = { "$${"%.2f".format(it.monto)}" },
+						extraField = {
+							when (it.tipoPago.lowercase()) {
+								"dólares" -> formatDollars(it.montoDolar)
+								"bolívares" -> formatBolivares(it.montoBolivares)
+								"mixto" -> "${formatDollars(it.montoDolar)} - ${formatBolivares(it.montoBolivares)}"
+								else -> formatDollars(it.monto)
+							}
+						},
 						extraFieldColor = { if (it.monto > 0) Color(0xFF2E7D32) else Color.Red },
 						emptyMessage = "No hay pagos para mostrar"
 					)
@@ -305,6 +321,7 @@ fun ReportScreen(
 						items = membresias,
 						field1 = { it.name },
 						field2 = { "${"%.2f".format(it.price)} $" },
+						extraField = { "${it.userCount} clientes" },
 						emptyMessage = "No hay membresías para mostrar"
 					)
 				}
@@ -390,9 +407,35 @@ fun <T> SimpleReportList(
 					}
 					
 					extraField?.let { ef ->
+						val value = ef(item)
+						
+						// Aplicar lógica de símbolo si es monto de pago
+						val formatted = when {
+							value.contains("Bs") || value.contains("$") -> value // Ya formateado
+							value.matches(Regex("\\d+(\\.\\d+)?")) -> { // Solo número
+								// Intentar inferir tipo de pago desde el item si es un Pago
+								val tipoPago = try {
+									val prop = item!!::class.members.firstOrNull { it.name == "tipoPago" }
+									val raw = prop?.call(item) as? String
+									raw?.lowercase() ?: ""
+								} catch (_: Exception) {
+									""
+								}
+								
+								val simbolo = when (tipoPago) {
+									"Bolívares" -> "Bs"
+									"Dólares" -> "$"
+									"Mixto" -> "Bs - $"
+									else -> ""
+								}
+								"$simbolo $value"
+							}
+							else -> value
+						}
+						
 						val color = extraFieldColor?.invoke(item) ?: MaterialTheme.colorScheme.onSurface
 						Text(
-							text = ef(item),
+							text = formatted,
 							color = color,
 							fontWeight = FontWeight.Bold,
 							style = MaterialTheme.typography.bodyMedium,
@@ -401,8 +444,8 @@ fun <T> SimpleReportList(
 					}
 				}
 			}
-			}
 		}
+	}
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -621,4 +664,18 @@ private fun DateSelectorButton(
 }
 
 
+fun formatDollars(amount: Double?): String {
+	if (amount == null) return "$0"
+	val format = NumberFormat.getCurrencyInstance(Locale.US)
+	return format.format(amount)
+}
+
+fun formatBolivares(amount: Double?): String {
+	if (amount == null) return "Bs 0,00"
+	val format = NumberFormat.getCurrencyInstance(Locale("es", "VE"))
+	format.maximumFractionDigits = 2
+	format.minimumFractionDigits = 2
+	val result = format.format(amount).replace("Bs.", "Bs ")
+	return result
+}
 

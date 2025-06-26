@@ -2,7 +2,6 @@ package com.jesus.gymcontrol.presentation.ui.commons.report
 import java.util.List
 
 import android.content.Context
-import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
@@ -14,7 +13,6 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.collections.getOrNull
 
 object PdfReportGenerator {
 	

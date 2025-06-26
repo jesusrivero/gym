@@ -32,6 +32,8 @@ class ReportesRepositoryImpl @Inject constructor(
 					membresia = data["membershipName"] as? String ?: "",
 					tipoPago = data["typepayment"] as? String ?: "",
 					monto = (data["amount"] as? Number)?.toDouble() ?: 0.0,
+					montoDolar = (data["amountDollar"] as? Number)?.toDouble() ?: 0.0,
+					montoBolivares = (data["amountBs"] as? Number)?.toDouble() ?: 0.0,
 					fecha = (data["date"] as? Number)?.toLong() ?: 0L,
 					referencia = data["reference"] as? String,
 					promocionNombre = data["promocionNombre"] as? String,
@@ -73,10 +75,26 @@ class ReportesRepositoryImpl @Inject constructor(
 			return@withContext snapshot.documents.mapNotNull { doc ->
 				val data = doc.data ?: return@mapNotNull null
 				
+				val name = data["nombre"] as? String ?: ""
+				val price = (data["precio"] as? Number)?.toDouble() ?: 0.0
+				val duracion = (data["duracionDias"] as? Number)?.toDouble() ?: 0.0
+				
+				// Obtener cantidad de usuarios inscritos a esta membresía
+				val userCountSnapshot = firestore.collection("gimnasios")
+					.document(gymCode)
+					.collection("membresias")
+					.document(doc.id)
+					.collection("usuarios")
+					.get()
+					.await()
+				
+				val userCount = userCountSnapshot.size()
+				
 				ReporteMembresia(
-					name = data["nombre"] as? String ?: "",
-					price = (data["precio"] as? Number)?.toDouble() ?: 0.0,
-					duracionDias =  (data["duracionDias"] as? Number)?.toDouble() ?: 0.0
+					name = name,
+					price = price,
+					duracionDias = duracion,
+					userCount = userCount
 				)
 			}
 		}

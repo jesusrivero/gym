@@ -10,8 +10,8 @@ import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.model.Promotion
 import com.jesus.gymcontrol.domain.usecase.usuario.CreatePromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.DeletePromotionUseCase
-import com.jesus.gymcontrol.domain.usecase.usuario.GetPromotionUseCase
-import com.jesus.gymcontrol.domain.usecase.usuario.GetUsersCountByPromotionUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetPromotionUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetUsersCountByPromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdatePromotionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

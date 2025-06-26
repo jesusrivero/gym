@@ -10,8 +10,8 @@ import com.jesus.gymcontrol.domain.model.MembershipWithCount
 import com.jesus.gymcontrol.domain.usecase.usuario.CreateMembershipUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.DeleteMembershipUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.EditMembershipUseCase
-import com.jesus.gymcontrol.domain.usecase.usuario.GetMembershipsUseCase
-import com.jesus.gymcontrol.domain.usecase.usuario.GetMembershipsWithUserCountUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetMembershipsUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetMembershipsWithUserCountUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

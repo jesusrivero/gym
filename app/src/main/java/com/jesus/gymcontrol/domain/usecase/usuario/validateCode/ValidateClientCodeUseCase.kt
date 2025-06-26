@@ -1,5 +1,4 @@
-package com.jesus.gymcontrol.domain.usecase.usuario
-
+package com.jesus.gymcontrol.domain.usecase.usuario.validateCode
 
 import com.jesus.gymcontrol.domain.repository.GymRepository
 import javax.inject.Inject

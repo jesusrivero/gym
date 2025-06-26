@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.model.ListUser
-import com.jesus.gymcontrol.domain.usecase.usuario.GetUserByGymUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetUserByGymUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

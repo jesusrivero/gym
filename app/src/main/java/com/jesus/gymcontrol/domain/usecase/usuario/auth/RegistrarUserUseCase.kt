@@ -1,4 +1,4 @@
-package com.jesus.gymcontrol.domain.usecase.usuario
+package com.jesus.gymcontrol.domain.usecase.usuario.auth
 
 import com.jesus.gymcontrol.domain.repository.AuthRepository
 

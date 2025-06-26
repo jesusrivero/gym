@@ -2,6 +2,8 @@
 accompanistPager = "0.28.0"
 agp = "8.9.2"
 coilCompose = "2.4.0"
+composeCapture = "1.1.0"
+composeCaptureVersion = "1.0.2"
 datastorePreferences = "1.0.0"
 datastorePreferencesVersion = "1.1.7"
 firebaseAnalytics = "22.4.0"
@@ -42,6 +44,7 @@ androidx-foundation = { module = "androidx.compose.foundation:foundation", versi
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+compose-capture = { module = "io.github.smarttoolfactory:compose-capture", version.ref = "composeCapture" }
 datastore-preferences = { module = "androix.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
@@ -56,6 +59,7 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomCompiler" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomCompiler" }
+iglaweb-compose-capture = { module = "com.github.iglaweb:compose-capture", version.ref = "composeCaptureVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

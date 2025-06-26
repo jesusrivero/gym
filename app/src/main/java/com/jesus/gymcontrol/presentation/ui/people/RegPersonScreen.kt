@@ -14,6 +14,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -95,7 +97,7 @@ fun RegPersonScreen(
 			CenterAlignedTopAppBar(
 				title = {
 					Text(
-						text = "Gym Control",
+						text = "Registro de clientes",
 						color = colorScheme.onPrimary,
 						fontWeight = FontWeight.Bold
 					)
@@ -194,7 +196,7 @@ fun RegPersonContent(
 				}
 			},
 			title = { Text("Confirmar registro") },
-			text = { Text("¿Deseas registrar a esta persona con rol '$rol'?")}
+			text = { Text("¿Deseas registrar a esta persona con rol '$rol'?") }
 		)
 	}
 	
@@ -205,97 +207,117 @@ fun RegPersonContent(
 			.fillMaxWidth(),
 		horizontalAlignment = Alignment.CenterHorizontally
 	) {
-		OutlinedTextField(
-			value = name,
-			onValueChange = { name = it },
-			label = { Text("Nombre completo") },
-			isError = !isNameValid && name.isNotEmpty(),
-			maxLines = 1,
-			modifier = Modifier.fillMaxWidth()
-		)
-		if (!isNameValid && name.isNotEmpty()) {
-			Text("El nombre es obligatorio", color = MaterialTheme.colorScheme.error)
-		}
-		
-		OutlinedTextField(
-			value = email,
-			onValueChange = { email = it },
-			label = { Text("Correo Gmail") },
-			isError = email.isNotBlank() && !isEmailValid,
-			maxLines = 1,
-			modifier = Modifier.fillMaxWidth()
-		)
-		if (email.isNotBlank() && !isEmailValid) {
-			Text("Correo inválido. Usa un Gmail válido", color = MaterialTheme.colorScheme.error)
-		}
-		
-		OutlinedTextField(
-			value = password,
-			onValueChange = { password = it },
-			label = { Text("Contraseña (mín. 6 caracteres)") },
-			isError = password.isNotEmpty() && !isPasswordValid,
-			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-			maxLines = 1,
-			modifier = Modifier.fillMaxWidth()
-		)
-		if (password.isNotEmpty() && !isPasswordValid) {
-			Text("Debe tener al menos 6 caracteres", color = MaterialTheme.colorScheme.error)
-		}
-		
-		OutlinedTextField(
-			value = idCard,
-			onValueChange = { idCard = it },
-			label = { Text("Cédula") },
-			isError = !isIdCardValid && idCard.isNotEmpty(),
-			maxLines = 1,
-			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-			modifier = Modifier.fillMaxWidth()
-		)
-		if (!isIdCardValid && idCard.isNotEmpty()) {
-			Text("La cédula es obligatoria", color = MaterialTheme.colorScheme.error)
-		}
-		
-		Row(
+		Card(
 			modifier = Modifier.fillMaxWidth(),
-			verticalAlignment = Alignment.CenterVertically
+			elevation = CardDefaults.cardElevation(4.dp),
+			colors = CardDefaults.cardColors(containerColor = colorScheme.background)
 		) {
-			OutlinedTextField(
-				value = code,
-				onValueChange = { code = it },
-				label = { Text("Código") },
-				isError = !isCodeValid && code.isNotEmpty(),
-				maxLines = 1,
-				modifier = Modifier.weight(1f)
-			)
-			Spacer(modifier = Modifier.width(8.dp))
-			Button(
-				onClick = {
-					viewModel.SetSelectedRoleForCode(rol)
-					viewModel.generateCodeForRoleFromAdmin { generated ->
-						code = generated
-					}
+			Column(modifier = Modifier.padding(16.dp)) {
+				OutlinedTextField(
+					value = name,
+					onValueChange = { name = it },
+					label = { Text("Nombre completo") },
+					isError = !isNameValid && name.isNotEmpty(),
+					maxLines = 1,
+					modifier = Modifier.fillMaxWidth()
+				)
+				if (!isNameValid && name.isNotEmpty()) {
+					Text("El nombre es obligatorio", color = MaterialTheme.colorScheme.error)
 				}
-			) {
-				Text("Generar")
 			}
 		}
-		if (!isCodeValid && code.isNotEmpty()) {
-			Text("El código es obligatorio", color = MaterialTheme.colorScheme.error)
-		}
 		
-		OutlinedTextField(
-			value = rol,
-			onValueChange = {},
-			label = { Text("Rol") },
-			readOnly = true,
+		Spacer(modifier = Modifier.height(16.dp))
+		
+		Card(
 			modifier = Modifier.fillMaxWidth(),
-			enabled = false,
-			colors = OutlinedTextFieldDefaults.colors(
-				disabledBorderColor = colorScheme.outline,
-				disabledTextColor = colorScheme.onSurface,
-				disabledLabelColor = colorScheme.onSurfaceVariant
-			)
-		)
+			elevation = CardDefaults.cardElevation(4.dp),
+			colors = CardDefaults.cardColors(containerColor = colorScheme.background)
+		) {
+			Column(modifier = Modifier.padding(16.dp)) {
+				
+				
+				OutlinedTextField(
+					value = email,
+					onValueChange = { email = it },
+					label = { Text("Correo Gmail") },
+					isError = email.isNotBlank() && !isEmailValid,
+					maxLines = 1,
+					modifier = Modifier.fillMaxWidth()
+				)
+				if (email.isNotBlank() && !isEmailValid) {
+					Text("Correo inválido. Usa un Gmail válido", color = MaterialTheme.colorScheme.error)
+				}
+				
+				OutlinedTextField(
+					value = password,
+					onValueChange = { password = it },
+					label = { Text("Contraseña (mín. 6 caracteres)") },
+					isError = password.isNotEmpty() && !isPasswordValid,
+					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+					maxLines = 1,
+					modifier = Modifier.fillMaxWidth()
+				)
+				if (password.isNotEmpty() && !isPasswordValid) {
+					Text("Debe tener al menos 6 caracteres", color = MaterialTheme.colorScheme.error)
+				}
+				
+				OutlinedTextField(
+					value = idCard,
+					onValueChange = { idCard = it },
+					label = { Text("Cédula") },
+					isError = !isIdCardValid && idCard.isNotEmpty(),
+					maxLines = 1,
+					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+					modifier = Modifier.fillMaxWidth()
+				)
+				if (!isIdCardValid && idCard.isNotEmpty()) {
+					Text("La cédula es obligatoria", color = MaterialTheme.colorScheme.error)
+				}
+				
+				Row(
+					modifier = Modifier.fillMaxWidth(),
+					verticalAlignment = Alignment.CenterVertically
+				) {
+					OutlinedTextField(
+						value = code,
+						onValueChange = { code = it },
+						label = { Text("Código") },
+						isError = !isCodeValid && code.isNotEmpty(),
+						maxLines = 1,
+						modifier = Modifier.weight(1f)
+					)
+					Spacer(modifier = Modifier.width(8.dp))
+					Button(
+						onClick = {
+							viewModel.SetSelectedRoleForCode(rol)
+							viewModel.generateCodeForRoleFromAdmin { generated ->
+								code = generated
+							}
+						}
+					) {
+						Text("Generar")
+					}
+				}
+				if (!isCodeValid && code.isNotEmpty()) {
+					Text("El código es obligatorio", color = MaterialTheme.colorScheme.error)
+				}
+				
+				OutlinedTextField(
+					value = rol,
+					onValueChange = {},
+					label = { Text("Rol") },
+					readOnly = true,
+					modifier = Modifier.fillMaxWidth(),
+					enabled = false,
+					colors = OutlinedTextFieldDefaults.colors(
+						disabledBorderColor = colorScheme.outline,
+						disabledTextColor = colorScheme.onSurface,
+						disabledLabelColor = colorScheme.onSurfaceVariant
+					)
+				)
+			}
+		}
 		
 		Spacer(modifier = Modifier.height(16.dp))
 		

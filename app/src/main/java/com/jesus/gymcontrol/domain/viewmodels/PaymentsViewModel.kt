@@ -13,7 +13,7 @@ import com.jesus.gymcontrol.domain.model.Payment
 import com.jesus.gymcontrol.domain.model.PaymentState
 import com.jesus.gymcontrol.domain.model.Promotion
 import com.jesus.gymcontrol.domain.usecase.usuario.AddPaymentUseCase
-import com.jesus.gymcontrol.domain.usecase.usuario.GetAllPaymentsUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetAllPaymentsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -50,7 +50,7 @@ class PaymentsViewModel @Inject constructor(
 	var errorMessage by mutableStateOf<String?>(null)
 		private set
 	
-	fun selectedPromotion (promotion: Promotion) {
+	fun selectedPromotion (promotion: Promotion?) {
 		selectedPromotion = promotion
 	}
 	
@@ -146,5 +146,13 @@ class PaymentsViewModel @Inject constructor(
 	fun resetState() {
 		isSuccess = false
 		errorMessage = null
+		_paymentState.update {
+			it.copy(
+				type = "Bolívares",
+				frequency = "Mensual",
+				amountDollar = "",
+				amountBs = ""
+			)
+		}
 	}
 }

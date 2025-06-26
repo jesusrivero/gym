@@ -1,11 +1,11 @@
-package com.jesus.gymcontrol.domain.usecase.usuario
+package com.jesus.gymcontrol.domain.usecase.usuario.auth
 
+import android.util.Patterns
 import com.jesus.gymcontrol.domain.model.Person
 import com.jesus.gymcontrol.domain.repository.UsuarioRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-
 
 class RegistrarClienteUseCase @Inject constructor(
 	private val usuarioRepository: UsuarioRepository
@@ -21,8 +21,8 @@ class RegistrarClienteUseCase @Inject constructor(
 			if (user.usuario.isBlank()) {
 				return@withContext Result.Error("El nombre no puede estar vacío")
 			}
-
-			if (user.email.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(user.email).matches()) {
+			
+			if (user.email.isBlank() || !Patterns.EMAIL_ADDRESS.matcher(user.email).matches()) {
 				return@withContext Result.Error("Email no válido")
 			}
 			

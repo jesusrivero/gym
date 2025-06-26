@@ -28,7 +28,6 @@ import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -46,6 +45,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -117,6 +117,7 @@ fun PaymentsScreenContent(
 	val context = LocalContext.current
 	val sessionManager = remember { SessionManager(context) }
 	val gimnasioCode = sessionManager.getGymCode()
+	
 	
 	val filteredUsers = if (nameUser.isBlank()) emptyList() else {
 		users.filter {
@@ -213,9 +214,9 @@ fun PaymentsScreenContent(
 		},
 		bottomBar = {
 			BottomAppBar(
-				containerColor = colorScheme.surfaceVariant,
+				containerColor = colorScheme.background,
 				actions = {
-					Button(
+					TextButton(
 						onClick = {
 							val user = users.find { it.id == selectedUserId }
 							val membership = memberships.find { it.nombre == paymentState.frequency }
@@ -320,6 +321,12 @@ fun PaymentsScreenContent(
 									IconButton(onClick = {
 										nameUser = ""
 										selectedUserId = null
+										
+								
+										viewModel.resetState()
+										description = ""
+										reference = ""
+										viewModel.selectedPromotion(null)
 									}) {
 										Icon(Icons.Default.Close, contentDescription = "Borrar selección")
 									}
