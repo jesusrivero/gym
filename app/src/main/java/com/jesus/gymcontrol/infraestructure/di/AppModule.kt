@@ -48,6 +48,7 @@ import com.jesus.gymcontrol.domain.usecase.usuario.auth.RegisterUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateDatesUserUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdatePromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateRolUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.UpdateUserProfileUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.report.GenerateClientsReportUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.report.GenerateMembershipsReportUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.report.GeneratePaymentsReportUseCase
@@ -89,15 +90,15 @@ object AppModule {
 	): GymRepository {
 		return GymRepositoryImpl(firestore)
 	}
-	
+	/////////////////////////////////////
 	@Provides
 	@Singleton
 	fun provideUserRepository(
 		firestore: FirebaseFirestore,
 	): UserRepository {
-		return UserRepositoryImpl(firestore)
+		return UserRepositoryImpl(firestore, FirebaseAuth.getInstance())
 	}
-	
+	//////////////////////////////
 	@Provides
 	@Singleton
 	fun provideCreateGymUseCase(repository: GymRepository): CreateGymUseCase {
@@ -292,6 +293,11 @@ object AppModule {
 	): GetUsersCountByPromotionUseCase {
 		return GetUsersCountByPromotionUseCase(repository)
 	}
+	
+	@Provides
+	fun provideUpdateUserProfileUseCase(
+		userRepository: UserRepository
+	): UpdateUserProfileUseCase = UpdateUserProfileUseCase(userRepository)
 	
 	
 	//REPORTES

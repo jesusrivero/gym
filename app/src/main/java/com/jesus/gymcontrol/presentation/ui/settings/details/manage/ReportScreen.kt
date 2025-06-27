@@ -84,7 +84,7 @@ fun ReportScreen(
 	var selectedReportType by remember { mutableStateOf("Todos") }
 	var selectedSubFilter by remember { mutableStateOf("Todos") }
 	
-	val reportTypes = listOf("Todos", "Clientes", "Pagos", "Membresías", "Promociones",)
+	val reportTypes = listOf("Todos", "Clientes", "Pagos", "Membresías", "Promociones")
 	
 	val clientesFilters = listOf("Todos", "Activos", "Inactivos", "Pendientes")
 	val pagosFilters = listOf("Todos", "Dólares", "Bolívares", "Mixtos", "Con promociones")
@@ -210,13 +210,14 @@ fun ReportScreen(
 							
 							"Promociones" -> Triple(
 								"Reporte de Promociones",
-								listOf("Nombre", "Porcentaje", "Duración", "Activa"),
+								listOf("Nombre", "Porcentaje", "Duración", "Activa", "Cantidad de Usuarios"),
 								promociones.map {
 									listOf(
 										it.nombre,
 										"${it.porcentaje}%",
 										"${it.duracion} días",
-										if (it.activa) "Sí" else "No"
+										if (it.activa) "Sí" else "No",
+										"${it.cantidadUsuarios} usuarios"
 									)
 								}
 							)
@@ -333,7 +334,7 @@ fun ReportScreen(
 						field2 = { "${it.porcentaje}%" },
 						extraField = { if (it.activa) "Activa" else "Inactiva" },
 						extraFieldColor = { if (it.activa) Color(0xFF2E7D32) else Color.Red },
-						emptyMessage = "No hay promociones para mostrar"
+						emptyMessage = "No hay promociones para mostrar",
 					)
 				}
 				

@@ -101,22 +101,39 @@ class ReportesRepositoryImpl @Inject constructor(
 	
 	override suspend fun getPromocionesReporte(gymCode: String): List<ReportePromocion> =
 		withContext(Dispatchers.IO) {
-			val snapshot = firestore.collection("gimnasios")
+			val promocionesRef = firestore.collection("gimnasios")
 				.document(gymCode)
 				.collection("promociones")
-				.get()
-				.await()
 			
-			return@withContext snapshot.documents.mapNotNull { doc ->
-				val data = doc.data ?: return@mapNotNull null
+			val promocionesSnapshot = promocionesRef.get().await()
+			
+			val result = promocionesSnapshot.documents.mapNotNull { promoDoc ->
+				val data = promoDoc.data ?: return@mapNotNull null
+				val promoId = promoDoc.id
+				
+				// Obtener usuarios de esta promoción
+				val usuariosSnapshot = try {
+					promocionesRef
+						.document(promoId)
+						.collection("usuarios")
+						.get()
+						.await()
+				} catch (e: Exception) {
+					null
+				}
+				val cantidadUsuarios = usuariosSnapshot?.size() ?: 0
+				
 				ReportePromocion(
 					nombre = data["nombre"] as? String ?: "",
 					descripcion = data["descripcion"] as? String ?: "",
 					porcentaje = (data["porcentajeDescuento"] as? Number)?.toDouble() ?: 0.0,
 					duracion = (data["duracionDias"] as? Number)?.toInt() ?: 0,
-					activa = data["activo"] as? Boolean ?: false
+					activa = data["activo"] as? Boolean ?: false,
+					cantidadUsuarios = cantidadUsuarios
 				)
 			}
+			
+			return@withContext result
 		}
 	
 	

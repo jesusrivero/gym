@@ -1,16 +1,19 @@
 package com.jesus.gymcontrol.data.repository
 
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.jesus.gymcontrol.domain.model.Gym
 import com.jesus.gymcontrol.domain.model.GymUserSummary
 import com.jesus.gymcontrol.domain.model.ListUser
+import com.jesus.gymcontrol.domain.model.UserUpdate
 import com.jesus.gymcontrol.domain.repository.UserRepository
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class UserRepositoryImpl @Inject constructor(
 	private val firestore: FirebaseFirestore,
+	private val auth: FirebaseAuth
 ) : UserRepository {
 	
 	override suspend fun assignGymToUser(uid: String, gym: Gym, rol: String): Result<Unit> {
@@ -208,6 +211,48 @@ class UserRepositoryImpl @Inject constructor(
 		Result.success(listUsers)
 	} catch (e: Exception) {
 		Result.failure(e)
+	}
+	
+	override suspend fun updateUserProfile(
+		uid: String,
+		gymCode: String,
+		userUpdate: UserUpdate
+	): Result<Unit> {
+		return try {
+			// No actualizamos el email en FirebaseAuth aquí
+			
+			// Actualizar Firestore: users/{uid}
+			val userMap = mapOf(
+				"name" to userUpdate.name,
+				"phone" to userUpdate.phone,
+				"age" to userUpdate.age,
+				"gender" to userUpdate.gender,
+				"weight" to userUpdate.weight,
+				"height" to userUpdate.height
+			)
+			
+			firestore.collection("users")
+				.document(uid)
+				.update(userMap)
+				.await()
+			
+			// Actualizar en gimnasios/{gymCode}/usuarios/{uid}
+			val gymUserMap = mapOf(
+				"name" to userUpdate.name,
+				"phone" to userUpdate.phone
+			)
+			
+			firestore.collection("gimnasios")
+				.document(gymCode)
+				.collection("usuarios")
+				.document(uid)
+				.update(gymUserMap)
+				.await()
+			
+			Result.success(Unit)
+		} catch (e: Exception) {
+			Result.failure(e)
+		}
 	}
 	
 	

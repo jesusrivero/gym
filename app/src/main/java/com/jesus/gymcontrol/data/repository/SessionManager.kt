@@ -65,7 +65,11 @@ class SessionManager @Inject constructor(@ApplicationContext private val context
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return null
         return sharedPreferences.getString("${uid}_gym_code", null)
     }
-
+	
+	
+	fun getUserUid(): String? {
+		return FirebaseAuth.getInstance().currentUser?.uid
+	}
 //    fun saveGymCode(gymCode: String) {
 //        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 //        sharedPreferences.edit().putString("${uid}_gym_code", gymCode).apply()
