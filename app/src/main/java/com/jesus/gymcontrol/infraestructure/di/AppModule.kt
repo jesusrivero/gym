@@ -49,6 +49,7 @@ import com.jesus.gymcontrol.domain.usecase.usuario.UpdateDatesUserUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdatePromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateRolUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateUserProfileUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.password.ChangePasswordUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.report.GenerateClientsReportUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.report.GenerateMembershipsReportUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.report.GeneratePaymentsReportUseCase
@@ -329,8 +330,10 @@ object AppModule {
 	): GeneratePromotionsReportUseCase = GeneratePromotionsReportUseCase(repository)
 	
 	
-	
-	
+	@Provides
+	fun provideChangePasswordUseCase(authRepository: AuthRepository): ChangePasswordUseCase {
+		return ChangePasswordUseCase(authRepository)
+	}
 	
 	
 }

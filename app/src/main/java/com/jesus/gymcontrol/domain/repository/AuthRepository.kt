@@ -1,5 +1,7 @@
 package com.jesus.gymcontrol.domain.repository
 
+import com.jesus.gymcontrol.domain.model.PasswordChangeRequest
+
 
 interface AuthRepository {
     suspend fun registerUser(
@@ -32,5 +34,7 @@ interface AuthRepository {
         phone: String,
         gender: String,
     ):  Result<Unit>
+	
+	suspend fun changePassword(request: PasswordChangeRequest): Result<Unit>
 }
 

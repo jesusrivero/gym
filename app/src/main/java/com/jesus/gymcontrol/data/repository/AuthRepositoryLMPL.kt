@@ -1,8 +1,10 @@
 package com.jesus.gymcontrol.data.repository
 
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
+import com.jesus.gymcontrol.domain.model.PasswordChangeRequest
 import com.jesus.gymcontrol.domain.repository.AuthRepository
 import kotlinx.coroutines.tasks.await
 
@@ -105,8 +107,35 @@ class AuthRepositoryImpl(
             Result.failure(e)
         }
     }
-
-
+	
+	override suspend fun changePassword(request: PasswordChangeRequest): Result<Unit> {
+		return try {
+			val currentUser = firebaseAuth.currentUser
+				?: return Result.failure(Exception("Usuario no autenticado"))
+			
+			val email = currentUser.email
+				?: return Result.failure(Exception("No se encontró el correo electrónico del usuario"))
+			
+			// Validación de nueva contraseña
+			if (request.newPassword != request.confirmPassword) {
+				return Result.failure(Exception("La nueva contraseña y la confirmación no coinciden"))
+			}
+			
+			// 1. Re-autenticación
+			val credential = EmailAuthProvider.getCredential(email, request.currentPassword)
+			currentUser.reauthenticate(credential).await()
+			
+			// 2. Cambiar la contraseña
+			currentUser.updatePassword(request.newPassword).await()
+			
+			Result.success(Unit)
+		} catch (e: Exception) {
+			Result.failure(e)
+		}
+	}
+	
+	
+	
 }
 
 
