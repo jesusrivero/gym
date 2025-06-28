@@ -24,7 +24,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -270,7 +269,7 @@ fun SecurityContent(
 							.fillMaxWidth()
 							.height(50.dp),
 						colors = ButtonDefaults.buttonColors(
-							containerColor = if (isFormValid) Color(0xCD4CAF50) else Color.Gray
+							containerColor = if (isFormValid)  colorScheme.primary else Color.Gray
 						)
 					) {
 						Text("Guardar cambios", color = Color.White)

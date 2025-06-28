@@ -321,7 +321,7 @@ fun AccountContent(
 							) {
 								Text("Cancelar")
 							}
-						}
+						}, containerColor =  Color.White
 						
 					)
 					// Indicadores visuales de estado
@@ -356,12 +356,12 @@ fun AccountContent(
 							Icon(
 								imageVector = Icons.Default.CheckCircle,
 								contentDescription = null,
-								tint = Color(0xFF4CAF50) // verde éxito
+								tint = Color(0xFF4CAF50)
 							)
 						},
-						containerColor = MaterialTheme.colorScheme.surface,
-						titleContentColor = MaterialTheme.colorScheme.onSurface,
-						textContentColor = MaterialTheme.colorScheme.onSurface
+						containerColor = colorScheme.surface,
+						titleContentColor = colorScheme.onSurface,
+						textContentColor = colorScheme.onSurface
 					)
 					
 					// Cierra el dialog después de 2 segundos
