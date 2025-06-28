@@ -12,7 +12,6 @@ import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetAllPaymentsUseCas
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 @HiltViewModel
 class MovementsViewModel @Inject constructor(
 	private val getAllPaymentsUseCase: GetAllPaymentsUseCase,
@@ -22,6 +21,9 @@ class MovementsViewModel @Inject constructor(
 	var lastPayments by mutableStateOf<List<Payment>>(emptyList())
 		private set
 	
+	var isLoading by mutableStateOf(false)
+		private set
+	
 	init {
 		loadLastPayments()
 	}
@@ -29,6 +31,7 @@ class MovementsViewModel @Inject constructor(
 	private fun loadLastPayments() {
 		val gymCode = sessionManager.getGymCode() ?: return
 		viewModelScope.launch {
+			isLoading = true
 			try {
 				val allPayments = getAllPaymentsUseCase(gymCode)
 				lastPayments = allPayments
@@ -37,6 +40,7 @@ class MovementsViewModel @Inject constructor(
 			} catch (e: Exception) {
 				Log.e("MovementsViewModel", "Error loading payments", e)
 			}
+			isLoading = false
 		}
 	}
 }
