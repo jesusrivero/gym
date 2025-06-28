@@ -98,6 +98,7 @@ fun NavigationHost(
 				navPag = { navController.navigate(AppRoutes.PaymentsScreen) },
 				navBottom = navController,
 				
+				
 				)
 		}
 		

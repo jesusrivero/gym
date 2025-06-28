@@ -50,11 +50,11 @@ import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.domain.model.ListUser
 import com.jesus.gymcontrol.domain.viewmodels.UserListViewModel
+import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.ui.commons.PaymentFilters
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
@@ -74,14 +74,13 @@ fun PersonsScreen(
 	var searchText by remember { mutableStateOf("") }
 	var selectedState by remember { mutableStateOf("Todos") }
 	
-	
-	
 	val filterOptions = listOf("Todos", "Activos", "Inactivos", "Próximos a pagar")
 	
 	if (showUserDialog && selectedUser != null) {
 		val formattedDate = selectedUser?.date?.takeIf { it > 0L }?.let {
 			SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(it))
 		} ?: "No disponible"
+		
 		AlertDialog(
 			onDismissRequest = {
 				showUserDialog = false
@@ -105,9 +104,8 @@ fun PersonsScreen(
 					DetailRow("Estado:", selectedUser?.state ?: "")
 					Spacer(modifier = Modifier.height(8.dp))
 					DetailRow("Teléfono:", selectedUser?.phone ?: "")
-					DetailRow("Fecha de registro:",formattedDate)
-					
-					
+					Spacer(modifier = Modifier.height(8.dp))
+					DetailRow("Fecha de registro:", formattedDate)
 				}
 			},
 			containerColor = MaterialTheme.colorScheme.surface,
@@ -122,8 +120,7 @@ fun PersonsScreen(
 						containerColor = MaterialTheme.colorScheme.primary,
 						contentColor = MaterialTheme.colorScheme.onPrimary
 					),
-					
-					) {
+				) {
 					Text("Cerrar")
 				}
 			}
@@ -154,16 +151,20 @@ fun PersonsScreen(
 						containerColor = MaterialTheme.colorScheme.primary
 					)
 				)
+				
+				// 🔁 CORREGIDO: uso de variables correctas
 				PaymentFilters(
 					selectedPaymentType = selectedState,
-					paymentTypeOptions = filterOptions,
+					paymentTypeOptions = listOf("Todos", "Activos", "Inactivos"),
 					onPaymentTypeSelected = { selectedState = it },
 					onClearFilters = {
 						selectedState = "Todos"
 						searchText = ""
 					},
 					searchText = searchText,
-					onSearchTextChanged = { searchText = it }
+					onSearchTextChanged = { searchText = it },
+					onAddClick = {navBottom.navigate(AppRoutes.RegPersonScreen)},
+					showAddButton = true
 				)
 			}
 		}

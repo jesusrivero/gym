@@ -2,9 +2,10 @@ package com.jesus.gymcontrol.presentation.ui.commons
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -13,8 +14,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,7 +26,6 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -48,6 +50,8 @@ fun PaymentFilters(
 	onClearFilters: () -> Unit,
 	searchText: String,
 	onSearchTextChanged: (String) -> Unit,
+	onAddClick: () -> Unit = {},          // Acción personalizada
+	showAddButton: Boolean = true         // Mostrar botón Agregar o no
 ) {
 	var expandedFilter by remember { mutableStateOf(false) }
 	
@@ -57,7 +61,7 @@ fun PaymentFilters(
 				.fillMaxWidth()
 				.padding(horizontal = 16.dp, vertical = 8.dp),
 			shape = RoundedCornerShape(16.dp),
-			color = colorScheme.surface,
+			color = MaterialTheme.colorScheme.surface,
 			shadowElevation = 4.dp
 		) {
 			Column(modifier = Modifier.padding(16.dp)) {
@@ -65,9 +69,10 @@ fun PaymentFilters(
 				Text(
 					text = "Tipo de pago",
 					style = MaterialTheme.typography.labelMedium,
-					color = colorScheme.onSurfaceVariant,
+					color = MaterialTheme.colorScheme.onSurfaceVariant,
 					modifier = Modifier.padding(bottom = 4.dp)
 				)
+				
 				ExposedDropdownMenuBox(
 					expanded = expandedFilter,
 					onExpandedChange = { expandedFilter = it }
@@ -76,12 +81,15 @@ fun PaymentFilters(
 						value = selectedPaymentType,
 						onValueChange = {},
 						readOnly = true,
-						trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedFilter) },
+						trailingIcon = {
+							ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedFilter)
+						},
 						modifier = Modifier
 							.fillMaxWidth()
 							.menuAnchor(),
 						shape = RoundedCornerShape(12.dp)
 					)
+					
 					ExposedDropdownMenu(
 						expanded = expandedFilter,
 						onDismissRequest = { expandedFilter = false },
@@ -90,23 +98,28 @@ fun PaymentFilters(
 						paymentTypeOptions.forEach { option ->
 							DropdownMenuItem(
 								text = { Text(option, modifier = Modifier.fillMaxWidth()) },
-								onClick = { onPaymentTypeSelected(option); expandedFilter = false }
+								onClick = {
+									onPaymentTypeSelected(option)
+									expandedFilter = false
+								}
 							)
 						}
 					}
 				}
 				
+				Spacer(modifier = Modifier.height(16.dp))
 				
-				if (true) {
-					Spacer(modifier = Modifier.height(16.dp))
-					OutlinedButton(
+				Row(
+					modifier = Modifier.fillMaxWidth(),
+					horizontalArrangement = if (showAddButton) Arrangement.SpaceBetween else Arrangement.Center
+				) {
+					Button(
 						onClick = onClearFilters,
-						modifier = Modifier.fillMaxWidth(),
-						colors = ButtonDefaults.outlinedButtonColors(
-							contentColor = colorScheme.primary
-						),
-						border = BorderStroke(
-							1.dp, colorScheme.primary.copy(alpha = 0.5f)
+						modifier = Modifier.weight(1f),
+						shape = RoundedCornerShape(12.dp),
+						colors = ButtonDefaults.buttonColors(
+							containerColor = colorScheme.primary,
+							contentColor = colorScheme.onPrimary
 						)
 					) {
 						Icon(
@@ -114,13 +127,31 @@ fun PaymentFilters(
 							contentDescription = "Limpiar",
 							modifier = Modifier.size(18.dp)
 						)
-						Spacer(modifier = Modifier.width(3.dp))
-						Text("Limpiar filtros")
+						Spacer(modifier = Modifier.width(4.dp))
+						Text("Limpiar")
 					}
+					
+					if (showAddButton) {
+						Spacer(modifier = Modifier.width(8.dp))
+						
+						Button(
+							onClick = onAddClick,
+							modifier = Modifier.weight(1f),
+							shape = RoundedCornerShape(12.dp),
+							colors = ButtonDefaults.buttonColors(
+								containerColor = colorScheme.primary,
+								contentColor = colorScheme.onPrimary
+							)
+						) {
+							Icon(Icons.Default.Add, contentDescription = "Agregar", modifier = Modifier.size(18.dp))
+							Spacer(modifier = Modifier.width(4.dp))
+							Text("Agregar")
+							}
+						}
 				}
+				
 			}
 		}
-		
 		
 		TextField(
 			value = searchText,
@@ -146,8 +177,6 @@ fun PaymentFilters(
 				unfocusedTextColor = colorScheme.onSurface
 			),
 			singleLine = true,
-		)
+			)
 	}
-	
-	
 }
