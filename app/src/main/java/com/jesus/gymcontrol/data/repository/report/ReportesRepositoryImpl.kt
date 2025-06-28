@@ -23,8 +23,10 @@ class ReportesRepositoryImpl @Inject constructor(
 				.get()
 				.await()
 			
-			return@withContext snapshot.documents.mapNotNull { doc ->
+			val pagos = snapshot.documents.mapNotNull { doc ->
 				val data = doc.data ?: return@mapNotNull null
+				
+				val fecha = (data["date"] as? Number)?.toLong()
 				
 				ReportePago(
 					nombreCliente = data["name"] as? String ?: "",
@@ -34,12 +36,13 @@ class ReportesRepositoryImpl @Inject constructor(
 					monto = (data["amount"] as? Number)?.toDouble() ?: 0.0,
 					montoDolar = (data["amountDollar"] as? Number)?.toDouble() ?: 0.0,
 					montoBolivares = (data["amountBs"] as? Number)?.toDouble() ?: 0.0,
-					fecha = (data["date"] as? Number)?.toLong() ?: 0L,
+					fecha = fecha ?: 0L,
 					referencia = data["reference"] as? String,
-					promocionNombre = data["promocionNombre"] as? String,
-			
+					promocionNombre = data["promocionNombre"] as? String
 				)
 			}
+			
+			return@withContext pagos.sortedByDescending { it.fecha }
 		}
 	
 	override suspend fun getClientesReporte(gymCode: String): List<ReporteCliente> =
@@ -50,19 +53,24 @@ class ReportesRepositoryImpl @Inject constructor(
 				.get()
 				.await()
 			
-			return@withContext snapshot.documents.mapNotNull { doc ->
+			val clientes = snapshot.documents.mapNotNull { doc ->
 				val data = doc.data ?: return@mapNotNull null
 				if ((data["rol"] as? String)?.lowercase() == "cliente") {
+					val date = (data["date"] as? Number)?.toLong() ?: 0L
 					ReporteCliente(
 						nombre = data["name"] as? String ?: "",
 						cedula = data["idcard"] as? String ?: "",
 						correo = data["email"] as? String ?: "",
 						telefono = data["phone"] as? String ?: "",
 						activo = data["state"] as? String ?: "",
+						date = date
 					)
 				} else null
 			}
+			
+			return@withContext clientes.sortedByDescending { it.date }
 		}
+	
 	
 	override suspend fun getMembresiasReporte(gymCode: String): List<ReporteMembresia> =
 		withContext(Dispatchers.IO) {

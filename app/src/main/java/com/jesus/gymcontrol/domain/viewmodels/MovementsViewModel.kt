@@ -35,8 +35,8 @@ class MovementsViewModel @Inject constructor(
 			try {
 				val allPayments = getAllPaymentsUseCase(gymCode)
 				lastPayments = allPayments
-					.sortedByDescending { it.date } // Más recientes primero
-					.take(6) // Solo los 6 últimos
+					.sortedByDescending { it.date }
+					.take(6)
 			} catch (e: Exception) {
 				Log.e("MovementsViewModel", "Error loading payments", e)
 			}

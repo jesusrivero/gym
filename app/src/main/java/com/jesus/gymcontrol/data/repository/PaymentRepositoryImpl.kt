@@ -2,6 +2,7 @@ package com.jesus.gymcontrol.data.repository
 
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
 import com.jesus.gymcontrol.domain.model.Pago
 import com.jesus.gymcontrol.domain.model.Payment
@@ -142,38 +143,44 @@ class PaymentRepositoryImpl @Inject constructor(
 	
 	override suspend fun getAllPayments(gymCode: String): List<Payment> =
 		withContext(Dispatchers.IO) {
-			val paymentsSnapshot = firestore
-				.collection("gimnasios")
-				.document(gymCode)
-				.collection("pagos")
-				.get()
-				.await()
-			
-			return@withContext paymentsSnapshot.documents.mapNotNull { doc ->
-				try {
+			try {
+				val paymentsSnapshot = firestore
+					.collection("gimnasios")
+					.document(gymCode)
+					.collection("pagos")
+					.orderBy("date", Query.Direction.DESCENDING)
+					.get()
+					.await()
+				
+				paymentsSnapshot.documents.mapNotNull { doc ->
 					val data = doc.data ?: return@mapNotNull null
-					Payment(
-						id = data["id"] as? String ?: "",
-						userId = data["userId"] as? String ?: "",
-						name = data["name"] as? String ?: "",
-						idCard = data["idcard"] as? String ?: "",
-						membershipId = data["membershipId"] as? String ?: "",
-						membershipName = data["membershipName"] as? String ?: "",
-						paymentType = data["typepayment"] as? String ?: "",
-						amount = (data["amount"] as? Number)?.toDouble() ?: 0.0,
-						amountDollar = (data["amountDollar"] as? Number)?.toDouble() ?: 0.0,
-						amountBs = (data["amountBs"] as? Number)?.toDouble() ?: 0.0,
-						description = data["description"] as? String ?: "",
-						reference = data["reference"] as? String,
-						date = (data["date"] as? Number)?.toLong() ?: 0L,
-						gymCode = data["gimnasioCode"] as? String ?: "",
-						promocionNombre = data["promocionNombre"] as? String,
-						promocionPorcentajeDescuento = (data["promocionPorcentajeDescuento"] as? Number)?.toDouble()
-					)
-				} catch (e: Exception) {
-					Log.e("getAllPayments", "Error parsing document ${doc.id}", e)
-					null
+					try {
+						Payment(
+							id = data["id"] as? String ?: "",
+							userId = data["userId"] as? String ?: "",
+							name = data["name"] as? String ?: "",
+							idCard = data["idcard"] as? String ?: "",
+							membershipId = data["membershipId"] as? String ?: "",
+							membershipName = data["membershipName"] as? String ?: "",
+							paymentType = data["typepayment"] as? String ?: "",
+							amount = (data["amount"] as? Number)?.toDouble() ?: 0.0,
+							amountDollar = (data["amountDollar"] as? Number)?.toDouble() ?: 0.0,
+							amountBs = (data["amountBs"] as? Number)?.toDouble() ?: 0.0,
+							description = data["description"] as? String ?: "",
+							reference = data["reference"] as? String,
+							date = (data["date"] as? Number)?.toLong() ?: 0L,
+							gymCode = data["gimnasioCode"] as? String ?: "",
+							promocionNombre = data["promocionNombre"] as? String,
+							promocionPorcentajeDescuento = (data["promocionPorcentajeDescuento"] as? Number)?.toDouble()
+						)
+					} catch (e: Exception) {
+						Log.e("getAllPayments", "Error parsing document ${doc.id}", e)
+						null
+					}
 				}
+			} catch (e: Exception) {
+				Log.e("getAllPayments", "Firestore fetch failed", e)
+				emptyList()
 			}
 		}
 }

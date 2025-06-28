@@ -5,5 +5,6 @@ data class ReporteCliente(
 	val cedula: String,
 	val correo: String,
 	val telefono: String,
-	val activo: String
+	val activo: String,
+	val date: Long
 )
