@@ -3,6 +3,7 @@ package com.jesus.gymcontrol.data.repository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.jesus.gymcontrol.domain.model.Gym
 import com.jesus.gymcontrol.domain.model.GymUserSummary
 import com.jesus.gymcontrol.domain.model.ListUser
@@ -184,6 +185,7 @@ class UserRepositoryImpl @Inject constructor(
 		val snapshot = firestore.collection("gimnasios")
 			.document(gymCode)
 			.collection("usuarios")
+			.orderBy("date", Query.Direction.DESCENDING) // 👈 clave aquí
 			.get()
 			.await()
 		
@@ -197,16 +199,13 @@ class UserRepositoryImpl @Inject constructor(
 				email = data["email"] as? String ?: "",
 				state = data["state"] as? String ?: "",
 				enabled = data["isActive"] as? Boolean ?: false,
-				date = when(val d = data["date"]) {
+				date = when (val d = data["date"]) {
 					is Long -> d
-					is Double -> d.toLong()  // En caso que venga como Double
+					is Double -> d.toLong()
 					else -> null
 				}
 			)
 		}
-		
-		
-		
 		
 		Result.success(listUsers)
 	} catch (e: Exception) {

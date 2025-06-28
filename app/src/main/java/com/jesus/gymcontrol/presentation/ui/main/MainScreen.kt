@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -35,6 +36,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -54,11 +56,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.domain.model.GymUserSummary
+import com.jesus.gymcontrol.domain.model.ListUser
 import com.jesus.gymcontrol.domain.model.MembershipWithCount
 import com.jesus.gymcontrol.domain.model.Payment
 import com.jesus.gymcontrol.domain.viewmodels.AdminViewModel
 import com.jesus.gymcontrol.domain.viewmodels.MembershipViewModel
 import com.jesus.gymcontrol.domain.viewmodels.MovementsViewModel
+import com.jesus.gymcontrol.domain.viewmodels.UserListViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 import com.jesus.gymcontrol.presentation.ui.commons.BottomNavigationBar
@@ -88,7 +92,8 @@ fun MainContent(
 	navRegister: () -> Unit,
 	viewModel: AdminViewModel = hiltViewModel(),
 	memberviewModel: MembershipViewModel = hiltViewModel(),
-	mviewModel: MovementsViewModel = hiltViewModel()
+	mviewModel: MovementsViewModel = hiltViewModel(),
+  userListViewModel: UserListViewModel = hiltViewModel()
 ) {
 	val colorScheme = MaterialTheme.colorScheme
 	val summary = viewModel.summary
@@ -107,6 +112,7 @@ fun MainContent(
 		memberviewModel.loadMemberships()
 		memberviewModel.loadMembershipsSummary()
 		viewModel.loadGymUserSummary()
+		userListViewModel.loadUsers()
 	}
 	
 	if (errorMessage != null) {
@@ -198,11 +204,12 @@ fun MainContent(
 
 
 @Composable
-fun NewClientAvatar(name: String, photoUrl: String? = null) {
+fun NewClientAvatar(name: String, photoUrl: String? = null, onClick: () -> Unit) {
 	Column(
 		modifier = Modifier
 			.width(72.dp)
-			.padding(horizontal = 4.dp),
+			.padding(horizontal = 4.dp)
+			.clickable { onClick() }, // Aquí
 		horizontalAlignment = Alignment.CenterHorizontally
 	) {
 		Box(
@@ -213,12 +220,7 @@ fun NewClientAvatar(name: String, photoUrl: String? = null) {
 			contentAlignment = Alignment.Center
 		) {
 			if (photoUrl != null) {
-				// Aquí podrías cargar la imagen con Coil o Glide
-				// AsyncImage(model = photoUrl, contentDescription = "Foto de $name", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-				Text(
-					text = "Img", // Placeholder para imagen
-					color = Color.White
-				)
+				Text("Img", color = Color.White)
 			} else {
 				Text(
 					text = name.firstOrNull()?.uppercase() ?: "",
@@ -234,36 +236,60 @@ fun NewClientAvatar(name: String, photoUrl: String? = null) {
 			style = MaterialTheme.typography.labelMedium,
 			maxLines = 1,
 			overflow = TextOverflow.Ellipsis
-		)
+			)
+		}
+}
+@Composable
+fun NewClientsSection(viewModel: UserListViewModel = hiltViewModel()) {
+	var selectedUser by remember { mutableStateOf<ListUser?>(null) }
+	
+	val users = viewModel.listUsers.take(8)
+	
+	if (users.isNotEmpty()) {
+		Column(modifier = Modifier.padding(start = 16.dp, top = 16.dp)) {
+			Text(
+				text = "Clientes Nuevos",
+				style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+			)
+			
+			Spacer(modifier = Modifier.height(8.dp))
+			
+			LazyRow {
+				items(users) { user ->
+					NewClientAvatar(
+						name = user.name,
+						onClick = { selectedUser = user }
+					)
+				}
+			}
+			
+			Spacer(modifier = Modifier.height(16.dp))
+		}
+	}
+	
+	// Mostrar AlertDialog si hay un usuario seleccionado
+	selectedUser?.let { user ->
+		AlertDialog(
+			onDismissRequest = { selectedUser = null },
+			confirmButton = {
+				TextButton(onClick = { selectedUser = null }) {
+					Text("Cerrar")
+				}
+			},
+			title = { Text("Información del cliente") },
+			text = {
+				Column {
+					Text("Nombre: ${user.name}")
+					Text("Cédula: ${user.idcard}")
+					Text("Teléfono: ${user.phone}")
+					Text("Correo: ${user.email}")
+					Text("Estado: ${user.state}")
+				}
+			}, containerColor = Color.White
+			)
 	}
 }
 
-@Composable
-fun NewClientsSection() {
-	val sampleClients = listOf(
-		"Jesús Rivero",
-		"Ana Gómez",
-		"Carlos Pérez",
-		"María López",
-		"Juan Martínez",
-		"Laura Sánchez",
-		"Pedro Gómez"
-	)
-	Column(modifier = Modifier.padding(start = 16.dp, top = 16.dp)) {
-		Text(
-			text = "Clientes Nuevos",
-			style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-		)
-		
-		Spacer(modifier = Modifier.height(8.dp))
-		
-		LazyRow {
-			items(sampleClients) { clientName ->
-				NewClientAvatar(name = clientName)
-			}
-			}
-	Spacer(modifier = Modifier.height(16.dp))}
-}
 @Composable
 fun SummaryAndMembershipCard(
 	summary: GymUserSummary,
