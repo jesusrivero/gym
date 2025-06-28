@@ -364,6 +364,7 @@ fun AccountContent(
 						textContentColor = colorScheme.onSurface
 					)
 					
+					
 					// Cierra el dialog después de 2 segundos
 					LaunchedEffect(Unit) {
 						delay(2000)
