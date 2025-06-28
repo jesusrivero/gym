@@ -1,7 +1,9 @@
 package com.jesus.gymcontrol.presentation.ui.main
 
 
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,12 +15,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -35,15 +41,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.jesus.gymcontrol.domain.model.GymUserSummary
+import com.jesus.gymcontrol.domain.model.MembershipWithCount
 import com.jesus.gymcontrol.domain.model.Payment
 import com.jesus.gymcontrol.domain.viewmodels.AdminViewModel
 import com.jesus.gymcontrol.domain.viewmodels.MembershipViewModel
@@ -82,15 +93,15 @@ fun MainContent(
 	val colorScheme = MaterialTheme.colorScheme
 	val summary = viewModel.summary
 	val errorMessage = viewModel.errorMessage
-	val scrollState = rememberScrollState()
 	val isLoadingAdmin = viewModel.isLoading
-	val isLoadingMembership = memberviewModel.isLoading
 	val isLoadingMovements = mviewModel.isLoading
-	val isAllDataLoaded = remember(isLoadingAdmin, isLoadingMovements) {
-		!isLoadingAdmin &&  !isLoadingMovements
+	val isLoadingMemberships = memberviewModel.isLoading
+	
+	val isAllDataLoaded = remember(isLoadingAdmin, isLoadingMovements, isLoadingMemberships) {
+		!isLoadingAdmin && !isLoadingMovements && !isLoadingMemberships
 	}
 	
-	val payments  by remember { derivedStateOf { mviewModel.lastPayments } }
+	val payments by remember { derivedStateOf { mviewModel.lastPayments } }
 	
 	LaunchedEffect(Unit) {
 		memberviewModel.loadMemberships()
@@ -155,64 +166,15 @@ fun MainContent(
 						.fillMaxSize()
 						.verticalScroll(rememberScrollState())
 				) {
-					Card(
-						modifier = Modifier
-							.fillMaxWidth()
-							.padding(14.dp),
-						colors = CardDefaults.cardColors(
-							containerColor = Color(0xE0447A9C),
-						),
-						elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-					) {
-						Column(
-							modifier = Modifier
-								.padding(24.dp)
-								.fillMaxWidth(),
-							verticalArrangement = Arrangement.Center,
-							horizontalAlignment = Alignment.Start
-						) {
-							Text(
-								text = "Bienvenido, Jesus",
-								style = MaterialTheme.typography.headlineMedium.copy(
-									fontWeight = FontWeight.Bold,
-									color = Color.White
-								)
-							)
-						}
-					}
 					
-					Text(
-						text = "Resumen General",
-						style = MaterialTheme.typography.headlineSmall,
-						modifier = Modifier.padding(start = 10.dp),
-						color = colorScheme.onBackground
+					NewClientsSection()
+					
+					SummaryAndMembershipCard(
+						summary = summary,
+						memberships = memberviewModel.membershipsSummary,
+						isLoading = isLoadingAdmin
 					)
 					
-					Row(
-						modifier = Modifier
-							.horizontalScroll(scrollState)
-							.padding(horizontal = 16.dp, vertical = 8.dp),
-						horizontalArrangement = Arrangement.spacedBy(16.dp)
-					) {
-						SummaryCard(color = Color(0xC92196F3)) {
-							SummaryCardContent(title = "Todos", count = summary.total, isLoading = isLoadingAdmin)
-						}
-						SummaryCard(color = Color(0xCD4CAF50)) {
-							SummaryCardContent(title = "Activos", count = summary.activos, isLoading = isLoadingAdmin)
-						}
-						SummaryCard(color = Color(0xB4E33E3E)) {
-							SummaryCardContent(title = "Inactivos", count = summary.inactivos, isLoading = isLoadingAdmin)
-						}
-					}
-					
-					Text(
-						text = "Resumen de Membresias",
-						style = MaterialTheme.typography.headlineSmall,
-						modifier = Modifier.padding(start = 10.dp),
-						color = colorScheme.onBackground
-					)
-					
-					MembersCardScreen()
 					
 					Column(
 						modifier = Modifier
@@ -236,125 +198,137 @@ fun MainContent(
 
 
 @Composable
-fun SummaryCardContent(title: String, count: Int, isLoading: Boolean) {
+fun NewClientAvatar(name: String, photoUrl: String? = null) {
 	Column(
-		horizontalAlignment = Alignment.CenterHorizontally,
-		verticalArrangement = Arrangement.Center
-	) {
-		Text(
-			text = title,
-			color = Color.White,
-			fontSize = 16.sp,
-			fontWeight = FontWeight.Bold
-		)
-		
-		Row(verticalAlignment = Alignment.CenterVertically) {
-			Icon(
-				imageVector = Icons.Default.Person,
-				contentDescription = title,
-				tint = Color.White,
-				modifier = Modifier.size(20.dp)
-			)
-			Spacer(modifier = Modifier.width(4.dp))
-			
-			if (isLoading) {
-				CircularProgressIndicator(
-					color = Color.White,
-					strokeWidth = 2.dp,
-					modifier = Modifier.size(16.dp)
-				)
-			} else {
-				Text(
-					text = count.toString(),
-					color = Color.White,
-					fontSize = 16.sp
-				)
-			}
-		}
-	}
-}
-
-@Composable
-fun SummaryCard(
-	color: Color,
-	modifier: Modifier = Modifier,
-	content: @Composable () -> Unit,
-) {
-	Card(
-		modifier = modifier
-			.width(150.dp)
-			.height(100.dp),
-		colors = CardDefaults.cardColors(containerColor = color),
-		elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-		shape = RoundedCornerShape(12.dp)
+		modifier = Modifier
+			.width(72.dp)
+			.padding(horizontal = 4.dp),
+		horizontalAlignment = Alignment.CenterHorizontally
 	) {
 		Box(
 			modifier = Modifier
-				.fillMaxSize()
-				.padding(16.dp),
+				.size(60.dp)
+				.clip(CircleShape)
+				.background(MaterialTheme.colorScheme.primary),
 			contentAlignment = Alignment.Center
 		) {
-			content()
+			if (photoUrl != null) {
+				// Aquí podrías cargar la imagen con Coil o Glide
+				// AsyncImage(model = photoUrl, contentDescription = "Foto de $name", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+				Text(
+					text = "Img", // Placeholder para imagen
+					color = Color.White
+				)
+			} else {
+				Text(
+					text = name.firstOrNull()?.uppercase() ?: "",
+					style = MaterialTheme.typography.titleMedium.copy(color = Color.White)
+				)
+			}
 		}
+		
+		Spacer(modifier = Modifier.height(4.dp))
+		
+		Text(
+			text = name,
+			style = MaterialTheme.typography.labelMedium,
+			maxLines = 1,
+			overflow = TextOverflow.Ellipsis
+		)
 	}
 }
 
-
 @Composable
-fun MembersCardScreen(
-	viewModel: MembershipViewModel = hiltViewModel(),
-) {
-	val scrollState = rememberScrollState()
-	val memberships = viewModel.memberships
-	val isLoading = viewModel.isLoading
-	val membershipsSummary = viewModel.membershipsSummary
-	
-	// Cargar membresías al abrir
-	LaunchedEffect(Unit) {
-		viewModel.loadMemberships()
-		viewModel.loadMembershipsSummary()
-	}
-	
-	Row(
-		modifier = Modifier
-			.horizontalScroll(scrollState)
-			.padding(horizontal = 16.dp, vertical = 8.dp),
-		horizontalArrangement = Arrangement.spacedBy(16.dp)
-	) {
-		if (isLoading && memberships.isEmpty()) {
-			repeat(3) {
-				LoadingMemberCard()
+fun NewClientsSection() {
+	val sampleClients = listOf(
+		"Jesús Rivero",
+		"Ana Gómez",
+		"Carlos Pérez",
+		"María López",
+		"Juan Martínez",
+		"Laura Sánchez",
+		"Pedro Gómez"
+	)
+	Column(modifier = Modifier.padding(start = 16.dp, top = 16.dp)) {
+		Text(
+			text = "Clientes Nuevos",
+			style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+		)
+		
+		Spacer(modifier = Modifier.height(8.dp))
+		
+		LazyRow {
+			items(sampleClients) { clientName ->
+				NewClientAvatar(name = clientName)
 			}
-		} else {
-			membershipsSummary.forEach { membershipWithCount ->
-				val membership = membershipWithCount.membership
-				val userCount = membershipWithCount.userCount
-				
-				MembersCard(color = Color(0xCE447A9C)) {
-					Column(
-						horizontalAlignment = Alignment.CenterHorizontally,
-						verticalArrangement = Arrangement.Center
-					) {
-						Text(
-							text = membership.nombre,
-							color = Color.White,
-							fontSize = 16.sp,
-							fontWeight = FontWeight.Bold
-						)
-						Row(verticalAlignment = Alignment.CenterVertically) {
-							Icon(
-								imageVector = Icons.Default.Person,
-								contentDescription = "Clientes",
-								tint = Color.White,
-								modifier = Modifier.size(20.dp)
-							)
-							Spacer(modifier = Modifier.width(4.dp))
-							Text(
-								text = "$userCount",
-								color = Color.White,
-								fontSize = 16.sp
-							)
-						}
+			}
+	Spacer(modifier = Modifier.height(16.dp))}
+}
+@Composable
+fun SummaryAndMembershipCard(
+	summary: GymUserSummary,
+	memberships: List<MembershipWithCount>,
+	isLoading: Boolean
+) {
+	var isExpanded by remember { mutableStateOf(false) }
+	val cardColor = MaterialTheme.colorScheme.background
+	
+	Card(
+		modifier = Modifier
+			.fillMaxWidth()
+			.padding(16.dp),
+		colors = CardDefaults.cardColors(containerColor = cardColor),
+		elevation = CardDefaults.cardElevation(6.dp),
+		shape = RoundedCornerShape(16.dp)
+	) {
+		Column(modifier = Modifier.padding(16.dp)) {
+			
+			// Título
+			Text(
+				text = "Resumen General",
+				style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+				color = MaterialTheme.colorScheme.onSurface
+			)
+			
+			Spacer(modifier = Modifier.height(16.dp))
+			
+			// Fila de resumen: total, activos, inactivos
+			Row(
+				modifier = Modifier.fillMaxWidth(),
+				horizontalArrangement = Arrangement.SpaceBetween
+			) {
+				SummaryItem("Todos", summary.total, isLoading)
+				SummaryItem("Activos", summary.activos, isLoading)
+				SummaryItem("Inactivos", summary.inactivos, isLoading)
+			}
+			
+			Spacer(modifier = Modifier.height(16.dp))
+			
+			// Botón expandir
+			Row(
+				modifier = Modifier
+					.fillMaxWidth()
+					.clickable { isExpanded = !isExpanded },
+				verticalAlignment = Alignment.CenterVertically,
+				horizontalArrangement = Arrangement.SpaceBetween
+			) {
+				Text(
+					text = "Membresías",
+					style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
+					color = MaterialTheme.colorScheme.primary
+				)
+				Icon(
+					imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+					contentDescription = "Expandir",
+					tint = MaterialTheme.colorScheme.primary
+				)
+			}
+			
+			// Contenido expandible
+			AnimatedVisibility(visible = isExpanded) {
+				Column(modifier = Modifier.padding(top = 8.dp)) {
+					memberships.forEach { item ->
+						MembershipItem(item)
 					}
 				}
 			}
@@ -363,44 +337,59 @@ fun MembersCardScreen(
 }
 
 @Composable
-fun MembersCard(
-	color: Color,
-	modifier: Modifier = Modifier,
-	content: @Composable () -> Unit,
-) {
-	Card(
-		modifier = modifier
-			.width(150.dp)
-			.height(100.dp),
-		colors = CardDefaults.cardColors(containerColor = color),
-		elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-	) {
-		Box(
-			modifier = Modifier
-				.fillMaxSize()
-				.padding(16.dp),
-			contentAlignment = Alignment.Center
-		) {
-			content()
-		}
-	}
-}
-
-@Composable
-fun LoadingMemberCard() {
-	MembersCard(color = Color(0xCE447A9C)) {
-		Column(
-			horizontalAlignment = Alignment.CenterHorizontally,
-			verticalArrangement = Arrangement.Center
-		) {
+fun SummaryItem(title: String, count: Int, isLoading: Boolean) {
+	Column(horizontalAlignment = Alignment.CenterHorizontally) {
+		Text(
+			text = title,
+			style = MaterialTheme.typography.bodyMedium,
+			color = MaterialTheme.colorScheme.onSurface
+		)
+		if (isLoading) {
 			CircularProgressIndicator(
-				color = Color.White,
-				strokeWidth = 2.dp,
-				modifier = Modifier.size(24.dp)
+				modifier = Modifier.size(18.dp),
+				strokeWidth = 2.dp
+			)
+		} else {
+			Text(
+				text = count.toString(),
+				style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+				color = MaterialTheme.colorScheme.primary
 			)
 		}
 	}
 }
+
+
+@Composable
+fun MembershipItem(item: MembershipWithCount) {
+	Row(
+		modifier = Modifier
+			.fillMaxWidth()
+			.padding(vertical = 6.dp),
+		horizontalArrangement = Arrangement.SpaceBetween
+	) {
+		Text(
+			text = item.membership.nombre,
+			style = MaterialTheme.typography.bodyLarge,
+			color = MaterialTheme.colorScheme.onSurface
+		)
+		Row(verticalAlignment = Alignment.CenterVertically) {
+			Icon(
+				imageVector = Icons.Default.Person,
+				contentDescription = null,
+				tint = MaterialTheme.colorScheme.primary,
+				modifier = Modifier.size(18.dp)
+			)
+			Spacer(modifier = Modifier.width(4.dp))
+			Text(
+				text = "${item.userCount}",
+				style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+				color = MaterialTheme.colorScheme.primary
+			)
+		}
+	}
+}
+
 
 
 @Composable
@@ -474,7 +463,7 @@ fun MovementsCard(
 		Card(
 			modifier = modifier.fillMaxWidth(),
 			colors = CardDefaults.cardColors(
-				containerColor = MaterialTheme.colorScheme.surfaceVariant,
+				containerColor = MaterialTheme.colorScheme.background,
 			),
 			elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
 		) {
