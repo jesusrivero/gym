@@ -34,6 +34,7 @@ import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.CodeCli
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.ContactScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.ErrorReportScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.NotificationScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.NotificationsScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.PreferencesScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.SecurityScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.selected.SelectedGymAdmin
@@ -223,6 +224,10 @@ fun NavigationHost(
 				navController = navController,
 				gymViewModel = gymViewModel,
 			)
+		}
+		
+		composable<AppRoutes.NotificationsScreen> {
+			NotificationsScreen(navController = navController)
 		}
 		
 	}

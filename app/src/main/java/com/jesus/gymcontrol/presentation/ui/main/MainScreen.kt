@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -33,6 +34,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -66,10 +68,10 @@ import com.jesus.gymcontrol.domain.viewmodels.UserListViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 import com.jesus.gymcontrol.presentation.ui.commons.BottomNavigationBar
+import com.jesus.gymcontrol.presentation.ui.commons.NotificationPanel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,6 +82,7 @@ fun MainScreen(
 	GymTheme {
 		MainContent(
 			navBottom = navController,
+			navController = navController,
 			navRegister = { navController.navigate(AppRoutes.RegPersonScreen) }
 		)
 	}
@@ -89,11 +92,12 @@ fun MainScreen(
 @Composable
 fun MainContent(
 	navBottom: NavController,
+	navController: NavController,
 	navRegister: () -> Unit,
 	viewModel: AdminViewModel = hiltViewModel(),
 	memberviewModel: MembershipViewModel = hiltViewModel(),
 	mviewModel: MovementsViewModel = hiltViewModel(),
-  userListViewModel: UserListViewModel = hiltViewModel()
+	userListViewModel: UserListViewModel = hiltViewModel(),
 ) {
 	val colorScheme = MaterialTheme.colorScheme
 	val summary = viewModel.summary
@@ -107,6 +111,27 @@ fun MainContent(
 	}
 	
 	val payments by remember { derivedStateOf { mviewModel.lastPayments } }
+	
+	var showNotifications by remember { mutableStateOf(false) }
+	
+	val notifications = listOf(
+		"Nuevo registro: Jesús R.",
+		"Pago recibido: 20 USD",
+		"Cambio de estado: Pedro ahora está 'Pendiente'",
+		"Nuevo registro: Jesús R.",
+		"Pago recibido: 20 USD",
+		"Cambio de estado: Pedro ahora está 'Pendiente'",
+		"Nuevo registro: Jesús R.",
+		"Pago recibido: 20 USD",
+		"Cambio de estado: Pedro ahora está 'Pendiente'",
+		"Nuevo registro: Jesús R.",
+		"Pago recibido: 20 USD",
+		"Cambio de estado: Pedro ahora está 'Pendiente'",
+		"Nuevo registro: Jesús R.",
+		"Pago recibido: 20 USD",
+		"Cambio de estado: Pedro ahora está 'Pendiente'"
+	)
+	
 	
 	LaunchedEffect(Unit) {
 		memberviewModel.loadMemberships()
@@ -126,80 +151,100 @@ fun MainContent(
 		return
 	}
 	
-	Scaffold(
-		topBar = {
-			TopAppBar(
-				title = {
-					Text(
-						text = "Gym Control",
-						color = colorScheme.onPrimary,
-						fontWeight = FontWeight.Bold
+
+	Box(modifier = Modifier.fillMaxSize()) {
+		Scaffold(
+			topBar = {
+				TopAppBar(
+					title = {
+						Text(
+							text = "Gym Control",
+							color = colorScheme.onPrimary,
+							fontWeight = FontWeight.Bold
+						)
+					},
+					actions = {
+						IconButton(onClick = { showNotifications = !showNotifications }) {
+							Icon(
+								imageVector = Icons.Default.Notifications,
+								contentDescription = "Notificaciones",
+								tint = colorScheme.onPrimary
+							)
+						}
+					},
+					colors = TopAppBarDefaults.topAppBarColors(
+						containerColor = colorScheme.primary
 					)
-				},
-				colors = TopAppBarDefaults.topAppBarColors(
-					containerColor = colorScheme.primary
 				)
-			)
-		},
-		floatingActionButton = {
-			FloatingActionButton(
-				shape = CircleShape,
-				onClick = navRegister,
-				containerColor = colorScheme.primary,
-				contentColor = colorScheme.onPrimary
-			) {
-				Icon(
-					modifier = Modifier.size(22.dp),
-					imageVector = Icons.Default.Add,
-					contentDescription = "Agregar"
-				)
-			}
-		},
-		bottomBar = {
-			BottomNavigationBar(navController = navBottom)
-		}
-	) { innerPadding ->
-		Box(
-			modifier = Modifier
-				.fillMaxSize()
-				.padding(innerPadding)
-		) {
-			if (!isAllDataLoaded) {
-				CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-			} else {
-				Column(
-					modifier = Modifier
-						.fillMaxSize()
-						.verticalScroll(rememberScrollState())
+			},
+			floatingActionButton = {
+				FloatingActionButton(
+					shape = CircleShape,
+					onClick = navRegister,
+					containerColor = colorScheme.primary,
+					contentColor = colorScheme.onPrimary
 				) {
-					
-					NewClientsSection()
-					
-					SummaryAndMembershipCard(
-						summary = summary,
-						memberships = memberviewModel.membershipsSummary,
-						isLoading = isLoadingAdmin
+					Icon(
+						modifier = Modifier.size(22.dp),
+						imageVector = Icons.Default.Add,
+						contentDescription = "Agregar"
 					)
-					
-					
+				}
+			},
+			bottomBar = {
+				BottomNavigationBar(navController = navBottom)
+			}
+		) { innerPadding ->
+			Box(
+				modifier = Modifier
+					.fillMaxSize()
+					.padding(innerPadding)
+			) {
+				if (!isAllDataLoaded) {
+					CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+				} else {
 					Column(
 						modifier = Modifier
-							.fillMaxWidth()
-							.padding(8.dp)
+							.fillMaxSize()
+							.verticalScroll(rememberScrollState())
 					) {
-						Text(
-							text = "Últimos Movimientos",
-							style = MaterialTheme.typography.headlineSmall.copy(
-								fontWeight = FontWeight.Bold
-							),
-							modifier = Modifier.padding(bottom = 16.dp)
+						
+						NewClientsSection()
+						
+						SummaryAndMembershipCard(
+							summary = summary,
+							memberships = memberviewModel.membershipsSummary,
+							isLoading = isLoadingAdmin
 						)
-						PaymentsList(payments = payments)
+						
+						
+						Column(
+							modifier = Modifier
+								.fillMaxWidth()
+								.padding(8.dp)
+						) {
+							Text(
+								text = "Últimos Movimientos",
+								style = MaterialTheme.typography.headlineSmall.copy(
+									fontWeight = FontWeight.Bold
+								),
+								modifier = Modifier.padding(bottom = 16.dp)
+							)
+							PaymentsList(payments = payments)
+						}
+						
+						
 					}
 				}
 			}
 		}
 	}
+	NotificationPanel(
+		isVisible = showNotifications,
+		navController = navController,
+		notifications = notifications,
+		onDismiss = { showNotifications = false }
+	)
 }
 
 
@@ -236,9 +281,10 @@ fun NewClientAvatar(name: String, photoUrl: String? = null, onClick: () -> Unit)
 			style = MaterialTheme.typography.labelMedium,
 			maxLines = 1,
 			overflow = TextOverflow.Ellipsis
-			)
-		}
+		)
+	}
 }
+
 @Composable
 fun NewClientsSection(viewModel: UserListViewModel = hiltViewModel()) {
 	var selectedUser by remember { mutableStateOf<ListUser?>(null) }
@@ -286,7 +332,7 @@ fun NewClientsSection(viewModel: UserListViewModel = hiltViewModel()) {
 					Text("Estado: ${user.state}")
 				}
 			}, containerColor = Color.White
-			)
+		)
 	}
 }
 
@@ -294,7 +340,7 @@ fun NewClientsSection(viewModel: UserListViewModel = hiltViewModel()) {
 fun SummaryAndMembershipCard(
 	summary: GymUserSummary,
 	memberships: List<MembershipWithCount>,
-	isLoading: Boolean
+	isLoading: Boolean,
 ) {
 	var isExpanded by remember { mutableStateOf(false) }
 	val cardColor = MaterialTheme.colorScheme.background
@@ -417,7 +463,6 @@ fun MembershipItem(item: MembershipWithCount) {
 }
 
 
-
 @Composable
 fun PaymentsList(payments: List<Payment>) {
 	if (payments.isEmpty()) {
@@ -436,9 +481,11 @@ fun PaymentsList(payments: List<Payment>) {
 					horizontalArrangement = Arrangement.SpaceBetween,
 					verticalAlignment = Alignment.CenterVertically
 				) {
-					Column(modifier = Modifier
-						.weight(1f)
-						.padding(horizontal = 6.dp)) {
+					Column(
+						modifier = Modifier
+							.weight(1f)
+							.padding(horizontal = 6.dp)
+					) {
 						Row(verticalAlignment = Alignment.CenterVertically) {
 							Text(
 								text = "$",

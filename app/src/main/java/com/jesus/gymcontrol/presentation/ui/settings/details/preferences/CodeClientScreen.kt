@@ -78,7 +78,7 @@ fun CodeClientContent(
 	
 	val gymCode = viewModel.gymCode
 	val userUid = FirebaseAuth.getInstance().currentUser?.uid
-	val clipboardManager = LocalClipboardManager.current
+	val clipboardManager =  LocalClipboardManager.current
 	val context = LocalContext.current
 	
 	LaunchedEffect(Unit) {

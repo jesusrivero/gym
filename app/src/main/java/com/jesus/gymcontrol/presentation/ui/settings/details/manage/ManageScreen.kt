@@ -15,15 +15,21 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,6 +44,8 @@ import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 import com.jesus.gymcontrol.presentation.ui.commons.BottomNavigationBar
+import com.jesus.gymcontrol.presentation.ui.commons.NotificationPanel
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageScreen(navController: NavController) {
@@ -56,76 +64,110 @@ fun ManagerContent(
 	navBottom: NavController,
 ) {
 	val colorScheme = MaterialTheme.colorScheme
-
-	Scaffold(
-		topBar = {
-			TopAppBar(
-				title = {
-					Text(
-						text = "Panel de administración",
-						color = colorScheme.onPrimary,
-						fontWeight = FontWeight.Bold
+	var showNotifications by remember { mutableStateOf(false) }
+	val notifications = listOf(
+		"Nuevo registro: Jesús R.",
+		"Pago recibido: 20 USD",
+		"Cambio de estado: Pedro ahora está 'Pendiente'",
+		"Nuevo registro: Jesús R.",
+		"Pago recibido: 20 USD",
+		"Cambio de estado: Pedro ahora está 'Pendiente'",
+		"Nuevo registro: Jesús R.",
+		"Pago recibido: 20 USD",
+		"Cambio de estado: Pedro ahora está 'Pendiente'",
+		"Nuevo registro: Jesús R.",
+		"Pago recibido: 20 USD",
+		"Cambio de estado: Pedro ahora está 'Pendiente'",
+		"Nuevo registro: Jesús R.",
+		"Pago recibido: 20 USD",
+		"Cambio de estado: Pedro ahora está 'Pendiente'"
+	)
+	
+	Box(modifier = Modifier.fillMaxSize()) {
+		Scaffold(
+			topBar = {
+				TopAppBar(
+					title = {
+						Text(
+							text = "Panel de administración",
+							color = colorScheme.onPrimary,
+							fontWeight = FontWeight.Bold
+						)
+					},actions = {
+						IconButton(onClick = { showNotifications = !showNotifications }) {
+							Icon(
+								imageVector = Icons.Default.Notifications,
+								contentDescription = "Notificaciones",
+								tint = colorScheme.onPrimary
+							)
+						}
+					},
+					colors = TopAppBarDefaults.topAppBarColors(
+						containerColor = colorScheme.primary
 					)
-				},
-				colors = TopAppBarDefaults.topAppBarColors(
-					containerColor = colorScheme.primary
 				)
-			)
-		},
-		bottomBar = {
-			BottomNavigationBar(
-				navController = navBottom,
-			)
-		}
-	) { innerPadding ->
-		Column(
-			modifier = Modifier
-				.fillMaxSize()
-				.padding(innerPadding)
-				.verticalScroll(rememberScrollState())
-		) {
-			Row(
+			},
+			bottomBar = {
+				BottomNavigationBar(
+					navController = navBottom,
+				)
+			}
+		) { innerPadding ->
+			Column(
 				modifier = Modifier
-					.padding(horizontal = 8.dp, vertical = 8.dp),
-				horizontalArrangement = Arrangement.spacedBy(16.dp)
+					.fillMaxSize()
+					.padding(innerPadding)
+					.verticalScroll(rememberScrollState())
 			) {
-				Column {
-					MenuCard(
-						title = "Personas",
-						subtitle = "Listado de personas",
-						onClick = { navController.navigate(AppRoutes.PersonasScreen) }
-					)
-					MenuCard(
-						title = "Pagos",
-						subtitle = "Listado de pagos",
-						onClick = { navController.navigate(AppRoutes.ListPaymentsScreen) }
-					)
-					MenuCard(
-						title = "Membresías",
-						subtitle = "Listado de membresías",
-						onClick = { navController.navigate(AppRoutes.MembershipScreen) }
-					)
-					MenuCard(
-						title = "Promociones",
-						subtitle = "Listado de membresías",
-						onClick = { navController.navigate(AppRoutes.PromotionsScreen) }
-					)
-					MenuCard(
-						title = "Reportes",
-						subtitle = "Listado de reportes",
-						onClick = { navController.navigate(AppRoutes.ReportScreen) }
-					)
+				Row(
+					modifier = Modifier
+						.padding(horizontal = 8.dp, vertical = 8.dp),
+					horizontalArrangement = Arrangement.spacedBy(16.dp)
+				) {
+					Column {
+						MenuCard(
+							title = "Personas",
+							subtitle = "Listado de personas",
+							onClick = { navController.navigate(AppRoutes.PersonasScreen) }
+						)
+						MenuCard(
+							title = "Pagos",
+							subtitle = "Listado de pagos",
+							onClick = { navController.navigate(AppRoutes.ListPaymentsScreen) }
+						)
+						MenuCard(
+							title = "Membresías",
+							subtitle = "Listado de membresías",
+							onClick = { navController.navigate(AppRoutes.MembershipScreen) }
+						)
+						MenuCard(
+							title = "Promociones",
+							subtitle = "Listado de membresías",
+							onClick = { navController.navigate(AppRoutes.PromotionsScreen) }
+						)
+						MenuCard(
+							title = "Reportes",
+							subtitle = "Listado de reportes",
+							onClick = { navController.navigate(AppRoutes.ReportScreen) }
+						)
+					}
 				}
 			}
 		}
 	}
+	NotificationPanel(
+		isVisible = showNotifications,
+		navController = navController,
+		notifications = notifications,
+		onDismiss = { showNotifications = false }
+	)
 }
 
 @Composable
 fun MenuCard(
 	title: String,
 	subtitle: String,
-	onClick: () -> Unit
+	onClick: () -> Unit,
 ) {
 	Card(
 		modifier = Modifier
@@ -136,22 +178,22 @@ fun MenuCard(
 		shape = RoundedCornerShape(12.dp)
 	) {
 		Box(modifier = Modifier.fillMaxSize()) {
-
+			
 			Image(
 				painter = painterResource(id = R.drawable.ic_background),
 				contentDescription = null,
 				modifier = Modifier.fillMaxSize(),
 				contentScale = ContentScale.Crop
 			)
-
-
+			
+			
 			Box(
 				modifier = Modifier
 					.fillMaxSize()
 					.background(Color.Black.copy(alpha = 0.5f))
 			)
-
-
+			
+			
 			Row(
 				modifier = Modifier
 					.align(Alignment.BottomStart)
@@ -178,7 +220,7 @@ fun MenuCard(
 					contentDescription = null,
 					tint = Color.White
 				)
-			} 
+			}
 		}
 	}
 }

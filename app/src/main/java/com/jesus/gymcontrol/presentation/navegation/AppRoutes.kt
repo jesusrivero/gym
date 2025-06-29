@@ -86,4 +86,7 @@ object AppRoutes {
 	
 	@Serializable
 	data object ClientMainScreen
+	
+	@Serializable
+	data object NotificationsScreen
 }
