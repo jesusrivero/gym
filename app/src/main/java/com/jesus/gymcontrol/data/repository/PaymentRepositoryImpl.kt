@@ -15,10 +15,10 @@ import javax.inject.Inject
 class PaymentRepositoryImpl @Inject constructor(
 	private val firestore: FirebaseFirestore,
 ) : PaymentRepository {
-	
+
 	override suspend fun addPago(pago: Pago): Result<Unit> = try {
 		Log.d("addPago", "== INICIO DE addPago ==")
-		
+
 		val pagoMap = mutableMapOf(
 			"id" to pago.id,
 			"userId" to pago.userId,
@@ -39,39 +39,39 @@ class PaymentRepositoryImpl @Inject constructor(
 			"promocionDescripcion" to pago.promocionDescripcion,
 			"promocionPorcentajeDescuento" to pago.promocionDescuento
 		).filterValues { it != null }
-		
+
 		val gymRef = firestore.collection("gimnasios").document(pago.gimnasioCode)
-		
+
 		val pagoRef = gymRef.collection("pagos").document(pago.id)
-		
+
 		val userPagoRef = firestore.collection("users")
 			.document(pago.userId)
 			.collection("gimnasios")
 			.document(pago.gimnasioCode)
 			.collection("pagos")
 			.document(pago.id)
-		
+
 		val membresiaUserRef = gymRef
 			.collection("usuarios")
 			.document(pago.membershipId)
 			.collection("usuarios")
 			.document(pago.userId)
-		
+
 		val membershipUsersRef = gymRef
 			.collection("membresias")
 			.document(pago.membershipId)
 			.collection("usuarios")
 			.document(pago.userId)
-		
+
 		val userRef = firestore.collection("users").document(pago.userId)
-		
+
 		// 🔍 LOG: Verifica si la promoción existe
 		if (pago.promocionId != null) {
 			Log.d("addPago", "Promoción asignada: ${pago.promocionId}")
 		} else {
 			Log.d("addPago", "NO se asignó promoción")
 		}
-		
+
 		// 👇 Referencia a la subcolección usuarios de la promoción (si aplica)
 		val promoUserRef = pago.promocionId?.let { promoId ->
 			val ref = gymRef.collection("promociones")
@@ -81,13 +81,13 @@ class PaymentRepositoryImpl @Inject constructor(
 			Log.d("addPago", "Ruta promoUserRef: ${ref.path}")
 			ref
 		}
-		
+
 		firestore.runBatch { batch ->
 			batch.set(pagoRef, pagoMap)
 			batch.set(userPagoRef, pagoMap)
-			
-			
-			
+
+
+
 			batch.set(
 				membershipUsersRef, mapOf(
 					"name" to pago.name,
@@ -96,9 +96,9 @@ class PaymentRepositoryImpl @Inject constructor(
 					"state" to "activo"
 				)
 			)
-			
+
 			val gymUserRef = gymRef.collection("usuarios").document(pago.userId)
-			
+
 			batch.set(
 				gymUserRef, mapOf(
 					"name" to pago.name,
@@ -108,7 +108,7 @@ class PaymentRepositoryImpl @Inject constructor(
 					"membership" to pago.membershipName
 				), SetOptions.merge()
 			)
-			
+
 			batch.update(
 				userRef, mapOf(
 					"state" to "activo",
@@ -116,7 +116,7 @@ class PaymentRepositoryImpl @Inject constructor(
 					"promocion" to pago.promocionNombre // ✅ actualiza promoción en user
 				)
 			)
-			
+
 			// 👇 Solo se ejecuta si hay promoción asociada
 			promoUserRef?.let {
 				Log.d("addPago", "Agregando usuario en promoción: ${it.path}")
@@ -133,14 +133,14 @@ class PaymentRepositoryImpl @Inject constructor(
 				)
 			}
 		}.await()
-		
+
 		Log.d("addPago", "✅ Pago agregado correctamente")
 		Result.success(Unit)
 	} catch (e: Exception) {
 		Log.e("addPago", "❌ Error al agregar pago: ${e.localizedMessage}", e)
 		Result.failure(e)
 	}
-	
+
 	override suspend fun getAllPayments(gymCode: String): List<Payment> =
 		withContext(Dispatchers.IO) {
 			try {
@@ -151,7 +151,7 @@ class PaymentRepositoryImpl @Inject constructor(
 					.orderBy("date", Query.Direction.DESCENDING)
 					.get()
 					.await()
-				
+
 				paymentsSnapshot.documents.mapNotNull { doc ->
 					val data = doc.data ?: return@mapNotNull null
 					try {
