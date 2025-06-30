@@ -13,6 +13,8 @@ data class Pago(
 	val promocionNombre: String? = null,
 	val promocionDescripcion: String? = null,
 	val promocionDescuento: Double? = null,
+	val duracionDias: Int = 0,
+	val fechaVencimiento: Long = 0,
 	val amount: Double = 0.0,
 	val amountDollar: Double? = null,
 	val amountBs: Double? = null,

@@ -9,11 +9,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
 import com.jesus.gymcontrol.data.repository.SessionManager
+import com.jesus.gymcontrol.domain.usecase.usuario.UpdateRolUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.auth.LoginUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.auth.RecoverPasswordUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.auth.RegisterUseCase
-import com.jesus.gymcontrol.domain.usecase.usuario.UpdateRolUseCase
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -41,10 +42,11 @@ class AuthViewModel @Inject constructor(
 	var isRoleAssignedState by mutableStateOf(false)
 	var sessionLoaded by mutableStateOf(false)
 		private set
+	
 	var rol by mutableStateOf("Dueño")
 	var rol2 by mutableStateOf("Administrador")
 	var rol3 by mutableStateOf("Cliente")
-
+	
 	
 	fun registerUser(email: String, password: String, name: String, idcard: String) {
 		viewModelScope.launch {
@@ -79,7 +81,9 @@ class AuthViewModel @Inject constructor(
 				val uid = FirebaseAuth.getInstance().currentUser?.uid
 				if (uid != null) {
 					try {
-						val userDocSnapshot = FirebaseFirestore.getInstance()
+						val firestore = FirebaseFirestore.getInstance()
+						
+						val userDocSnapshot = firestore
 							.collection("users")
 							.document(uid)
 							.get()
@@ -89,32 +93,32 @@ class AuthViewModel @Inject constructor(
 						val rol = userData?.get("rol") as? String
 						val gymCode = userData?.get("gimnasioCode") as? String
 						
+						// ✅ Guardamos el token FCM
+						FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+							if (task.isSuccessful) {
+								val token = task.result
+								firestore.collection("users").document(uid)
+									.update("fcmToken", token)
+							}
+						}
+						
+						// ✅ Guardamos sesión local
 						sessionManager.setUserSessionData(
 							uid = uid,
 							rol = rol ?: "",
 							gymCode = gymCode ?: ""
 						)
-						
 						sessionManager.saveRoleState(!rol.isNullOrBlank())
-						Log.e("LOGIN", "rol: $rol")
 						sessionManager.saveLoginState(true)
 						
-						
-						
-						
+						// ✅ Navegar según rol
 						navigateBasedOnRole(navController)
 						
 					} catch (e: Exception) {
 						errorMessage = "Error al obtener datos del usuario"
 						Log.e("LOGIN", "Firestore Exception", e)
 					}
-				} else {
-					errorMessage = "No se encontró UID"
-					Log.e("LOGIN", "UID es null")
 				}
-			}.onFailure {
-				errorMessage = it.message
-				Log.e("LOGIN", "Login failed", it)
 			}
 		}
 	}
@@ -213,30 +217,4 @@ class AuthViewModel @Inject constructor(
 		}
 		FirebaseAuth.getInstance().signOut()
 	}
-	
-
-//    fun updateDatesUser(
-//        cedula: String,
-//        edad: String,
-//        numero: String,
-//        sexo: String
-//    ) {
-//        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-//
-//        viewModelScope.launch {
-//            isLoading = true
-//            errorMessage = null
-//            isSuccess = false
-//
-//            val result: Result<Unit> = updateDatesUserUseCase(uid, cedula, edad, numero, sexo)
-//
-//            isLoading = false
-//            result.onSuccess {
-//                isSuccess = true
-//            }.onFailure {
-//                errorMessage = it.message
-//            }
-//        }
-//    }
-
 }

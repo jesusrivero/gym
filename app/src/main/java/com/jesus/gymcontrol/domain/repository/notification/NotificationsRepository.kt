@@ -1,0 +1,11 @@
+package com.jesus.gymcontrol.domain.repository.notification
+
+import com.jesus.gymcontrol.domain.model.notification.Notificacion
+import kotlinx.coroutines.flow.Flow
+
+interface NotificacionRepository {
+	suspend fun agregarNotificacion(gymId: String, notificacion: Notificacion)
+	fun obtenerNotificaciones(gymId: String): Flow<List<Notificacion>>
+	suspend fun eliminarNotificacion(gymId: String, notificacionId: String)
+	suspend fun eliminarNotificacionesAntiguas(gymId: String, max:Int=30)
+}

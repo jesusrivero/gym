@@ -66,8 +66,7 @@ dependencies {
 	implementation (libs.androidx.hilt.navigation.compose)       // Hilt navigation
 	kapt(libs.hilt.compiler)                                     // Hilt compiler
 	implementation(libs.coil.compose)                            //coil
-//	implementation (libs.compose.capture)
-//	implementation(libs.iglaweb.compose.capture)
+	implementation (libs.firebase.messaging)
 	implementation(libs.androidx.datastore.preferences)
 	implementation (libs.androidx.material.icons.extended)
 	implementation (libs.guava)

@@ -15,6 +15,7 @@ import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.data.repository.UserAdminRepositoryImpl
 import com.jesus.gymcontrol.data.repository.UserRepositoryImpl
 import com.jesus.gymcontrol.data.repository.UsuarioRepositoryIMPL
+import com.jesus.gymcontrol.data.repository.notification.NotificacionRepositoryImpl
 import com.jesus.gymcontrol.data.repository.report.ReportesRepositoryImpl
 import com.jesus.gymcontrol.data.sharedPreferences.PreferencesManager
 import com.jesus.gymcontrol.domain.repository.AuthRepository
@@ -25,6 +26,7 @@ import com.jesus.gymcontrol.domain.repository.PromotionRepository
 import com.jesus.gymcontrol.domain.repository.UserAdminRepository
 import com.jesus.gymcontrol.domain.repository.UserRepository
 import com.jesus.gymcontrol.domain.repository.UsuarioRepository
+import com.jesus.gymcontrol.domain.repository.notification.NotificacionRepository
 import com.jesus.gymcontrol.domain.repository.report.ReportesRepository
 import com.jesus.gymcontrol.domain.usecase.usuario.AddPaymentUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.AssignGymToUserUseCase
@@ -49,6 +51,10 @@ import com.jesus.gymcontrol.domain.usecase.usuario.UpdateDatesUserUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdatePromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateRolUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateUserProfileUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.notification.AddNotificacionUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.notification.DeleteNotificacionUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.notification.GetNotificacionesUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.notification.PurgeNotificacionesUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.password.ChangePasswordUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.report.GenerateClientsReportUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.report.GenerateMembershipsReportUseCase
@@ -335,5 +341,33 @@ object AppModule {
 		return ChangePasswordUseCase(authRepository)
 	}
 	
+	@Provides
+	@Singleton
+	fun provideNotificacionRepository(
+		firestore: FirebaseFirestore,
+		sessionManager: SessionManager // si tu repo lo necesita
+	): NotificacionRepository {
+		return NotificacionRepositoryImpl(firestore, sessionManager)
+	}
+	
+	@Provides
+	fun provideAddNotificacionUseCase(repository: NotificacionRepository): AddNotificacionUseCase {
+		return AddNotificacionUseCase(repository)
+	}
+	
+	@Provides
+	fun provideGetNotificacionesUseCase(repository: NotificacionRepository): GetNotificacionesUseCase {
+		return GetNotificacionesUseCase(repository)
+	}
+	
+	@Provides
+	fun provideDeleteNotificacionUseCase(repository: NotificacionRepository): DeleteNotificacionUseCase {
+		return DeleteNotificacionUseCase(repository)
+	}
+	
+	@Provides
+	fun providePurgeNotificacionesUseCase(repository: NotificacionRepository): PurgeNotificacionesUseCase {
+		return PurgeNotificacionesUseCase(repository)
+	}
 	
 }

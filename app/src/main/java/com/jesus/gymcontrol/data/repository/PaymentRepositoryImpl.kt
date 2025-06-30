@@ -15,10 +15,26 @@ import javax.inject.Inject
 class PaymentRepositoryImpl @Inject constructor(
 	private val firestore: FirebaseFirestore,
 ) : PaymentRepository {
-
+	
 	override suspend fun addPago(pago: Pago): Result<Unit> = try {
 		Log.d("addPago", "== INICIO DE addPago ==")
-
+		
+		val gymRef = firestore.collection("gimnasios").document(pago.gimnasioCode)
+		
+		// 1️⃣ Obtener duración de la membresía desde Firestore
+		val duracionDias = gymRef
+			.collection("membresias")
+			.document(pago.membershipId)
+			.get()
+			.await()
+			.getLong("duracionDias")
+			?.toInt() ?: 0
+		
+		// 2️⃣ Calcular fecha de vencimiento con la duración obtenida
+		val fechaVencimientoFinal = pago.fechaVencimiento.takeIf { it > 0 }
+			?: pago.date + duracionDias * 24 * 60 * 60 * 1000L
+		
+		// 3️⃣ Crear el mapa del pago
 		val pagoMap = mutableMapOf(
 			"id" to pago.id,
 			"userId" to pago.userId,
@@ -33,95 +49,81 @@ class PaymentRepositoryImpl @Inject constructor(
 			"description" to pago.description,
 			"reference" to pago.reference,
 			"date" to pago.date,
+			"duracionDias" to duracionDias,
+			"fechaVencimiento" to fechaVencimientoFinal,
 			"gimnasioCode" to pago.gimnasioCode,
 			"promocionId" to pago.promocionId,
 			"promocionNombre" to pago.promocionNombre,
 			"promocionDescripcion" to pago.promocionDescripcion,
 			"promocionPorcentajeDescuento" to pago.promocionDescuento
 		).filterValues { it != null }
-
-		val gymRef = firestore.collection("gimnasios").document(pago.gimnasioCode)
-
+		
 		val pagoRef = gymRef.collection("pagos").document(pago.id)
-
+		
 		val userPagoRef = firestore.collection("users")
 			.document(pago.userId)
 			.collection("gimnasios")
 			.document(pago.gimnasioCode)
 			.collection("pagos")
 			.document(pago.id)
-
-		val membresiaUserRef = gymRef
-			.collection("usuarios")
-			.document(pago.membershipId)
-			.collection("usuarios")
-			.document(pago.userId)
-
+		
+		val userRef = firestore.collection("users").document(pago.userId)
+		val gymUserRef = gymRef.collection("usuarios").document(pago.userId)
+		
 		val membershipUsersRef = gymRef
 			.collection("membresias")
 			.document(pago.membershipId)
 			.collection("usuarios")
 			.document(pago.userId)
-
-		val userRef = firestore.collection("users").document(pago.userId)
-
-		// 🔍 LOG: Verifica si la promoción existe
-		if (pago.promocionId != null) {
-			Log.d("addPago", "Promoción asignada: ${pago.promocionId}")
-		} else {
-			Log.d("addPago", "NO se asignó promoción")
-		}
-
-		// 👇 Referencia a la subcolección usuarios de la promoción (si aplica)
+		
 		val promoUserRef = pago.promocionId?.let { promoId ->
-			val ref = gymRef.collection("promociones")
+			gymRef.collection("promociones")
 				.document(promoId)
 				.collection("usuarios")
 				.document(pago.userId)
-			Log.d("addPago", "Ruta promoUserRef: ${ref.path}")
-			ref
 		}
-
+		
+		// 4️⃣ Guardar todos los datos en un batch
 		firestore.runBatch { batch ->
 			batch.set(pagoRef, pagoMap)
 			batch.set(userPagoRef, pagoMap)
-
-
-
+			
 			batch.set(
-				membershipUsersRef, mapOf(
+				gymUserRef,
+				mapOf(
+					"name" to pago.name,
+					"idcard" to pago.idcard,
+					"state" to "activo",
+					"paymentdate" to pago.date,
+					"membership" to pago.membershipName,
+					"fechaVencimiento" to fechaVencimientoFinal
+				),
+				SetOptions.merge()
+			)
+			
+			batch.set(
+				membershipUsersRef,
+				mapOf(
 					"name" to pago.name,
 					"idcard" to pago.idcard,
 					"paymentdate" to pago.date,
 					"state" to "activo"
 				)
 			)
-
-			val gymUserRef = gymRef.collection("usuarios").document(pago.userId)
-
-			batch.set(
-				gymUserRef, mapOf(
-					"name" to pago.name,
-					"idcard" to pago.idcard,
-					"state" to "activo",
-					"paymentdate" to pago.date,
-					"membership" to pago.membershipName
-				), SetOptions.merge()
-			)
-
+			
 			batch.update(
-				userRef, mapOf(
+				userRef,
+				mapOf(
 					"state" to "activo",
 					"membership" to pago.membershipName,
-					"promocion" to pago.promocionNombre // ✅ actualiza promoción en user
+					"promocion" to pago.promocionNombre
 				)
 			)
-
-			// 👇 Solo se ejecuta si hay promoción asociada
+			
 			promoUserRef?.let {
-				Log.d("addPago", "Agregando usuario en promoción: ${it.path}")
 				batch.set(
-					it, mapOf(
+					it,
+					mapOf(
 						"userId" to pago.userId,
 						"name" to pago.name,
 						"idcard" to pago.idcard,
@@ -133,14 +135,15 @@ class PaymentRepositoryImpl @Inject constructor(
 				)
 			}
 		}.await()
-
+		
 		Log.d("addPago", "✅ Pago agregado correctamente")
 		Result.success(Unit)
 	} catch (e: Exception) {
 		Log.e("addPago", "❌ Error al agregar pago: ${e.localizedMessage}", e)
 		Result.failure(e)
 	}
-
+	
+	
 	override suspend fun getAllPayments(gymCode: String): List<Payment> =
 		withContext(Dispatchers.IO) {
 			try {
