@@ -21,7 +21,6 @@ class PaymentRepositoryImpl @Inject constructor(
 		
 		val gymRef = firestore.collection("gimnasios").document(pago.gimnasioCode)
 		
-		// 1️⃣ Obtener duración de la membresía desde Firestore
 		val duracionDias = gymRef
 			.collection("membresias")
 			.document(pago.membershipId)
@@ -30,11 +29,9 @@ class PaymentRepositoryImpl @Inject constructor(
 			.getLong("duracionDias")
 			?.toInt() ?: 0
 		
-		// 2️⃣ Calcular fecha de vencimiento con la duración obtenida
 		val fechaVencimientoFinal = pago.fechaVencimiento.takeIf { it > 0 }
-			?: pago.date + duracionDias * 24 * 60 * 60 * 1000L
+			?: (pago.date + duracionDias * 24 * 60 * 60 * 1000L)
 		
-		// 3️⃣ Crear el mapa del pago
 		val pagoMap = mutableMapOf(
 			"id" to pago.id,
 			"userId" to pago.userId,
@@ -59,7 +56,6 @@ class PaymentRepositoryImpl @Inject constructor(
 		).filterValues { it != null }
 		
 		val pagoRef = gymRef.collection("pagos").document(pago.id)
-		
 		val userPagoRef = firestore.collection("users")
 			.document(pago.userId)
 			.collection("gimnasios")
@@ -69,21 +65,35 @@ class PaymentRepositoryImpl @Inject constructor(
 		
 		val userRef = firestore.collection("users").document(pago.userId)
 		val gymUserRef = gymRef.collection("usuarios").document(pago.userId)
-		
 		val membershipUsersRef = gymRef
 			.collection("membresias")
 			.document(pago.membershipId)
 			.collection("usuarios")
 			.document(pago.userId)
 		
+		// ✅ NUEVO: usamos ID del pago, no del usuario
 		val promoUserRef = pago.promocionId?.let { promoId ->
 			gymRef.collection("promociones")
 				.document(promoId)
 				.collection("usuarios")
-				.document(pago.userId)
+				.document(pago.id)
 		}
 		
-		// 4️⃣ Guardar todos los datos en un batch
+		// 🔁 Desactivar membresías anteriores
+		val membresiasSnapshot = gymRef.collection("membresias").get().await()
+		for (doc in membresiasSnapshot.documents) {
+			val usuarioRef = gymRef
+				.collection("membresias")
+				.document(doc.id)
+				.collection("usuarios")
+				.document(pago.userId)
+			
+			val usuarioDoc = usuarioRef.get().await()
+			if (usuarioDoc.exists() && usuarioDoc.getString("state") == "activo") {
+				usuarioRef.update("state", "inactivo")
+			}
+		}
+		
 		firestore.runBatch { batch ->
 			batch.set(pagoRef, pagoMap)
 			batch.set(userPagoRef, pagoMap)
@@ -130,7 +140,8 @@ class PaymentRepositoryImpl @Inject constructor(
 						"paymentdate" to pago.date,
 						"state" to "activo",
 						"membershipId" to pago.membershipId,
-						"membershipName" to pago.membershipName
+						"membershipName" to pago.membershipName,
+						"expirationDate" to fechaVencimientoFinal,
 					)
 				)
 			}
@@ -142,7 +153,6 @@ class PaymentRepositoryImpl @Inject constructor(
 		Log.e("addPago", "❌ Error al agregar pago: ${e.localizedMessage}", e)
 		Result.failure(e)
 	}
-	
 	
 	override suspend fun getAllPayments(gymCode: String): List<Payment> =
 		withContext(Dispatchers.IO) {

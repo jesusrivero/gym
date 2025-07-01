@@ -32,7 +32,7 @@ class PromotionViewModel @Inject constructor(
 
 	
 	var errorMessage by mutableStateOf<String?>(null)
-		private set
+		internal set
 	
 	var promotions by mutableStateOf<List<Promotion>>(emptyList())
 		private set
@@ -62,7 +62,9 @@ class PromotionViewModel @Inject constructor(
 			
 			val result = createPromotionUseCase(promotion)
 			isLoading = false
-			
+			result.onSuccess{
+				loadPromotions()
+			}
 			result.onFailure {
 				errorMessage = it.message
 			}
@@ -92,7 +94,9 @@ class PromotionViewModel @Inject constructor(
 			
 			val result = updatePromotionUseCase(promotion)
 			isLoading = false
-			
+			result.onSuccess{
+				loadPromotions()
+			}
 			result.onFailure {
 				errorMessage = it.message
 			}
@@ -106,6 +110,9 @@ class PromotionViewModel @Inject constructor(
 			isLoading = true
 			val result = deletePromotionUseCase(promotion)
 			isLoading = false
+			result.onSuccess{
+				loadPromotions()
+			}
 			result.onFailure { errorMessage = it.message }
 			loadPromotions()
 			}
@@ -158,6 +165,8 @@ class PromotionViewModel @Inject constructor(
 		return String.format("%.2f", montoFinal).toDouble()
 	}
 	
-	
+	fun clearError() {
+		errorMessage = null
+	}
 	
 }

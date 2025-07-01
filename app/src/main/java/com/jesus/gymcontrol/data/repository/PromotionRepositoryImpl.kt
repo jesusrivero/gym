@@ -92,8 +92,7 @@ class PromotionRepositoryImpl @Inject constructor(
 			val gymCode = userDoc.getString("gimnasioCode")
 				?: return Result.failure(Exception("No se encontró el gimnasioCode del usuario"))
 			
-			// Verifica si hay usuarios inscritos a la promoción
-			val usersSnapshot = firestore.collection("gimnasios")
+			val usuariosSnapshot = firestore.collection("gimnasios")
 				.document(gymCode)
 				.collection("promociones")
 				.document(promotion.id)
@@ -101,11 +100,16 @@ class PromotionRepositoryImpl @Inject constructor(
 				.get()
 				.await()
 			
-			if (!usersSnapshot.isEmpty) {
-				return Result.failure(Exception("No se puede eliminar: tiene usuarios inscritos"))
+			// Verificamos si hay algún usuario activo
+			val hayUsuariosActivos = usuariosSnapshot.documents.any { doc ->
+				doc.getString("state") == "activo"
 			}
 			
-			// Elimina la promoción si no hay usuarios
+			if (hayUsuariosActivos) {
+				return Result.failure(Exception("No se puede eliminar la promoción: hay usuarios con estado activo."))
+			}
+			
+			// Si no hay usuarios activos, se permite eliminar la promoción
 			firestore.collection("gimnasios")
 				.document(gymCode)
 				.collection("promociones")
@@ -130,11 +134,15 @@ class PromotionRepositoryImpl @Inject constructor(
 		
 		for (promoDoc in promotionsSnapshot.documents) {
 			val promoId = promoDoc.id
+			
+			// 🔍 Filtrar usuarios por estado "activo"
 			val usersSnapshot = promotionsRef
 				.document(promoId)
 				.collection("usuarios")
+				.whereEqualTo("state", "activo") // ✅ solo los activos
 				.get()
 				.await()
+			
 			counts[promoId] = usersSnapshot.size()
 		}
 		

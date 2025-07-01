@@ -8,5 +8,6 @@ data class Promotion(
 	val duracionDias: Int = 0,
 	val gimnasioCode: String = "",
 	val activo: Boolean = true,
-	val fechaCreacion: Long = System.currentTimeMillis()
+	val fechaCreacion: Long = System.currentTimeMillis(),
+	val fechaVencimiento: Long = System.currentTimeMillis() + duracionDias * 24 * 60 * 60 * 1000L
 )

@@ -81,6 +81,13 @@ fun PromotionScreen(
 		viewModel.loadUserCountByPromotion()
 	}
 	
+	LaunchedEffect(errorMessage) {
+		errorMessage?.let {
+			Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+			viewModel.clearError()
+		}
+	}
+	
 	Scaffold(
 		topBar = {
 			TopAppBar(

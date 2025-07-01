@@ -87,40 +87,42 @@ class MembershipRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
-
-    override suspend fun getMembershipsWithUserCount(): Result<List<MembershipWithCount>> = try {
-        val uid = auth.currentUser?.uid
-            ?: return Result.failure(Exception("Usuario no autenticado"))
-
-        val userDoc = firestore.collection("users").document(uid).get().await()
-        val gymCode = userDoc.getString("gimnasioCode")
-            ?: return Result.failure(Exception("No se encontró el gimnasioCode del usuario"))
-
-        val membershipsSnapshot = firestore.collection("gimnasios")
-            .document(gymCode)
-            .collection("membresias")
-            .get()
-            .await()
-
-        val membershipsWithCount = membershipsSnapshot.documents.map { doc ->
-            val membership = doc.toObject(Membership::class.java)!!.copy(id = doc.id)
-
-            val usersCount = firestore.collection("gimnasios")
-                .document(gymCode)
-                .collection("membresias")
-                .document(doc.id)
-                .collection("usuarios")
-                .get()
-                .await()
-                .size()
-
-            MembershipWithCount(membership, usersCount)
-        }
-
-        Result.success(membershipsWithCount)
-    } catch (e: Exception) {
-        Result.failure(e)
-    }
+	
+	override suspend fun getMembershipsWithUserCount(): Result<List<MembershipWithCount>> = try {
+		val uid = auth.currentUser?.uid
+			?: return Result.failure(Exception("Usuario no autenticado"))
+		
+		val userDoc = firestore.collection("users").document(uid).get().await()
+		val gymCode = userDoc.getString("gimnasioCode")
+			?: return Result.failure(Exception("No se encontró el gimnasioCode del usuario"))
+		
+		val membershipsSnapshot = firestore.collection("gimnasios")
+			.document(gymCode)
+			.collection("membresias")
+			.get()
+			.await()
+		
+		val membershipsWithCount = membershipsSnapshot.documents.map { doc ->
+			val membership = doc.toObject(Membership::class.java)!!.copy(id = doc.id)
+			
+			// 🔧 Filtramos solo los usuarios con estado "activo"
+			val activeUsersCount = firestore.collection("gimnasios")
+				.document(gymCode)
+				.collection("membresias")
+				.document(doc.id)
+				.collection("usuarios")
+				.whereEqualTo("state", "activo") // ✅ Solo activos
+				.get()
+				.await()
+				.size()
+			
+			MembershipWithCount(membership, activeUsersCount)
+		}
+		
+		Result.success(membershipsWithCount)
+	} catch (e: Exception) {
+		Result.failure(e)
+	}
 	
 	override suspend fun updateMembership(membership: Membership): Result<Unit> {
 		return try {

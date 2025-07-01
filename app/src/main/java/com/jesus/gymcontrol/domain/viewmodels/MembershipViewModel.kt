@@ -41,6 +41,8 @@ class MembershipViewModel @Inject constructor(
 	var errorMessage by mutableStateOf<String?>(null)
 		private set
 	
+	var isFirstLoadDone by mutableStateOf(true)
+		private set
 	
 	
 	fun createMembership(membership: Membership) {
@@ -51,17 +53,21 @@ class MembershipViewModel @Inject constructor(
 			val result = createMembershipUseCase(membership)
 			isLoading = false
 			
-			result.onFailure {
+			result.onSuccess {
+				loadMemberships()
+			}.onFailure {
 				errorMessage = it.message
 			}
-			loadMembershipsSummary()
 		}
 	}
+	
 	
 	
 	fun loadMemberships() {
 		viewModelScope.launch {
 			isLoading = true
+			errorMessage = null
+			
 			getUseCase().onSuccess {
 				memberships = it
 			}.onFailure {
@@ -71,27 +77,37 @@ class MembershipViewModel @Inject constructor(
 		}
 	}
 	
+	
+	
 	fun deleteMembership(membership: Membership) {
 		viewModelScope.launch {
+			isLoading = true
+			errorMessage = null
+			
 			deleteUseCase(membership).onSuccess {
 				loadMemberships()
-			}.onFailure {
-				errorMessage = it.message
-			}
-		}
-	}
-	
-	fun loadMembershipsSummary() {
-		viewModelScope.launch {
-			isLoading = true
-			getMembershipsWithUserCountUseCase().onSuccess {
-				membershipsSummary = it
 			}.onFailure {
 				errorMessage = it.message
 			}
 			isLoading = false
 		}
 	}
+	
+	fun loadMembershipsSummary() {
+		viewModelScope.launch {
+			isLoading = true
+			errorMessage = null
+			
+			getMembershipsWithUserCountUseCase().onSuccess {
+				membershipsSummary = it
+			}.onFailure {
+				errorMessage = it.message
+			}
+			isFirstLoadDone = true
+			isLoading = false
+		}
+	}
+	
 	
 	fun editMembership(membership: Membership) {
 		viewModelScope.launch {
@@ -102,10 +118,11 @@ class MembershipViewModel @Inject constructor(
 			isLoading = false
 			
 			result.onSuccess {
-				loadMembershipsSummary()
+				loadMemberships()
 			}.onFailure {
 				errorMessage = it.message
-			}
+				}
 		}
 	}
+
 }

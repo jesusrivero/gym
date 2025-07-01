@@ -77,7 +77,10 @@ fun MembershipScreen(
 	
 	LaunchedEffect(Unit) {
 		viewModel.loadMembershipsSummary()
+		viewModel.loadMemberships()
 	}
+	
+
 	
 	Scaffold(
 		topBar = {
@@ -92,7 +95,7 @@ fun MembershipScreen(
 				navigationIcon = {
 					IconButton(onClick = { navController.popBackStack() }) {
 						Icon(
-							painter = painterResource(id = com.jesus.gymcontrol.R.drawable.ic_back),
+							painter = painterResource(id = R.drawable.ic_back),
 							contentDescription = "Regresar",
 							tint = MaterialTheme.colorScheme.onPrimary
 						)
@@ -123,7 +126,9 @@ fun MembershipScreen(
 					CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
 				}
 				
-				membershipsSummary.isEmpty() -> Box(Modifier.fillMaxSize(), Alignment.Center) {
+				!isLoading && viewModel.isFirstLoadDone && membershipsSummary.isEmpty() -> Box(
+					Modifier.fillMaxSize(), Alignment.Center
+				) {
 					Text("No hay membresías registradas.")
 				}
 				
