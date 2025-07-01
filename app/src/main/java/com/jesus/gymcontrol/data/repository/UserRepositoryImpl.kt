@@ -24,7 +24,7 @@ class UserRepositoryImpl @Inject constructor(
 			val userName = userSnapshot.getString("name") ?: "Desconocido"
 			val email = userSnapshot.getString("email") ?: "Desconocido"
 			val idcard = userSnapshot.getString("idcard") ?: "Desconocido"
-			val date = userSnapshot.getTimestamp("date")
+			val date = userSnapshot.getLong("date")
 			
 			// 2. Datos para guardar en users/{uid}/gimnasios/{uid} (o podrías usar gym.code como ID si prefieres)
 			val userGymData = mapOf(

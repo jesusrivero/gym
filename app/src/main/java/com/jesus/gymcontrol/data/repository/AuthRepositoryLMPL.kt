@@ -38,8 +38,9 @@ class AuthRepositoryImpl(
                 "state" to "",
                 "enabled" to "",
                 "lastpayment" to "",
-                "membership" to ""
-
+                "membership" to "",
+								"gimnasioCode" to "",
+	              "date" to System.currentTimeMillis()
             )
             firestore.collection("users").document(uid).set(userData).await()
 
