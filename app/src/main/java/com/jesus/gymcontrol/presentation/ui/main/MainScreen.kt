@@ -330,6 +330,7 @@ fun NewClientsSection(viewModel: UserListViewModel = hiltViewModel()) {
 					Text("Teléfono: ${user.phone}")
 					Text("Correo: ${user.email}")
 					Text("Estado: ${user.state}")
+					Text("rol: ${user.rol}")
 				}
 			}, containerColor = Color.White
 		)

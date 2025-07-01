@@ -61,7 +61,7 @@ fun PaymentFilters(
 				.fillMaxWidth()
 				.padding(horizontal = 16.dp, vertical = 8.dp),
 			shape = RoundedCornerShape(16.dp),
-			color = MaterialTheme.colorScheme.surface,
+			color = colorScheme.surface,
 			shadowElevation = 4.dp
 		) {
 			Column(modifier = Modifier.padding(16.dp)) {
@@ -69,7 +69,7 @@ fun PaymentFilters(
 				Text(
 					text = "Tipo de pago",
 					style = MaterialTheme.typography.labelMedium,
-					color = MaterialTheme.colorScheme.onSurfaceVariant,
+					color = colorScheme.onSurfaceVariant,
 					modifier = Modifier.padding(bottom = 4.dp)
 				)
 				

@@ -74,7 +74,6 @@ fun PersonsScreen(
 	var searchText by remember { mutableStateOf("") }
 	var selectedState by remember { mutableStateOf("Todos") }
 	
-	val filterOptions = listOf("Todos", "Activos", "Inactivos", "Próximos a pagar")
 	
 	if (showUserDialog && selectedUser != null) {
 		val formattedDate = selectedUser?.date?.takeIf { it > 0L }?.let {
@@ -96,6 +95,8 @@ fun PersonsScreen(
 			text = {
 				Column {
 					DetailRow("Nombre:", selectedUser?.name ?: "")
+					Spacer(modifier = Modifier.height(8.dp))
+					DetailRow("Rol:", selectedUser?.rol ?: "")
 					Spacer(modifier = Modifier.height(8.dp))
 					DetailRow("Email:", selectedUser?.email ?: "")
 					Spacer(modifier = Modifier.height(8.dp))
@@ -155,7 +156,7 @@ fun PersonsScreen(
 				// 🔁 CORREGIDO: uso de variables correctas
 				PaymentFilters(
 					selectedPaymentType = selectedState,
-					paymentTypeOptions = listOf("Todos", "Activos", "Inactivos"),
+					paymentTypeOptions = listOf("Todos", "Activos", "Inactivos", "Próximos a pagar"),
 					onPaymentTypeSelected = { selectedState = it },
 					onClearFilters = {
 						selectedState = "Todos"

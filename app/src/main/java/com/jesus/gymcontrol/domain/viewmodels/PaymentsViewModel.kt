@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jesus.gymcontrol.data.repository.SessionManager
+import com.jesus.gymcontrol.domain.model.ListUser
 import com.jesus.gymcontrol.domain.model.Membership
 import com.jesus.gymcontrol.domain.model.Pago
 import com.jesus.gymcontrol.domain.model.Payment
@@ -14,6 +15,7 @@ import com.jesus.gymcontrol.domain.model.PaymentState
 import com.jesus.gymcontrol.domain.model.Promotion
 import com.jesus.gymcontrol.domain.usecase.usuario.AddPaymentUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetAllPaymentsUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetUserByGymUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,8 +38,6 @@ class PaymentsViewModel @Inject constructor(
 		private set
 	
 	
-	var selectedPayment by mutableStateOf<Payment?>(null)
-	
 	var selectedPromotion by mutableStateOf<Promotion?>(null)
 		private set
 	
@@ -49,6 +49,7 @@ class PaymentsViewModel @Inject constructor(
 	
 	var errorMessage by mutableStateOf<String?>(null)
 		private set
+	
 	
 	fun selectedPromotion (promotion: Promotion?) {
 		selectedPromotion = promotion

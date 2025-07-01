@@ -185,7 +185,7 @@ class UserRepositoryImpl @Inject constructor(
 		val snapshot = firestore.collection("gimnasios")
 			.document(gymCode)
 			.collection("usuarios")
-			.orderBy("date", Query.Direction.DESCENDING) // 👈 clave aquí
+			.orderBy("date", Query.Direction.DESCENDING)
 			.get()
 			.await()
 		
@@ -198,6 +198,7 @@ class UserRepositoryImpl @Inject constructor(
 				phone = data["phone"] as? String ?: "",
 				email = data["email"] as? String ?: "",
 				state = data["state"] as? String ?: "",
+				rol = data["rol"] as? String ?: "",
 				enabled = data["isActive"] as? Boolean ?: false,
 				date = when (val d = data["date"]) {
 					is Long -> d

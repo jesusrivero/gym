@@ -9,6 +9,7 @@ data class ListUser(
 	val date: Long? = null,
 	val phone: String = "",
 	val email: String = "",
+	val rol: String = "",
 	val enabled: Boolean = false,
 	val state: String = "",
 )

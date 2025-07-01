@@ -120,11 +120,13 @@ fun PaymentsScreenContent(
 	
 	
 	val filteredUsers = if (nameUser.isBlank()) emptyList() else {
-		users.filter {
-			it.name.contains(nameUser, true) ||
-					it.idcard.contains(nameUser, true) ||
-					it.email.contains(nameUser, true) ||
-					it.phone.contains(nameUser, true)
+		users.filter { user ->
+			user.rol == "cliente" && (
+					user.name.contains(nameUser, true) ||
+							user.idcard.contains(nameUser, true) ||
+							user.email.contains(nameUser, true) ||
+							user.phone.contains(nameUser, true)
+					)
 		}
 	}
 	
@@ -322,7 +324,7 @@ fun PaymentsScreenContent(
 										nameUser = ""
 										selectedUserId = null
 										
-								
+										
 										viewModel.resetState()
 										description = ""
 										reference = ""
@@ -438,7 +440,7 @@ fun PaymentsScreenContent(
 										onClick = {
 											viewModel.updatePaymentFrequency(membership.nombre)
 											viewModel.calculateDiscountedAmountIfApplicable()
-											isMembershipDropdownExpanded=false
+											isMembershipDropdownExpanded = false
 										}
 									)
 								}
@@ -471,7 +473,7 @@ fun PaymentsScreenContent(
 								DropdownMenuItem(
 									text = { Text("Sin promoción") },
 									onClick = {
-										viewModel.selectedPromotion(null?: Promotion())
+										viewModel.selectedPromotion(null ?: Promotion())
 										isPromoDropdownExpanded = false
 									}
 								)
@@ -498,7 +500,7 @@ fun PaymentsScreenContent(
 											onClick = {
 												viewModel.selectedPromotion(promo)
 												viewModel.calculateDiscountedAmountIfApplicable()
-												isPromoDropdownExpanded=false
+												isPromoDropdownExpanded = false
 											}
 										)
 									}
@@ -544,7 +546,7 @@ fun PaymentsScreenContent(
 											onClick = {
 												viewModel.updatePaymentType(type)
 												viewModel.calculateDiscountedAmountIfApplicable()
-												isTypeDropdownExpanded=false
+												isTypeDropdownExpanded = false
 											}
 										)
 									}

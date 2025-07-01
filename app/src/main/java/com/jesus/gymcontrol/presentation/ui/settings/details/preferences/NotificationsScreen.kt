@@ -44,10 +44,10 @@ fun NotificationsScreen(
 		val notifications by viewModel.notifications.collectAsState()
 		val isLoading by viewModel.isLoading.collectAsState()
 		val error by viewModel.error.collectAsState()
-		
-		LaunchedEffect(Unit) {
-			viewModel.loadNotifications()
-		}
+//
+//		LaunchedEffect(Unit) {
+//			viewModel.loadNotifications()
+//		}
 		
 		Scaffold(
 			topBar = {
