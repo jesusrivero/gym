@@ -52,6 +52,7 @@ import com.jesus.gymcontrol.domain.usecase.usuario.UpdatePromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateRolUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateUserProfileUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.codes.GetAvailableCodesUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.membership.ToggleMembershipStateUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.notification.AddNotificacionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.notification.DeleteNotificacionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.notification.GetNotificacionesUseCase
@@ -375,5 +376,12 @@ object AppModule {
 	fun provideGetAvailableCodesUseCase(
 		repository: GymRepository
 	): GetAvailableCodesUseCase = GetAvailableCodesUseCase(repository)
+	
+	@Provides
+	fun provideToggleMembershipStateUseCase(
+		repository: MembershipRepository
+	): ToggleMembershipStateUseCase {
+		return ToggleMembershipStateUseCase(repository)
+	}
 	
 }

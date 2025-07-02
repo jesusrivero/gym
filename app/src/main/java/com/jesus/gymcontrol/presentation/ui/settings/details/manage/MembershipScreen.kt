@@ -18,8 +18,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -34,6 +36,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -44,6 +47,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -53,6 +57,7 @@ import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.domain.model.Membership
 import com.jesus.gymcontrol.domain.viewmodels.MembershipViewModel
+import kotlinx.coroutines.delay
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,22 +70,54 @@ fun MembershipScreen(
 	val isLoading = viewModel.isLoading
 	val membershipsSummary = viewModel.membershipsSummary
 	val errorMessage = viewModel.errorMessage
+	val membershipActionMessage by viewModel.membershipActionMessage
 	
 	var showCreateDialog by remember { mutableStateOf(false) }
 	var name by remember { mutableStateOf("") }
 	var price by remember { mutableStateOf("") }
 	var duration by remember { mutableStateOf("") }
+	var membershipToToggle by remember { mutableStateOf<Membership?>(null) }
+	var showSuccessDialog by remember { mutableStateOf(false) }
 	
-	var membershipToDelete by remember { mutableStateOf<Membership?>(null) }
 	var membershipToEdit by remember { mutableStateOf<Membership?>(null) }
 	var membershipToView by remember { mutableStateOf<Membership?>(null) }
+	val isStillLoading = isLoading || membershipsSummary.isEmpty()
+	
 	
 	LaunchedEffect(Unit) {
 		viewModel.loadMembershipsSummary()
 		viewModel.loadMemberships()
 	}
 	
-
+	// Mostrar snackbar al cambiar estado
+	LaunchedEffect(membershipActionMessage) {
+		membershipActionMessage?.let {
+			showSuccessDialog = true
+			delay(1000)
+			showSuccessDialog = false
+			viewModel.clearMembershipMessage()
+		}
+	}
+	
+	if (showSuccessDialog) {
+		AlertDialog(
+			onDismissRequest = { showSuccessDialog = false },
+			title = { Text("¡Éxito!") },
+			text = { Text("Información actualizada con éxito.") },
+			confirmButton = {}, // sin botón
+			icon = {
+				Icon(
+					imageVector = Icons.Default.CheckCircle,
+					contentDescription = null,
+					tint = Color(0xFF4CAF50),
+					modifier = Modifier.size(48.dp)
+				)
+			},
+			containerColor = MaterialTheme.colorScheme.surface,
+			titleContentColor = MaterialTheme.colorScheme.onSurface,
+			textContentColor = MaterialTheme.colorScheme.onSurface
+		)
+	}
 	
 	Scaffold(
 		topBar = {
@@ -113,7 +150,7 @@ fun MembershipScreen(
 			) {
 				Icon(Icons.Default.Add, contentDescription = "Crear Membresía")
 			}
-		}
+		},
 	) { padding ->
 		Column(
 			modifier = Modifier
@@ -121,20 +158,20 @@ fun MembershipScreen(
 				.padding(horizontal = 20.dp, vertical = 12.dp)
 				.fillMaxSize()
 		) {
-			when {
-				isLoading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
+			if (isStillLoading) {
+				Box(
+					modifier = Modifier
+						.fillMaxSize()
+						.padding(top = 32.dp), // opcional: evita recortes por la AppBar
+					contentAlignment = Alignment.Center
+				) {
 					CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
 				}
+			} else {
+			LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+				items(membershipsSummary) { membershipWithCount ->
 				
-				!isLoading && viewModel.isFirstLoadDone && membershipsSummary.isEmpty() -> Box(
-					Modifier.fillMaxSize(), Alignment.Center
-				) {
-					Text("No hay membresías registradas.")
-				}
-				
-				else -> LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-					items(membershipsSummary) { membershipWithCount ->
-						val membership = membershipWithCount.membership
+				val membership = membershipWithCount.membership
 						val userCount = membershipWithCount.userCount
 						Card(
 							modifier = Modifier
@@ -156,7 +193,7 @@ fun MembershipScreen(
 									style = MaterialTheme.typography.labelSmall,
 									color = MaterialTheme.colorScheme.onSurfaceVariant
 								)
-//								Spacer(Modifier.height(6.dp))
+								Spacer(Modifier.height(6.dp))
 								Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
 									IconButton(onClick = { membershipToView = membership }) {
 										Icon(
@@ -167,8 +204,19 @@ fun MembershipScreen(
 									IconButton(onClick = { membershipToEdit = membership }) {
 										Icon(Icons.Default.Edit, contentDescription = "Editar")
 									}
-									IconButton(onClick = { membershipToDelete = membership }) {
-										Icon(Icons.Default.Delete, contentDescription = "Eliminar")
+									IconButton(onClick = {
+										viewModel.toggleMembershipState(membership)
+									}) {
+										IconButton(onClick = {
+											membershipToToggle = membership // En lugar de llamar directamente al ViewModel
+										}) {
+											Icon(
+												imageVector = if (membership.state == "activo") Icons.Default.Visibility else Icons.Default.VisibilityOff,
+												contentDescription = if (membership.state == "activo") "Desactivar" else "Activar",
+												tint = if (membership.state == "activo") MaterialTheme.colorScheme.primary else Color.Red
+											)
+										}
+										
 									}
 								}
 							}
@@ -176,7 +224,6 @@ fun MembershipScreen(
 					}
 				}
 			}
-			
 			// Detalles de membresía (nuevo)
 			membershipToView?.let { membership ->
 				AlertDialog(
@@ -187,6 +234,7 @@ fun MembershipScreen(
 							Text("Nombre: ${membership.nombre}")
 							Text("Precio: $${membership.precio}")
 							Text("Duración: ${membership.duracionDias} días")
+							Text("Estado:  ${membership.state}")
 						}
 					},
 					confirmButton = {
@@ -355,27 +403,59 @@ fun MembershipScreen(
 				)
 			}
 			
-			// Diálogo para eliminar membresía
-			membershipToDelete?.let { membership ->
+			membershipToToggle?.let { selected ->
 				AlertDialog(
-					onDismissRequest = { membershipToDelete = null },
-					title = { Text("¿Eliminar membresía?") },
-					text = { Text("¿Estás seguro de eliminar la membresía \"${membership.nombre}\"? Esta acción no se puede deshacer.") },
+					onDismissRequest = { membershipToToggle = null },
+					title = {
+						Text(
+							text = if (selected.state == "activo") "Desactivar membresía" else "Activar membresía"
+						)
+					},containerColor = MaterialTheme.colorScheme.surface,
+					text = {
+						Text(
+							text = if (selected.state == "activo") {
+								"¿Estás seguro de que deseas desactivar esta membresía? Ya no podras usarla para agregar pagos nuevos."
+							} else {
+								"¿Estás seguro de que deseas activar esta membresía?"
+							}
+						)
+					},
 					confirmButton = {
-						Button(onClick = {
-							viewModel.deleteMembership(membership)
-							membershipToDelete = null
+						TextButton(onClick = {
+							viewModel.toggleMembershipState(selected)
+							membershipToToggle = null
 						}) {
-							Text("Eliminar")
+							Text("Confirmar")
 						}
 					},
 					dismissButton = {
-						OutlinedButton(onClick = { membershipToDelete = null }) {
+						TextButton(onClick = { membershipToToggle = null }) {
 							Text("Cancelar")
 						}
-					}, 	containerColor = MaterialTheme.colorScheme.surface
+					}
 				)
 			}
+//			// Diálogo para eliminar membresía
+//			membershipToDelete?.let { membership ->
+//				AlertDialog(
+//					onDismissRequest = { membershipToDelete = null },
+//					title = { Text("¿Eliminar membresía?") },
+//					text = { Text("¿Estás seguro de eliminar la membresía \"${membership.nombre}\"? Esta acción no se puede deshacer.") },
+//					confirmButton = {
+//						Button(onClick = {
+//							viewModel.deleteMembership(membership)
+//							membershipToDelete = null
+//						}) {
+//							Text("Eliminar")
+//						}
+//					},
+//					dismissButton = {
+//						OutlinedButton(onClick = { membershipToDelete = null }) {
+//							Text("Cancelar")
+//						}
+//					}, 	containerColor = MaterialTheme.colorScheme.surface
+//				)
+//			}
 			
 			errorMessage?.let {
 				LaunchedEffect(it) {

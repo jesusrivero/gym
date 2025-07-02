@@ -61,6 +61,8 @@ class MembershipRepositoryImpl @Inject constructor(
     }
 
 
+	
+//	VOY A DEJAR ESTA FUNCION PARA UNA FUTURA IMPLEMENTACION
     override suspend fun deleteMembershipIfNoUsers(membership: Membership): Result<Unit> {
         return try {
             val usersSnapshot = firestore.collection("gimnasios")
@@ -151,4 +153,40 @@ class MembershipRepositoryImpl @Inject constructor(
 			Result.failure(e)
 		}
 	}
+	
+	override suspend fun setMembershipState(
+		membershipId: String,
+		gymCode: String,
+		newState: String
+	): Result<Unit> {
+		return try {
+			// Paso 1: Verificamos si hay usuarios activos en la membresía
+			val activeUsersSnapshot = firestore.collection("gimnasios")
+				.document(gymCode)
+				.collection("membresias")
+				.document(membershipId)
+				.collection("usuarios")
+				.whereEqualTo("state", "activo")
+				.get()
+				.await()
+			
+			if (!activeUsersSnapshot.isEmpty && newState == "inactivo") {
+				return Result.failure(Exception("No se puede desactivar: hay usuarios activos."))
+			}
+			
+			// Paso 2: Actualizamos el estado si no hay usuarios activos o si se quiere activar
+			val ref = firestore.collection("gimnasios")
+				.document(gymCode)
+				.collection("membresias")
+				.document(membershipId)
+			
+			ref.update("state", newState).await()
+			
+			Result.success(Unit)
+		} catch (e: Exception) {
+			Result.failure(e)
+			}
+	}
+	
+	
 }

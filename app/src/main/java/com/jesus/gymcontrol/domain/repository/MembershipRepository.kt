@@ -14,5 +14,13 @@ interface MembershipRepository {
     suspend fun getMembershipsWithUserCount(): Result<List<MembershipWithCount>>
 
     suspend fun updateMembership(membership: Membership): Result<Unit>
-
+	
+	suspend fun setMembershipState(
+		membershipId: String,
+		gymCode: String,
+		newState: String
+	): Result<Unit>
+	
+	
+	
 }

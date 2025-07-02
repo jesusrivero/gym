@@ -425,7 +425,7 @@ fun PaymentsScreenContent(
 								expanded = isMembershipDropdownExpanded,
 								onDismissRequest = { isMembershipDropdownExpanded = false }
 							) {
-								memberships.forEach { membership ->
+								memberships.filter { it.state == "activo" }.forEach { membership ->
 									DropdownMenuItem(
 										text = {
 											Column {
@@ -441,8 +441,8 @@ fun PaymentsScreenContent(
 											viewModel.updatePaymentFrequency(membership.nombre)
 											viewModel.calculateDiscountedAmountIfApplicable()
 											isMembershipDropdownExpanded = false
-										}
-									)
+											}
+										)
 								}
 							}
 						}

@@ -1,5 +1,6 @@
 package com.jesus.gymcontrol.domain.viewmodels
 
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -12,6 +13,7 @@ import com.jesus.gymcontrol.domain.usecase.usuario.DeleteMembershipUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.EditMembershipUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetMembershipsUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetMembershipsWithUserCountUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.membership.ToggleMembershipStateUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,14 +25,21 @@ class MembershipViewModel @Inject constructor(
 	private val deleteUseCase: DeleteMembershipUseCase,
 	private val getMembershipsWithUserCountUseCase: GetMembershipsWithUserCountUseCase,
 	private val editMembershipUseCase: EditMembershipUseCase,
+	private val toggleMembershipStateUseCase: ToggleMembershipStateUseCase
+
 ) : ViewModel() {
-	
+	data class MembershipUiState(
+		val isLoading: Boolean = true,
+		val memberships: List<MembershipWithCount> = emptyList(),
+		val errorMessage: String?=null
+	)
 	
 	var membershipsSummary by mutableStateOf<List<MembershipWithCount>>(emptyList())
 		private set
 	
 	var isLoading by mutableStateOf(false)
 		private set
+	
 	
 	var memberships by mutableStateOf<List<Membership>>(emptyList())
 		private set
@@ -44,6 +53,8 @@ class MembershipViewModel @Inject constructor(
 	var isFirstLoadDone by mutableStateOf(true)
 		private set
 	
+	private val _membershipActionMessage = mutableStateOf<String?>(null)
+	val membershipActionMessage: State<String?> = _membershipActionMessage
 	
 	fun createMembership(membership: Membership) {
 		viewModelScope.launch {
@@ -54,6 +65,7 @@ class MembershipViewModel @Inject constructor(
 			isLoading = false
 			
 			result.onSuccess {
+				_membershipActionMessage.value = ""
 				loadMemberships()
 			}.onFailure {
 				errorMessage = it.message
@@ -65,7 +77,7 @@ class MembershipViewModel @Inject constructor(
 	
 	fun loadMemberships() {
 		viewModelScope.launch {
-			isLoading = true
+			isLoading= true
 			errorMessage = null
 			
 			getUseCase().onSuccess {
@@ -79,19 +91,23 @@ class MembershipViewModel @Inject constructor(
 	
 	
 	
-	fun deleteMembership(membership: Membership) {
-		viewModelScope.launch {
-			isLoading = true
-			errorMessage = null
-			
-			deleteUseCase(membership).onSuccess {
-				loadMemberships()
-			}.onFailure {
-				errorMessage = it.message
-			}
-			isLoading = false
-		}
-	}
+	
+	//	VOY A DEJAR ESTA FUNCION PARA UNA FUTURA IMPLEMENTACION
+//	fun deleteMembership(membership: Membership) {
+//		viewModelScope.launch {
+//			isLoading = true
+//			errorMessage = null
+//
+//			deleteUseCase(membership).onSuccess {
+//				loadMemberships()
+//			}.onFailure {
+//				errorMessage = it.message
+//			}
+//			isLoading = false
+//		}
+//	}
+	
+	
 	
 	fun loadMembershipsSummary() {
 		viewModelScope.launch {
@@ -118,11 +134,37 @@ class MembershipViewModel @Inject constructor(
 			isLoading = false
 			
 			result.onSuccess {
+				_membershipActionMessage.value = ""
 				loadMemberships()
 			}.onFailure {
 				errorMessage = it.message
 				}
 		}
 	}
-
+	
+	
+	fun toggleMembershipState(membership: Membership) {
+		viewModelScope.launch {
+			val newState = if (membership.state == "activo") "inactivo" else "activo"
+			val result = toggleMembershipStateUseCase(
+				membershipId = membership.id,
+				gymCode = membership.gimnasioCode,
+				newState = newState
+			)
+			
+			if (result.isSuccess) {
+				_membershipActionMessage.value = "Membresía ${if (newState == "activo") "activada" else "desactivada"} correctamente"
+				loadMembershipsSummary()
+			} else {
+				_membershipActionMessage.value = "Error al actualizar estado: ${result.exceptionOrNull()?.message}"
+			}
+		}
+	}
+	
+	fun clearMembershipMessage() {
+		_membershipActionMessage.value = null
+	}
+	
+	
+	
 }
