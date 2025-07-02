@@ -89,7 +89,7 @@ fun ManagerContent(
 				TopAppBar(
 					title = {
 						Text(
-							text = "Panel de administración",
+							text = "Administración",
 							color = colorScheme.onPrimary,
 							fontWeight = FontWeight.Bold
 						)

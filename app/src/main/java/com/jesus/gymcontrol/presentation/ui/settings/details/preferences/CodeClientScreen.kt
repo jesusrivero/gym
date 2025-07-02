@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -35,6 +37,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,18 +74,24 @@ fun CodeClientContent(
 	viewModel: GymViewModel = hiltViewModel()
 ) {
 	val colorScheme = MaterialTheme.colorScheme
+	val clipboardManager = LocalClipboardManager.current
+	val context = LocalContext.current
+	
 	var showDialog by remember { mutableStateOf(false) }
+	
 	val generatedCode = viewModel.generatedCode
 	val errorMessage = viewModel.errorMessage
 	val snackbarHostState = remember { SnackbarHostState() }
 	
 	val gymCode = viewModel.gymCode
 	val userUid = FirebaseAuth.getInstance().currentUser?.uid
-	val clipboardManager =  LocalClipboardManager.current
-	val context = LocalContext.current
+	
+	val availableCodes by viewModel.availableCodes.collectAsState()
+	val codesError by viewModel.codesError.collectAsState()
 	
 	LaunchedEffect(Unit) {
 		userUid?.let { viewModel.loadCurrentUserGymCode(it) }
+		viewModel.loadAvailableCodes()
 	}
 	
 	LaunchedEffect(errorMessage) {
@@ -140,17 +149,10 @@ fun CodeClientContent(
 		Column(
 			modifier = Modifier
 				.padding(innerPadding)
-				.padding(horizontal = 16.dp, vertical = 24.dp)
+				.padding(horizontal = 16.dp)
 				.fillMaxSize(),
 			verticalArrangement = Arrangement.Top
 		) {
-			Text(
-				text = "Último código generado:",
-				style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-			)
-			
-			Spacer(modifier = Modifier.height(16.dp))
-			
 			generatedCode?.let { code ->
 				Card(
 					modifier = Modifier
@@ -193,31 +195,80 @@ fun CodeClientContent(
 					}
 				}
 			}
-		}
-		
-		// Diálogo de confirmación
-		if (showDialog && gymCode != null) {
-			AlertDialog(
-				onDismissRequest = { showDialog = false },
-				title = { Text("Confirmar generación") },
-				text = { Text("¿Deseas generar un nuevo código de acceso para clientes?") },
-				confirmButton = {
-					TextButton(
-						onClick = {
-							showDialog = false
-							viewModel.SetSelectedRoleForCode("cliente")
-							viewModel.generateCodeForRole()
-						}
-					) {
-						Text("Aceptar")
-					}
-				},
-				dismissButton = {
-					TextButton(onClick = { showDialog = false }) {
-						Text("Cancelar")
-					}
-				}, containerColor = colorScheme.surface
+			
+			Spacer(modifier = Modifier.height(24.dp))
+			
+			Text(
+				text = "Códigos disponibles:",
+				style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
 			)
+			
+			Spacer(modifier = Modifier.height(8.dp))
+			
+			if (availableCodes.isEmpty()) {
+				Text(
+					text = "No hay códigos disponibles actualmente.",
+					style = MaterialTheme.typography.bodyMedium,
+					color = colorScheme.onSurfaceVariant
+				)
+			} else {
+				LazyColumn {
+					items(availableCodes) { code ->
+						Card(
+							modifier = Modifier
+								.fillMaxWidth()
+								.padding(vertical = 6.dp)
+								.clickable {
+									clipboardManager.setText(AnnotatedString(code))
+									Toast.makeText(context, "Código copiado: $code", Toast.LENGTH_SHORT).show()
+								},
+							shape = RoundedCornerShape(12.dp),
+							elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+							colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceVariant)
+						) {
+							Row(
+								modifier = Modifier
+									.padding(16.dp)
+									.fillMaxWidth(),
+								horizontalArrangement = Arrangement.SpaceBetween,
+								verticalAlignment = Alignment.CenterVertically
+							) {
+								Text(code, fontWeight = FontWeight.SemiBold)
+								Icon(
+									imageVector = Icons.Default.ContentCopy,
+									contentDescription = "Copiar código",
+									tint = colorScheme.primary
+								)
+							}
+						}
+					}
+				}
+			}
 		}
+	}
+	
+	if (showDialog && gymCode != null) {
+		AlertDialog(
+			onDismissRequest = { showDialog = false },
+			title = { Text("Confirmar generación") },
+			text = { Text("¿Deseas generar un nuevo código de acceso para clientes?") },
+			confirmButton = {
+				TextButton(
+					onClick = {
+						showDialog = false
+						viewModel.SetSelectedRoleForCode("cliente")
+						viewModel.generateCodeForRole()
+					}
+				) {
+					Text("Aceptar")
+				}
+			},
+			dismissButton = {
+				TextButton(onClick = { showDialog = false }) {
+					Text("Cancelar")
+				}
+			},
+			containerColor = colorScheme.surface
+		)
 	}
 }

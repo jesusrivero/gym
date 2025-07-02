@@ -32,7 +32,7 @@ class UserAdminRepositoryImpl @Inject constructor(
 			val codigoDocument = codigoSnapshot.documents.firstOrNull()
 				?: return@withContext Result.failure(Exception("El código '$code' no existe."))
 			
-			val yaUsado = codigoDocument.getBoolean("usado") == true
+			val yaUsado = codigoDocument.getBoolean("used") == true
 			if (yaUsado) return@withContext Result.failure(Exception("El código '$code' ya fue usado."))
 			
 			// UID del administrador actual
@@ -96,7 +96,7 @@ class UserAdminRepositoryImpl @Inject constructor(
 				).await()
 			
 			// Marcar código como usado
-			codigoDocument.reference.update("usado", true).await()
+			codigoDocument.reference.update("used", true).await()
 			
 			// Cerrar sesión secundaria
 			secondaryAuth.signOut()

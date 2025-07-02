@@ -76,7 +76,7 @@ class GymRepositoryImpl @Inject constructor(
 
             val isValid = doc != null &&
                     (doc.getString("rol") == "dueño") &&
-                    !(doc.getBoolean("usado") ?: false)
+                    !(doc.getBoolean("used") ?: false)
 
             Result.success(isValid)
         } catch (e: Exception) {
@@ -100,7 +100,7 @@ class GymRepositoryImpl @Inject constructor(
 
             val isValid = doc != null &&
                     (doc.getString("rol") == "cliente") &&
-                    !(doc.getBoolean("usado") ?: false) &&
+                    !(doc.getBoolean("used") ?: false) &&
                     codeParts.firstOrNull() == gymCode
 
             Result.success(isValid)
@@ -125,7 +125,7 @@ class GymRepositoryImpl @Inject constructor(
 
             val isValid = doc != null &&
                     (doc.getString("rol") == "administrador") &&
-                    !(doc.getBoolean("usado") ?: false) &&
+                    !(doc.getBoolean("used") ?: false) &&
                     codeParts.firstOrNull() == gymCode
 
             Result.success(isValid)
@@ -147,7 +147,7 @@ class GymRepositoryImpl @Inject constructor(
 
             if (docRef != null) {
                 val updates = mutableMapOf<String, Any>(
-                    "usado" to true
+                    "used" to true
                 )
 
                 rol?.let {
@@ -236,7 +236,23 @@ class GymRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
-
+	
+	override suspend fun getAvailableCodes(): Result<List<String>> {
+		return try {
+			val snapshot = firestore.collection("codigos")
+				.whereEqualTo("used", false)
+				.get()
+				.await()
+			
+			val codes = snapshot.documents.mapNotNull { it.getString("code") }
+			Result.success(codes)
+		} catch (e: Exception) {
+			Result.failure(e)
+		}
+	}
+	
+	
+	
 }
 
 

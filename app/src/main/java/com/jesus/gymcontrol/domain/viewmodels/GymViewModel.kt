@@ -18,6 +18,8 @@ import com.jesus.gymcontrol.domain.usecase.usuario.validateCode.ValidateAdminCod
 import com.jesus.gymcontrol.domain.usecase.usuario.validateCode.ValidateClientCodeUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.validateCode.ValidateOwnerCodeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -30,13 +32,13 @@ class GymViewModel @Inject constructor(
     private val getAllGymUseCase: GetAllGymUseCase,
     private val firebaseAuth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
-    private val validateGymCodeUseCase: ValidateClientCodeUseCase,
     private val markCodeAsUseUseCase: MarkCodeAsUseUseCase,
     private val generateCodeUseCase: GenerateCodeUseCase,
     private val getGymByOwnerUseCase: GetGymByOwnerUseCase,
     private val validateOwnerCodeUseCase: ValidateOwnerCodeUseCase,
     private val validateClientCodeUseCase: ValidateClientCodeUseCase,
-    private val validateAdminCodeUseCase: ValidateAdminCodeUseCase
+    private val validateAdminCodeUseCase: ValidateAdminCodeUseCase,
+	private val getAvailableCodesUseCase: com.jesus.gymcontrol.domain.usecase.usuario.codes.GetAvailableCodesUseCase
 ) : ViewModel() {
 
     var gyms by mutableStateOf<List<Gym>>(emptyList())
@@ -71,8 +73,28 @@ class GymViewModel @Inject constructor(
 
     var setSelectedRoleForCode by mutableStateOf("cliente")
         private set
+	
 
-    fun generateCodeForRole() {
+	private val _availableCodes = MutableStateFlow<List<String>>(emptyList())
+	val availableCodes: StateFlow<List<String>> = _availableCodes
+	
+	private val _codesError = MutableStateFlow<String?>(null)
+	val codesError: StateFlow<String?> = _codesError
+	
+	fun loadAvailableCodes() {
+		viewModelScope.launch {
+			val result = getAvailableCodesUseCase()
+			result.onSuccess { codes ->
+				_availableCodes.value = codes
+			}.onFailure { error ->
+				_codesError.value = error.message
+			}
+		}
+	}
+	
+	
+	
+	fun generateCodeForRole() {
         val uid = firebaseAuth.currentUser?.uid ?: return
 
         viewModelScope.launch {

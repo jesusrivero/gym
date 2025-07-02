@@ -1,7 +1,6 @@
 package com.jesus.gymcontrol.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.jesus.gymcontrol.domain.model.Gym
@@ -62,24 +61,6 @@ class UserRepositoryImpl @Inject constructor(
 			
 			val userRef = firestore.collection("users").document(uid)
 			
-			// 5. Subcolección de pagos personalizada del usuario
-			val pagosRef = userGymRef.collection("pagos").document("pagos")
-			
-			// 6. Subcolecciones compartidas del gimnasio
-			val membresiasRef = firestore.collection("gimnasios")
-				.document(gym.code)
-				.collection("membresias")
-				.document("basica")
-			
-			val promocionesRef = firestore.collection("gimnasios")
-				.document(gym.code)
-				.collection("promociones")
-				.document("inicial")
-			
-			val mensajesRef = firestore.collection("gimnasios")
-				.document(gym.code)
-				.collection("mensajes")
-				.document("bienvenida")
 			
 			// 7. Transacción en lote
 			val batch = firestore.batch()
@@ -96,40 +77,6 @@ class UserRepositoryImpl @Inject constructor(
 					"rol" to rol,
 					"gimnasio" to gym.name,
 					"gimnasioCode" to gym.code
-				)
-			)
-			
-			// Crear subcolección de pagos (personal del usuario)
-			batch.set(
-				pagosRef, mapOf(
-					"mensaje" to "No hay pagos registrados aún"
-				)
-			)
-			
-			// Crear membresía inicial
-			batch.set(
-				membresiasRef, mapOf(
-					"name" to "Membresía Básica",
-					"description" to "Plan de acceso básico",
-					"price" to 0,
-					"state" to "activa"
-				)
-			)
-			
-			
-			// Crear promoción inicial
-			batch.set(
-				promocionesRef, mapOf(
-					"title" to "Sin promociones",
-					"description" to "Aún no hay promociones activas"
-				)
-			)
-			
-			// Crear mensaje de bienvenida
-			batch.set(
-				mensajesRef, mapOf(
-					"content" to "¡Bienvenido al gimnasio ${gym.name}!",
-					"date" to FieldValue.serverTimestamp()
 				)
 			)
 			

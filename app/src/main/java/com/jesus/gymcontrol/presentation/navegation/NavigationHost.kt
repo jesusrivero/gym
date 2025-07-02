@@ -32,7 +32,6 @@ import com.jesus.gymcontrol.presentation.ui.settings.details.payments.PaymentsSc
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.AccountScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.CodeClientScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.ContactScreen
-import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.ErrorReportScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.NotificationScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.NotificationsScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.PreferencesScreen
@@ -110,11 +109,6 @@ fun NavigationHost(
 		
 		composable<AppRoutes.ContactScreen> {
 			ContactScreen(navController = navController)
-			
-		}
-		
-		composable<AppRoutes.ErrorReportScreen> {
-			ErrorReportScreen(navController = navController)
 			
 		}
 		

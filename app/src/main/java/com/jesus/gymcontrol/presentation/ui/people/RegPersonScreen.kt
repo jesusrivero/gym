@@ -34,6 +34,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -142,15 +143,15 @@ fun RegPersonContent(
 ) {
 	val colorScheme = MaterialTheme.colorScheme
 	
-	var name by remember { mutableStateOf("") }
-	var email by remember { mutableStateOf("") }
-	var password by remember { mutableStateOf("") }
-	var phone by remember { mutableStateOf("") }
-	var idCard by remember { mutableStateOf("") }
-	var code by remember { mutableStateOf("") }
-	var gimnasioCode by remember { mutableStateOf("") } // Se ignora en backend pero aún puedes mantenerlo visible si quieres
-	var rol by remember { mutableStateOf("cliente") }
-	val date by remember { mutableStateOf(System.currentTimeMillis()) }
+	var name by rememberSaveable { mutableStateOf("") }
+	var email by rememberSaveable { mutableStateOf("") }
+	var password by rememberSaveable { mutableStateOf("") }
+	var phone by rememberSaveable { mutableStateOf("") }
+	var idCard by rememberSaveable { mutableStateOf("") }
+	var code by rememberSaveable { mutableStateOf("") }
+	var gimnasioCode by rememberSaveable { mutableStateOf("") }
+	var rol by rememberSaveable { mutableStateOf("cliente") }
+	val date by rememberSaveable { mutableStateOf(System.currentTimeMillis()) }
 	
 	var showDialog by remember { mutableStateOf(false) }
 	

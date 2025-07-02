@@ -1,6 +1,9 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details.preferences
 
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,6 +28,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,6 +36,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -45,6 +53,7 @@ import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 import com.jesus.gymcontrol.presentation.ui.commons.BottomNavigationBar
+import com.jesus.gymcontrol.presentation.ui.commons.NotificationPanel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,16 +71,43 @@ fun PreferencesContent(
 	viewModel: AuthViewModel = hiltViewModel(),
 ) {
 	val colorScheme = MaterialTheme.colorScheme
+	val context = LocalContext.current
+	var showNotifications by remember { mutableStateOf(false) }
+	val notifications = listOf(
+		"Nuevo registro: Jesús R.",
+		"Pago recibido: 20 USD",
+		"Cambio de estado: Pedro ahora está 'Pendiente'",
+		"Nuevo registro: Jesús R.",
+		"Pago recibido: 20 USD",
+		"Cambio de estado: Pedro ahora está 'Pendiente'",
+		"Nuevo registro: Jesús R.",
+		"Pago recibido: 20 USD",
+		"Cambio de estado: Pedro ahora está 'Pendiente'",
+		"Nuevo registro: Jesús R.",
+		"Pago recibido: 20 USD",
+		"Cambio de estado: Pedro ahora está 'Pendiente'",
+		"Nuevo registro: Jesús R.",
+		"Pago recibido: 20 USD",
+		"Cambio de estado: Pedro ahora está 'Pendiente'"
+	)
 	
 	Scaffold(
 		topBar = {
 			TopAppBar(
 				title = {
 					Text(
-						text = "Panel de administración",
+						text = "Preferencias",
 						color = colorScheme.onPrimary,
 						fontWeight = FontWeight.Bold
 					)
+				}, actions = {
+					IconButton(onClick = { showNotifications = !showNotifications }) {
+						Icon(
+							imageVector = Icons.Default.Notifications,
+							contentDescription = "Notificaciones",
+							tint = colorScheme.onPrimary
+						)
+					}
 				},
 				colors = TopAppBarDefaults.topAppBarColors(
 					containerColor = colorScheme.primary
@@ -121,8 +157,23 @@ fun PreferencesContent(
 			SettingsItem(
 				text = "Reportar errores",
 				icon = Icons.Default.Email,
-				onClick = { navController.navigate(AppRoutes.ErrorReportScreen) }
+				onClick = {
+					val intent = Intent(Intent.ACTION_SEND).apply {
+						type = "message/rfc822"
+						putExtra(Intent.EXTRA_EMAIL, arrayOf("soporte@tugimnasio.com"))
+						putExtra(Intent.EXTRA_SUBJECT, "Reporte de error")
+						putExtra(Intent.EXTRA_TEXT, "Hola, encontré un error en la app:")
+						setPackage("com.google.android.gm")
+					}
+					
+					try {
+						context.startActivity(Intent.createChooser(intent, "Enviar correo con..."))
+					} catch (e: ActivityNotFoundException) {
+						Toast.makeText(context, "No se encontró una app de correo", Toast.LENGTH_SHORT).show()
+					}
+				}
 			)
+			
 			
 			SettingsItem(
 				text = "Sobre nosotros",
@@ -147,6 +198,12 @@ fun PreferencesContent(
 			}
 		}
 	}
+	NotificationPanel(
+		isVisible = showNotifications,
+		navController = navController,
+		notifications = notifications,
+		onDismiss = { showNotifications = false }
+	)
 }
 
 @Composable

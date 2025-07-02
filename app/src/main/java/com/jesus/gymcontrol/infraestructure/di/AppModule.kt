@@ -51,6 +51,7 @@ import com.jesus.gymcontrol.domain.usecase.usuario.UpdateDatesUserUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdatePromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateRolUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateUserProfileUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.codes.GetAvailableCodesUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.notification.AddNotificacionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.notification.DeleteNotificacionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.notification.GetNotificacionesUseCase
@@ -369,5 +370,10 @@ object AppModule {
 	fun providePurgeNotificacionesUseCase(repository: NotificacionRepository): PurgeNotificacionesUseCase {
 		return PurgeNotificacionesUseCase(repository)
 	}
+	
+	@Provides
+	fun provideGetAvailableCodesUseCase(
+		repository: GymRepository
+	): GetAvailableCodesUseCase = GetAvailableCodesUseCase(repository)
 	
 }

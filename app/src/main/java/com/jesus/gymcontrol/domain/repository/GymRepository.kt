@@ -36,4 +36,8 @@ interface GymRepository {
 
     suspend fun getGymByOwnerUid(uid: String):
             Result<Gym>
+	
+	suspend fun getAvailableCodes(): Result<List<String>>
+	
+	
 }
