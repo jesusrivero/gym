@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -59,6 +60,7 @@ import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.domain.model.Membership
 import com.jesus.gymcontrol.domain.viewmodels.MembershipViewModel
+import com.jesus.gymcontrol.presentation.ui.commons.PromotionFilter
 import kotlinx.coroutines.delay
 
 
@@ -80,11 +82,10 @@ fun MembershipScreen(
 	var duration by remember { mutableStateOf("") }
 	var membershipToToggle by remember { mutableStateOf<Membership?>(null) }
 	var showSuccessDialog by remember { mutableStateOf(false) }
-	
 	var membershipToEdit by remember { mutableStateOf<Membership?>(null) }
 	var membershipToView by remember { mutableStateOf<Membership?>(null) }
-	val isStillLoading = isLoading || membershipsSummary.isEmpty()
 	val isActionSuccess by viewModel.isActionSuccess.collectAsState()
+	var filter by remember { mutableStateOf(PromotionFilter.ACTIVE) }
 	
 	
 	LaunchedEffect(Unit) {
@@ -162,69 +163,115 @@ fun MembershipScreen(
 		Column(
 			modifier = Modifier
 				.padding(padding)
-				.padding(horizontal = 20.dp, vertical = 12.dp)
+				.padding(horizontal = 20.dp, vertical = 8.dp)
 				.fillMaxSize()
 		) {
-			if (isStillLoading) {
-				Box(
-					modifier = Modifier
-						.fillMaxSize()
-						.padding(top = 32.dp), // opcional: evita recortes por la AppBar
-					contentAlignment = Alignment.Center
+			Row(
+				modifier = Modifier.fillMaxWidth(),
+				horizontalArrangement = Arrangement.End
+			) {
+				TextButton(
+					onClick = { filter = PromotionFilter.ACTIVE },
+					colors = ButtonDefaults.textButtonColors(
+						contentColor = if (filter == PromotionFilter.ACTIVE) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+					)
 				) {
-					CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+					Text("Activas")
 				}
-			} else {
-				LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-					items(membershipsSummary) { membershipWithCount ->
-						
-						val membership = membershipWithCount.membership
-						val userCount = membershipWithCount.userCount
-						Card(
-							modifier = Modifier
-								.fillMaxWidth()
-								.padding(vertical = 4.dp),
-							shape = RoundedCornerShape(16.dp),
-							elevation = CardDefaults.cardElevation(4.dp),
-							colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-						) {
-							Column(Modifier.padding(16.dp)) {
-								Text(
-									membership.nombre,
-									style = MaterialTheme.typography.titleMedium,
-									color = MaterialTheme.colorScheme.primary
-								)
-								Spacer(Modifier.height(4.dp))
-								Text(
-									"Usuarios registrados: $userCount",
-									style = MaterialTheme.typography.labelSmall,
-									color = MaterialTheme.colorScheme.onSurfaceVariant
-								)
-								Spacer(Modifier.height(6.dp))
-								Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-									IconButton(onClick = { membershipToView = membership }) {
-										Icon(
-											painterResource(id = R.drawable.ic_details),
-											contentDescription = "Detalles"
-										)
-									}
-									IconButton(onClick = { membershipToEdit = membership }) {
-										Icon(Icons.Default.Edit, contentDescription = "Editar")
-									}
-									IconButton(onClick = {
-										viewModel.toggleMembershipState(membership)
-									}) {
-										IconButton(onClick = {
-											membershipToToggle =
-												membership // En lugar de llamar directamente al ViewModel
-										}) {
+				TextButton(
+					onClick = { filter = PromotionFilter.INACTIVE },
+					colors = ButtonDefaults.textButtonColors(
+						contentColor = if (filter == PromotionFilter.INACTIVE) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+					)
+				) {
+					Text("Inactivas")
+				}
+			}
+			
+			when {
+				isLoading -> {
+					Box(
+						modifier = Modifier
+							.fillMaxSize()
+							.padding(top = 32.dp),
+						contentAlignment = Alignment.Center
+					) {
+						CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+					}
+				}
+				
+				membershipsSummary.isEmpty() -> {
+					Box(
+						modifier = Modifier
+							.fillMaxSize()
+							.padding(top = 32.dp),
+						contentAlignment = Alignment.Center
+					) {
+						Text(
+							text = "No hay membresías creadas",
+							style = MaterialTheme.typography.bodyMedium,
+							color = MaterialTheme.colorScheme.onSurfaceVariant
+						)
+					}
+				}
+				
+				else -> {
+					val filteredMemberships = when (filter) {
+						PromotionFilter.ACTIVE -> membershipsSummary.filter { it.membership.activo }
+						PromotionFilter.INACTIVE -> membershipsSummary.filter { !it.membership.activo }
+					}
+					LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+						items(filteredMemberships) { membershipWithCount ->
+							
+							
+							val membership = membershipWithCount.membership
+							val userCount = membershipWithCount.userCount
+							Card(
+								modifier = Modifier
+									.fillMaxWidth()
+									.padding(vertical = 4.dp),
+								shape = RoundedCornerShape(16.dp),
+								elevation = CardDefaults.cardElevation(4.dp),
+								colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+							) {
+								Column(Modifier.padding(16.dp)) {
+									Text(
+										membership.nombre,
+										style = MaterialTheme.typography.titleMedium,
+										color = MaterialTheme.colorScheme.primary
+									)
+									Spacer(Modifier.height(4.dp))
+									Text(
+										"Usuarios registrados: $userCount",
+										style = MaterialTheme.typography.labelSmall,
+										color = MaterialTheme.colorScheme.onSurfaceVariant
+									)
+									Spacer(Modifier.height(6.dp))
+									Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+										IconButton(onClick = { membershipToView = membership }) {
 											Icon(
-												imageVector = if (membership.activo) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-												contentDescription = if (membership.activo) "Desactivar" else "Activar",
-												tint = if (membership.activo) MaterialTheme.colorScheme.primary else Color.Red
+												painterResource(id = R.drawable.ic_details),
+												contentDescription = "Detalles"
 											)
 										}
-										
+										IconButton(onClick = { membershipToEdit = membership }) {
+											Icon(Icons.Default.Edit, contentDescription = "Editar")
+										}
+										IconButton(onClick = {
+											viewModel.toggleMembershipState(membership)
+										}) {
+											IconButton(onClick = {
+												membershipToToggle =
+													membership // En lugar de llamar directamente al ViewModel
+											}) {
+												Icon(
+													imageVector = if (membership.activo) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+													contentDescription = if (membership.activo) "Desactivar" else "Activar",
+													tint = if (membership.activo) MaterialTheme.colorScheme.primary else Color.Red
+												)
+											}
+											
+										}
 									}
 								}
 							}
@@ -477,5 +524,4 @@ fun MembershipScreen(
 //					}, 	containerColor = MaterialTheme.colorScheme.surface
 //				)
 //			}
-			
 

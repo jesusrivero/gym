@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -58,6 +59,7 @@ import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.domain.model.Promotion
 import com.jesus.gymcontrol.domain.viewmodels.PromotionViewModel
+import com.jesus.gymcontrol.presentation.ui.commons.PromotionFilter
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -88,6 +90,7 @@ fun PromotionScreen(
 	val isActionSuccess by viewModel.isActionSuccess.collectAsState()
 	var showDiscountError by remember { mutableStateOf(false) }
 	var showEditDiscountError by remember { mutableStateOf(false) }
+	var filter by remember { mutableStateOf(PromotionFilter.ACTIVE) }
 	
 	
 	
@@ -165,7 +168,7 @@ fun PromotionScreen(
 		Column(
 			modifier = Modifier
 				.padding(padding)
-				.padding(16.dp)
+				.padding(horizontal = 16.dp, vertical = 8.dp)
 				.fillMaxSize()
 		) {
 			
@@ -204,7 +207,27 @@ fun PromotionScreen(
 					containerColor = MaterialTheme.colorScheme.surface
 				)
 			}
-			
+			Row(
+				modifier = Modifier.fillMaxWidth(),
+				horizontalArrangement = Arrangement.End
+			) {
+				TextButton(
+					onClick = { filter = PromotionFilter.ACTIVE },
+					colors = ButtonDefaults.textButtonColors(
+						contentColor = if (filter == PromotionFilter.ACTIVE) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+					)
+				) {
+					Text("Activas")
+				}
+				TextButton(
+					onClick = { filter = PromotionFilter.INACTIVE },
+					colors = ButtonDefaults.textButtonColors(
+						contentColor = if (filter == PromotionFilter.INACTIVE) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+					)
+				) {
+					Text("Inactivas")
+				}
+			}
 			when {
 				isLoading -> {
 					Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -219,8 +242,12 @@ fun PromotionScreen(
 				}
 				
 				else -> {
+					val filteredPromotions = when (filter) {
+						PromotionFilter.ACTIVE -> promotions.filter { it.activo }
+						PromotionFilter.INACTIVE -> promotions.filter { !it.activo }
+					}
 					LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-						items(promotions) { promo ->
+						items(filteredPromotions) { promo ->
 							Card(
 								modifier = Modifier
 									.fillMaxWidth()
@@ -321,12 +348,17 @@ fun PromotionScreen(
 							val durationValue = duration.toIntOrNull()
 							
 							if (name.isBlank() || description.isBlank() || discountValue == null || durationValue == null) {
-								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT).show()
+								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT)
+									.show()
 								return@Button
 							}
 							
 							if (discountValue > 100.0) {
-								Toast.makeText(context, "El descuento no puede ser mayor al 100%", Toast.LENGTH_SHORT).show()
+								Toast.makeText(
+									context,
+									"El descuento no puede ser mayor al 100%",
+									Toast.LENGTH_SHORT
+								).show()
 								return@Button
 							}
 							
@@ -344,7 +376,6 @@ fun PromotionScreen(
 							description = ""
 							discount = ""
 							duration = ""
-							Toast.makeText(context, "Promoción creada exitosamente", Toast.LENGTH_SHORT).show()
 						}) {
 							Text("Guardar")
 						}
@@ -393,7 +424,7 @@ fun PromotionScreen(
 									text = "El descuento no puede ser mayor a 100%",
 									color = Color.Red,
 									style = MaterialTheme.typography.labelSmall,
-									modifier = Modifier.padding(top=4.dp)
+									modifier = Modifier.padding(top = 4.dp)
 								)
 							}
 							OutlinedTextField(
@@ -425,12 +456,17 @@ fun PromotionScreen(
 							val durationVal = editedDuration.toIntOrNull()
 							
 							if (editedName.isBlank() || editedDescription.isBlank() || discountVal == null || durationVal == null) {
-								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT).show()
+								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT)
+									.show()
 								return@Button
 							}
 							
 							if (discountVal > 100.0) {
-								Toast.makeText(context, "El descuento no puede ser mayor al 100%", Toast.LENGTH_SHORT).show()
+								Toast.makeText(
+									context,
+									"El descuento no puede ser mayor al 100%",
+									Toast.LENGTH_SHORT
+								).show()
 								return@Button
 							}
 							
@@ -492,7 +528,7 @@ fun PromotionScreen(
 									text = "El descuento no puede ser mayor a 100%",
 									color = Color.Red,
 									style = MaterialTheme.typography.labelSmall,
-									modifier = Modifier.padding(top=4.dp),
+									modifier = Modifier.padding(top = 4.dp),
 									maxLines = 1
 								)
 							}
@@ -540,3 +576,4 @@ fun PromotionScreen(
 		}
 	}
 }
+

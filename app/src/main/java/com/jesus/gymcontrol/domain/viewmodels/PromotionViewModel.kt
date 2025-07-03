@@ -77,7 +77,6 @@ class PromotionViewModel @Inject constructor(
 			isLoading = false
 			
 			result.onSuccess {
-				setActionResult("Promoción creada correctamente", true)
 				loadPromotions()
 			}.onFailure {
 				setActionResult("Error al crear promoción: ${it.message}", false)
