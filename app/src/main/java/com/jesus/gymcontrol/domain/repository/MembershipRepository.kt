@@ -18,7 +18,7 @@ interface MembershipRepository {
 	suspend fun setMembershipState(
 		membershipId: String,
 		gymCode: String,
-		newState: String
+		newState: Boolean
 	): Result<Unit>
 	
 	

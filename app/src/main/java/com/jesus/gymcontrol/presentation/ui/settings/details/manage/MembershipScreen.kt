@@ -219,9 +219,9 @@ fun MembershipScreen(
 												membership // En lugar de llamar directamente al ViewModel
 										}) {
 											Icon(
-												imageVector = if (membership.state == "activo") Icons.Default.Visibility else Icons.Default.VisibilityOff,
-												contentDescription = if (membership.state == "activo") "Desactivar" else "Activar",
-												tint = if (membership.state == "activo") MaterialTheme.colorScheme.primary else Color.Red
+												imageVector = if (membership.activo) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+												contentDescription = if (membership.activo) "Desactivar" else "Activar",
+												tint = if (membership.activo) MaterialTheme.colorScheme.primary else Color.Red
 											)
 										}
 										
@@ -416,13 +416,14 @@ fun MembershipScreen(
 					onDismissRequest = { membershipToToggle = null },
 					title = {
 						Text(
-							text = if (selected.state == "activo") "Desactivar membresía" else "Activar membresía"
+							text = if (selected.activo) "Desactivar membresía" else "Activar membresía"
 						)
-					}, containerColor = MaterialTheme.colorScheme.surface,
+					},
+					containerColor = MaterialTheme.colorScheme.surface,
 					text = {
 						Text(
-							text = if (selected.state == "activo") {
-								"¿Estás seguro de que deseas desactivar esta membresía? Ya no podras usarla para agregar pagos nuevos."
+							text = if (selected.activo) {
+								"¿Estás seguro de que deseas desactivar esta membresía? Ya no podrás usarla para agregar pagos nuevos."
 							} else {
 								"¿Estás seguro de que deseas activar esta membresía?"
 							}

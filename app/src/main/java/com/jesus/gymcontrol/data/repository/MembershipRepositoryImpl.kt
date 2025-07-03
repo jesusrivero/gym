@@ -113,7 +113,7 @@ class MembershipRepositoryImpl @Inject constructor(
 				.collection("membresias")
 				.document(doc.id)
 				.collection("usuarios")
-				.whereEqualTo("state", "activo") // ✅ Solo activos
+				.whereEqualTo("state", "activo")
 				.get()
 				.await()
 				.size()
@@ -154,38 +154,41 @@ class MembershipRepositoryImpl @Inject constructor(
 		}
 	}
 	
+	
 	override suspend fun setMembershipState(
 		membershipId: String,
 		gymCode: String,
-		newState: String
+		newState: Boolean
 	): Result<Unit> {
 		return try {
-			// Paso 1: Verificamos si hay usuarios activos en la membresía
-			val activeUsersSnapshot = firestore.collection("gimnasios")
-				.document(gymCode)
-				.collection("membresias")
-				.document(membershipId)
-				.collection("usuarios")
-				.whereEqualTo("state", "activo")
-				.get()
-				.await()
-			
-			if (!activeUsersSnapshot.isEmpty && newState == "inactivo") {
-				return Result.failure(Exception("No se puede desactivar: hay usuarios activos."))
+			// Si se quiere desactivar, verificamos que no haya usuarios activos
+			if (!newState) {
+				val activeUsersSnapshot = firestore.collection("gimnasios")
+					.document(gymCode)
+					.collection("membresias")
+					.document(membershipId)
+					.collection("usuarios")
+					.whereEqualTo("state", "activo")
+					.get()
+					.await()
+				
+				if (!activeUsersSnapshot.isEmpty) {
+					return Result.failure(Exception("No se puede desactivar: hay usuarios activos."))
+				}
 			}
 			
-			// Paso 2: Actualizamos el estado si no hay usuarios activos o si se quiere activar
-			val ref = firestore.collection("gimnasios")
+			// Actualizamos el campo "activo"
+			firestore.collection("gimnasios")
 				.document(gymCode)
 				.collection("membresias")
 				.document(membershipId)
-			
-			ref.update("state", newState).await()
+				.update("activo", newState)
+				.await()
 			
 			Result.success(Unit)
 		} catch (e: Exception) {
 			Result.failure(e)
-			}
+		}
 	}
 	
 	

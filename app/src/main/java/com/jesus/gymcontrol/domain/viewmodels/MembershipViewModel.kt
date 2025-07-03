@@ -125,7 +125,8 @@ class MembershipViewModel @Inject constructor(
 	
 	fun toggleMembershipState(membership: Membership) {
 		viewModelScope.launch {
-			val newState = if (membership.state == "activo") "inactivo" else "activo"
+			val newState = !membership.activo
+			
 			val result = toggleMembershipStateUseCase(
 				membershipId = membership.id,
 				gymCode = membership.gimnasioCode,
@@ -133,12 +134,12 @@ class MembershipViewModel @Inject constructor(
 			)
 			
 			if (result.isSuccess) {
-				_membershipActionMessage.value = "Membresía ${if (newState == "activo") "activada" else "desactivada"} correctamente"
+				_membershipActionMessage.value = "Membresía ${if (newState) "activada" else "desactivada"} correctamente"
 				_isActionSuccess.value = true
 				loadMembershipsSummary()
 			} else {
 				_membershipActionMessage.value = result.exceptionOrNull()?.message ?: "Error desconocido"
-				_isActionSuccess.value = false
+				_isActionSuccess.value =false
 			}
 		}
 	}

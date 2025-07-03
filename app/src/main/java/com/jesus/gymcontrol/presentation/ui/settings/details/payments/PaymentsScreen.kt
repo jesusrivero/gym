@@ -429,7 +429,7 @@ fun PaymentsScreenContent(
 								modifier = Modifier
 									.background(MaterialTheme.colorScheme.surfaceVariant)
 							) {
-								memberships.filter { it.state == "activo" }.forEach { membership ->
+								memberships.filter { it.activo == true }.forEach { membership ->
 									DropdownMenuItem(
 										text = {
 											Column {
