@@ -15,6 +15,8 @@ import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetMembershipsUseCas
 import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetMembershipsWithUserCountUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.membership.ToggleMembershipStateUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,20 +28,13 @@ class MembershipViewModel @Inject constructor(
 	private val getMembershipsWithUserCountUseCase: GetMembershipsWithUserCountUseCase,
 	private val editMembershipUseCase: EditMembershipUseCase,
 	private val toggleMembershipStateUseCase: ToggleMembershipStateUseCase
-
 ) : ViewModel() {
-	data class MembershipUiState(
-		val isLoading: Boolean = true,
-		val memberships: List<MembershipWithCount> = emptyList(),
-		val errorMessage: String?=null
-	)
 	
 	var membershipsSummary by mutableStateOf<List<MembershipWithCount>>(emptyList())
 		private set
 	
 	var isLoading by mutableStateOf(false)
 		private set
-	
 	
 	var memberships by mutableStateOf<List<Membership>>(emptyList())
 		private set
@@ -56,6 +51,9 @@ class MembershipViewModel @Inject constructor(
 	private val _membershipActionMessage = mutableStateOf<String?>(null)
 	val membershipActionMessage: State<String?> = _membershipActionMessage
 	
+	private val _isActionSuccess = MutableStateFlow<Boolean?>(null)
+	val isActionSuccess: StateFlow<Boolean?> = _isActionSuccess
+	
 	fun createMembership(membership: Membership) {
 		viewModelScope.launch {
 			isLoading = true
@@ -65,19 +63,20 @@ class MembershipViewModel @Inject constructor(
 			isLoading = false
 			
 			result.onSuccess {
-				_membershipActionMessage.value = ""
+				_membershipActionMessage.value = "Membresía creada exitosamente"
+				_isActionSuccess.value = true
 				loadMemberships()
 			}.onFailure {
 				errorMessage = it.message
+				_membershipActionMessage.value = it.message
+				_isActionSuccess.value = false
 			}
 		}
 	}
 	
-	
-	
 	fun loadMemberships() {
 		viewModelScope.launch {
-			isLoading= true
+			isLoading = true
 			errorMessage = null
 			
 			getUseCase().onSuccess {
@@ -88,26 +87,6 @@ class MembershipViewModel @Inject constructor(
 			isLoading = false
 		}
 	}
-	
-	
-	
-	
-	//	VOY A DEJAR ESTA FUNCION PARA UNA FUTURA IMPLEMENTACION
-//	fun deleteMembership(membership: Membership) {
-//		viewModelScope.launch {
-//			isLoading = true
-//			errorMessage = null
-//
-//			deleteUseCase(membership).onSuccess {
-//				loadMemberships()
-//			}.onFailure {
-//				errorMessage = it.message
-//			}
-//			isLoading = false
-//		}
-//	}
-	
-	
 	
 	fun loadMembershipsSummary() {
 		viewModelScope.launch {
@@ -124,7 +103,6 @@ class MembershipViewModel @Inject constructor(
 		}
 	}
 	
-	
 	fun editMembership(membership: Membership) {
 		viewModelScope.launch {
 			isLoading = true
@@ -134,14 +112,16 @@ class MembershipViewModel @Inject constructor(
 			isLoading = false
 			
 			result.onSuccess {
-				_membershipActionMessage.value = ""
+				_membershipActionMessage.value = "Membresía actualizada correctamente"
+				_isActionSuccess.value = true
 				loadMemberships()
 			}.onFailure {
 				errorMessage = it.message
-				}
+				_membershipActionMessage.value = it.message
+				_isActionSuccess.value = false
+			}
 		}
 	}
-	
 	
 	fun toggleMembershipState(membership: Membership) {
 		viewModelScope.launch {
@@ -154,17 +134,33 @@ class MembershipViewModel @Inject constructor(
 			
 			if (result.isSuccess) {
 				_membershipActionMessage.value = "Membresía ${if (newState == "activo") "activada" else "desactivada"} correctamente"
+				_isActionSuccess.value = true
 				loadMembershipsSummary()
 			} else {
-				_membershipActionMessage.value = "Error al actualizar estado: ${result.exceptionOrNull()?.message}"
+				_membershipActionMessage.value = result.exceptionOrNull()?.message ?: "Error desconocido"
+				_isActionSuccess.value = false
 			}
 		}
 	}
 	
 	fun clearMembershipMessage() {
 		_membershipActionMessage.value = null
+		_isActionSuccess.value=null
 	}
-	
-	
-	
 }
+	
+	
+	//	VOY A DEJAR ESTA FUNCION PARA UNA FUTURA IMPLEMENTACION
+//	fun deleteMembership(membership: Membership) {
+//		viewModelScope.launch {
+//			isLoading = true
+//			errorMessage = null
+//
+//			deleteUseCase(membership).onSuccess {
+//				loadMemberships()
+//			}.onFailure {
+//				errorMessage = it.message
+//			}
+//			isLoading = false
+//		}
+//	}

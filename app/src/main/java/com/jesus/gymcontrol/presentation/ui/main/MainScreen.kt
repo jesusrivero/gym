@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -65,6 +66,7 @@ import com.jesus.gymcontrol.domain.viewmodels.AdminViewModel
 import com.jesus.gymcontrol.domain.viewmodels.MembershipViewModel
 import com.jesus.gymcontrol.domain.viewmodels.MovementsViewModel
 import com.jesus.gymcontrol.domain.viewmodels.UserListViewModel
+import com.jesus.gymcontrol.domain.viewmodels.UserPreferencesViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 import com.jesus.gymcontrol.presentation.ui.commons.BottomNavigationBar
@@ -151,14 +153,14 @@ fun MainContent(
 		return
 	}
 	
-
+	
 	Box(modifier = Modifier.fillMaxSize()) {
 		Scaffold(
 			topBar = {
 				TopAppBar(
 					title = {
 						Text(
-							text = "Gym Control",
+							text = "Bienvenido \uD83D\uDCAA\uD83C\uDFFB",
 							color = colorScheme.onPrimary,
 							fontWeight = FontWeight.Bold
 						)
@@ -209,9 +211,10 @@ fun MainContent(
 							.verticalScroll(rememberScrollState())
 					) {
 						
-						NewClientsSection()
+						NewClientsSection(navController = navController)
 						
 						SummaryAndMembershipCard(
+							navController = navController,
 							summary = summary,
 							memberships = memberviewModel.membershipsSummary,
 							isLoading = isLoadingAdmin
@@ -223,13 +226,31 @@ fun MainContent(
 								.fillMaxWidth()
 								.padding(8.dp)
 						) {
-							Text(
-								text = "Últimos Movimientos",
-								style = MaterialTheme.typography.headlineSmall.copy(
-									fontWeight = FontWeight.Bold
-								),
-								modifier = Modifier.padding(bottom = 16.dp)
-							)
+							Row(
+								modifier = Modifier
+									.fillMaxWidth()
+									.padding(bottom = 16.dp),
+								horizontalArrangement = Arrangement.SpaceBetween,
+								verticalAlignment = Alignment.CenterVertically
+							) {
+								Row(modifier = Modifier.padding(start = 8.dp)) {
+									Text(
+										text = "Últimos Movimientos",
+										style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
+									)
+								}
+								
+								TextButton(
+									onClick = { navController.navigate(AppRoutes.ListPaymentsScreen) },
+									contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+								) {
+									Text(
+										text = "Ver más",
+										style = MaterialTheme.typography.labelMedium,
+										color = MaterialTheme.colorScheme.primary
+									)
+								}
+							}
 							PaymentsList(payments = payments)
 						}
 						
@@ -286,17 +307,38 @@ fun NewClientAvatar(name: String, photoUrl: String? = null, onClick: () -> Unit)
 }
 
 @Composable
-fun NewClientsSection(viewModel: UserListViewModel = hiltViewModel()) {
+fun NewClientsSection(
+	viewModel: UserListViewModel = hiltViewModel(),
+	navController: NavController,
+) {
 	var selectedUser by remember { mutableStateOf<ListUser?>(null) }
 	
 	val users = viewModel.listUsers.take(8)
 	
 	if (users.isNotEmpty()) {
-		Column(modifier = Modifier.padding(start = 16.dp, top = 16.dp)) {
-			Text(
-				text = "Clientes Nuevos",
-				style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-			)
+		Column(modifier = Modifier.padding(start = 10.dp, top = 8.dp)) {
+			Row(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(horizontal = 8.dp),
+				horizontalArrangement = Arrangement.SpaceBetween,
+				verticalAlignment = Alignment.CenterVertically
+			) {
+					Text(
+						text = "Clientes Nuevos",
+						style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+					)
+				TextButton(
+					onClick = { navController.navigate(AppRoutes.PersonasScreen) },
+					contentPadding = PaddingValues(horizontal = 8.dp)
+				) {
+					Text(
+						text = "Ver más",
+						style = MaterialTheme.typography.labelMedium,
+						color = MaterialTheme.colorScheme.primary
+					)
+				}
+			}
 			
 			Spacer(modifier = Modifier.height(8.dp))
 			
@@ -339,6 +381,7 @@ fun NewClientsSection(viewModel: UserListViewModel = hiltViewModel()) {
 
 @Composable
 fun SummaryAndMembershipCard(
+	navController: NavController,
 	summary: GymUserSummary,
 	memberships: List<MembershipWithCount>,
 	isLoading: Boolean,
@@ -355,13 +398,25 @@ fun SummaryAndMembershipCard(
 		shape = RoundedCornerShape(16.dp)
 	) {
 		Column(modifier = Modifier.padding(16.dp)) {
-			
-			// Título
-			Text(
-				text = "Resumen General",
-				style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-				color = MaterialTheme.colorScheme.onSurface
-			)
+			Row(
+				modifier = Modifier.fillMaxWidth(),
+				horizontalArrangement = Arrangement.SpaceBetween,
+				verticalAlignment = Alignment.CenterVertically
+			) {
+				Text(
+					text = "Resumen de General",
+					style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+				)
+				TextButton(
+					onClick = { navController.navigate(AppRoutes.MembershipScreen) },
+				) {
+					Text(
+						text = "Ver más",
+						style = MaterialTheme.typography.labelMedium,
+						color = MaterialTheme.colorScheme.primary
+					)
+				}
+			}
 			
 			Spacer(modifier = Modifier.height(16.dp))
 			

@@ -10,14 +10,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -32,6 +35,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -42,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -51,6 +56,7 @@ import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.domain.model.Promotion
 import com.jesus.gymcontrol.domain.viewmodels.PromotionViewModel
+import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -74,11 +80,22 @@ fun PromotionScreen(
 	var promotionToEdit by remember { mutableStateOf<Promotion?>(null) }
 	var promotionToDelete by remember { mutableStateOf<Promotion?>(null) }
 	var promotionToShow by remember { mutableStateOf<Promotion?>(null) }
-	
+	var promotionToggle by remember { mutableStateOf<Promotion?> (null)}
+	var showSuccessDialog by remember { mutableStateOf(false) }
+	val promotionActionMessage by viewModel.promotionActionMessage
 	
 	LaunchedEffect(Unit) {
 		viewModel.loadPromotions()
 		viewModel.loadUserCountByPromotion()
+	}
+	
+	LaunchedEffect(promotionToggle) {
+		promotionActionMessage?.let {
+			showSuccessDialog = true
+			delay(3000)
+			showSuccessDialog = false
+			viewModel.clearpromotionMessage()
+		}
 	}
 	
 	LaunchedEffect(errorMessage) {
@@ -88,6 +105,26 @@ fun PromotionScreen(
 		}
 	}
 	
+	
+	if (showSuccessDialog) {
+		AlertDialog(
+			onDismissRequest = { showSuccessDialog = false },
+			title = { Text("¡Éxito!") },
+			text = { Text("Información actualizada con éxito.") },
+			confirmButton = {}, // sin botón
+			icon = {
+				Icon(
+					imageVector = Icons.Default.CheckCircle,
+					contentDescription = null,
+					tint = Color(0xFF4CAF50),
+					modifier = Modifier.size(48.dp)
+				)
+			},
+			containerColor = MaterialTheme.colorScheme.surface,
+			titleContentColor = MaterialTheme.colorScheme.onSurface,
+			textContentColor = MaterialTheme.colorScheme.onSurface
+		)
+	}
 	Scaffold(
 		topBar = {
 			TopAppBar(
@@ -124,6 +161,43 @@ fun PromotionScreen(
 				.padding(16.dp)
 				.fillMaxSize()
 		) {
+			
+			promotionToggle?.let { selected ->
+				AlertDialog(
+					onDismissRequest = { promotionToggle = null },
+					title = {
+						Text(
+							text = if (selected.activo) "Desactivar promoción" else "Activar promoción"
+						)
+					},
+					text = {
+						Text(
+							text = if (selected.activo) {
+								"¿Estás seguro de que deseas desactivar esta promoción? Ya no podrá aplicarse a los pagos nuevos."
+							} else {
+								"¿Estás seguro de que deseas activar esta promoción?"
+							}
+						)
+					},
+					confirmButton = {
+						TextButton(onClick = {
+							viewModel.togglePromotionState(selected)
+							promotionToggle = null
+						}) {
+							Text("Confirmar")
+						}
+					},
+					dismissButton = {
+						TextButton(onClick = {
+							promotionToggle = null
+						}) {
+							Text("Cancelar")
+						}
+					},
+					containerColor = MaterialTheme.colorScheme.surface
+					)
+			}
+			
 			when {
 				isLoading -> {
 					Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -180,10 +254,15 @@ fun PromotionScreen(
 											Icon(Icons.Default.Edit, contentDescription = "Editar promoción")
 										}
 										IconButton(onClick = {
-											promotionToDelete = promo
+											promotionToggle = promo
 										}) {
-											Icon(Icons.Default.Delete, contentDescription = "Eliminar promoción")
+											Icon(
+												imageVector = if (promo.activo) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+												contentDescription = if (promo.activo) "Desacticar" else "Activar",
+												tint = if (promo.activo) MaterialTheme.colorScheme.primary else Color.Red
+											)
 										}
+										
 									}
 								}
 							}
@@ -207,7 +286,13 @@ fun PromotionScreen(
 							Spacer(modifier = Modifier.height(4.dp))
 							Text("Estado: ${if (promo.activo) "Activa" else "Inactiva"}")
 							Spacer(modifier = Modifier.height(4.dp))
-							Text("Fecha de creación: ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(promo.fechaCreacion))}")
+							Text(
+								"Fecha de creación: ${
+									SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(
+										Date(promo.fechaCreacion)
+									)
+								}"
+							)
 						}
 					},
 					confirmButton = {
@@ -322,7 +407,7 @@ fun PromotionScreen(
 							
 							viewModel.updatePromotion(updatedPromo)
 							promotionToEdit = null
-							Toast.makeText(context, "Promoción actualizada", Toast.LENGTH_SHORT).show()
+							promotionActionMessage
 						}) {
 							Text("Guardar")
 						}

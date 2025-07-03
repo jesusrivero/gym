@@ -4,7 +4,11 @@ package com.jesus.gymcontrol.presentation.ui.settings.details.preferences
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,25 +18,25 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -42,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -76,18 +81,6 @@ fun PreferencesContent(
 	val notifications = listOf(
 		"Nuevo registro: Jesús R.",
 		"Pago recibido: 20 USD",
-		"Cambio de estado: Pedro ahora está 'Pendiente'",
-		"Nuevo registro: Jesús R.",
-		"Pago recibido: 20 USD",
-		"Cambio de estado: Pedro ahora está 'Pendiente'",
-		"Nuevo registro: Jesús R.",
-		"Pago recibido: 20 USD",
-		"Cambio de estado: Pedro ahora está 'Pendiente'",
-		"Nuevo registro: Jesús R.",
-		"Pago recibido: 20 USD",
-		"Cambio de estado: Pedro ahora está 'Pendiente'",
-		"Nuevo registro: Jesús R.",
-		"Pago recibido: 20 USD",
 		"Cambio de estado: Pedro ahora está 'Pendiente'"
 	)
 	
@@ -100,7 +93,8 @@ fun PreferencesContent(
 						color = colorScheme.onPrimary,
 						fontWeight = FontWeight.Bold
 					)
-				}, actions = {
+				},
+				actions = {
 					IconButton(onClick = { showNotifications = !showNotifications }) {
 						Icon(
 							imageVector = Icons.Default.Notifications,
@@ -115,89 +109,136 @@ fun PreferencesContent(
 			)
 		},
 		bottomBar = {
-			BottomNavigationBar(navController = navController)
+			Column {
+				Button(
+					onClick = {
+						viewModel.logout()
+						navController.navigate(AppRoutes.LoginScreen) {
+							popUpTo(AppRoutes.PreferencesScreen) { inclusive = true }
+						}
+					},
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(horizontal = 16.dp, vertical = 8.dp)
+						.height(56.dp),
+					colors = ButtonDefaults.buttonColors(
+						containerColor = colorScheme.primary,
+						contentColor = colorScheme.onErrorContainer
+					),
+					shape = RoundedCornerShape(30.dp)
+				) {
+					Icon(
+						imageVector = Icons.Default.Logout,
+						contentDescription = "Cerrar sesión",
+						modifier = Modifier.size(24.dp)
+					)
+					Spacer(modifier = Modifier.width(8.dp))
+					Text("Cerrar sesión")
+				}
+				
+				// Barra de navegación inferior
+				BottomNavigationBar(navController = navController)
+			}
 		}
 	) { innerPadding ->
 		Column(
 			modifier = Modifier
 				.fillMaxSize()
 				.padding(innerPadding)
-				.padding(horizontal = 4.dp)
-				.verticalScroll(rememberScrollState())
+				.padding(horizontal = 2.dp)
+		
 		) {
-			SettingsSectionTitle("General")
-			
-			SettingsItem(
-				text = "Cuenta y Datos",
-				icon = Icons.Default.AccountCircle,
-				onClick = { navController.navigate(AppRoutes.AccountScreen) }
-			)
-			
-			SettingsItem(
-				text = "Notificaciones",
-				icon = Icons.Default.Notifications,
-				onClick = { navController.navigate(AppRoutes.NotificationScreen) }
-			)
-			
-			SettingsItem(
-				text = "Seguridad",
-				icon = Icons.Default.Build,
-				onClick = { navController.navigate(AppRoutes.SecurityScreen) }
-			)
-			SettingsItem(
-				text = "Generar codigo para clientes",
-				icon = Icons.Default.Info,
-				onClick = { navController.navigate(AppRoutes.CodeClientScreen) }
-			)
-			
-			Spacer(modifier = Modifier.height(24.dp))
-			
-			SettingsSectionTitle("Soporte")
-			
-			SettingsItem(
-				text = "Reportar errores",
-				icon = Icons.Default.Email,
-				onClick = {
-					val intent = Intent(Intent.ACTION_SEND).apply {
-						type = "message/rfc822"
-						putExtra(Intent.EXTRA_EMAIL, arrayOf("soporte@tugimnasio.com"))
-						putExtra(Intent.EXTRA_SUBJECT, "Reporte de error")
-						putExtra(Intent.EXTRA_TEXT, "Hola, encontré un error en la app:")
-						setPackage("com.google.android.gm")
-					}
-					
-					try {
-						context.startActivity(Intent.createChooser(intent, "Enviar correo con..."))
-					} catch (e: ActivityNotFoundException) {
-						Toast.makeText(context, "No se encontró una app de correo", Toast.LENGTH_SHORT).show()
-					}
-				}
-			)
-			
-			
-			SettingsItem(
-				text = "Sobre nosotros",
-				icon = Icons.Default.Info,
-				onClick = { navController.navigate(AppRoutes.ContactScreen) }
-			)
-			
-			Spacer(modifier = Modifier.padding(vertical = 20.dp))
-			
-			Button(
-				onClick = {
-					viewModel.logout()
-					navController.navigate(AppRoutes.LoginScreen) {
-						popUpTo(AppRoutes.PreferencesScreen) { inclusive = true }
-					}
-				},
+			// Sección General en Card
+			Card(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(horizontal = 16.dp)
+					.padding(6.dp),
+				colors = CardDefaults.cardColors(
+					containerColor = colorScheme.onPrimary,
+					contentColor = colorScheme.onSurfaceVariant
+				),
+				elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+				shape = RoundedCornerShape(16.dp)
 			) {
-				Text(text = "Cerrar sesión")
+				
+				Column(modifier = Modifier.padding(8.dp)) {
+					SettingsSectionTitle("General")
+					
+					SettingsItem(
+						text = "Cuenta y Datos",
+						icon = Icons.Default.AccountCircle,
+						onClick = { navController.navigate(AppRoutes.AccountScreen) }
+					)
+					
+					SettingsItem(
+						text = "Notificaciones",
+						icon = Icons.Default.Notifications,
+						onClick = { navController.navigate(AppRoutes.NotificationScreen) }
+					)
+					
+					SettingsItem(
+						text = "Seguridad",
+						icon = Icons.Default.Build,
+						onClick = { navController.navigate(AppRoutes.SecurityScreen) }
+					)
+					
+					SettingsItem(
+						text = "Generar código para clientes",
+						icon = Icons.Default.Info,
+						onClick = { navController.navigate(AppRoutes.CodeClientScreen) }
+					)
+				}
 			}
+			// Sección Soporte en Card
+			Card(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(horizontal= 6.dp, vertical = 4.dp),
+				colors = CardDefaults.cardColors(
+					containerColor = colorScheme.onPrimary,
+					contentColor = colorScheme.onSurfaceVariant
+				),
+				elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+				shape = RoundedCornerShape(16.dp)
+			) {
+				
+				Column(modifier = Modifier.padding(8.dp)) {
+					SettingsSectionTitle("Soporte")
+					
+					SettingsItem(
+						text = "Reportar errores",
+						icon = Icons.Default.Email,
+						onClick = {
+							val intent = Intent(Intent.ACTION_SEND).apply {
+								type = "message/rfc822"
+								putExtra(Intent.EXTRA_EMAIL, arrayOf("soporte@tugimnasio.com"))
+								putExtra(Intent.EXTRA_SUBJECT, "Reporte de error")
+								putExtra(Intent.EXTRA_TEXT, "Hola, encontré un error en la app:")
+								setPackage("com.google.android.gm")
+							}
+							
+							try {
+								context.startActivity(Intent.createChooser(intent, "Enviar correo con..."))
+							} catch (e: ActivityNotFoundException) {
+								Toast.makeText(context, "No se encontró una app de correo", Toast.LENGTH_SHORT)
+									.show()
+							}
+						}
+					)
+					
+					SettingsItem(
+						text = "Sobre nosotros",
+						icon = Icons.Default.Info,
+						onClick = { navController.navigate(AppRoutes.ContactScreen) }
+					)
+				}
+			}
+			
+			// Espacio para el botón fijo
+			Spacer(modifier = Modifier.height(80.dp))
 		}
 	}
+	
 	NotificationPanel(
 		isVisible = showNotifications,
 		navController = navController,
@@ -205,6 +246,7 @@ fun PreferencesContent(
 		onDismiss = { showNotifications = false }
 	)
 }
+// Los componentes SettingsSectionTitle y SettingsItem permanecen iguales
 
 @Composable
 fun SettingsSectionTitle(title: String) {
@@ -227,54 +269,51 @@ fun SettingsItem(
 ) {
 	val colorScheme = MaterialTheme.colorScheme
 	
-	Column {
-		TextButton(
-			onClick = onClick,
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(horizontal = 8.dp),
-			colors = ButtonDefaults.textButtonColors(
-				contentColor = colorScheme.onSurface
+	Box(
+		modifier = Modifier
+			.fillMaxWidth()
+			.padding(horizontal = 8.dp, vertical = 4.dp) // Separación entre ítems
+			.border(
+				width = 1.dp,
+				color = colorScheme.outline.copy(alpha = 0.5f), // Color más sutil
+				shape = RoundedCornerShape(12.dp)
 			)
+			.clip(RoundedCornerShape(12.dp)) // Recorte para mantener esquinas
+			.clickable(onClick = onClick) // Comportamiento más limpio que TextButton
+			.background(colorScheme.surface)
+			.padding(horizontal = 12.dp, vertical = 14.dp)
+	) {
+		Row(
+			verticalAlignment = Alignment.CenterVertically,
+			horizontalArrangement = Arrangement.SpaceBetween,
+			modifier = Modifier.fillMaxWidth()
 		) {
-			Row(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(vertical = 8.dp),
-				verticalAlignment = Alignment.CenterVertically,
-				horizontalArrangement = Arrangement.Start
-			) {
+			Row(verticalAlignment = Alignment.CenterVertically) {
 				Icon(
 					imageVector = icon,
 					contentDescription = null,
-					tint = colorScheme.onSurface.copy(alpha = 0.7f),
-					modifier = Modifier.size(24.dp)
+					tint = colorScheme.primary,
+					modifier = Modifier.size(22.dp)
 				)
 				
 				Spacer(modifier = Modifier.width(12.dp))
 				
 				Text(
 					text = text,
-					style = MaterialTheme.typography.bodyLarge,
-					modifier = Modifier.weight(1f)
-				)
-				
-				Icon(
-					imageVector = Icons.Default.KeyboardArrowRight,
-					contentDescription = "Navegar",
-					tint = colorScheme.onSurface.copy(alpha = 0.5f)
+					style = MaterialTheme.typography.bodyLarge.copy(
+						color = colorScheme.onSurface
+					)
 				)
 			}
+			
+			Icon(
+				imageVector = Icons.Default.KeyboardArrowRight,
+				contentDescription = "Navegar",
+				tint = colorScheme.onSurfaceVariant
+			)
 		}
-		
-		Divider(
-			color = colorScheme.onSurface.copy(alpha = 0.1f),
-			thickness = 1.dp,
-			modifier = Modifier.padding(start = 56.dp, end = 16.dp)
-		)
 	}
 }
-
 @Preview(showBackground = true)
 @Composable
 fun PreferencesPreview() {

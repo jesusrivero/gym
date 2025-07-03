@@ -192,11 +192,13 @@ fun AccountContent(
 							.fillMaxWidth(),
 						trailingIcon = {
 							ExposedDropdownMenuDefaults.TrailingIcon(expanded = isGenderDropdownExpanded)
-						}
+						},
 					)
 					ExposedDropdownMenu(
 						expanded = isGenderDropdownExpanded,
-						onDismissRequest = { isGenderDropdownExpanded = false }
+						onDismissRequest = { isGenderDropdownExpanded = false },
+						modifier = Modifier
+							.background(colorScheme.surfaceVariant)
 					) {
 						genderOptions.forEach { option ->
 							DropdownMenuItem(

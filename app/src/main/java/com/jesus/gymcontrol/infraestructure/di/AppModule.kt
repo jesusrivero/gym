@@ -58,6 +58,7 @@ import com.jesus.gymcontrol.domain.usecase.usuario.notification.DeleteNotificaci
 import com.jesus.gymcontrol.domain.usecase.usuario.notification.GetNotificacionesUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.notification.PurgeNotificacionesUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.password.ChangePasswordUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.promotion.TogglePromotionStateUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.report.GenerateClientsReportUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.report.GenerateMembershipsReportUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.report.GeneratePaymentsReportUseCase
@@ -384,4 +385,10 @@ object AppModule {
 		return ToggleMembershipStateUseCase(repository)
 	}
 	
+	@Provides
+	fun provideTogglePromotionStateUseCase(
+		repository: PromotionRepository
+	): TogglePromotionStateUseCase {
+		return TogglePromotionStateUseCase(repository)
+	}
 }

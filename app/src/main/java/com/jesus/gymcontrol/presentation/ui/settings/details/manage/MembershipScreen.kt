@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -41,6 +42,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -82,6 +84,7 @@ fun MembershipScreen(
 	var membershipToEdit by remember { mutableStateOf<Membership?>(null) }
 	var membershipToView by remember { mutableStateOf<Membership?>(null) }
 	val isStillLoading = isLoading || membershipsSummary.isEmpty()
+	val isActionSuccess by viewModel.isActionSuccess.collectAsState()
 	
 	
 	LaunchedEffect(Unit) {
@@ -89,27 +92,31 @@ fun MembershipScreen(
 		viewModel.loadMemberships()
 	}
 	
-	// Mostrar snackbar al cambiar estado
 	LaunchedEffect(membershipActionMessage) {
 		membershipActionMessage?.let {
 			showSuccessDialog = true
-			delay(1000)
+			delay(2000)
 			showSuccessDialog = false
 			viewModel.clearMembershipMessage()
 		}
 	}
 	
-	if (showSuccessDialog) {
+	if (showSuccessDialog && membershipActionMessage != null) {
+		val isSuccess = isActionSuccess == true
+		val iconColor = if (isSuccess) Color(0xFF4CAF50) else Color(0xFFD32F2F)
+		val titleText = if (isSuccess) "¡Éxito!" else "Error"
+		val iconImage = if (isSuccess) Icons.Default.CheckCircle else Icons.Default.Warning
+		
 		AlertDialog(
 			onDismissRequest = { showSuccessDialog = false },
-			title = { Text("¡Éxito!") },
-			text = { Text("Información actualizada con éxito.") },
-			confirmButton = {}, // sin botón
+			title = { Text(titleText) },
+			text = { Text(membershipActionMessage ?: "") },
+			confirmButton = {},
 			icon = {
 				Icon(
-					imageVector = Icons.Default.CheckCircle,
+					imageVector = iconImage,
 					contentDescription = null,
-					tint = Color(0xFF4CAF50),
+					tint = iconColor,
 					modifier = Modifier.size(48.dp)
 				)
 			},
@@ -168,10 +175,10 @@ fun MembershipScreen(
 					CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
 				}
 			} else {
-			LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-				items(membershipsSummary) { membershipWithCount ->
-				
-				val membership = membershipWithCount.membership
+				LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+					items(membershipsSummary) { membershipWithCount ->
+						
+						val membership = membershipWithCount.membership
 						val userCount = membershipWithCount.userCount
 						Card(
 							modifier = Modifier
@@ -208,7 +215,8 @@ fun MembershipScreen(
 										viewModel.toggleMembershipState(membership)
 									}) {
 										IconButton(onClick = {
-											membershipToToggle = membership // En lugar de llamar directamente al ViewModel
+											membershipToToggle =
+												membership // En lugar de llamar directamente al ViewModel
 										}) {
 											Icon(
 												imageVector = if (membership.state == "activo") Icons.Default.Visibility else Icons.Default.VisibilityOff,
@@ -234,7 +242,6 @@ fun MembershipScreen(
 							Text("Nombre: ${membership.nombre}")
 							Text("Precio: $${membership.precio}")
 							Text("Duración: ${membership.duracionDias} días")
-							Text("Estado:  ${membership.state}")
 						}
 					},
 					confirmButton = {
@@ -276,8 +283,6 @@ fun MembershipScreen(
 								name = ""
 								price = ""
 								duration = ""
-								Toast.makeText(context, "Membresía creada exitosamente", Toast.LENGTH_SHORT)
-									.show()
 								viewModel.loadMembershipsSummary()
 							},
 							enabled = !isLoading
@@ -310,7 +315,8 @@ fun MembershipScreen(
 								value = name,
 								onValueChange = { name = it },
 								label = { Text("Nombre") },
-								modifier = Modifier.fillMaxWidth()
+								modifier = Modifier.fillMaxWidth(),
+								maxLines = 1,
 							)
 							Spacer(modifier = Modifier.height(12.dp))
 							OutlinedTextField(
@@ -318,7 +324,8 @@ fun MembershipScreen(
 								onValueChange = { price = it },
 								label = { Text("Precio") },
 								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-								modifier = Modifier.fillMaxWidth()
+								modifier = Modifier.fillMaxWidth(),
+								maxLines = 1,
 							)
 							Spacer(modifier = Modifier.height(12.dp))
 							OutlinedTextField(
@@ -326,7 +333,8 @@ fun MembershipScreen(
 								onValueChange = { duration = it },
 								label = { Text("Duración (días)") },
 								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-								modifier = Modifier.fillMaxWidth()
+								modifier = Modifier.fillMaxWidth(),
+								maxLines = 1,
 							)
 						}
 					},
@@ -410,7 +418,7 @@ fun MembershipScreen(
 						Text(
 							text = if (selected.state == "activo") "Desactivar membresía" else "Activar membresía"
 						)
-					},containerColor = MaterialTheme.colorScheme.surface,
+					}, containerColor = MaterialTheme.colorScheme.surface,
 					text = {
 						Text(
 							text = if (selected.state == "activo") {

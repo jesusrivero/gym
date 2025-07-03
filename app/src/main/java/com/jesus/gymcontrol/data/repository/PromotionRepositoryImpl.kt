@@ -151,4 +151,27 @@ class PromotionRepositoryImpl @Inject constructor(
 		Result.failure(e)
 	}
 	
+	override suspend fun togglePromotionState(promotion: Promotion): Result<Unit> = try {
+		val uid = auth.currentUser?.uid
+			?: return Result.failure(Exception("Usuario no autenticado"))
+		
+		val userDoc = firestore.collection("users").document(uid).get().await()
+		val gymCode = userDoc.getString("gimnasioCode")
+			?: return Result.failure(Exception("No se encontró el gimnasioCode del usuario"))
+		
+		val newState = !promotion.activo
+		
+		firestore.collection("gimnasios")
+			.document(gymCode)
+			.collection("promociones")
+			.document(promotion.id)
+			.update("activo", newState)
+			.await()
+		
+		Result.success(Unit)
+	} catch (e: Exception) {
+		Result.failure(e)
+	}
+
+	
 }

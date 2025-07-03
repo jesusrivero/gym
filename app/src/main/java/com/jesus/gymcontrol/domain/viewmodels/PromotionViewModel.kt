@@ -1,6 +1,7 @@
 package com.jesus.gymcontrol.domain.viewmodels
 
 import android.util.Log
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -24,6 +25,7 @@ class PromotionViewModel @Inject constructor(
 	private val updatePromotionUseCase: UpdatePromotionUseCase,
 	private val deletePromotionUseCase: DeletePromotionUseCase,
 	private val getUsersCountByPromotionUseCase:GetUsersCountByPromotionUseCase,
+	private val togglePromotionStateUseCase: UpdatePromotionUseCase,
 	private val sessionManager: SessionManager
 ) : ViewModel() {
 	
@@ -52,8 +54,8 @@ class PromotionViewModel @Inject constructor(
 	var montoCalculado by mutableStateOf(0.0)
 		private set
 	
-	
-	
+	private val _promotionActionMessage = mutableStateOf<String?>(null)
+	val promotionActionMessage: State<String?> = _promotionActionMessage
 	
 	fun createPromotion(promotion: Promotion) {
 		viewModelScope.launch {
@@ -70,6 +72,24 @@ class PromotionViewModel @Inject constructor(
 			}
 			}
 		}
+	
+	
+	fun togglePromotionState(promotion: Promotion) {
+		viewModelScope.launch {
+			isLoading = true
+			errorMessage = null
+			
+			val result = togglePromotionStateUseCase(promotion)
+			
+			isLoading = false
+			
+			result.onSuccess {
+				loadPromotions()
+			}.onFailure {
+				errorMessage = it.message
+			}
+		}
+	}
 	
 	fun loadPromotions() {
 		viewModelScope.launch {
@@ -89,6 +109,7 @@ class PromotionViewModel @Inject constructor(
 	
 	fun updatePromotion(promotion: Promotion) {
 		viewModelScope.launch {
+			_promotionActionMessage
 			isLoading = true
 			errorMessage = null
 			
@@ -167,6 +188,10 @@ class PromotionViewModel @Inject constructor(
 	
 	fun clearError() {
 		errorMessage = null
+	}
+	
+	fun clearpromotionMessage() {
+		_promotionActionMessage.value = null
 	}
 	
 }

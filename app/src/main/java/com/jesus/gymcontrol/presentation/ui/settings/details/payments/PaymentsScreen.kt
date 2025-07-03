@@ -118,7 +118,6 @@ fun PaymentsScreenContent(
 	val sessionManager = remember { SessionManager(context) }
 	val gimnasioCode = sessionManager.getGymCode()
 	
-	
 	val filteredUsers = if (nameUser.isBlank()) emptyList() else {
 		users.filter { user ->
 			user.rol == "cliente" && (
@@ -288,7 +287,7 @@ fun PaymentsScreenContent(
 					.weight(1f)
 			) {
 				
-				Spacer(modifier = Modifier.height(16.dp))
+				Spacer(modifier = Modifier.height(10.dp))
 				
 				// Sección búsqueda usuario
 				Card(
@@ -318,6 +317,7 @@ fun PaymentsScreenContent(
 									contentDescription = "Buscar"
 								)
 							},
+							maxLines = 1,
 							trailingIcon = {
 								if (selectedUserId != null) {
 									IconButton(onClick = {
@@ -382,7 +382,7 @@ fun PaymentsScreenContent(
 					}
 				}
 				
-				Spacer(modifier = Modifier.height(16.dp))
+				Spacer(modifier = Modifier.height(10.dp))
 				
 				// Detalles del pago
 				Card(
@@ -399,6 +399,7 @@ fun PaymentsScreenContent(
 						)
 						
 						// Selector de membresía
+						
 						ExposedDropdownMenuBox(
 							expanded = isMembershipDropdownExpanded,
 							onExpandedChange = { isMembershipDropdownExpanded = it }
@@ -419,11 +420,14 @@ fun PaymentsScreenContent(
 								},
 								trailingIcon = {
 									ExposedDropdownMenuDefaults.TrailingIcon(expanded = isMembershipDropdownExpanded)
-								}
+								},
 							)
+							
 							ExposedDropdownMenu(
 								expanded = isMembershipDropdownExpanded,
-								onDismissRequest = { isMembershipDropdownExpanded = false }
+								onDismissRequest = { isMembershipDropdownExpanded = false },
+								modifier = Modifier
+									.background(MaterialTheme.colorScheme.surfaceVariant)
 							) {
 								memberships.filter { it.state == "activo" }.forEach { membership ->
 									DropdownMenuItem(
@@ -433,7 +437,7 @@ fun PaymentsScreenContent(
 												Text(
 													"Valor: ${membership.precio} $",
 													fontSize = 12.sp,
-													color = colorScheme.onSurfaceVariant
+													color = MaterialTheme.colorScheme.onSurfaceVariant
 												)
 											}
 										},
@@ -441,14 +445,64 @@ fun PaymentsScreenContent(
 											viewModel.updatePaymentFrequency(membership.nombre)
 											viewModel.calculateDiscountedAmountIfApplicable()
 											isMembershipDropdownExpanded = false
-											}
-										)
+										}
+									)
 								}
 							}
 						}
 						
 						
-						Spacer(modifier = Modifier.height(16.dp))
+						Spacer(modifier = Modifier.height(10.dp))
+						
+						
+						// Selector tipo de pago
+						ExposedDropdownMenuBox(
+							expanded = isTypeDropdownExpanded && isPaymentTypeEnabled,
+							onExpandedChange = { if (isPaymentTypeEnabled) isTypeDropdownExpanded = it },
+						) {
+							OutlinedTextField(
+								value = paymentState.type,
+								onValueChange = {},
+								label = { Text("Método de pago") },
+								modifier = Modifier
+									.fillMaxWidth()
+									.menuAnchor(),
+								readOnly = true,
+								leadingIcon = {
+									Icon(
+										Icons.Default.Payments,
+										contentDescription = "Tipo de pago"
+									)
+								},
+								trailingIcon = {
+									ExposedDropdownMenuDefaults.TrailingIcon(
+										expanded = isTypeDropdownExpanded && isPaymentTypeEnabled
+									)
+								},
+								enabled = isPaymentTypeEnabled
+							)
+							if (isPaymentTypeEnabled) {
+								ExposedDropdownMenu(
+									expanded = isTypeDropdownExpanded,
+									onDismissRequest = { isTypeDropdownExpanded = false },
+									modifier = Modifier
+										.background(MaterialTheme.colorScheme.surfaceVariant)
+								) {
+									paymentTypes.forEach { type ->
+										DropdownMenuItem(
+											text = { Text(type) },
+											onClick = {
+												viewModel.updatePaymentType(type)
+												viewModel.calculateDiscountedAmountIfApplicable()
+												isTypeDropdownExpanded = false
+											},
+										)
+									}
+								}
+							}
+						}
+						
+						Spacer(modifier = Modifier.height(10.dp))
 
 //						 Dropdown promociones
 						ExposedDropdownMenuBox(
@@ -468,7 +522,9 @@ fun PaymentsScreenContent(
 							)
 							ExposedDropdownMenu(
 								expanded = isPromoDropdownExpanded,
-								onDismissRequest = { isPromoDropdownExpanded = false }
+								onDismissRequest = { isPromoDropdownExpanded = false },
+								modifier = Modifier
+									.background(MaterialTheme.colorScheme.surfaceVariant)
 							) {
 								DropdownMenuItem(
 									text = { Text("Sin promoción") },
@@ -507,54 +563,8 @@ fun PaymentsScreenContent(
 							}
 						}
 						
-						Spacer(modifier = Modifier.height(16.dp))
+						Spacer(modifier = Modifier.height(10.dp))
 						
-						// Selector tipo de pago
-						ExposedDropdownMenuBox(
-							expanded = isTypeDropdownExpanded && isPaymentTypeEnabled,
-							onExpandedChange = { if (isPaymentTypeEnabled) isTypeDropdownExpanded = it }
-						) {
-							OutlinedTextField(
-								value = paymentState.type,
-								onValueChange = {},
-								label = { Text("Método de pago") },
-								modifier = Modifier
-									.fillMaxWidth()
-									.menuAnchor(),
-								readOnly = true,
-								leadingIcon = {
-									Icon(
-										Icons.Default.Payments,
-										contentDescription = "Tipo de pago"
-									)
-								},
-								trailingIcon = {
-									ExposedDropdownMenuDefaults.TrailingIcon(
-										expanded = isTypeDropdownExpanded && isPaymentTypeEnabled
-									)
-								},
-								enabled = isPaymentTypeEnabled
-							)
-							if (isPaymentTypeEnabled) {
-								ExposedDropdownMenu(
-									expanded = isTypeDropdownExpanded,
-									onDismissRequest = { isTypeDropdownExpanded = false }
-								) {
-									paymentTypes.forEach { type ->
-										DropdownMenuItem(
-											text = { Text(type) },
-											onClick = {
-												viewModel.updatePaymentType(type)
-												viewModel.calculateDiscountedAmountIfApplicable()
-												isTypeDropdownExpanded = false
-											}
-										)
-									}
-								}
-							}
-						}
-						
-						Spacer(modifier = Modifier.height(16.dp))
 						
 						// Campos monto según tipo de pago
 						when (paymentState.type) {
@@ -630,7 +640,7 @@ fun PaymentsScreenContent(
 							}
 						}
 						
-						Spacer(modifier = Modifier.height(16.dp))
+						Spacer(modifier = Modifier.height(10.dp))
 						
 						// Campo de referencia (excepto dólares)
 						if (paymentState.type != "Dólares") {
@@ -662,7 +672,7 @@ fun PaymentsScreenContent(
 									contentDescription = "Descripción"
 								)
 							},
-							maxLines = 3
+							maxLines = 2
 						)
 					}
 				}
