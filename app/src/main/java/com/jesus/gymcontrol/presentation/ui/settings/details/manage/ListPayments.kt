@@ -119,7 +119,7 @@ fun ListPaymentsScreen(
 					searchText = searchText,
 					onSearchTextChanged = { searchText = it },
 					onAddClick = navPagToScreen,
-					showAddButton=true
+					showAddButton = true
 				)
 			}
 		}
@@ -132,7 +132,11 @@ fun ListPaymentsScreen(
 			
 			val matchesFilter = when (selectedPaymentType) {
 				"Todos" -> true
-				"Dólares", "Bolívares", "Mixto" -> payment.paymentType.equals(selectedPaymentType, ignoreCase = true)
+				"Dólares", "Bolívares", "Mixto" -> payment.paymentType.equals(
+					selectedPaymentType,
+					ignoreCase = true
+				)
+				
 				"Promociones" -> !payment.promocionNombre.isNullOrBlank()
 				else -> true
 			}
@@ -328,10 +332,17 @@ fun PaymentDetailDialog(payment: Payment, onDismiss: () -> Unit) {
 					DetailRow("Descuento aplicado:", "${payment.promocionPorcentajeDescuento}%")
 				}
 				
-				// 📅 Fecha de pago
 				Spacer(modifier = Modifier.height(8.dp))
-				val formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(payment.date))
-				DetailRow("Fecha de pago:",formattedDate)
+				val formattedDate =
+					SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(payment.date))
+				DetailRow("Fecha de pago:", formattedDate)
+				
+				Spacer(modifier = Modifier.height(8.dp))
+				
+				val formattedVencimiento =
+					SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(payment.fechaVencimiento))
+				DetailRow("Fecha de vencimiento:", formattedVencimiento)
+				
 			}
 		},
 		containerColor = MaterialTheme.colorScheme.surface,

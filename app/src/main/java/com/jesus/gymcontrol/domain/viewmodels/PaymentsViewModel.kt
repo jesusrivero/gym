@@ -6,8 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.FirebaseFirestore
 import com.jesus.gymcontrol.data.repository.SessionManager
-import com.jesus.gymcontrol.domain.model.ListUser
 import com.jesus.gymcontrol.domain.model.Membership
 import com.jesus.gymcontrol.domain.model.Pago
 import com.jesus.gymcontrol.domain.model.Payment
@@ -15,7 +15,7 @@ import com.jesus.gymcontrol.domain.model.PaymentState
 import com.jesus.gymcontrol.domain.model.Promotion
 import com.jesus.gymcontrol.domain.usecase.usuario.AddPaymentUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetAllPaymentsUseCase
-import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetUserByGymUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.payment.CalcularNuevaFechaVencimientoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +29,8 @@ class PaymentsViewModel @Inject constructor(
 	private val addPaymentUseCase: AddPaymentUseCase,
 	private val getAllPaymentsUseCase: GetAllPaymentsUseCase,
 	private val sessionManager: SessionManager,
+	private val calcularNuevaFechaVencimientoUseCase: CalcularNuevaFechaVencimientoUseCase,
+	private val firestore: FirebaseFirestore
 ) : ViewModel() {
 	
 	private val _paymentState = MutableStateFlow(PaymentState())
@@ -156,4 +158,44 @@ class PaymentsViewModel @Inject constructor(
 			)
 		}
 	}
+	
+	
+	fun registrarPago(pago: Pago, membershipDays: Int) {
+		viewModelScope.launch {
+			isLoading = true
+			isSuccess = false
+			errorMessage = null
+			
+			try {
+				val nuevaFechaVencimiento = calcularNuevaFechaVencimientoUseCase(
+					pago.userId,
+					pago.gimnasioCode,
+					membershipDays
+				)
+				
+				val pagoConFecha = pago.copy(fechaVencimiento = nuevaFechaVencimiento)
+				
+				val result = addPaymentUseCase(pagoConFecha)
+				
+				result.onSuccess {
+					// 👉 ACTUALIZA la fechaVencimiento también en el documento del usuario
+					firestore.collection("users")
+						.document(pago.userId)
+						.collection("gimnasios")
+						.document(pago.gimnasioCode)
+						.update("fechaVencimiento", nuevaFechaVencimiento)
+					
+					isSuccess = true
+				}.onFailure {
+					errorMessage = it.message
+				}
+			} catch (e: Exception) {
+				errorMessage = e.message
+			} finally {
+				isLoading =false
+			}
+		}
+	}
+	
+ 
 }

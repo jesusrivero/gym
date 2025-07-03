@@ -9,4 +9,12 @@ interface PaymentRepository {
 	
 	
 	suspend fun getAllPayments(gymCode: String): List<Payment>
+	
+	/** Nueva función para calcular la nueva fecha de vencimiento */
+	suspend fun calcularNuevaFechaVencimiento(
+		userId: String,
+		gymCode: String,
+		membershipDays: Int
+		):Long
+	
 }

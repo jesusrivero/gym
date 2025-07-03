@@ -181,6 +181,7 @@ class PaymentRepositoryImpl @Inject constructor(
 							amountBs = (data["amountBs"] as? Number)?.toDouble() ?: 0.0,
 							description = data["description"] as? String ?: "",
 							reference = data["reference"] as? String,
+							fechaVencimiento = (data["fechaVencimiento"] as? Number)?.toLong() ?: 0L,
 							date = (data["date"] as? Number)?.toLong() ?: 0L,
 							gymCode = data["gimnasioCode"] as? String ?: "",
 							promocionNombre = data["promocionNombre"] as? String,
@@ -196,4 +197,22 @@ class PaymentRepositoryImpl @Inject constructor(
 				emptyList()
 			}
 		}
+	
+	override suspend fun calcularNuevaFechaVencimiento(
+		userId: String,
+		gymCode: String,
+		membershipDays: Int
+	): Long {
+		val userRef = firestore
+			.collection("users")
+			.document(userId)
+			.collection("gimnasios")
+			.document(gymCode)
+		
+		val snapshot = userRef.get().await()
+		val fechaActual = snapshot.getLong("fechaVencimiento") ?: 0L
+		val hoy = System.currentTimeMillis()
+		val base = if (fechaActual > hoy) fechaActual else hoy
+		return base + (membershipDays * 24 * 60*60*1000L)
+	}
 }

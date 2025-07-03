@@ -27,7 +27,6 @@ import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -117,6 +116,8 @@ fun PaymentsScreenContent(
 	val context = LocalContext.current
 	val sessionManager = remember { SessionManager(context) }
 	val gimnasioCode = sessionManager.getGymCode()
+	
+	val selectedUser = users.find { it.id == selectedUserId }
 	
 	val filteredUsers = if (nameUser.isBlank()) emptyList() else {
 		users.filter { user ->
@@ -214,64 +215,64 @@ fun PaymentsScreenContent(
 			}
 		},
 		bottomBar = {
-			BottomAppBar(
-				containerColor = colorScheme.background,
-				actions = {
-					TextButton(
-						onClick = {
-							val user = users.find { it.id == selectedUserId }
-							val membership = memberships.find { it.nombre == paymentState.frequency }
-							if (user != null && membership != null) {
-								val montoDolares = paymentState.amountDollar.toDoubleOrNull() ?: 0.0
-								val montoBs = paymentState.amountBs.toDoubleOrNull() ?: 0.0
-								
-								val montoTotal = when (paymentState.type) {
-									"Dólares" -> montoDolares
-									"Bolívares" -> montoBs
-									"Mixto" -> montoDolares + montoBs
-									else -> 0.0
-								}
-								
-								val pago = Pago(
-									id = UUID.randomUUID().toString(),
-									userId = user.id,
-									name = user.name,
-									idcard = user.idcard,
-									membershipId = membership.id,
-									membershipName = membership.nombre,
-									tipepayment = paymentState.type,
-									amount = montoTotal,
-									amountDollar = if (paymentState.type != "Bolívares") montoDolares else null,
-									amountBs = if (paymentState.type != "Dólares") montoBs else null,
-									description = description,
-									reference = if (paymentState.type != "Dólares") reference else null,
-									date = System.currentTimeMillis(),
-									gimnasioCode = gimnasioCode.toString(),
-									promocionId = selectedPromotion?.id,
-									promocionNombre = selectedPromotion?.nombre ?: "",
-									promocionDescripcion = selectedPromotion?.descripcion ?: "",
-									promocionDescuento = selectedPromotion?.porcentajeDescuento ?: 0.0
-								)
-								
-								viewModel.addPago(pago)
-							} else {
-								snackbarMessage = "Error: datos de usuario o membresía no encontrados"
-								showSnackbar = true
-							}
-						},
-						modifier = Modifier
-							.fillMaxWidth()
-							.padding(horizontal = 16.dp, vertical = 8.dp),
-						enabled = formIsValid,
-						colors = ButtonDefaults.buttonColors(
-							containerColor = colorScheme.primary,
-							disabledContainerColor = colorScheme.onSurface.copy(alpha = 0.12f)
+			TextButton(
+				onClick = {
+					val user = users.find { it.id == selectedUserId }
+					val membership = memberships.find { it.nombre == paymentState.frequency }
+					if (user != null && membership != null) {
+						val montoDolares = paymentState.amountDollar.toDoubleOrNull() ?: 0.0
+						val montoBs = paymentState.amountBs.toDoubleOrNull() ?: 0.0
+						
+						val montoTotal = when (paymentState.type) {
+							"Dólares" -> montoDolares
+							"Bolívares" -> montoBs
+							"Mixto" -> montoDolares + montoBs
+							else -> 0.0
+						}
+						
+						val pago = Pago(
+							id = UUID.randomUUID().toString(),
+							userId = user.id,
+							name = user.name,
+							idcard = user.idcard,
+							membershipId = membership.id,
+							membershipName = membership.nombre,
+							tipepayment = paymentState.type,
+							amount = montoTotal,
+							amountDollar = if (paymentState.type != "Bolívares") montoDolares else null,
+							amountBs = if (paymentState.type != "Dólares") montoBs else null,
+							description = description,
+							reference = if (paymentState.type != "Dólares") reference else null,
+							date = System.currentTimeMillis(),
+							gimnasioCode = gimnasioCode.toString(),
+							promocionId = selectedPromotion?.id,
+							promocionNombre = selectedPromotion?.nombre ?: "",
+							promocionDescripcion = selectedPromotion?.descripcion ?: "",
+							promocionDescuento = selectedPromotion?.porcentajeDescuento ?: 0.0
 						)
-					) {
-						Text("Registrar Pago", fontWeight = FontWeight.Bold)
+						
+						// ✅ Aquí se llama a la función nueva
+						viewModel.registrarPago(
+							pago,
+							membership.duracionDias ?: 0
+						)
+						
+					} else {
+						snackbarMessage = "Error: datos de usuario o membresía no encontrados"
+						showSnackbar = true
 					}
-				}
-			)
+				},
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(horizontal = 16.dp, vertical = 8.dp),
+				enabled = formIsValid,
+				colors = ButtonDefaults.buttonColors(
+					containerColor = colorScheme.primary,
+					disabledContainerColor = colorScheme.onSurface.copy(alpha = 0.12f)
+				)
+			) {
+				Text("Registrar Pago", fontWeight = FontWeight.Bold)
+			}
 		}
 	) { innerPadding ->
 		Column(
@@ -335,6 +336,14 @@ fun PaymentsScreenContent(
 								}
 							}
 						)
+						if (selectedUser != null && selectedUser.state != "inactivo") {
+							Text(
+								text = "El usuario ya está ${selectedUser.state}. La fecha de vencimiento se extenderá al registrar este pago.",
+								color = MaterialTheme.colorScheme.primary,
+								style = MaterialTheme.typography.bodySmall,
+								modifier = Modifier.padding(top = 4.dp)
+							)
+						}
 						
 						if (filteredUsers.isNotEmpty() && selectedUserId == null) {
 							Spacer(modifier = Modifier.height(8.dp))
