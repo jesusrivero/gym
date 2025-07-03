@@ -14,7 +14,10 @@ import com.jesus.gymcontrol.domain.usecase.usuario.DeletePromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetPromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetUsersCountByPromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdatePromotionUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.promotion.TogglePromotionStateUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,14 +27,13 @@ class PromotionViewModel @Inject constructor(
 	private val getPromotionsUseCase: GetPromotionUseCase,
 	private val updatePromotionUseCase: UpdatePromotionUseCase,
 	private val deletePromotionUseCase: DeletePromotionUseCase,
-	private val getUsersCountByPromotionUseCase:GetUsersCountByPromotionUseCase,
-	private val togglePromotionStateUseCase: UpdatePromotionUseCase,
+	private val getUsersCountByPromotionUseCase: GetUsersCountByPromotionUseCase,
+	private val togglePromotionStateUseCase: TogglePromotionStateUseCase,
 	private val sessionManager: SessionManager
 ) : ViewModel() {
 	
 	var isLoading by mutableStateOf(false)
 		private set
-
 	
 	var errorMessage by mutableStateOf<String?>(null)
 		internal set
@@ -57,6 +59,15 @@ class PromotionViewModel @Inject constructor(
 	private val _promotionActionMessage = mutableStateOf<String?>(null)
 	val promotionActionMessage: State<String?> = _promotionActionMessage
 	
+	private val _isActionSuccess = MutableStateFlow<Boolean?>(null)
+	val isActionSuccess = _isActionSuccess.asStateFlow()
+	
+	// NUEVO: Registrar acción como éxito o error
+	private fun setActionResult(message: String, success: Boolean) {
+		_promotionActionMessage.value = message
+		_isActionSuccess.value = success
+	}
+	
 	fun createPromotion(promotion: Promotion) {
 		viewModelScope.launch {
 			isLoading = true
@@ -64,15 +75,15 @@ class PromotionViewModel @Inject constructor(
 			
 			val result = createPromotionUseCase(promotion)
 			isLoading = false
-			result.onSuccess{
+			
+			result.onSuccess {
+				setActionResult("Promoción creada correctamente", true)
 				loadPromotions()
-			}
-			result.onFailure {
-				errorMessage = it.message
-			}
+			}.onFailure {
+				setActionResult("Error al crear promoción: ${it.message}", false)
 			}
 		}
-	
+	}
 	
 	fun togglePromotionState(promotion: Promotion) {
 		viewModelScope.launch {
@@ -80,13 +91,52 @@ class PromotionViewModel @Inject constructor(
 			errorMessage = null
 			
 			val result = togglePromotionStateUseCase(promotion)
-			
 			isLoading = false
 			
 			result.onSuccess {
-				loadPromotions()
+				_promotionActionMessage.value = if (promotion.activo) {
+					"Promoción desactivada correctamente"
+				} else {
+					"Promoción activada correctamente"
+				}
+				_isActionSuccess.value = true
+				loadPromotions() // <--- Recargar lista tras cambio
 			}.onFailure {
 				errorMessage = it.message
+				_promotionActionMessage.value = "Error: ${it.message}"
+				_isActionSuccess.value =false
+			}
+		}
+	}
+	
+	fun updatePromotion(promotion: Promotion) {
+		viewModelScope.launch {
+			isLoading = true
+			errorMessage = null
+			
+			val result = updatePromotionUseCase(promotion)
+			isLoading = false
+			
+			result.onSuccess {
+				setActionResult("Promoción editada correctamente", true)
+				loadPromotions()
+			}.onFailure {
+				setActionResult("Error al editar promoción: ${it.message}", false)
+			}
+		}
+	}
+	
+	fun deletePromotion(promotion: Promotion) {
+		viewModelScope.launch {
+			isLoading = true
+			val result = deletePromotionUseCase(promotion)
+			isLoading = false
+			
+			result.onSuccess {
+				setActionResult("Promoción eliminada correctamente", true)
+				loadPromotions()
+			}.onFailure {
+				setActionResult("Error al eliminar promoción: ${it.message}", false)
 			}
 		}
 	}
@@ -107,38 +157,6 @@ class PromotionViewModel @Inject constructor(
 		}
 	}
 	
-	fun updatePromotion(promotion: Promotion) {
-		viewModelScope.launch {
-			_promotionActionMessage
-			isLoading = true
-			errorMessage = null
-			
-			val result = updatePromotionUseCase(promotion)
-			isLoading = false
-			result.onSuccess{
-				loadPromotions()
-			}
-			result.onFailure {
-				errorMessage = it.message
-			}
-			
-			loadPromotions()
-			}
-		}
-	
-	fun deletePromotion(promotion: Promotion) {
-		viewModelScope.launch {
-			isLoading = true
-			val result = deletePromotionUseCase(promotion)
-			isLoading = false
-			result.onSuccess{
-				loadPromotions()
-			}
-			result.onFailure { errorMessage = it.message }
-			loadPromotions()
-			}
-		}
-	
 	fun loadUserCountByPromotion() {
 		val gymCode = sessionManager.getGymCode() ?: return
 		viewModelScope.launch {
@@ -150,7 +168,6 @@ class PromotionViewModel @Inject constructor(
 			}
 		}
 	}
-	
 	
 	fun setTipoPago(tipo: String) {
 		tipoPagoSeleccionado = tipo
@@ -190,8 +207,8 @@ class PromotionViewModel @Inject constructor(
 		errorMessage = null
 	}
 	
-	fun clearpromotionMessage() {
+	fun clearPromotionMessage() {
 		_promotionActionMessage.value = null
+		_isActionSuccess.value = null
 	}
-	
 }

@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
@@ -40,6 +41,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -80,24 +82,24 @@ fun PromotionScreen(
 	var promotionToEdit by remember { mutableStateOf<Promotion?>(null) }
 	var promotionToDelete by remember { mutableStateOf<Promotion?>(null) }
 	var promotionToShow by remember { mutableStateOf<Promotion?>(null) }
-	var promotionToggle by remember { mutableStateOf<Promotion?> (null)}
-	var showSuccessDialog by remember { mutableStateOf(false) }
+	var promotionToggle by remember { mutableStateOf<Promotion?>(null) }
+	var showResultDialog by remember { mutableStateOf(false) }
 	val promotionActionMessage by viewModel.promotionActionMessage
+	val isActionSuccess by viewModel.isActionSuccess.collectAsState()
 	
 	LaunchedEffect(Unit) {
 		viewModel.loadPromotions()
 		viewModel.loadUserCountByPromotion()
 	}
 	
-	LaunchedEffect(promotionToggle) {
+	LaunchedEffect(promotionActionMessage) {
 		promotionActionMessage?.let {
-			showSuccessDialog = true
-			delay(3000)
-			showSuccessDialog = false
-			viewModel.clearpromotionMessage()
+			showResultDialog = true
+			delay(2000)
+			showResultDialog = false
+			viewModel.clearPromotionMessage()
 		}
 	}
-	
 	LaunchedEffect(errorMessage) {
 		errorMessage?.let {
 			Toast.makeText(context, it, Toast.LENGTH_LONG).show()
@@ -106,17 +108,18 @@ fun PromotionScreen(
 	}
 	
 	
-	if (showSuccessDialog) {
+	if (showResultDialog && promotionActionMessage != null && isActionSuccess != null) {
+		val isSuccess = isActionSuccess == true
 		AlertDialog(
-			onDismissRequest = { showSuccessDialog = false },
-			title = { Text("¡Éxito!") },
-			text = { Text("Información actualizada con éxito.") },
-			confirmButton = {}, // sin botón
+			onDismissRequest = { showResultDialog = false },
+			title = { Text(if (isSuccess) "¡Éxito!" else "Error") },
+			text = { Text(promotionActionMessage ?: "") },
+			confirmButton = {},
 			icon = {
 				Icon(
-					imageVector = Icons.Default.CheckCircle,
+					imageVector = if (isSuccess) Icons.Default.CheckCircle else Icons.Default.Error,
 					contentDescription = null,
-					tint = Color(0xFF4CAF50),
+					tint = if (isSuccess) Color(0xFF4CAF50) else Color(0xFFD32F2F),
 					modifier = Modifier.size(48.dp)
 				)
 			},
@@ -173,7 +176,7 @@ fun PromotionScreen(
 					text = {
 						Text(
 							text = if (selected.activo) {
-								"¿Estás seguro de que deseas desactivar esta promoción? Ya no podrá aplicarse a los pagos nuevos."
+								"¿Estás seguro de que deseas desactivar esta promoción?"
 							} else {
 								"¿Estás seguro de que deseas activar esta promoción?"
 							}
@@ -195,7 +198,7 @@ fun PromotionScreen(
 						}
 					},
 					containerColor = MaterialTheme.colorScheme.surface
-					)
+				)
 			}
 			
 			when {
@@ -350,27 +353,31 @@ fun PromotionScreen(
 								value = name,
 								onValueChange = { name = it },
 								label = { Text("Nombre") },
-								modifier = Modifier.fillMaxWidth()
+								modifier = Modifier.fillMaxWidth(),
+								maxLines = 1
 							)
 							OutlinedTextField(
 								value = description,
 								onValueChange = { description = it },
 								label = { Text("Descripción") },
-								modifier = Modifier.fillMaxWidth()
+								modifier = Modifier.fillMaxWidth(),
+								maxLines = 1
 							)
 							OutlinedTextField(
 								value = discount,
 								onValueChange = { discount = it },
 								label = { Text("Descuento (%)") },
 								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-								modifier = Modifier.fillMaxWidth()
+								modifier = Modifier.fillMaxWidth(),
+								maxLines = 1
 							)
 							OutlinedTextField(
 								value = duration,
 								onValueChange = { duration = it },
 								label = { Text("Duración (días)") },
 								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-								modifier = Modifier.fillMaxWidth()
+								modifier = Modifier.fillMaxWidth(),
+								maxLines = 1
 							)
 						}
 					},

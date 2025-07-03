@@ -8,7 +8,6 @@ class TogglePromotionStateUseCase @Inject constructor(
 	private val promotionRepository: PromotionRepository
 ) {
 	suspend operator fun invoke(promotion: Promotion): Result<Unit> {
-		val updated = promotion.copy(activo = !promotion.activo)
-		return promotionRepository.updatePromotion(updated)
-		}
+		return promotionRepository.togglePromotionState(promotion)
+	}
 }
