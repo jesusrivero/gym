@@ -330,8 +330,8 @@ fun PaymentDetailDialog(payment: Payment, onDismiss: () -> Unit) {
 				
 				// 📅 Fecha de pago
 				Spacer(modifier = Modifier.height(8.dp))
-				DetailRow("Fecha de pago: ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(payment.date))}",""
-				)
+				val formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(payment.date))
+				DetailRow("Fecha de pago:",formattedDate)
 			}
 		},
 		containerColor = MaterialTheme.colorScheme.surface,

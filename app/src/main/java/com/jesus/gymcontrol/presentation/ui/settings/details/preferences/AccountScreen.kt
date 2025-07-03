@@ -179,7 +179,11 @@ fun AccountContent(
 				
 				ExposedDropdownMenuBox(
 					expanded = isGenderDropdownExpanded,
-					onExpandedChange = { isGenderDropdownExpanded = it }
+					onExpandedChange = {
+						if (isEditing) {
+							isGenderDropdownExpanded = it
+						}
+					}
 				) {
 					OutlinedTextField(
 						value = gender,
@@ -194,21 +198,24 @@ fun AccountContent(
 							ExposedDropdownMenuDefaults.TrailingIcon(expanded = isGenderDropdownExpanded)
 						},
 					)
-					ExposedDropdownMenu(
-						expanded = isGenderDropdownExpanded,
-						onDismissRequest = { isGenderDropdownExpanded = false },
-						modifier = Modifier
-							.background(colorScheme.surfaceVariant)
-					) {
-						genderOptions.forEach { option ->
-							DropdownMenuItem(
-								text = { Text(option) },
-								onClick = {
-									gender = option
-									isGenderDropdownExpanded = false
-								}
-							)
-						}
+					
+					if (isEditing) {
+						ExposedDropdownMenu(
+							expanded = isGenderDropdownExpanded,
+							onDismissRequest = { isGenderDropdownExpanded = false },
+							modifier = Modifier
+								.background(colorScheme.surfaceVariant)
+						) {
+							genderOptions.forEach { option ->
+								DropdownMenuItem(
+									text = { Text(option) },
+									onClick = {
+										gender = option
+										isGenderDropdownExpanded = false
+									}
+								)
+							}
+							}
 					}
 				}
 				

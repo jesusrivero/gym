@@ -7,5 +7,6 @@ data class ReportePromocion(
 	val porcentaje: Double,
 	val activa: Boolean,
 	val duracion: Int = 0,
-	val cantidadUsuarios: Int = 0
+	val cantidadUsuarios: Int = 0,
+	val fechaCreacion: Long,
 )

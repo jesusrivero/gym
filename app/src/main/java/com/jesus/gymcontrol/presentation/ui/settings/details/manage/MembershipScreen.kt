@@ -386,7 +386,8 @@ fun MembershipScreen(
 								value = editedName,
 								onValueChange = { editedName = it },
 								label = { Text("Nombre") },
-								modifier = Modifier.fillMaxWidth()
+								modifier = Modifier.fillMaxWidth(),
+								maxLines = 1
 							)
 							Spacer(modifier = Modifier.height(12.dp))
 							OutlinedTextField(
@@ -394,7 +395,8 @@ fun MembershipScreen(
 								onValueChange = { editedPrice = it },
 								label = { Text("Precio") },
 								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-								modifier = Modifier.fillMaxWidth()
+								modifier = Modifier.fillMaxWidth(),
+								maxLines = 1
 							)
 							Spacer(modifier = Modifier.height(12.dp))
 							OutlinedTextField(
@@ -402,7 +404,8 @@ fun MembershipScreen(
 								onValueChange = { editedDuration = it },
 								label = { Text("Duración (días)") },
 								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-								modifier = Modifier.fillMaxWidth()
+								modifier = Modifier.fillMaxWidth(),
+								maxLines = 1
 							)
 						}
 					},
@@ -444,6 +447,15 @@ fun MembershipScreen(
 					}
 				)
 			}
+			errorMessage?.let {
+				LaunchedEffect(it) {
+					Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+				}
+			}
+		}
+	}
+}
+
 //			// Diálogo para eliminar membresía
 //			membershipToDelete?.let { membership ->
 //				AlertDialog(
@@ -466,11 +478,4 @@ fun MembershipScreen(
 //				)
 //			}
 			
-			errorMessage?.let {
-				LaunchedEffect(it) {
-					Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-				}
-			}
-		}
-	}
-}
+

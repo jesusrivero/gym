@@ -146,8 +146,8 @@ fun PaymentFilters(
 							Icon(Icons.Default.Add, contentDescription = "Agregar", modifier = Modifier.size(18.dp))
 							Spacer(modifier = Modifier.width(4.dp))
 							Text("Agregar")
-							}
 						}
+					}
 				}
 				
 			}
@@ -177,6 +177,6 @@ fun PaymentFilters(
 				unfocusedTextColor = colorScheme.onSurface
 			),
 			singleLine = true,
-			)
+		)
 	}
 }

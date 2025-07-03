@@ -137,7 +137,8 @@ class ReportesRepositoryImpl @Inject constructor(
 					porcentaje = (data["porcentajeDescuento"] as? Number)?.toDouble() ?: 0.0,
 					duracion = (data["duracionDias"] as? Number)?.toInt() ?: 0,
 					activa = data["activo"] as? Boolean ?: false,
-					cantidadUsuarios = cantidadUsuarios
+					cantidadUsuarios = cantidadUsuarios,
+					fechaCreacion = (data["fechaCreacion"] as? Number)?.toLong() ?: 0L
 				)
 			}
 			

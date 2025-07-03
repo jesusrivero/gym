@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -119,20 +118,11 @@ fun PreferencesContent(
 					},
 					modifier = Modifier
 						.fillMaxWidth()
-						.padding(horizontal = 16.dp, vertical = 8.dp)
-						.height(56.dp),
+					.padding(horizontal = 16.dp),
 					colors = ButtonDefaults.buttonColors(
-						containerColor = colorScheme.primary,
-						contentColor = colorScheme.onErrorContainer
-					),
-					shape = RoundedCornerShape(30.dp)
-				) {
-					Icon(
-						imageVector = Icons.Default.Logout,
-						contentDescription = "Cerrar sesión",
-						modifier = Modifier.size(24.dp)
+						containerColor = colorScheme.primary
 					)
-					Spacer(modifier = Modifier.width(8.dp))
+				) {
 					Text("Cerrar sesión")
 				}
 				

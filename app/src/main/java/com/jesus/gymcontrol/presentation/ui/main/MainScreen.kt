@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -66,11 +67,11 @@ import com.jesus.gymcontrol.domain.viewmodels.AdminViewModel
 import com.jesus.gymcontrol.domain.viewmodels.MembershipViewModel
 import com.jesus.gymcontrol.domain.viewmodels.MovementsViewModel
 import com.jesus.gymcontrol.domain.viewmodels.UserListViewModel
-import com.jesus.gymcontrol.domain.viewmodels.UserPreferencesViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 import com.jesus.gymcontrol.presentation.ui.commons.BottomNavigationBar
 import com.jesus.gymcontrol.presentation.ui.commons.NotificationPanel
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -519,16 +520,41 @@ fun MembershipItem(item: MembershipWithCount) {
 }
 
 
+
+@Composable
+fun formatBolivares(amount: Double): String {
+	val format = NumberFormat.getInstance(Locale("es", "VE"))
+	format.minimumFractionDigits = 2
+	format.maximumFractionDigits = 2
+	return format.format(amount)
+}
+
+
 @Composable
 fun PaymentsList(payments: List<Payment>) {
 	if (payments.isEmpty()) {
 		Text(
-			text = "Sin movimientos recientes",
+			text = "Pagos recientes",
 			style = MaterialTheme.typography.bodyMedium,
 			color = MaterialTheme.colorScheme.onSurfaceVariant
 		)
 	} else {
 		payments.forEach { payment ->
+			// Determinar el texto del monto según el tipo de pago
+			val formattedAmount = when (payment.paymentType.lowercase()) {
+				"bolívares" -> "${formatBolivares(payment.amountBs)} Bs"
+				"dólares" -> "$ ${payment.amountDollar}"
+				"mixto" -> "${payment.amountDollar} $ - ${formatBolivares(payment.amountBs)} Bs"
+				else -> "${payment.amount}"
+			}
+			
+			val paymentSymbol = when (payment.paymentType.lowercase()) {
+				"dólares" -> "$"
+				"bolívares" -> "Bs"
+				"mixto" -> "$ - Bs"
+				else -> ""
+			}
+			
 			MovementsCard(color = Color(0xFF4CAF50)) {
 				Row(
 					modifier = Modifier
@@ -544,7 +570,7 @@ fun PaymentsList(payments: List<Payment>) {
 					) {
 						Row(verticalAlignment = Alignment.CenterVertically) {
 							Text(
-								text = "$",
+								text = paymentSymbol,
 								style = MaterialTheme.typography.bodyLarge.copy(
 									fontWeight = FontWeight.Bold,
 									color = MaterialTheme.colorScheme.primary
@@ -552,7 +578,7 @@ fun PaymentsList(payments: List<Payment>) {
 								modifier = Modifier.padding(end = 8.dp)
 							)
 							Text(
-								text = "Pago de ${payment.name}",
+								text = payment.name,
 								style = MaterialTheme.typography.bodyLarge.copy(
 									fontWeight = FontWeight.SemiBold
 								)
@@ -567,13 +593,21 @@ fun PaymentsList(payments: List<Payment>) {
 						)
 					}
 					
-					Text(
-						text = "${payment.amount}$",
-						style = MaterialTheme.typography.bodyLarge.copy(
-							fontWeight = FontWeight.Bold,
-							color = MaterialTheme.colorScheme.primary
+					Box(
+						modifier = Modifier
+							.widthIn(max = 140.dp), // Limita el ancho del texto
+						contentAlignment = Alignment.CenterEnd
+					) {
+						Text(
+							text = formattedAmount,
+							maxLines = 1,
+							overflow = TextOverflow.Ellipsis,
+							style = MaterialTheme.typography.bodyLarge.copy(
+								fontWeight = FontWeight.Bold,
+								color = MaterialTheme.colorScheme.primary
+							)
 						)
-					)
+					}
 				}
 			}
 			Spacer(modifier = Modifier.height(6.dp))

@@ -86,6 +86,10 @@ fun PromotionScreen(
 	var showResultDialog by remember { mutableStateOf(false) }
 	val promotionActionMessage by viewModel.promotionActionMessage
 	val isActionSuccess by viewModel.isActionSuccess.collectAsState()
+	var showDiscountError by remember { mutableStateOf(false) }
+	var showEditDiscountError by remember { mutableStateOf(false) }
+	
+	
 	
 	LaunchedEffect(Unit) {
 		viewModel.loadPromotions()
@@ -317,8 +321,12 @@ fun PromotionScreen(
 							val durationValue = duration.toIntOrNull()
 							
 							if (name.isBlank() || description.isBlank() || discountValue == null || durationValue == null) {
-								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT)
-									.show()
+								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT).show()
+								return@Button
+							}
+							
+							if (discountValue > 100.0) {
+								Toast.makeText(context, "El descuento no puede ser mayor al 100%", Toast.LENGTH_SHORT).show()
 								return@Button
 							}
 							
@@ -365,12 +373,29 @@ fun PromotionScreen(
 							)
 							OutlinedTextField(
 								value = discount,
-								onValueChange = { discount = it },
+								onValueChange = {
+									val value = it.toDoubleOrNull()
+									if (value == null || value <= 100.0) {
+										discount = it
+										showDiscountError = false
+									} else {
+										showDiscountError = true
+									}
+								},
 								label = { Text("Descuento (%)") },
 								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
 								modifier = Modifier.fillMaxWidth(),
 								maxLines = 1
 							)
+							
+							if (showDiscountError) {
+								Text(
+									text = "El descuento no puede ser mayor a 100%",
+									color = Color.Red,
+									style = MaterialTheme.typography.labelSmall,
+									modifier = Modifier.padding(top=4.dp)
+								)
+							}
 							OutlinedTextField(
 								value = duration,
 								onValueChange = { duration = it },
@@ -400,8 +425,12 @@ fun PromotionScreen(
 							val durationVal = editedDuration.toIntOrNull()
 							
 							if (editedName.isBlank() || editedDescription.isBlank() || discountVal == null || durationVal == null) {
-								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT)
-									.show()
+								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT).show()
+								return@Button
+							}
+							
+							if (discountVal > 100.0) {
+								Toast.makeText(context, "El descuento no puede ser mayor al 100%", Toast.LENGTH_SHORT).show()
 								return@Button
 							}
 							
@@ -431,21 +460,42 @@ fun PromotionScreen(
 								value = editedName,
 								onValueChange = { editedName = it },
 								label = { Text("Nombre") },
-								modifier = Modifier.fillMaxWidth()
+								modifier = Modifier.fillMaxWidth(),
+								maxLines = 1
 							)
 							OutlinedTextField(
 								value = editedDescription,
 								onValueChange = { editedDescription = it },
 								label = { Text("Descripción") },
-								modifier = Modifier.fillMaxWidth()
+								modifier = Modifier.fillMaxWidth(),
+								maxLines = 1
 							)
 							OutlinedTextField(
 								value = editedDiscount,
-								onValueChange = { editedDiscount = it },
+								onValueChange = {
+									val value = it.toDoubleOrNull()
+									if (value == null || value <= 100.0) {
+										editedDiscount = it
+										showEditDiscountError = false
+									} else {
+										showEditDiscountError = true
+									}
+								},
 								label = { Text("Descuento (%)") },
 								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-								modifier = Modifier.fillMaxWidth()
+								modifier = Modifier.fillMaxWidth(),
+								maxLines = 1
 							)
+							
+							if (showEditDiscountError) {
+								Text(
+									text = "El descuento no puede ser mayor a 100%",
+									color = Color.Red,
+									style = MaterialTheme.typography.labelSmall,
+									modifier = Modifier.padding(top=4.dp),
+									maxLines = 1
+								)
+							}
 							OutlinedTextField(
 								value = editedDuration,
 								onValueChange = { editedDuration = it },

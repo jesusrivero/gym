@@ -468,7 +468,7 @@ fun ReportFilters(
 	dateFormatter: DateTimeFormatter,
 	context: Context,
 	pagos: List<ReportePago>,
-	 clientes: List<ReporteCliente>,
+	clientes: List<ReporteCliente>,
 ) {
 	var expandedFilter by remember { mutableStateOf(false) }
 	var expandedSubFilter by remember { mutableStateOf(false) }
@@ -679,4 +679,3 @@ fun formatBolivares(amount: Double?): String {
 	val result = format.format(amount).replace("Bs.", "Bs ")
 	return result
 }
-
