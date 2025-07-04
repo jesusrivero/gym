@@ -10,6 +10,9 @@ import com.jesus.gymcontrol.domain.repository.PaymentRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 class PaymentRepositoryImpl @Inject constructor(
@@ -215,4 +218,40 @@ class PaymentRepositoryImpl @Inject constructor(
 		val base = if (fechaActual > hoy) fechaActual else hoy
 		return base + (membershipDays * 24 * 60*60*1000L)
 	}
+	
+	
+	override suspend fun generarDescripcionPago(
+		userId: String,
+		gymCode: String,
+		nuevaMembresia: String
+	): String {
+		val userGymDoc = firestore
+			.collection("users")
+			.document(userId)
+			.collection("gimnasios")
+			.document(gymCode)
+			.get()
+			.await()
+		
+		val membershipActual = userGymDoc.getString("membership")
+		val fechaVencimiento = userGymDoc.getLong("fechaVencimiento") ?: 0L
+		
+		val hoy = System.currentTimeMillis()
+		
+		val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+		val fechaStr = sdf.format(Date(fechaVencimiento))
+		
+		return when {
+			membershipActual == null -> {
+				"Este pago inicia la membresía $nuevaMembresia."
+			}
+			fechaVencimiento < hoy -> {
+				"Este pago reinicia la membresía $nuevaMembresia. La membresía anterior $membershipActual estaba vencida desde $fechaStr."
+			}
+			else -> {
+				"Este pago extiende la membresía $membershipActual (vence $fechaStr) con la nueva membresía $nuevaMembresia."
+			}
+		}
+	}
+	
 }

@@ -17,4 +17,9 @@ interface PaymentRepository {
 		membershipDays: Int
 		):Long
 	
+	suspend fun generarDescripcionPago(
+		userId: String,
+		gymCode: String,
+		nuevaMembresia: String
+	): String
 }

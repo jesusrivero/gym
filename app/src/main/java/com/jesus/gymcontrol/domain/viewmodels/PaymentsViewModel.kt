@@ -16,6 +16,7 @@ import com.jesus.gymcontrol.domain.model.Promotion
 import com.jesus.gymcontrol.domain.usecase.usuario.AddPaymentUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetAllPaymentsUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.payment.CalcularNuevaFechaVencimientoUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.payment.GenerarDescripcionPagoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,7 +31,9 @@ class PaymentsViewModel @Inject constructor(
 	private val getAllPaymentsUseCase: GetAllPaymentsUseCase,
 	private val sessionManager: SessionManager,
 	private val calcularNuevaFechaVencimientoUseCase: CalcularNuevaFechaVencimientoUseCase,
-	private val firestore: FirebaseFirestore
+	private val generarDescripcionPagoUseCase: GenerarDescripcionPagoUseCase,
+	
+	private val firestore: FirebaseFirestore,
 ) : ViewModel() {
 	
 	private val _paymentState = MutableStateFlow(PaymentState())
@@ -52,8 +55,11 @@ class PaymentsViewModel @Inject constructor(
 	var errorMessage by mutableStateOf<String?>(null)
 		private set
 	
+	var descripcionGenerada by mutableStateOf<String?>(null)
+		internal set
 	
-	fun selectedPromotion (promotion: Promotion?) {
+	
+	fun selectedPromotion(promotion: Promotion?) {
 		selectedPromotion = promotion
 	}
 	
@@ -192,10 +198,22 @@ class PaymentsViewModel @Inject constructor(
 			} catch (e: Exception) {
 				errorMessage = e.message
 			} finally {
-				isLoading =false
+				isLoading = false
 			}
 		}
 	}
 	
- 
+	
+	fun generarDescripcion(userId: String, gymCode: String, nuevaMembresia: String) {
+		viewModelScope.launch {
+			isLoading = true
+			descripcionGenerada = try {
+				generarDescripcionPagoUseCase(userId, gymCode, nuevaMembresia)
+			} catch (e: Exception) {
+				null
+			}
+			isLoading = false
+		}
+	}
+	
 }

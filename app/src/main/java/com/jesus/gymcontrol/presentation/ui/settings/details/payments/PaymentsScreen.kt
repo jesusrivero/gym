@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -118,6 +119,7 @@ fun PaymentsScreenContent(
 	val gimnasioCode = sessionManager.getGymCode()
 	
 	val selectedUser = users.find { it.id == selectedUserId }
+	val descripcionGenerada = viewModel.descripcionGenerada
 	
 	val filteredUsers = if (nameUser.isBlank()) emptyList() else {
 		users.filter { user ->
@@ -241,7 +243,7 @@ fun PaymentsScreenContent(
 							amount = montoTotal,
 							amountDollar = if (paymentState.type != "Bolívares") montoDolares else null,
 							amountBs = if (paymentState.type != "Dólares") montoBs else null,
-							description = description,
+							description = viewModel.descripcionGenerada,
 							reference = if (paymentState.type != "Dólares") reference else null,
 							date = System.currentTimeMillis(),
 							gimnasioCode = gimnasioCode.toString(),
@@ -264,15 +266,15 @@ fun PaymentsScreenContent(
 				},
 				modifier = Modifier
 					.fillMaxWidth()
+					.navigationBarsPadding()
 					.padding(horizontal = 16.dp, vertical = 8.dp),
-				enabled = formIsValid,
 				colors = ButtonDefaults.buttonColors(
-					containerColor = colorScheme.primary,
-					disabledContainerColor = colorScheme.onSurface.copy(alpha = 0.12f)
-				)
+					containerColor = colorScheme.primary),
+				enabled = formIsValid
 			) {
 				Text("Registrar Pago", fontWeight = FontWeight.Bold)
 			}
+			
 		}
 	) { innerPadding ->
 		Column(
@@ -360,6 +362,13 @@ fun PaymentsScreenContent(
 											.clickable {
 												nameUser = user.name
 												selectedUserId = user.id
+												// Reset otros campos
+												description = ""
+												viewModel.generarDescripcion(
+													userId = user.id,
+													gymCode = gimnasioCode ?: "",
+													nuevaMembresia = paymentState.frequency
+												)
 											}
 											.padding(12.dp),
 										verticalAlignment = Alignment.CenterVertically,
@@ -454,6 +463,14 @@ fun PaymentsScreenContent(
 											viewModel.updatePaymentFrequency(membership.nombre)
 											viewModel.calculateDiscountedAmountIfApplicable()
 											isMembershipDropdownExpanded = false
+											
+											if (selectedUserId != null) {
+												viewModel.generarDescripcion(
+													userId = selectedUserId!!,
+													gymCode = gimnasioCode ?: "",
+													nuevaMembresia = membership.nombre
+												)
+											}
 										}
 									)
 								}
@@ -671,8 +688,8 @@ fun PaymentsScreenContent(
 						
 						// Campo de descripción
 						OutlinedTextField(
-							value = description,
-							onValueChange = { description = it },
+							value = descripcionGenerada ?: "",
+							onValueChange = { viewModel.descripcionGenerada  = it },
 							label = { Text("Notas adicionales") },
 							modifier = Modifier.fillMaxWidth(),
 							leadingIcon = {
@@ -681,7 +698,7 @@ fun PaymentsScreenContent(
 									contentDescription = "Descripción"
 								)
 							},
-							maxLines = 2
+							maxLines=2
 						)
 					}
 				}

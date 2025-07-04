@@ -343,6 +343,9 @@ fun PaymentDetailDialog(payment: Payment, onDismiss: () -> Unit) {
 					SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(payment.fechaVencimiento))
 				DetailRow("Fecha de vencimiento:", formattedVencimiento)
 				
+				DetailRow("Descripcion:", payment.description)
+				Spacer(modifier = Modifier.height(8.dp))
+				
 			}
 		},
 		containerColor = MaterialTheme.colorScheme.surface,
