@@ -58,6 +58,9 @@ class PaymentsViewModel @Inject constructor(
 	var descripcionGenerada by mutableStateOf<String?>(null)
 		internal set
 	
+	val paymentActionMessage = mutableStateOf<String?>(null)
+	val isActionSuccess = mutableStateOf<Boolean?>(null)
+	
 	
 	fun selectedPromotion(promotion: Promotion?) {
 		selectedPromotion = promotion
@@ -157,8 +160,8 @@ class PaymentsViewModel @Inject constructor(
 		errorMessage = null
 		_paymentState.update {
 			it.copy(
-				type = "Bolívares",
-				frequency = "Mensual",
+				type = "",
+				frequency = "",
 				amountDollar = "",
 				amountBs = ""
 			)
@@ -191,12 +194,25 @@ class PaymentsViewModel @Inject constructor(
 						.document(pago.gimnasioCode)
 						.update("fechaVencimiento", nuevaFechaVencimiento)
 					
-					isSuccess = true
+					result.onSuccess {
+						firestore.collection("users")
+							.document(pago.userId)
+							.collection("gimnasios")
+							.document(pago.gimnasioCode)
+							.update("fechaVencimiento", nuevaFechaVencimiento)
+						
+						paymentActionMessage.value = "Pago registrado correctamente, deseas registrar otro?"
+						isActionSuccess.value = true
+					}.onFailure {
+						paymentActionMessage.value = "Error al registrar el pago: ${it.message}"
+						isActionSuccess.value = false
+					}
 				}.onFailure {
 					errorMessage = it.message
 				}
 			} catch (e: Exception) {
-				errorMessage = e.message
+				paymentActionMessage.value = "Error al registrar el pago: ${e.message}"
+				isActionSuccess.value = false
 			} finally {
 				isLoading = false
 			}
@@ -206,14 +222,20 @@ class PaymentsViewModel @Inject constructor(
 	
 	fun generarDescripcion(userId: String, gymCode: String, nuevaMembresia: String) {
 		viewModelScope.launch {
-			isLoading = true
 			descripcionGenerada = try {
 				generarDescripcionPagoUseCase(userId, gymCode, nuevaMembresia)
 			} catch (e: Exception) {
 				null
 			}
-			isLoading = false
 		}
 	}
 	
+	fun clearPaymentAction() {
+		paymentActionMessage.value = null
+		isActionSuccess.value = null
+	}
+	
+	fun clearDescription() {
+		descripcionGenerada = null
+	}
 }

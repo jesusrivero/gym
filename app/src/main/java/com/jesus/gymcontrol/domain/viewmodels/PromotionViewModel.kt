@@ -224,4 +224,13 @@ class PromotionViewModel @Inject constructor(
 		_promotionActionMessage.value = null
 		_isActionSuccess.value = null
 	}
+	
+	fun clearresetState() {
+		promotions = emptyList()
+		precioBaseMembresia = 0.0
+		tipoPagoSeleccionado = "Dólares"
+		promocionSeleccionada = null
+		montoCalculado = 0.0
+		clearPromotionMessage()
+	}
 }
