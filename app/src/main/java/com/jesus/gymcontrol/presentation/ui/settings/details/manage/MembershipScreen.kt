@@ -96,7 +96,7 @@ fun MembershipScreen(
 	LaunchedEffect(membershipActionMessage) {
 		membershipActionMessage?.let {
 			showSuccessDialog = true
-			delay(2000)
+			delay(1000)
 			showSuccessDialog = false
 			viewModel.clearMembershipMessage()
 		}

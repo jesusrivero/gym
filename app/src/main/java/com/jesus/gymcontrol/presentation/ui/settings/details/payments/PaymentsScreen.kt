@@ -460,10 +460,6 @@ fun PaymentsScreenContent(
 											}
 										},
 										onClick = {
-											viewModel.updatePaymentFrequency(membership.nombre)
-											viewModel.calculateDiscountedAmountIfApplicable()
-											isMembershipDropdownExpanded = false
-											
 											if (selectedUserId != null) {
 												viewModel.generarDescripcion(
 													userId = selectedUserId!!,
@@ -471,6 +467,10 @@ fun PaymentsScreenContent(
 													nuevaMembresia = membership.nombre
 												)
 											}
+											
+											viewModel.updatePaymentFrequency(membership.nombre)
+											viewModel.calculateDiscountedAmountIfApplicable()
+											isMembershipDropdownExpanded=false
 										}
 									)
 								}

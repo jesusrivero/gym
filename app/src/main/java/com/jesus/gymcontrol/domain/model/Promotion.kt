@@ -1,6 +1,6 @@
 package com.jesus.gymcontrol.domain.model
 
-data class Promotion(
+data class  Promotion(
 	val id: String = "",
 	val nombre: String = "",
 	val descripcion: String = "",

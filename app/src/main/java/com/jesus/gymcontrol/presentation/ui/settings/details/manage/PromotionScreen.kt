@@ -1,16 +1,7 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details.manage
 
 import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,31 +13,8 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -64,6 +32,7 @@ import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -102,7 +71,7 @@ fun PromotionScreen(
 	LaunchedEffect(promotionActionMessage) {
 		promotionActionMessage?.let {
 			showResultDialog = true
-			delay(2000)
+			delay(1000)
 			showResultDialog = false
 			viewModel.clearPromotionMessage()
 		}
@@ -327,6 +296,14 @@ fun PromotionScreen(
 									)
 								}"
 							)
+							Text(
+								"Fecha de vencimiento: ${
+									SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(
+										Date(promo.fechaVencimiento)
+									)
+								}"
+							)
+							
 						}
 					},
 					confirmButton = {
@@ -447,6 +424,7 @@ fun PromotionScreen(
 				var editedDescription by remember { mutableStateOf(promo.descripcion) }
 				var editedDiscount by remember { mutableStateOf(promo.porcentajeDescuento.toString()) }
 				var editedDuration by remember { mutableStateOf(promo.duracionDias.toString()) }
+				var canEditDuration by remember { mutableStateOf(false) }
 				
 				AlertDialog(
 					onDismissRequest = { promotionToEdit = null },
@@ -456,8 +434,7 @@ fun PromotionScreen(
 							val durationVal = editedDuration.toIntOrNull()
 							
 							if (editedName.isBlank() || editedDescription.isBlank() || discountVal == null || durationVal == null) {
-								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT)
-									.show()
+								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT).show()
 								return@Button
 							}
 							
@@ -470,6 +447,8 @@ fun PromotionScreen(
 								return@Button
 							}
 							
+							val vencida = (promo.fechaVencimiento ?: 0L) < System.currentTimeMillis()
+							
 							val updatedPromo = promo.copy(
 								nombre = editedName.trim(),
 								descripcion = editedDescription.trim(),
@@ -477,9 +456,8 @@ fun PromotionScreen(
 								duracionDias = durationVal
 							)
 							
-							viewModel.updatePromotion(updatedPromo)
+							viewModel.updatePromotion(updatedPromo, forceRecalculate = vencida || canEditDuration)
 							promotionToEdit = null
-							promotionActionMessage
 						}) {
 							Text("Guardar")
 						}
@@ -489,20 +467,31 @@ fun PromotionScreen(
 							Text("Cancelar")
 						}
 					},
-					title = { Text("Editar Promoción") },
+					title = {
+						val vencida = (promo.fechaVencimiento ?: 0L) < System.currentTimeMillis()
+						val textColor = if (vencida) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurface
+						Text(
+							text = if (vencida) "Editar Promoción (VENCIDA)" else "Editar Promoción",
+							color = textColor
+						)
+					},
 					text = {
+						val vencida = (promo.fechaVencimiento ?: 0L) < System.currentTimeMillis()
+						val textColor =
+							if (vencida) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurface
+						
 						Column {
 							OutlinedTextField(
 								value = editedName,
 								onValueChange = { editedName = it },
-								label = { Text("Nombre") },
+								label = { Text("Nombre", color = textColor) },
 								modifier = Modifier.fillMaxWidth(),
 								maxLines = 1
 							)
 							OutlinedTextField(
 								value = editedDescription,
 								onValueChange = { editedDescription = it },
-								label = { Text("Descripción") },
+								label = { Text("Descripción", color = textColor) },
 								modifier = Modifier.fillMaxWidth(),
 								maxLines = 1
 							)
@@ -517,7 +506,7 @@ fun PromotionScreen(
 										showEditDiscountError = true
 									}
 								},
-								label = { Text("Descuento (%)") },
+								label = { Text("Descuento (%)", color = textColor) },
 								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
 								modifier = Modifier.fillMaxWidth(),
 								maxLines = 1
@@ -532,17 +521,36 @@ fun PromotionScreen(
 									maxLines = 1
 								)
 							}
-							OutlinedTextField(
-								value = editedDuration,
-								onValueChange = { editedDuration = it },
-								label = { Text("Duración (días)") },
-								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-								modifier = Modifier.fillMaxWidth()
-							)
+							
+							Row(
+								verticalAlignment = Alignment.CenterVertically
+							) {
+								OutlinedTextField(
+									value = editedDuration,
+									onValueChange = { editedDuration = it },
+									label = { Text("Duración (días)", color = textColor) },
+									keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+									modifier = Modifier.weight(1f),
+									enabled = canEditDuration,
+									maxLines = 1
+								)
+								IconButton(
+									onClick = { canEditDuration = !canEditDuration }
+								) {
+									Icon(
+										imageVector = Icons.Default.Edit,
+										contentDescription = "Extender duración",
+										tint = if (canEditDuration) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+									)
+								}
+							}
 						}
 					},
 					shape = RoundedCornerShape(16.dp),
-					containerColor = MaterialTheme.colorScheme.surface
+					containerColor = if ((promo.fechaVencimiento ?: 0L) < System.currentTimeMillis())
+						MaterialTheme.colorScheme.errorContainer
+					else
+						MaterialTheme.colorScheme.surface
 				)
 			}
 			

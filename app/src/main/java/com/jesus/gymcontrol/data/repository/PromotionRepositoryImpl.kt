@@ -2,6 +2,7 @@ package com.jesus.gymcontrol.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.jesus.gymcontrol.domain.model.Promotion
 import com.jesus.gymcontrol.domain.repository.PromotionRepository
 import kotlinx.coroutines.tasks.await
@@ -51,6 +52,7 @@ class PromotionRepositoryImpl @Inject constructor(
 		val snapshot = firestore.collection("gimnasios")
 			.document(gymCode)
 			.collection("promociones")
+			.orderBy("fechaCreacion", Query.Direction.DESCENDING) // 👈 aquí
 			.get()
 			.await()
 		
@@ -63,7 +65,10 @@ class PromotionRepositoryImpl @Inject constructor(
 		Result.failure(e)
 	}
 	
-	override suspend fun updatePromotion(promotion: Promotion): Result<Unit> = try {
+	override suspend fun updatePromotion(
+		promotion: Promotion,
+		forceRecalculate: Boolean
+	): Result<Unit> = try {
 		val uid = auth.currentUser?.uid
 			?: return Result.failure(Exception("Usuario no autenticado"))
 		
@@ -71,17 +76,35 @@ class PromotionRepositoryImpl @Inject constructor(
 		val gymCode = userDoc.getString("gimnasioCode")
 			?: return Result.failure(Exception("No se encontró el gimnasioCode del usuario"))
 		
+		val ahora = System.currentTimeMillis()
+		val duracionDias = promotion.duracionDias ?: 0
+		
+		val vencida = promotion.fechaVencimiento?.let { ahora >= it } ?: true
+		
+		val nuevaFechaVencimiento = if (vencida || forceRecalculate) {
+			ahora + (duracionDias * 24 * 60 * 60 * 1000L)
+		} else {
+			promotion.fechaVencimiento
+		}
+		
+		val promotionActualizada = promotion.copy(
+			fechaVencimiento = nuevaFechaVencimiento,
+			activo = true,
+			duracionDias = duracionDias
+		)
+		
 		firestore.collection("gimnasios")
 			.document(gymCode)
 			.collection("promociones")
 			.document(promotion.id)
-			.set(promotion)
+			.set(promotionActualizada)
 			.await()
 		
 		Result.success(Unit)
 	} catch (e: Exception) {
 		Result.failure(e)
 	}
+	
 	
 	override suspend fun deletePromotion(promotion: Promotion): Result<Unit> {
 		return try {

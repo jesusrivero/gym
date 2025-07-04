@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
+import com.google.firebase.firestore.Source
 
 class PaymentRepositoryImpl @Inject constructor(
 	private val firestore: FirebaseFirestore,
@@ -225,33 +226,43 @@ class PaymentRepositoryImpl @Inject constructor(
 		gymCode: String,
 		nuevaMembresia: String
 	): String {
+		Log.d("PagoDebug", "Iniciando generación para userId=$userId gymCode=$gymCode nuevaMembresia=$nuevaMembresia")
+		
 		val userGymDoc = firestore
-			.collection("users")
-			.document(userId)
 			.collection("gimnasios")
 			.document(gymCode)
-			.get()
+			.collection("usuarios")
+			.document(userId)
+			.get(Source.SERVER) // 👈 lee del servidor
 			.await()
 		
-		val membershipActual = userGymDoc.getString("membership")
+		Log.d("PagoDebug", "Documento existe: ${userGymDoc.exists()}")
+		Log.d("PagoDebug", "Datos completos: ${userGymDoc.data}")
+		
+		val membershipActual = userGymDoc.data?.get("membership")?.toString()
+		Log.d("PagoDebug", "membershipActual=$membershipActual")
+		
 		val fechaVencimiento = userGymDoc.getLong("fechaVencimiento") ?: 0L
+		Log.d("PagoDebug", "fechaVencimiento=$fechaVencimiento")
 		
 		val hoy = System.currentTimeMillis()
-		
 		val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 		val fechaStr = sdf.format(Date(fechaVencimiento))
 		
 		return when {
 			membershipActual == null -> {
+				Log.d("PagoDebug", "Caso: No tenía membresía previa")
 				"Este pago inicia la membresía $nuevaMembresia."
 			}
 			fechaVencimiento < hoy -> {
+				Log.d("PagoDebug", "Caso: Membresía vencida")
 				"Este pago reinicia la membresía $nuevaMembresia. La membresía anterior $membershipActual estaba vencida desde $fechaStr."
 			}
 			else -> {
+				Log.d("PagoDebug", "Caso: Extiende membresía")
 				"Este pago extiende la membresía $membershipActual (vence $fechaStr) con la nueva membresía $nuevaMembresia."
-			}
-		}
+				}
+				}
 	}
 	
 }

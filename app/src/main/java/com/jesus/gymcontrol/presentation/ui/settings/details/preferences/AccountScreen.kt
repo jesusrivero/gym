@@ -98,6 +98,12 @@ fun AccountContent(
 	}
 	
 	LaunchedEffect(Unit) {
+		delay(1000)
+		showSuccessDialog = false
+		viewModel.resetState() // importante para resetear isSuccess
+	}
+	
+	LaunchedEffect(Unit) {
 		viewModel.loadUserProfile()
 	}
 	
@@ -374,12 +380,7 @@ fun AccountContent(
 					)
 					
 					
-					// Cierra el dialog después de 2 segundos
-					LaunchedEffect(Unit) {
-						delay(2000)
-						showSuccessDialog = false
-						viewModel.resetState() // importante para resetear isSuccess
-						}
+					
 				}
 			}
 		}

@@ -89,7 +89,20 @@ class PromotionViewModel @Inject constructor(
 			isLoading = true
 			errorMessage = null
 			
+			val ahora = System.currentTimeMillis()
+			val vencida = promotion.fechaVencimiento?.let { ahora >= it } ?: true
+			
+			if (vencida && !promotion.activo) {
+				// No se puede activar si vencida
+				isLoading = false
+				_promotionActionMessage.value =
+					"La promoción está vencida. Debes actualizar la duración antes de reactivarla."
+				_isActionSuccess.value = false
+				return@launch
+			}
+			
 			val result = togglePromotionStateUseCase(promotion)
+			
 			isLoading = false
 			
 			result.onSuccess {
@@ -108,12 +121,13 @@ class PromotionViewModel @Inject constructor(
 		}
 	}
 	
-	fun updatePromotion(promotion: Promotion) {
+	fun updatePromotion(promotion: Promotion, forceRecalculate: Boolean = false) {
 		viewModelScope.launch {
 			isLoading = true
 			errorMessage = null
 			
-			val result = updatePromotionUseCase(promotion)
+			val result = updatePromotionUseCase(promotion, forceRecalculate)
+			
 			isLoading = false
 			
 			result.onSuccess {
@@ -121,8 +135,8 @@ class PromotionViewModel @Inject constructor(
 				loadPromotions()
 			}.onFailure {
 				setActionResult("Error al editar promoción: ${it.message}", false)
+				}
 			}
-		}
 	}
 	
 	fun deletePromotion(promotion: Promotion) {
