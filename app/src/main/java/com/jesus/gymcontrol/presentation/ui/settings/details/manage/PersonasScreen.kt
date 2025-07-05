@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
+import com.jesus.gymcontrol.domain.helpers.WhatsAppButton
 import com.jesus.gymcontrol.domain.model.ListUser
 import com.jesus.gymcontrol.domain.viewmodels.UserListViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
@@ -245,6 +246,16 @@ fun PersonsScreen(
 										horizontalArrangement = Arrangement.spacedBy(4.dp),
 										verticalAlignment = Alignment.CenterVertically
 									) {
+										if (user.state.equals("pendiente", ignoreCase = true)) {
+											WhatsAppButton(
+												phoneNumber = user.phone,
+												message = """
+                                Hola ${user.name}, te recordamos que tu membresía está próxima a vencer.
+                                ¡Contáctanos para renovarla a tiempo!
+                            """.trimIndent()
+											)
+										}
+										
 										IconButton(onClick = { navPag(user.id) }) {
 											Icon(
 												Icons.Default.Payment,
@@ -271,7 +282,7 @@ fun PersonsScreen(
 										}
 									}
 								}
-							}
+								}
 						}
 					}
 				}
