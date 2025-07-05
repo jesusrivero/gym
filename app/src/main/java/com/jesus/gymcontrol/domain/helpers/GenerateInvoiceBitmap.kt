@@ -56,7 +56,7 @@ fun generateInvoiceBitmap(payment: Payment, context: Context): Bitmap {
 	canvas.drawRect(0f, 0f, width.toFloat(), 150f, headerPaint)
 	canvas.drawText("FACTURA", width / 2f, 100f, titlePaint)
 	
-	var y = 180f + 30f // margen superior después del header
+	var y = 180f + 30f
 	
 	val date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(payment.date))
 	val venc = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(payment.fechaVencimiento))
@@ -77,37 +77,27 @@ fun generateInvoiceBitmap(payment: Payment, context: Context): Bitmap {
 	y += 60f
 	
 	canvas.drawText("Concepto", margen, y, labelPaint)
-	canvas.drawText("Membersia", width - margen - 200f, y, labelPaint)
+	canvas.drawText("Monto", width - margen - 200f, y, labelPaint)
 	y += 40f
 	canvas.drawLine(margen, y, width - margen, y, dividerPaint)
 	y += 50f
 	
-	when (payment.paymentType) {
-		"Mixto" -> {
-			canvas.drawText("Pago Mixto", margen, y, valuePaint)
-			canvas.drawText(formatMonto(payment), width - margen - 200f, y, valuePaint)
-			y += 50f
-			if (payment.amountDollar > 0) {
-				canvas.drawText("Dólares", margen, y, valuePaint)
-				canvas.drawText("$${payment.amountDollar}", width - margen - 200f, y, valuePaint)
-				y += 50f
-			}
-			if (payment.amountBs > 0) {
-				canvas.drawText("Bolívares", margen, y, valuePaint)
-				canvas.drawText("Bs. ${payment.amountBs}", width - margen - 200f, y, valuePaint)
-				y += 50f
-			}
-		}
-		"Dólares" -> {
-			canvas.drawText("Pago en Dólares", margen, y, valuePaint)
-			canvas.drawText("$${payment.amountDollar}", width - margen - 200f, y, valuePaint)
-			y += 50f
-		}
-		"Bolívares" -> {
-			canvas.drawText("Pago en Bolívares", margen, y, valuePaint)
-			canvas.drawText("Bs. ${payment.amountBs}", width - margen - 200f, y, valuePaint)
-			y += 50f
-		}
+	// 🔷 Concepto y monto total (precio de la membresía)
+	canvas.drawText("Precio", margen, y, valuePaint)
+	canvas.drawText(formatMembershipPrice(payment), width - margen - 200f, y, valuePaint)
+	y += 50f
+	
+	// 🔷 Detalle del pago según monedas
+	if (payment.amountDollar > 0) {
+		canvas.drawText("Dólares", margen, y, valuePaint)
+		canvas.drawText("$${"%.2f".format(payment.amountDollar)}", width - margen - 200f, y, valuePaint)
+		y += 50f
+	}
+	
+	if (payment.amountBs > 0) {
+		canvas.drawText("Bolívares", margen, y, valuePaint)
+		canvas.drawText("Bs. ${"%.2f".format(payment.amountBs)}", width - margen - 200f, y, valuePaint)
+		y += 50f
 	}
 	
 	payment.reference?.let {
@@ -130,13 +120,12 @@ fun generateInvoiceBitmap(payment: Payment, context: Context): Bitmap {
 	y += 60f
 	
 	canvas.drawText("TOTAL", margen, y, totalPaint)
-	canvas.drawText(formatMonto(payment), width - margen - 200f, y, totalPaint)
+	canvas.drawText(formatMembershipPrice(payment), width - margen - 200f, y, totalPaint)
 	y += 100f
 	
 	canvas.drawText("Descripción:", margen, y, labelPaint)
 	y += 50f
 	
-	// 💡 texto con wrap
 	val maxLineWidth = width - 2 * margen
 	val descriptionLines = breakTextIntoLines(payment.description, valuePaint, maxLineWidth)
 	
@@ -148,7 +137,7 @@ fun generateInvoiceBitmap(payment: Payment, context: Context): Bitmap {
 	return bitmap
 }
 
-// 💡 helper para partir texto en líneas
+// 🔷 helper para partir texto en líneas
 fun breakTextIntoLines(text: String, paint: Paint, maxWidth: Float): List<String> {
 	val words = text.split(" ")
 	val lines = mutableListOf<String>()
@@ -168,4 +157,9 @@ fun breakTextIntoLines(text: String, paint: Paint, maxWidth: Float): List<String
 	}
 	
 	return lines
+}
+
+// 🔷 Esta función devuelve el precio original de la membresía:
+fun formatMembershipPrice(payment: Payment): String {
+	return "$${"%.2f".format(payment.amount)}"
 }
