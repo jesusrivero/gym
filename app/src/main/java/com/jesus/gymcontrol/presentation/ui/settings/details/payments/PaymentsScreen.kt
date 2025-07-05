@@ -289,6 +289,7 @@ fun PaymentsScreenContent(
 					onClick = {
 						val user = users.find { it.id == selectedUserId }
 						val membership = memberships.find { it.nombre == paymentState.frequency }
+						val amountMemberhsip = membership?.precio ?: 0.0
 						if (user != null && membership != null) {
 							val montoDolares = paymentState.amountDollar.toDoubleOrNull() ?: 0.0
 							val montoBs = paymentState.amountBs.toDoubleOrNull() ?: 0.0
@@ -308,7 +309,7 @@ fun PaymentsScreenContent(
 								membershipId = membership.id,
 								membershipName = membership.nombre,
 								tipepayment = paymentState.type,
-								amount = montoTotal,
+								amount = amountMemberhsip,
 								amountDollar = if (paymentState.type != "Bolívares") montoDolares else null,
 								amountBs = if (paymentState.type != "Dólares") montoBs else null,
 								description = viewModel.descripcionGenerada,

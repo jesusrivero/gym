@@ -14,6 +14,7 @@ import java.util.Date
 import java.util.Locale
 import kotlin.math.ceil
 
+
 object PdfReportGenerator {
 	
 	fun generateReportPdf(
@@ -42,14 +43,26 @@ object PdfReportGenerator {
 			val marginLeft = 40f
 			val marginTop = 60f
 			val marginBottom = 60f
-			val columnWidth = 100f
-			val rowHeight = 20f
+			val rowHeight = 25f
 			
 			val dateText = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
 			
 			val availableHeight = pageHeight - marginTop - marginBottom - 90f
 			val rowsPerPage = availableHeight.toInt() / rowHeight
 			val totalPages = ceil(rows.size.toDouble() / rowsPerPage).toInt()
+			
+			val columnCount = headers.size
+			val baseColumnWidth = (pageWidth - 2 * marginLeft) / columnCount
+			
+			// Ajuste: hacer la última columna (Monto) más ancha
+			val columnWidths = FloatArray(columnCount) { baseColumnWidth.toFloat() }
+			if (headers.last().contains("Monto", ignoreCase = true)) {
+				columnWidths[columnCount - 1] = baseColumnWidth * 1.5f
+				val reduce = (baseColumnWidth * 0.5f) / (columnCount - 1)
+				for (i in 0 until columnCount - 1) {
+					columnWidths[i] -= reduce.toFloat()
+				}
+			}
 			
 			var rowIndex = 0
 			var pageNumber = 1
@@ -69,21 +82,23 @@ object PdfReportGenerator {
 				paint.textSize = 12f
 				paint.isFakeBoldText = true
 				headers.forEachIndexed { index, header ->
-					val x = marginLeft + index * columnWidth
+					val x = marginLeft + columnWidths.take(index).sum()
 					canvas.drawText(header, x + 5, y + 15, paint)
-					canvas.drawRect(x, y, x + columnWidth, y + rowHeight, linePaint)
+					canvas.drawRect(x, y, x + columnWidths[index], y + rowHeight, linePaint)
 				}
 				y += rowHeight
 				
 				paint.isFakeBoldText = false
+				paint.textSize = 10f // más pequeño para datos
+				
 				for (i in 0 until rowsPerPage.toInt()) {
 					if (rowIndex >= rows.size) break
 					val row = rows[rowIndex]
 					row.forEachIndexed { index, cell ->
-						val x = marginLeft + index * columnWidth
+						val x = marginLeft + columnWidths.take(index).sum()
 						val formattedCell = formatIfDate(cell)
-						canvas.drawText(formattedCell, x + 5, y + 15, paint)
-						canvas.drawRect(x, y, x + columnWidth, y + rowHeight, linePaint)
+						drawWrappedText(canvas, formattedCell, x + 5, y + 12, columnWidths[index] - 10, paint)
+						canvas.drawRect(x, y, x + columnWidths[index], y + rowHeight, linePaint)
 					}
 					y += rowHeight
 					rowIndex++
@@ -139,9 +154,39 @@ object PdfReportGenerator {
 		canvas.drawText(pageLabel, pageWidth - textWidth - margin, bottomY, paint)
 	}
 	
+	/**
+	 * Dibuja texto en múltiples líneas si es necesario para ajustarse al ancho disponible
+	 */
+	private fun drawWrappedText(
+		canvas: Canvas,
+		text: String,
+		x: Float,
+		y: Float,
+		maxWidth: Float,
+		paint: Paint,
+	) {
+		val words = text.split(" ")
+		val lineSpacing = paint.textSize + 2f
+		var currentLine = ""
+		var currentY = y
+		
+		for (word in words) {
+			val testLine = if (currentLine.isEmpty()) word else "$currentLine $word"
+			if (paint.measureText(testLine) <= maxWidth) {
+				currentLine = testLine
+			} else {
+				canvas.drawText(currentLine, x, currentY, paint)
+				currentY += lineSpacing
+				currentLine = word
+			}
+		}
+		if (currentLine.isNotEmpty()) {
+			canvas.drawText(currentLine, x, currentY, paint)
+		}
+	}
+	
 	fun getUriFromFile(context: Context, file: File): Uri {
 		return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
 	}
 }
-
 

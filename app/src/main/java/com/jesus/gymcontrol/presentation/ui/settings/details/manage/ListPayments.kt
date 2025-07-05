@@ -329,24 +329,25 @@ fun PaymentDetailDialog(
 				DetailRow("Tipo de pago:", payment.paymentType)
 				Spacer(modifier = Modifier.height(8.dp))
 				
+				DetailRow("Monto total:", "$${formatAmount(payment.amount)}")
+				
 				when (payment.paymentType) {
 					"Mixto" -> {
-						DetailRow("Monto total:", formatMonto(payment))
-						payment.amountDollar.takeIf { it > 0 }?.let {
-							DetailRow("Dólares:", "$${formatAmount(it)}")
+						payment.amountDollar.takeIf { it != null && it > 0 }?.let {
+							DetailRow("Pagado en dólares:", "$${formatAmount(it)}")
 						}
-						payment.amountBs.takeIf { it > 0 }?.let {
-							DetailRow("Bolívares:", "Bs. ${formatAmount(it)}")
+						payment.amountBs.takeIf { it != null && it > 0 }?.let {
+							DetailRow("Pagado en bolívares:", "Bs. ${formatAmount(it)}")
 						}
 					}
 					
 					"Dólares" -> {
-						DetailRow("Monto:", "$${formatAmount(payment.amountDollar)}")
+						DetailRow("Pagado en dólares:", "$${formatAmount(payment.amountDollar)}")
 					}
 					
 					"Bolívares" -> {
-						DetailRow("Monto:", "Bs. ${formatAmount(payment.amountBs)}")
-					}
+						DetailRow("Pagado en bolívares:", "Bs. ${formatAmount(payment.amountBs)}")
+						}
 				}
 				
 				payment.reference?.let {

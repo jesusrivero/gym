@@ -171,11 +171,27 @@ fun ReportScreen(
 										it.membresia,
 										it.tipoPago,
 										it.referencia ?: "-",
-										when (it.tipoPago.lowercase()) {
-											"dólares" -> formatDollars(it.montoDolar)
-											"bolívares" -> formatBolivares(it.montoBolivares)
-											"mixto" -> "${formatDollars(it.montoDolar)} - ${formatBolivares(it.montoBolivares)}"
-											else -> formatDollars(it.monto)
+										buildString {
+											append(formatDollars(it.monto)) // siempre muestra el monto total
+											when (it.tipoPago.lowercase()) {
+												"mixto" -> {
+													append(" (")
+													append(formatDollars(it.montoDolar))
+													append(" + ")
+													append(formatBolivares(it.montoBolivares))
+													append(")")
+												}
+												"bolívares" -> {
+													append(" (")
+													append(formatBolivares(it.montoBolivares))
+													append(")")
+												}
+												"dólares" -> {
+													append(" (")
+													append(formatDollars(it.montoDolar))
+													append(")")
+													}
+											}
 										},
 									)
 								}
@@ -286,16 +302,32 @@ fun ReportScreen(
 						field1 = { it.nombreCliente },
 						field2 = { it.membresia },
 						extraField = {
-							when (it.tipoPago.lowercase()) {
-								"dólares" -> formatDollars(it.montoDolar)
-								"bolívares" -> formatBolivares(it.montoBolivares)
-								"mixto" -> "${formatDollars(it.montoDolar)} - ${formatBolivares(it.montoBolivares)}"
-								else -> formatDollars(it.monto)
+							buildString {
+								append(formatDollars(it.monto))
+								when (it.tipoPago.lowercase()) {
+									"mixto" -> {
+										append(" (")
+										append(formatDollars(it.montoDolar))
+										append(" + ")
+										append(formatBolivares(it.montoBolivares))
+										append(")")
+									}
+									"bolívares" -> {
+										append(" (")
+										append(formatBolivares(it.montoBolivares))
+										append(")")
+									}
+									"dólares" -> {
+										append(" (")
+										append(formatDollars(it.montoDolar))
+										append(")")
+									}
+								}
 							}
 						},
 						extraFieldColor = { if (it.monto > 0) Color(0xFF2E7D32) else Color.Red },
 						emptyMessage = "No hay pagos para mostrar"
-					)
+						)
 				}
 				
 				selectedReportType == "Clientes" -> {
@@ -349,7 +381,6 @@ fun ReportScreen(
 	}
 }
 
-// Componente reutilizable para mostrar listas de reportes
 @Composable
 fun <T> SimpleReportList(
 	items: List<T>,
@@ -407,35 +438,10 @@ fun <T> SimpleReportList(
 					}
 					
 					extraField?.let { ef ->
-						val value = ef(item)
-						
-						// Aplicar lógica de símbolo si es monto de pago
-						val formatted = when {
-							value.contains("Bs") || value.contains("$") -> value // Ya formateado
-							value.matches(Regex("\\d+(\\.\\d+)?")) -> { // Solo número
-								// Intentar inferir tipo de pago desde el item si es un Pago
-								val tipoPago = try {
-									val prop = item!!::class.members.firstOrNull { it.name == "tipoPago" }
-									val raw = prop?.call(item) as? String
-									raw?.lowercase() ?: ""
-								} catch (_: Exception) {
-									""
-								}
-								
-								val simbolo = when (tipoPago) {
-									"Bolívares" -> "Bs"
-									"Dólares" -> "$"
-									"Mixto" -> "Bs - $"
-									else -> ""
-								}
-								"$simbolo $value"
-							}
-							else -> value
-						}
-						
+						val text = ef(item)
 						val color = extraFieldColor?.invoke(item) ?: MaterialTheme.colorScheme.onSurface
 						Text(
-							text = formatted,
+							text = text,
 							color = color,
 							fontWeight = FontWeight.Bold,
 							style = MaterialTheme.typography.bodyMedium,
@@ -444,8 +450,8 @@ fun <T> SimpleReportList(
 					}
 				}
 			}
+			}
 		}
-	}
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
