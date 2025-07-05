@@ -146,8 +146,6 @@ fun PaymentsScreenContent(
 			isMembershipDropdownExpanded = false
 			isTypeDropdownExpanded = false
 			isPromoDropdownExpanded = false
-			
-			
 			description = ""
 			viewModel.resetState()
 			viewModel.clearDescription()
@@ -237,6 +235,7 @@ fun PaymentsScreenContent(
 							// No quiere → navega
 							viewModel.clearPaymentAction()
 							navController.navigate(AppRoutes.ListPaymentsScreen) {
+								popUpTo(AppRoutes.ListPaymentsScreen) {inclusive = true}
 							}
 						}) {
 							Text("No")
@@ -340,7 +339,7 @@ fun PaymentsScreenContent(
 					colors = ButtonDefaults.buttonColors(
 						containerColor = colorScheme.primary
 					),
-					enabled = formIsValid
+					enabled = formIsValid && !isLoading
 				) {
 					Text("Registrar Pago", fontWeight = FontWeight.Bold)
 				}
@@ -411,7 +410,7 @@ fun PaymentsScreenContent(
 							if (selectedUser != null && selectedUser.state != "inactivo") {
 								Text(
 									text = "El usuario ya está ${selectedUser.state}. La fecha de vencimiento se extenderá al registrar este pago.",
-									color = MaterialTheme.colorScheme.primary,
+									color = MaterialTheme.colorScheme.error,
 									style = MaterialTheme.typography.bodySmall,
 									modifier = Modifier.padding(top = 4.dp)
 								)

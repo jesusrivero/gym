@@ -8,5 +8,6 @@ data class ReportePromocion(
 	val activa: Boolean,
 	val duracion: Int = 0,
 	val cantidadUsuarios: Int = 0,
-	val fechaCreacion: Long,
+	val fechaCreacion:  Long,
+	val fechaVencimiento: Long,
 )

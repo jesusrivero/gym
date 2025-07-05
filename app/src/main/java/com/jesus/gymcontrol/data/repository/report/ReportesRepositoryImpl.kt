@@ -138,7 +138,8 @@ class ReportesRepositoryImpl @Inject constructor(
 					duracion = (data["duracionDias"] as? Number)?.toInt() ?: 0,
 					activa = data["activo"] as? Boolean ?: false,
 					cantidadUsuarios = cantidadUsuarios,
-					fechaCreacion = (data["fechaCreacion"] as? Number)?.toLong() ?: 0L
+					fechaCreacion = (data["fechaCreacion"] as? Number)?.toLong() ?: 0L,
+					fechaVencimiento =  (data["fechaVencimiento"] as? Number)?.toLong() ?: 0L,
 				)
 			}
 			

@@ -183,14 +183,13 @@ fun ReportScreen(
 							
 							"Clientes" -> Triple(
 								"Reporte de Clientes",
-								listOf("Nombre", "Cédula", "Correo", "Teléfono", "Estado"),
+								listOf("Nombre", "Cédula", "Estado", "Teléfono"),
 								clientes.map {
 									listOf(
 										it.nombre,
 										it.cedula,
 										it.activo?.uppercase() ?: "Desconocido",
 										it.telefono,
-										it.correo,
 									)
 								}
 							)
@@ -210,14 +209,14 @@ fun ReportScreen(
 							
 							"Promociones" -> Triple(
 								"Reporte de Promociones",
-								listOf("Nombre", "Porcentaje", "Duración", "Activa", "Cantidad de Usuarios"),
+								listOf("Nombre", "Porcentaje", "Duracion", "Activa", "Usrs. Tot."),
 								promociones.map {
 									listOf(
 										it.nombre,
 										"${it.porcentaje}%",
 										"${it.duracion} días",
 										if (it.activa) "Sí" else "No",
-										"${it.cantidadUsuarios} usuarios"
+										"${it.cantidadUsuarios} usuarios",
 									)
 								}
 							)
