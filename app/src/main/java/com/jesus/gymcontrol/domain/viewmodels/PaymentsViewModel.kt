@@ -230,6 +230,8 @@ class PaymentsViewModel @Inject constructor(
 		}
 	}
 	
+
+	
 	fun clearPaymentAction() {
 		paymentActionMessage.value = null
 		isActionSuccess.value = null

@@ -2,6 +2,7 @@ package com.jesus.gymcontrol.presentation.ui.settings.details.manage
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,11 +11,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -38,6 +44,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -45,6 +53,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
+import com.jesus.gymcontrol.domain.helpers.generateInvoiceBitmap
+import com.jesus.gymcontrol.domain.helpers.shareBitmap
 import com.jesus.gymcontrol.domain.model.Payment
 import com.jesus.gymcontrol.domain.viewmodels.PaymentsViewModel
 import com.jesus.gymcontrol.presentation.ui.commons.PaymentFilters
@@ -70,6 +80,7 @@ fun ListPaymentsScreen(
 	var selectedPayment by remember { mutableStateOf<Payment?>(null) }
 	var searchText by remember { mutableStateOf("") }
 	var selectedPaymentType by remember { mutableStateOf("Todos") }
+
 	
 	val paymentTypeOptions = listOf("Todos", "Dólares", "Bolívares", "Mixto", "Promociones")
 	
@@ -272,20 +283,43 @@ fun formatAmount(value: Double): String {
 	return formatter.format(value)
 }
 
-
 @Composable
-fun PaymentDetailDialog(payment: Payment, onDismiss: () -> Unit) {
+fun PaymentDetailDialog(
+	payment: Payment,
+	onDismiss: () -> Unit
+) {
+	val context = LocalContext.current
+	
 	AlertDialog(
 		onDismissRequest = onDismiss,
 		title = {
-			Text(
-				text = "Detalles del pago",
-				modifier = Modifier.fillMaxWidth(),
-				textAlign = TextAlign.Center
-			)
+			Row(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(horizontal = 8.dp),
+				verticalAlignment = Alignment.CenterVertically
+			) {
+				Text(
+					text = "Detalles del pago",
+					modifier = Modifier.weight(1f),
+					textAlign = TextAlign.Center,
+					style = MaterialTheme.typography.titleLarge
+				)
+				IconButton(
+					onClick = {
+						val bitmap = generateInvoiceBitmap(payment, context)
+						shareBitmap(context,bitmap)
+					}
+				) {
+					Icon(
+						imageVector = Icons.Default.Share,
+						contentDescription = "Compartir"
+						)
+				}
+			}
 		},
 		text = {
-			Column {
+			Column(modifier = Modifier.fillMaxWidth()) {
 				DetailRow("Nombre:", payment.name)
 				Spacer(modifier = Modifier.height(8.dp))
 				
@@ -295,7 +329,6 @@ fun PaymentDetailDialog(payment: Payment, onDismiss: () -> Unit) {
 				DetailRow("Tipo de pago:", payment.paymentType)
 				Spacer(modifier = Modifier.height(8.dp))
 				
-				// 💰 Mostrar Monto según tipo de pago
 				when (payment.paymentType) {
 					"Mixto" -> {
 						DetailRow("Monto total:", formatMonto(payment))
@@ -316,13 +349,11 @@ fun PaymentDetailDialog(payment: Payment, onDismiss: () -> Unit) {
 					}
 				}
 				
-				// 🔢 Referencia (si aplica)
 				payment.reference?.let {
 					Spacer(modifier = Modifier.height(8.dp))
 					DetailRow("Referencia:", it)
 				}
 				
-				// 🎯 Promoción (si aplica)
 				if (!payment.promocionNombre.isNullOrBlank()) {
 					Spacer(modifier = Modifier.height(12.dp))
 					DetailRow("Promoción:", payment.promocionNombre ?: "")
@@ -338,14 +369,32 @@ fun PaymentDetailDialog(payment: Payment, onDismiss: () -> Unit) {
 				DetailRow("Fecha de pago:", formattedDate)
 				
 				Spacer(modifier = Modifier.height(8.dp))
-				
 				val formattedVencimiento =
 					SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(payment.fechaVencimiento))
 				DetailRow("Fecha de vencimiento:", formattedVencimiento)
 				
-				DetailRow("Descripcion:", payment.description)
 				Spacer(modifier = Modifier.height(8.dp))
 				
+				Text(
+					text = "Descripción:",
+					style = MaterialTheme.typography.bodyMedium,
+					fontWeight = FontWeight.Bold
+				)
+				Spacer(modifier = Modifier.height(4.dp))
+				
+				Box(
+					modifier = Modifier
+						.fillMaxWidth()
+						.heightIn(max = 150.dp)
+						.verticalScroll(rememberScrollState())
+						.padding(4.dp)
+				) {
+					Text(
+						text = payment.description,
+						style = MaterialTheme.typography.bodyMedium,
+						softWrap = true
+					)
+				}
 			}
 		},
 		containerColor = MaterialTheme.colorScheme.surface,
@@ -363,5 +412,89 @@ fun PaymentDetailDialog(payment: Payment, onDismiss: () -> Unit) {
 		}
 	)
 }
-
-
+@Composable
+fun PaymentInvoiceView(payment: Payment) {
+	Column(
+		modifier = Modifier
+			.background(Color.White)
+			.padding(16.dp)
+			.fillMaxWidth()
+	) {
+		Text("Factura de Pago", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+		
+		DetailRow("Nombre:", payment.name)
+		Spacer(modifier = Modifier.height(8.dp))
+		
+		DetailRow("Membresía:", payment.membershipName)
+		Spacer(modifier = Modifier.height(8.dp))
+		
+		DetailRow("Tipo de pago:", payment.paymentType)
+		Spacer(modifier = Modifier.height(8.dp))
+		
+		when (payment.paymentType) {
+			"Mixto" -> {
+				DetailRow("Monto total:", formatMonto(payment))
+				payment.amountDollar.takeIf { it > 0 }?.let {
+					DetailRow("Dólares:", "$${formatAmount(it)}")
+				}
+				payment.amountBs.takeIf { it > 0 }?.let {
+					DetailRow("Bolívares:", "Bs. ${formatAmount(it)}")
+				}
+			}
+			"Dólares" -> {
+				DetailRow("Monto:", "$${formatAmount(payment.amountDollar)}")
+			}
+			"Bolívares" -> {
+				DetailRow("Monto:", "Bs. ${formatAmount(payment.amountBs)}")
+			}
+		}
+		
+		payment.reference?.let {
+			Spacer(modifier = Modifier.height(8.dp))
+			DetailRow("Referencia:", it)
+		}
+		
+		if (!payment.promocionNombre.isNullOrBlank()) {
+			Spacer(modifier = Modifier.height(12.dp))
+			DetailRow("Promoción:", payment.promocionNombre ?: "")
+		}
+		if (payment.promocionPorcentajeDescuento != null) {
+			Spacer(modifier = Modifier.height(8.dp))
+			DetailRow("Descuento aplicado:", "${payment.promocionPorcentajeDescuento}%")
+		}
+		
+		Spacer(modifier = Modifier.height(8.dp))
+		val formattedDate =
+			SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(payment.date))
+		DetailRow("Fecha de pago:", formattedDate)
+		
+		Spacer(modifier = Modifier.height(8.dp))
+		val formattedVencimiento =
+			SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(payment.fechaVencimiento))
+		DetailRow("Fecha de vencimiento:", formattedVencimiento)
+		
+		Spacer(modifier = Modifier.height(8.dp))
+		
+		// 📝 Descripción adaptativa
+		Text(
+			text = "Descripción:",
+			style = MaterialTheme.typography.bodyMedium,
+			fontWeight = FontWeight.Bold
+		)
+		Spacer(modifier = Modifier.height(4.dp))
+		
+		Box(
+			modifier = Modifier
+				.fillMaxWidth()
+				.heightIn(max = 150.dp) // máximo 150dp alto
+				.verticalScroll(rememberScrollState())
+				.padding(4.dp)
+		) {
+			Text(
+				text = payment.description,
+				style = MaterialTheme.typography.bodyMedium,
+				softWrap = true
+			)
+		}
+	}
+}
