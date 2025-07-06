@@ -2,7 +2,6 @@ package com.jesus.gymcontrol.presentation.ui.settings.details.manage
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,7 +43,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -58,7 +56,6 @@ import com.jesus.gymcontrol.domain.helpers.shareBitmap
 import com.jesus.gymcontrol.domain.model.Payment
 import com.jesus.gymcontrol.domain.viewmodels.PaymentsViewModel
 import com.jesus.gymcontrol.presentation.ui.commons.PaymentFilters
-import com.jesus.gymcontrol.presentation.ui.commons.formatMonto
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -197,49 +194,66 @@ fun ListPaymentsScreen(
 	}
 }
 
-
 @Composable
 fun PaymentCard(payment: Payment, onViewDetails: () -> Unit) {
 	Card(
 		modifier = Modifier
 			.fillMaxWidth()
 			.wrapContentHeight()
-			.padding(horizontal = 4.dp),
-		shape = RoundedCornerShape(16.dp),
-		elevation = CardDefaults.cardElevation(2.dp),
+			.padding(horizontal = 2.dp),
+		shape = RoundedCornerShape(12.dp),
+		elevation = CardDefaults.cardElevation(1.dp),
 		colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
 	) {
 		Row(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(horizontal = 16.dp, vertical = 12.dp),
+				.padding(horizontal = 12.dp, vertical = 8.dp),
 			verticalAlignment = Alignment.CenterVertically,
 			horizontalArrangement = Arrangement.SpaceBetween
 		) {
-			Column(
+			// Nombre
+			Text(
+				text = payment.name,
+				style = MaterialTheme.typography.bodyMedium,
+				fontWeight = FontWeight.SemiBold,
+				modifier = Modifier.weight(1.2f)
+			)
+			
+			// Membresía
+			Text(
+				text = payment.membershipName,
+				style = MaterialTheme.typography.bodySmall,
+				color = MaterialTheme.colorScheme.onSurfaceVariant,
 				modifier = Modifier.weight(1f)
-			) {
-				Text(
-					text = payment.name,
-					style = MaterialTheme.typography.titleMedium,
-					fontWeight = FontWeight.SemiBold
-				)
-				Spacer(modifier = Modifier.height(4.dp))
-				Text(
-					text = payment.membershipName,
-					style = MaterialTheme.typography.bodySmall,
-					color = MaterialTheme.colorScheme.onSurfaceVariant
-				)
-				Spacer(modifier = Modifier.height(8.dp))
-				Row(
-					horizontalArrangement = Arrangement.spacedBy(8.dp),
-					verticalAlignment = Alignment.CenterVertically
-				) {
-					PaymentInfoBadge("Monto", formatMonto(payment))
-					PaymentInfoBadge("Tipo", payment.paymentType)
-				}
+			)
+			
+			// Tipo
+			Text(
+				text = payment.paymentType,
+				style = MaterialTheme.typography.bodySmall,
+				color = MaterialTheme.colorScheme.onSurfaceVariant,
+				modifier = Modifier.weight(1f),
+				textAlign = TextAlign.End
+			)
+			
+			// Precio
+			val amountText = when (payment.paymentType.lowercase()) {
+				"dólares" -> "${payment.amountDollar} $"
+				"mixto" -> "${payment.amount} $"
+				"bolívares" -> "${payment.amountBs} Bs"
+				else -> "-"
 			}
 			
+			Text(
+				text = amountText,
+				style = MaterialTheme.typography.bodySmall,
+				color = MaterialTheme.colorScheme.primary,
+				modifier = Modifier.weight(1f),
+				textAlign = TextAlign.End
+			)
+			
+			// Botón de detalles
 			IconButton(onClick = onViewDetails) {
 				Icon(
 					painter = painterResource(id = R.drawable.ic_details),
@@ -413,89 +427,89 @@ fun PaymentDetailDialog(
 		}
 	)
 }
-@Composable
-fun PaymentInvoiceView(payment: Payment) {
-	Column(
-		modifier = Modifier
-			.background(Color.White)
-			.padding(16.dp)
-			.fillMaxWidth()
-	) {
-		Text("Factura de Pago", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-		
-		DetailRow("Nombre:", payment.name)
-		Spacer(modifier = Modifier.height(8.dp))
-		
-		DetailRow("Membresía:", payment.membershipName)
-		Spacer(modifier = Modifier.height(8.dp))
-		
-		DetailRow("Tipo de pago:", payment.paymentType)
-		Spacer(modifier = Modifier.height(8.dp))
-		
-		when (payment.paymentType) {
-			"Mixto" -> {
-				DetailRow("Monto total:", formatMonto(payment))
-				payment.amountDollar.takeIf { it > 0 }?.let {
-					DetailRow("Dólares:", "$${formatAmount(it)}")
-				}
-				payment.amountBs.takeIf { it > 0 }?.let {
-					DetailRow("Bolívares:", "Bs. ${formatAmount(it)}")
-				}
-			}
-			"Dólares" -> {
-				DetailRow("Monto:", "$${formatAmount(payment.amountDollar)}")
-			}
-			"Bolívares" -> {
-				DetailRow("Monto:", "Bs. ${formatAmount(payment.amountBs)}")
-			}
-		}
-		
-		payment.reference?.let {
-			Spacer(modifier = Modifier.height(8.dp))
-			DetailRow("Referencia:", it)
-		}
-		
-		if (!payment.promocionNombre.isNullOrBlank()) {
-			Spacer(modifier = Modifier.height(12.dp))
-			DetailRow("Promoción:", payment.promocionNombre ?: "")
-		}
-		if (payment.promocionPorcentajeDescuento != null) {
-			Spacer(modifier = Modifier.height(8.dp))
-			DetailRow("Descuento aplicado:", "${payment.promocionPorcentajeDescuento}%")
-		}
-		
-		Spacer(modifier = Modifier.height(8.dp))
-		val formattedDate =
-			SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(payment.date))
-		DetailRow("Fecha de pago:", formattedDate)
-		
-		Spacer(modifier = Modifier.height(8.dp))
-		val formattedVencimiento =
-			SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(payment.fechaVencimiento))
-		DetailRow("Fecha de vencimiento:", formattedVencimiento)
-		
-		Spacer(modifier = Modifier.height(8.dp))
-		
-		// 📝 Descripción adaptativa
-		Text(
-			text = "Descripción:",
-			style = MaterialTheme.typography.bodyMedium,
-			fontWeight = FontWeight.Bold
-		)
-		Spacer(modifier = Modifier.height(4.dp))
-		
-		Box(
-			modifier = Modifier
-				.fillMaxWidth()
-				.heightIn(max = 150.dp) // máximo 150dp alto
-				.verticalScroll(rememberScrollState())
-				.padding(4.dp)
-		) {
-			Text(
-				text = payment.description,
-				style = MaterialTheme.typography.bodyMedium,
-				softWrap = true
-			)
-		}
-	}
-}
+//@Composable
+//fun PaymentInvoiceView(payment: Payment) {
+//	Column(
+//		modifier = Modifier
+//			.background(Color.White)
+//			.padding(16.dp)
+//			.fillMaxWidth()
+//	) {
+//		Text("Factura de Pago", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+//
+//		DetailRow("Nombre:", payment.name)
+//		Spacer(modifier = Modifier.height(8.dp))
+//
+//		DetailRow("Membresía:", payment.membershipName)
+//		Spacer(modifier = Modifier.height(8.dp))
+//
+//		DetailRow("Tipo de pago:", payment.paymentType)
+//		Spacer(modifier = Modifier.height(8.dp))
+//
+//		when (payment.paymentType) {
+//			"Mixto" -> {
+//				DetailRow("Monto total:", formatMonto(payment))
+//				payment.amountDollar.takeIf { it > 0 }?.let {
+//					DetailRow("Dólares:", "$${formatAmount(it)}")
+//				}
+//				payment.amountBs.takeIf { it > 0 }?.let {
+//					DetailRow("Bolívares:", "Bs. ${formatAmount(it)}")
+//				}
+//			}
+//			"Dólares" -> {
+//				DetailRow("Monto:", "$${formatAmount(payment.amountDollar)}")
+//			}
+//			"Bolívares" -> {
+//				DetailRow("Monto:", "Bs. ${formatAmount(payment.amountBs)}")
+//			}
+//		}
+//
+//		payment.reference?.let {
+//			Spacer(modifier = Modifier.height(8.dp))
+//			DetailRow("Referencia:", it)
+//		}
+//
+//		if (!payment.promocionNombre.isNullOrBlank()) {
+//			Spacer(modifier = Modifier.height(12.dp))
+//			DetailRow("Promoción:", payment.promocionNombre ?: "")
+//		}
+//		if (payment.promocionPorcentajeDescuento != null) {
+//			Spacer(modifier = Modifier.height(8.dp))
+//			DetailRow("Descuento aplicado:", "${payment.promocionPorcentajeDescuento}%")
+//		}
+//
+//		Spacer(modifier = Modifier.height(8.dp))
+//		val formattedDate =
+//			SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(payment.date))
+//		DetailRow("Fecha de pago:", formattedDate)
+//
+//		Spacer(modifier = Modifier.height(8.dp))
+//		val formattedVencimiento =
+//			SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(payment.fechaVencimiento))
+//		DetailRow("Fecha de vencimiento:", formattedVencimiento)
+//
+//		Spacer(modifier = Modifier.height(8.dp))
+//
+//		// 📝 Descripción adaptativa
+//		Text(
+//			text = "Descripción:",
+//			style = MaterialTheme.typography.bodyMedium,
+//			fontWeight = FontWeight.Bold
+//		)
+//		Spacer(modifier = Modifier.height(4.dp))
+//
+//		Box(
+//			modifier = Modifier
+//				.fillMaxWidth()
+//				.heightIn(max = 150.dp) // máximo 150dp alto
+//				.verticalScroll(rememberScrollState())
+//				.padding(4.dp)
+//		) {
+//			Text(
+//				text = payment.description,
+//				style = MaterialTheme.typography.bodyMedium,
+//				softWrap = true
+//			)
+//		}
+//	}
+//}

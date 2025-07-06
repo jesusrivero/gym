@@ -229,52 +229,53 @@ fun MembershipScreen(
 							Card(
 								modifier = Modifier
 									.fillMaxWidth()
-									.padding(vertical = 4.dp),
+								.padding(vertical = 2.dp),
 								shape = RoundedCornerShape(16.dp),
 								elevation = CardDefaults.cardElevation(4.dp),
 								colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
 							) {
-								Column(Modifier.padding(16.dp)) {
-									Text(
-										membership.nombre,
-										style = MaterialTheme.typography.titleMedium,
-										color = MaterialTheme.colorScheme.primary
-									)
-									Spacer(Modifier.height(4.dp))
-									Text(
-										"Usuarios registrados: $userCount",
-										style = MaterialTheme.typography.labelSmall,
-										color = MaterialTheme.colorScheme.onSurfaceVariant
-									)
-									Spacer(Modifier.height(6.dp))
-									Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-										IconButton(onClick = { membershipToView = membership }) {
-											Icon(
-												painterResource(id = R.drawable.ic_details),
-												contentDescription = "Detalles"
-											)
-										}
-										IconButton(onClick = { membershipToEdit = membership }) {
-											Icon(Icons.Default.Edit, contentDescription = "Editar")
-										}
-										IconButton(onClick = {
-											viewModel.toggleMembershipState(membership)
-										}) {
-											IconButton(onClick = {
-												membershipToToggle =
-													membership // En lugar de llamar directamente al ViewModel
-											}) {
+								Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+									Row(
+										modifier = Modifier.fillMaxWidth(),
+										verticalAlignment = Alignment.CenterVertically,
+										horizontalArrangement = Arrangement.SpaceBetween
+									) {
+										Text(
+											membership.nombre,
+											style = MaterialTheme.typography.titleMedium,
+											color = MaterialTheme.colorScheme.primary,
+											modifier = Modifier.weight(1f)
+										)
+										
+										Row {
+											
+											IconButton(onClick = { membershipToEdit = membership }) {
+												Icon(Icons.Default.Edit, contentDescription = "Editar")
+											}
+											IconButton(onClick = { membershipToToggle = membership }) {
 												Icon(
 													imageVector = if (membership.activo) Icons.Default.Visibility else Icons.Default.VisibilityOff,
 													contentDescription = if (membership.activo) "Desactivar" else "Activar",
 													tint = if (membership.activo) MaterialTheme.colorScheme.primary else Color.Red
 												)
 											}
-											
+											IconButton(onClick = { membershipToView = membership }) {
+												Icon(
+													painterResource(id = R.drawable.ic_details),
+													contentDescription = "Detalles"
+												)
+											}
 										}
 									}
+									Spacer(Modifier.height(2.dp))
+									Text(
+										"Usuarios registrados: $userCount",
+										style = MaterialTheme.typography.labelSmall,
+										color = MaterialTheme.colorScheme.onSurfaceVariant
+									)
 								}
 							}
+							
 						}
 					}
 				}
@@ -502,6 +503,7 @@ fun MembershipScreen(
 		}
 	}
 }
+
 
 //			// Diálogo para eliminar membresía
 //			membershipToDelete?.let { membership ->

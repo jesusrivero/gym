@@ -1,7 +1,16 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details.manage
 
 import android.widget.Toast
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,8 +22,31 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -220,53 +252,55 @@ fun PromotionScreen(
 							Card(
 								modifier = Modifier
 									.fillMaxWidth()
-									.padding(vertical = 4.dp),
+									.padding(vertical = 2.dp),
 								shape = RoundedCornerShape(16.dp),
 								elevation = CardDefaults.cardElevation(4.dp),
 								colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
 							) {
-								Column(modifier = Modifier.padding(16.dp)) {
-									Text(
-										text = promo.nombre,
-										style = MaterialTheme.typography.titleMedium,
-										color = MaterialTheme.colorScheme.primary
-									)
+								Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+									
+									// Fila con nombre + botones
+									Row(
+										modifier = Modifier.fillMaxWidth(),
+										verticalAlignment = Alignment.CenterVertically,
+										horizontalArrangement = Arrangement.SpaceBetween
+									) {
+										Text(
+											text = promo.nombre,
+											style = MaterialTheme.typography.titleMedium,
+											color = MaterialTheme.colorScheme.primary,
+											modifier = Modifier.weight(1f)
+										)
+										
+										Row {
+											
+											IconButton(onClick = { promotionToEdit = promo }) {
+												Icon(Icons.Default.Edit, contentDescription = "Editar promoción")
+											}
+											IconButton(onClick = { promotionToggle = promo }) {
+												Icon(
+													imageVector = if (promo.activo) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+													contentDescription = if (promo.activo) "Desactivar" else "Activar",
+													tint = if (promo.activo) MaterialTheme.colorScheme.primary else Color.Red
+												)
+											}
+											IconButton(onClick = { promotionToShow = promo }) {
+												Icon(
+													painterResource(id = R.drawable.ic_details),
+													contentDescription = "Detalles"
+												)
+											}
+										}
+									}
 									
 									Spacer(modifier = Modifier.height(4.dp))
 									
+									// Descripción debajo
 									Text(
 										"Usuarios: ${viewModel.userCountByPromotion[promo.id] ?: 0}",
-										style = MaterialTheme.typography.bodySmall
+										style = MaterialTheme.typography.bodySmall,
+										color = MaterialTheme.colorScheme.onSurfaceVariant
 									)
-									
-									Row(
-										modifier = Modifier.fillMaxWidth(),
-										horizontalArrangement = Arrangement.End
-									) {
-										IconButton(onClick = {
-											promotionToShow = promo
-										}) {
-											Icon(
-												painterResource(id = R.drawable.ic_details),
-												contentDescription = "Detalles"
-											)
-										}
-										IconButton(onClick = {
-											promotionToEdit = promo
-										}) {
-											Icon(Icons.Default.Edit, contentDescription = "Editar promoción")
-										}
-										IconButton(onClick = {
-											promotionToggle = promo
-										}) {
-											Icon(
-												imageVector = if (promo.activo) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-												contentDescription = if (promo.activo) "Desacticar" else "Activar",
-												tint = if (promo.activo) MaterialTheme.colorScheme.primary else Color.Red
-											)
-										}
-										
-									}
 								}
 							}
 						}
@@ -434,7 +468,8 @@ fun PromotionScreen(
 							val durationVal = editedDuration.toIntOrNull()
 							
 							if (editedName.isBlank() || editedDescription.isBlank() || discountVal == null || durationVal == null) {
-								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT).show()
+								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT)
+									.show()
 								return@Button
 							}
 							
@@ -469,7 +504,8 @@ fun PromotionScreen(
 					},
 					title = {
 						val vencida = (promo.fechaVencimiento ?: 0L) < System.currentTimeMillis()
-						val textColor = if (vencida) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurface
+						val textColor =
+							if (vencida) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurface
 						Text(
 							text = if (vencida) "Editar Promoción (VENCIDA)" else "Editar Promoción",
 							color = textColor
