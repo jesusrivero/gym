@@ -105,7 +105,8 @@ fun ReportScreen(
 			"Clientes" -> viewModel.cargarReporteClientes(filtro = selectedSubFilter)
 			"Membresías" -> viewModel.cargarReporteMembresias()
 			"Promociones" -> viewModel.cargarReportePromociones()
-			else -> { /* no hacer nada */ }
+			else -> { /* no hacer nada */
+			}
 		}
 	}
 	
@@ -172,27 +173,15 @@ fun ReportScreen(
 										it.tipoPago,
 										it.referencia ?: "-",
 										buildString {
-											append(formatDollars(it.monto)) // siempre muestra el monto total
-											when (it.tipoPago.lowercase()) {
-												"mixto" -> {
-													append(" (")
-													append(formatDollars(it.montoDolar))
-													append(" + ")
-													append(formatBolivares(it.montoBolivares))
-													append(")")
-												}
-												"bolívares" -> {
-													append(" (")
-													append(formatBolivares(it.montoBolivares))
-													append(")")
-												}
-												"dólares" -> {
-													append(" (")
-													append(formatDollars(it.montoDolar))
-													append(")")
-													}
+											append(formatDollars(it.monto)) // precio de la membresía
+											if (it.tipoPago.lowercase() == "mixto") {
+												append(" (")
+												append(formatDollars(it.montoDolar))
+												append(" + ")
+												append(formatBolivares(it.montoBolivares))
+												append(")")
 											}
-										},
+										}
 									)
 								}
 							)
@@ -225,7 +214,7 @@ fun ReportScreen(
 							
 							"Promociones" -> Triple(
 								"Reporte de Promociones",
-								listOf("Nombre", "Porcentaje", "Duracion", "Activa", "Usrs. Tot."),
+								listOf("Nombre", "Porcentaje", "Duración", "Activa", "Usrs. Tot."),
 								promociones.map {
 									listOf(
 										it.nombre,
@@ -242,12 +231,23 @@ fun ReportScreen(
 						
 						if (headers.isEmpty() || rows.isEmpty()) return@FloatingActionButton
 						
-						val file = PdfReportGenerator.generateReportPdf(
-							context = context,
-							reportTitle = reportTitle,
-							headers = headers,
-							rows = rows
-						)
+						val file = if (selectedReportType == "Pagos") {
+							PdfReportGenerator.generateReportPdf(
+								context = context,
+								reportTitle = reportTitle,
+								headers = headers,
+								rows = rows,
+								totalDolares = viewModel.totalDolares,
+								totalBolivares = viewModel.totalBolivares
+							)
+						} else {
+							PdfReportGenerator.generateReportPdf(
+								context = context,
+								reportTitle = reportTitle,
+								headers = headers,
+								rows = rows
+							)
+						}
 						
 						file?.let {
 							val uri = PdfReportGenerator.getUriFromFile(context, it)
@@ -303,31 +303,25 @@ fun ReportScreen(
 						field2 = { it.membresia },
 						extraField = {
 							buildString {
-								append(formatDollars(it.monto))
 								when (it.tipoPago.lowercase()) {
 									"mixto" -> {
+										append(formatDollars(it.monto))
 										append(" (")
 										append(formatDollars(it.montoDolar))
 										append(" + ")
 										append(formatBolivares(it.montoBolivares))
 										append(")")
 									}
-									"bolívares" -> {
-										append(" (")
-										append(formatBolivares(it.montoBolivares))
-										append(")")
-									}
-									"dólares" -> {
-										append(" (")
-										append(formatDollars(it.montoDolar))
-										append(")")
-									}
+									
+									"dólares" -> append(formatDollars(it.monto))
+									"bolívares" -> append(formatBolivares(it.montoBolivares))
+									else -> append(formatDollars(it.monto))
 								}
 							}
 						},
 						extraFieldColor = { if (it.monto > 0) Color(0xFF2E7D32) else Color.Red },
 						emptyMessage = "No hay pagos para mostrar"
-						)
+					)
 				}
 				
 				selectedReportType == "Clientes" -> {
@@ -389,7 +383,7 @@ fun <T> SimpleReportList(
 	field2: (T) -> String,
 	extraField: ((T) -> String)? = null,
 	extraFieldColor: @Composable ((T) -> Color)? = null,
-	emptyMessage: String = "No hay datos para mostrar"
+	emptyMessage: String = "No hay datos para mostrar",
 ) {
 	if (items.isEmpty()) {
 		Text(
@@ -450,8 +444,8 @@ fun <T> SimpleReportList(
 					}
 				}
 			}
-			}
 		}
+	}
 }
 
 @RequiresApi(Build.VERSION_CODES.O)

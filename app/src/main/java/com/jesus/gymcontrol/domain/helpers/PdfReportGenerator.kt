@@ -2,6 +2,7 @@ package com.jesus.gymcontrol.domain.helpers
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
 import android.net.Uri
@@ -9,6 +10,7 @@ import android.os.Environment
 import androidx.core.content.FileProvider
 import java.io.File
 import java.io.FileOutputStream
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -22,6 +24,8 @@ object PdfReportGenerator {
 		reportTitle: String,
 		headers: List<String>,
 		rows: List<List<String>>,
+		totalDolares: Double? = null,
+		totalBolivares: Double? = null
 	): File? {
 		return try {
 			val fileName = "${reportTitle}_${System.currentTimeMillis()}.pdf"
@@ -36,6 +40,11 @@ object PdfReportGenerator {
 				strokeWidth = 1f
 				color = android.graphics.Color.BLACK
 				style = Paint.Style.STROKE
+			}
+			
+			val totalBackgroundPaint = Paint().apply {
+				color = Color.LTGRAY
+				style = Paint.Style.FILL
 			}
 			
 			val pageWidth = 595
@@ -54,7 +63,6 @@ object PdfReportGenerator {
 			val columnCount = headers.size
 			val baseColumnWidth = (pageWidth - 2 * marginLeft) / columnCount
 			
-			// Ajuste: hacer la última columna (Monto) más ancha
 			val columnWidths = FloatArray(columnCount) { baseColumnWidth.toFloat() }
 			if (headers.last().contains("Monto", ignoreCase = true)) {
 				columnWidths[columnCount - 1] = baseColumnWidth * 1.5f
@@ -89,7 +97,7 @@ object PdfReportGenerator {
 				y += rowHeight
 				
 				paint.isFakeBoldText = false
-				paint.textSize = 10f // más pequeño para datos
+				paint.textSize = 10f
 				
 				for (i in 0 until rowsPerPage.toInt()) {
 					if (rowIndex >= rows.size) break
@@ -102,6 +110,34 @@ object PdfReportGenerator {
 					}
 					y += rowHeight
 					rowIndex++
+				}
+				
+				// Si ya es la última página y ya dibujamos todas las filas
+				if (rowIndex >= rows.size && totalDolares != null && totalBolivares != null) {
+					// dibujar fondo gris claro
+					val totalText = "T.: ${formatDollars(totalDolares)} + ${formatBolivares(totalBolivares)}"
+					val totalRow = List(columnCount - 1) { "" } + totalText
+					
+					totalRow.forEachIndexed { index, cell ->
+						val x = marginLeft + columnWidths.take(index).sum()
+						canvas.drawRect(
+							x,
+							y,
+							x + columnWidths[index],
+							y + rowHeight,
+							totalBackgroundPaint
+						)
+						canvas.drawRect(
+							x,
+							y,
+							x + columnWidths[index],
+							y + rowHeight,
+							linePaint
+						)
+						paint.isFakeBoldText = true
+						drawWrappedText(canvas, cell, x + 5, y + 12, columnWidths[index] - 10, paint)
+						paint.isFakeBoldText = false
+					}
 				}
 				
 				drawFooter(canvas, paint, dateText, pageNumber, totalPages, pageWidth, pageHeight)
@@ -140,7 +176,7 @@ object PdfReportGenerator {
 		pageNumber: Int,
 		totalPages: Int,
 		pageWidth: Int,
-		pageHeight: Int,
+		pageHeight: Int
 	) {
 		paint.textSize = 10f
 		paint.isFakeBoldText = false
@@ -154,16 +190,13 @@ object PdfReportGenerator {
 		canvas.drawText(pageLabel, pageWidth - textWidth - margin, bottomY, paint)
 	}
 	
-	/**
-	 * Dibuja texto en múltiples líneas si es necesario para ajustarse al ancho disponible
-	 */
 	private fun drawWrappedText(
 		canvas: Canvas,
 		text: String,
 		x: Float,
 		y: Float,
 		maxWidth: Float,
-		paint: Paint,
+		paint: Paint
 	) {
 		val words = text.split(" ")
 		val lineSpacing = paint.textSize + 2f
@@ -188,5 +221,18 @@ object PdfReportGenerator {
 	fun getUriFromFile(context: Context, file: File): Uri {
 		return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
 	}
+	
+	private fun formatDollars(amount: Double?): String {
+		if (amount == null) return "$0.00"
+		val format = NumberFormat.getCurrencyInstance(Locale.US)
+		return format.format(amount)
+	}
+	
+	private fun formatBolivares(amount: Double?): String {
+		if (amount == null) return "Bs 0,00"
+		val format = NumberFormat.getCurrencyInstance(Locale("es", "VE"))
+		format.maximumFractionDigits = 2
+		format.minimumFractionDigits = 2
+		return format.format(amount).replace("Bs.", "Bs")
+	}
 }
-

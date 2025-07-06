@@ -47,6 +47,13 @@ class ReportesViewModel @Inject constructor(
 	var errorMessage by mutableStateOf<String?>(null)
 		private set
 	
+	var totalDolares by mutableStateOf(0.0)
+		private set
+	
+	var totalBolivares by mutableStateOf(0.0)
+		private set
+	
+	
 	fun cargarReportePagos(filtro: String) {
 		val gymCode = sessionManager.getGymCode() ?: return
 		
@@ -55,7 +62,8 @@ class ReportesViewModel @Inject constructor(
 			errorMessage = null
 			try {
 				val todosPagos = generatePaymentsReportUseCase(gymCode)
-				pagosReport = when (filtro.lowercase()) {
+				
+				val filtrados = when (filtro.lowercase()) {
 					"dólares", "dolares" -> todosPagos.filter { it.tipoPago.equals("dólares", ignoreCase = true) }
 					"bolívares", "bolivares" -> todosPagos.filter { it.tipoPago.equals("bolívares", ignoreCase = true) }
 					"mixtos" -> todosPagos.filter { it.tipoPago.equals("mixto", ignoreCase = true) }
@@ -63,13 +71,34 @@ class ReportesViewModel @Inject constructor(
 					"todos" -> todosPagos
 					else -> todosPagos
 				}
+				
+				pagosReport = filtrados
+				
+				// Calcula totales aquí
+				totalDolares = filtrados.sumOf {
+					when (it.tipoPago.lowercase()) {
+						"dólares" -> it.montoDolar ?: 0.0
+						"mixto" -> it.montoDolar ?: 0.0
+						else -> 0.0
+					}
+				}
+				
+				totalBolivares = filtrados.sumOf {
+					when (it.tipoPago.lowercase()) {
+						"bolívares" -> it.montoBolivares ?: 0.0
+						"mixto" -> it.montoBolivares ?: 0.0
+						else -> 0.0
+					}
+				}
+				
 			} catch (e: Exception) {
 				errorMessage = e.localizedMessage ?: "Error desconocido"
 			} finally {
 				isLoading = false
-			}
+				}
 		}
 	}
+	
 	
 	fun cargarReporteClientes(filtro: String) {
 		val gymCode = sessionManager.getGymCode() ?: return
