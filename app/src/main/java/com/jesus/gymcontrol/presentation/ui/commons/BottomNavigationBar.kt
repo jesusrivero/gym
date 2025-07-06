@@ -15,23 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.jesus.gymcontrol.domain.helpers.navRoute
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
-
-fun navigateIfNeeded(
-	navController: NavController,
-	destination: String,
-	currentRoute: String?
-) {
-	if (currentRoute != destination) {
-		navController.navigate(destination) {
-			launchSingleTop = true
-			restoreState = true
-			popUpTo(navController.graph.startDestinationId) {
-				saveState = true
-			}
-		}
-	}
-}
 
 @Composable
 fun BottomNavigationBar(
@@ -41,19 +26,17 @@ fun BottomNavigationBar(
 	val navBackStackEntry by navController.currentBackStackEntryAsState()
 	val currentRoute = navBackStackEntry?.destination?.route
 	
-	// Usa las rutas tal como las espera NavHost
-	val mainRoute = AppRoutes.MainScreen::class.qualifiedName!!
-	val manageRoute = AppRoutes.ManageScreen::class.qualifiedName!!
-	val preferencesRoute = AppRoutes.PreferencesScreen::class.qualifiedName!!
+	val mainRoute = navRoute<AppRoutes.MainScreen>()
+	val manageRoute = navRoute<AppRoutes.ManageScreen>()
+	val preferencesRoute = navRoute<AppRoutes.PreferencesScreen>()
 	
 	NavigationBar(
 		containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-		contentColor = MaterialTheme.colorScheme.onSurface
+		contentColor = MaterialTheme.colorScheme.onSurface,
+		modifier = modifier
 	) {
 		NavigationBarItem(
-			icon = {
-				Icon(Icons.Default.Home, contentDescription = "Home")
-			},
+			icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
 			label = { Text("Home") },
 			selected = currentRoute == mainRoute,
 			onClick = {
@@ -62,9 +45,7 @@ fun BottomNavigationBar(
 		)
 		
 		NavigationBarItem(
-			icon = {
-				Icon(Icons.Default.AccountBox, contentDescription = "Administrar")
-			},
+			icon = { Icon(Icons.Default.AccountBox, contentDescription = "Administrar") },
 			label = { Text("Administrar") },
 			selected = currentRoute == manageRoute,
 			onClick = {
@@ -85,5 +66,22 @@ fun BottomNavigationBar(
 				navigateIfNeeded(navController, preferencesRoute, currentRoute)
 			}
 		)
+	}
+}
+
+
+fun navigateIfNeeded(
+	navController: NavController,
+	destination: String,
+	currentRoute: String?
+) {
+	if (currentRoute != destination) {
+		navController.navigate(destination) {
+			launchSingleTop = true
+			restoreState = true
+			popUpTo(navController.graph.startDestinationId) {
+				saveState = true
+			}
+		}
 	}
 }

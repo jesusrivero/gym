@@ -161,8 +161,8 @@ fun RegPersonContent(
 	val isPasswordValid = password.length >= 6
 	val isIdCardValid = idCard.isNotBlank()
 	val isCodeValid = code.isNotBlank()
-	
-	val formIsValid = isNameValid && isEmailValid && isPasswordValid && isCodeValid && isIdCardValid
+	val isPhoneValid = phone.isBlank() || phone.matches(Regex("^\\+?[1-9]\\d{7,14}$"))
+	val formIsValid = isNameValid && isEmailValid && isPasswordValid && isCodeValid && isIdCardValid && isPhoneValid
 	
 	if (showDialog) {
 		AlertDialog(
@@ -274,6 +274,22 @@ fun RegPersonContent(
 				)
 				if (!isIdCardValid && idCard.isNotEmpty()) {
 					Text("La cédula es obligatoria", color = MaterialTheme.colorScheme.error)
+				}
+				
+				OutlinedTextField(
+					value = phone,
+					onValueChange = { phone = it },
+					label = { Text("Teléfono (opcional, formato internacional)") },
+					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+					maxLines = 1,
+					modifier = Modifier.fillMaxWidth()
+				)
+				
+				if (phone.isNotBlank() && !isPhoneValid) {
+					Text(
+						text = "Número inválido. Usa formato internacional: ej. 58412XXXXXXX",
+						color = MaterialTheme.colorScheme.error
+						)
 				}
 				
 				Row(
