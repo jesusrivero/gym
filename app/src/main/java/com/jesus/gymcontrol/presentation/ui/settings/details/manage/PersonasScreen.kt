@@ -1,6 +1,7 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details.manage
 
 
+import android.content.res.Configuration
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
@@ -36,11 +37,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -70,11 +72,13 @@ fun PersonsScreen(
 		viewModel.loadUsers()
 	}
 	
-	var showUserDialog by remember { mutableStateOf(false) }
-	var selectedUser by remember { mutableStateOf<ListUser?>(null) }
-	var searchText by remember { mutableStateOf("") }
-	var selectedState by remember { mutableStateOf("Todos") }
+	var showUserDialog by rememberSaveable { mutableStateOf(false) }
+	var selectedUser by rememberSaveable { mutableStateOf<ListUser?>(null) }
+	var searchText by rememberSaveable { mutableStateOf("") }
+	var selectedState by rememberSaveable { mutableStateOf("Todos") }
 	
+	val configuration = LocalConfiguration.current
+	val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 	
 	if (showUserDialog && selectedUser != null) {
 		val formattedDate = selectedUser?.date?.takeIf { it > 0L }?.let {
@@ -131,44 +135,27 @@ fun PersonsScreen(
 	
 	Scaffold(
 		topBar = {
-			Column {
-				TopAppBar(
-					title = {
-						Text(
-							text = "Listado de personas",
-							color = MaterialTheme.colorScheme.onPrimary,
-							fontWeight = FontWeight.Bold,
-						)
-					},
-					navigationIcon = {
-						IconButton(onClick = { navBottom.popBackStack() }) {
-							Icon(
-								painter = painterResource(id = R.drawable.ic_back),
-								contentDescription = "Regresar",
-								tint = Color.White
-							)
-						}
-					},
-					colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-						containerColor = MaterialTheme.colorScheme.primary
+			TopAppBar(
+				title = {
+					Text(
+						text = "Listado de personas",
+						color = MaterialTheme.colorScheme.onPrimary,
+						fontWeight = FontWeight.Bold,
 					)
+				},
+				navigationIcon = {
+					IconButton(onClick = { navBottom.popBackStack() }) {
+						Icon(
+							painter = painterResource(id = R.drawable.ic_back),
+							contentDescription = "Regresar",
+							tint = Color.White
+						)
+					}
+				},
+				colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+					containerColor = MaterialTheme.colorScheme.primary
 				)
-				
-				// 🔁 CORREGIDO: uso de variables correctas
-				PaymentFilters(
-					selectedPaymentType = selectedState,
-					paymentTypeOptions = listOf("Todos", "Activos", "Inactivos", "Próximos a pagar"),
-					onPaymentTypeSelected = { selectedState = it },
-					onClearFilters = {
-						selectedState = "Todos"
-						searchText = ""
-					},
-					searchText = searchText,
-					onSearchTextChanged = { searchText = it },
-					onAddClick = {navBottom.navigate(AppRoutes.RegPersonScreen)},
-					showAddButton = true
-				)
-			}
+			)
 		}
 	) { innerPadding ->
 		val users = viewModel.listUsers
@@ -192,99 +179,183 @@ fun PersonsScreen(
 			matchesSearch && matchesState
 		}
 		
-		Box(
-			modifier = Modifier
-				.fillMaxSize()
-				.padding(innerPadding),
-			contentAlignment = Alignment.Center
-		) {
-			when {
-				isLoading -> {
-					Column(horizontalAlignment = Alignment.CenterHorizontally) {
-						CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-						Spacer(modifier = Modifier.height(12.dp))
-						Text("Cargando usuarios...", color = MaterialTheme.colorScheme.onSurfaceVariant)
-					}
-				}
-				
-				filteredList.isEmpty() -> {
-					Text(
-						text = if (searchText.isNotEmpty()) "No se encontraron resultados" else "No hay personas registradas",
-						color = MaterialTheme.colorScheme.onSurfaceVariant
+		if (isLandscape) {
+			LazyColumn(
+				modifier = Modifier
+					.fillMaxSize()
+					.padding(innerPadding)
+					.padding(horizontal = 16.dp),
+				verticalArrangement = Arrangement.spacedBy(12.dp)
+			) {
+				item {
+					PaymentFilters(
+						selectedPaymentType = selectedState,
+						paymentTypeOptions = listOf("Todos", "Activos", "Inactivos", "Próximos a pagar"),
+						onPaymentTypeSelected = { selectedState = it },
+						onClearFilters = {
+							selectedState = "Todos"
+							searchText = ""
+						},
+						searchText = searchText,
+						onSearchTextChanged = { searchText = it },
+						onAddClick = { navBottom.navigate(AppRoutes.RegPersonScreen) },
+						showAddButton = true
 					)
 				}
 				
-				else -> {
-					LazyColumn(
-						modifier = Modifier
-							.fillMaxSize()
-							.padding(horizontal = 16.dp),
-						verticalArrangement = Arrangement.spacedBy(12.dp)
-					) {
-						items(filteredList) { user ->
-							Card(
-								modifier = Modifier.fillMaxWidth(),
-								shape = RoundedCornerShape(16.dp),
-								elevation = CardDefaults.cardElevation(2.dp),
-								colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
-							) {
-								Row(
-									modifier = Modifier
-										.fillMaxWidth()
-										.padding(horizontal = 16.dp, vertical = 12.dp),
-									verticalAlignment = Alignment.CenterVertically,
-									horizontalArrangement = Arrangement.SpaceBetween
-								) {
-									Text(
-										text = user.name,
-										style = MaterialTheme.typography.titleMedium,
-										fontWeight = FontWeight.SemiBold,
-										modifier = Modifier.weight(1f)
-									)
-									
-									Row(
-										horizontalArrangement = Arrangement.spacedBy(4.dp),
-										verticalAlignment = Alignment.CenterVertically
-									) {
-										if (user.state.equals("pendiente", ignoreCase = true)) {
-											WhatsAppButton(
-												phoneNumber = user.phone,
-												message = """
-                                Hola ${user.name}, te recordamos que tu membresía está próxima a vencer.
-                                ¡Contáctanos para renovarla a tiempo!
-                            """.trimIndent()
-											)
-										}
-										
-										IconButton(onClick = { navPag(user.id) }) {
-											Icon(
-												Icons.Default.Payment,
-												contentDescription = "Pagar",
-												tint = MaterialTheme.colorScheme.primary
-											)
-										}
-										IconButton(onClick = { navEdit(user.id) }) {
-											Icon(
-												Icons.Default.Edit,
-												contentDescription = "Editar",
-												tint = MaterialTheme.colorScheme.primary
-											)
-										}
-										IconButton(onClick = {
-											selectedUser = user
-											showUserDialog = true
-										}) {
-											Icon(
-												painter = painterResource(id = R.drawable.ic_details),
-												contentDescription = "Detalles",
-												tint = MaterialTheme.colorScheme.primary
-											)
-										}
-									}
-								}
-								}
+				when {
+					isLoading -> {
+						item {
+							Column(horizontalAlignment = Alignment.CenterHorizontally) {
+								CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+								Spacer(modifier = Modifier.height(12.dp))
+								Text("Cargando usuarios...", color = MaterialTheme.colorScheme.onSurfaceVariant)
+							}
 						}
 					}
+					
+					filteredList.isEmpty() -> {
+						item {
+							Text(
+								text = if (searchText.isNotEmpty()) "No se encontraron resultados" else "No hay personas registradas",
+								color = MaterialTheme.colorScheme.onSurfaceVariant
+							)
+						}
+					}
+					
+					else -> {
+						items(filteredList) { user ->
+							PersonCard(user, navEdit, navPag, onViewDetails = {
+								selectedUser = user
+								showUserDialog = true
+							})
+						}
+					}
+				}
+			}
+		} else {
+			Column(
+				modifier = Modifier
+					.fillMaxSize()
+					.padding(innerPadding)
+			) {
+				PaymentFilters(
+					selectedPaymentType = selectedState,
+					paymentTypeOptions = listOf("Todos", "Activos", "Inactivos", "Próximos a pagar"),
+					onPaymentTypeSelected = { selectedState = it },
+					onClearFilters = {
+						selectedState = "Todos"
+						searchText = ""
+					},
+					searchText = searchText,
+					onSearchTextChanged = { searchText = it },
+					onAddClick = { navBottom.navigate(AppRoutes.RegPersonScreen) },
+					showAddButton = true
+				)
+				
+				Box(
+					modifier = Modifier
+						.fillMaxSize()
+						.padding(horizontal = 16.dp),
+					contentAlignment = Alignment.Center
+				) {
+					when {
+						isLoading -> {
+							Column(horizontalAlignment = Alignment.CenterHorizontally) {
+								CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+								Spacer(modifier = Modifier.height(12.dp))
+								Text("Cargando usuarios...", color = MaterialTheme.colorScheme.onSurfaceVariant)
+							}
+						}
+						
+						filteredList.isEmpty() -> {
+							Text(
+								text = if (searchText.isNotEmpty()) "No se encontraron resultados" else "No hay personas registradas",
+								color = MaterialTheme.colorScheme.onSurfaceVariant
+							)
+						}
+						
+						else -> {
+							LazyColumn(
+								modifier = Modifier
+									.fillMaxSize(),
+								verticalArrangement = Arrangement.spacedBy(12.dp)
+							) {
+								items(filteredList) { user ->
+									PersonCard(user, navEdit, navPag, onViewDetails = {
+										selectedUser = user
+										showUserDialog = true
+									})
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+@Composable
+fun PersonCard(
+	user: ListUser,
+	navEdit: (String) -> Unit,
+	navPag: (String) -> Unit,
+	onViewDetails: () -> Unit,
+) {
+	Card(
+		modifier = Modifier.fillMaxWidth(),
+		shape = RoundedCornerShape(16.dp),
+		elevation = CardDefaults.cardElevation(2.dp),
+		colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
+	) {
+		Row(
+			modifier = Modifier
+				.fillMaxWidth()
+				.padding(horizontal = 16.dp, vertical = 12.dp),
+			verticalAlignment = Alignment.CenterVertically,
+			horizontalArrangement = Arrangement.SpaceBetween
+		) {
+			Text(
+				text = user.name,
+				style = MaterialTheme.typography.titleMedium,
+				fontWeight = FontWeight.SemiBold,
+				modifier = Modifier.weight(1f)
+			)
+			
+			Row(
+				horizontalArrangement = Arrangement.spacedBy(4.dp),
+				verticalAlignment = Alignment.CenterVertically
+			) {
+				if (user.state.equals("pendiente", ignoreCase = true)) {
+					WhatsAppButton(
+						phoneNumber = user.phone,
+						message = """Hola ${user.name}, te recordamos que tu membresía está próxima a vencer.
+             ¡Contáctanos para renovarla a tiempo!
+              """.trimIndent()
+					)
+				}
+				
+				IconButton(onClick = { navPag(user.id) }) {
+					Icon(
+						Icons.Default.Payment,
+						contentDescription = "Pagar",
+						tint = MaterialTheme.colorScheme.primary
+					)
+				}
+				IconButton(onClick = { navEdit(user.id) }) {
+					Icon(
+						Icons.Default.Edit,
+						contentDescription = "Editar",
+						tint = MaterialTheme.colorScheme.primary
+					)
+				}
+				IconButton(onClick = onViewDetails) {
+					Icon(
+						painter = painterResource(id = R.drawable.ic_details),
+						contentDescription = "Detalles",
+						tint = MaterialTheme.colorScheme.primary
+					)
 				}
 			}
 		}

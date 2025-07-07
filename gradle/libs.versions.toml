@@ -37,6 +37,7 @@ hilt = "2.51.1"
 benchmarkMacro = "1.3.4"
 compiler = "3.2.0-alpha11"
 datastoreCoreAndroid = "1.1.7"
+sqldelight = "2.0.1"
 
 [libraries]
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
@@ -83,6 +84,11 @@ androidx-benchmark-macro = { group = "androidx.benchmark", name = "benchmark-mac
 material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 androidx-compiler = { group = "androidx.databinding", name = "compiler", version.ref = "compiler" }
 androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastoreCoreAndroid" }
+sqldelight-gradle-plugin = { module = "com.squareup.sqldelight:gradle-plugin", version.ref = "sqldelight" }
+sqldelight-android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
+sqldelight-runtime = { module = "app.cash.sqldelight:runtime", version.ref = "sqldelight" }
+sqldelight-coroutines-extensions = { module = "app.cash.sqldelight:coroutines-extensions", version.ref ="sqldelight"}
+
 
 
 [plugins]
@@ -95,4 +101,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-
+sqldelight = { id = "com.squareup.sqldelight", version.ref = "sqldelight" }

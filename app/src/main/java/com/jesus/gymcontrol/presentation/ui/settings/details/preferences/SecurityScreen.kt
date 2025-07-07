@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Lock
@@ -33,7 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,14 +72,14 @@ fun SecurityContent(
 	navBottom: NavController,
 	viewModel: ChangePasswordViewModel = hiltViewModel(),
 ) {
-	var currentPassword by remember { mutableStateOf("") }
-	var newPassword by remember { mutableStateOf("") }
-	var confirmPassword by remember { mutableStateOf("") }
-	var showCurrentPassword by remember { mutableStateOf(false) }
-	var showNewPassword by remember { mutableStateOf(false) }
-	var showConfirmPassword by remember { mutableStateOf(false) }
-	var passwordError by remember { mutableStateOf(false) }
-	var showSuccessDialog by remember { mutableStateOf(false) }
+	var currentPassword by rememberSaveable { mutableStateOf("") }
+	var newPassword by rememberSaveable { mutableStateOf("") }
+	var confirmPassword by rememberSaveable { mutableStateOf("") }
+	var showCurrentPassword by rememberSaveable { mutableStateOf(false) }
+	var showNewPassword by rememberSaveable { mutableStateOf(false) }
+	var showConfirmPassword by rememberSaveable { mutableStateOf(false) }
+	var passwordError by rememberSaveable { mutableStateOf(false) }
+	var showSuccessDialog by rememberSaveable { mutableStateOf(false) }
 	val isFormValid = currentPassword.isNotBlank()
 			&& newPassword.isNotBlank()
 			&& confirmPassword.isNotBlank()
@@ -130,7 +132,8 @@ fun SecurityContent(
 			Column(
 				modifier = Modifier
 					.fillMaxSize()
-					.padding(horizontal = 16.dp),
+					.padding(horizontal = 16.dp)
+					.verticalScroll(rememberScrollState()),
 				horizontalAlignment = Alignment.CenterHorizontally,
 				verticalArrangement = Arrangement.Top
 			) {

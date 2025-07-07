@@ -1,0 +1,26 @@
+CREATE TABLE personas (
+    id TEXT PRIMARY KEY,
+    nombre TEXT NOT NULL,
+    cedula TEXT NOT NULL,
+    correo TEXT,
+    telefono TEXT,
+    estado TEXT NOT NULL DEFAULT 'pendiente' -- activo, inactivo, pendiente, etc.
+);
+
+selectAll:
+SELECT * FROM personas;
+
+selectById:
+SELECT * FROM personas WHERE id = ?;
+
+insertPersona:
+INSERT INTO personas(id, nombre, cedula, correo, telefono, estado)
+VALUES (?, ?, ?, ?, ?, ?);
+
+updatePersona:
+UPDATE personas
+SET nombre = ?, cedula = ?, correo = ?, telefono = ?, estado = ?
+WHERE id = ?;
+
+deletePersona:
+DELETE FROM personas WHERE id=?;

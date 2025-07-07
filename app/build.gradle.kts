@@ -9,9 +9,9 @@ plugins {
 	alias(libs.plugins.hilt.android)
 	kotlin("kapt")
 	id("com.google.gms.google-services")
-	
-	
+	id("com.squareup.sqldelight")
 }
+
 
 android {
 	namespace = "com.jesus.gymcontrol"
@@ -50,6 +50,14 @@ android {
 	}
 }
 
+sqldelight {
+	database("GymDatabase") {
+		packageName = "com.jesus.gymcontrol.data.db"
+		// Opcional: si quieres especificar dónde se generan los esquemas JSON para migraciones
+		schemaOutputDirectory = file("schemas")
+	}
+}
+
 dependencies {
 	
 	implementation (libs.androidx.foundation)
@@ -66,16 +74,18 @@ dependencies {
 	implementation (libs.androidx.hilt.navigation.compose)       // Hilt navigation
 	kapt(libs.hilt.compiler)                                     // Hilt compiler
 	implementation(libs.coil.compose)                            //coil
-	implementation (libs.firebase.messaging)
-	implementation(libs.androidx.datastore.preferences)
-	implementation (libs.androidx.material.icons.extended)
-	implementation (libs.guava)
-	implementation(platform(libs.firebase.bom))
-	implementation (libs.google.firebase.analytics)
-	implementation(libs.firebase.auth.ktx)
-	implementation(libs.firebase.firestore.ktx)
-	implementation(libs.kotlinx.coroutines.play.services)
-
+	implementation (libs.firebase.messaging)                     //Firebase messaging
+	implementation(libs.androidx.datastore.preferences)           // DataStore
+	implementation (libs.androidx.material.icons.extended)       // Icons extended
+	implementation (libs.guava)                                  // Guava
+	implementation(platform(libs.firebase.bom))                  // Firebase BOM
+	implementation (libs.google.firebase.analytics)             // Firebase Analytics
+	implementation(libs.firebase.auth.ktx)                      // Fi rebase Auth
+	implementation(libs.firebase.firestore.ktx)                 // Firebase Firestore
+	implementation(libs.kotlinx.coroutines.play.services)         // Coroutines Play Services
+	implementation(libs.sqldelight.android.driver)
+	implementation(libs.sqldelight.coroutines.extensions)
+	implementation(libs.sqldelight.runtime)
 	//DEFAULT
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.lifecycle.runtime.ktx)
