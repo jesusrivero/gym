@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,9 +39,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.jesus.gymcontrol.R
+import com.jesus.gymcontrol.domain.viewmodels.notification.NotificacionesViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 import com.jesus.gymcontrol.presentation.ui.commons.BottomNavigationBar
@@ -62,26 +65,12 @@ fun ManageScreen(navController: NavController) {
 fun ManagerContent(
 	navController: NavController,
 	navBottom: NavController,
+	notificacionesViewModel: NotificacionesViewModel = hiltViewModel()
 ) {
 	val colorScheme = MaterialTheme.colorScheme
 	var showNotifications by remember { mutableStateOf(false) }
-	val notifications = listOf(
-		"Nuevo registro: Jesús R.",
-		"Pago recibido: 20 USD",
-		"Cambio de estado: Pedro ahora está 'Pendiente'",
-		"Nuevo registro: Jesús R.",
-		"Pago recibido: 20 USD",
-		"Cambio de estado: Pedro ahora está 'Pendiente'",
-		"Nuevo registro: Jesús R.",
-		"Pago recibido: 20 USD",
-		"Cambio de estado: Pedro ahora está 'Pendiente'",
-		"Nuevo registro: Jesús R.",
-		"Pago recibido: 20 USD",
-		"Cambio de estado: Pedro ahora está 'Pendiente'",
-		"Nuevo registro: Jesús R.",
-		"Pago recibido: 20 USD",
-		"Cambio de estado: Pedro ahora está 'Pendiente'"
-	)
+	val notifications by notificacionesViewModel.notifications.collectAsState()
+
 	
 	Box(modifier = Modifier.fillMaxSize()) {
 		Scaffold(
@@ -159,7 +148,10 @@ fun ManagerContent(
 		isVisible = showNotifications,
 		navController = navController,
 		notifications = notifications,
-		onDismiss = { showNotifications = false }
+		onDismiss = { showNotifications = false },
+		onDeleteAll = {
+			notificacionesViewModel.deleteAllNotifications()
+		}
 	)
 }
 

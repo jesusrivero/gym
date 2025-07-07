@@ -41,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
+import com.jesus.gymcontrol.domain.viewmodels.notification.NotificacionesViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 import com.jesus.gymcontrol.presentation.ui.commons.BottomNavigationBar
@@ -75,15 +77,13 @@ fun PreferencesScreen(navController: NavController) {
 fun PreferencesContent(
 	navController: NavController,
 	viewModel: AuthViewModel = hiltViewModel(),
+	notificacionesViewModel: NotificacionesViewModel = hiltViewModel(),
 ) {
 	val colorScheme = MaterialTheme.colorScheme
 	val context = LocalContext.current
 	var showNotifications by remember { mutableStateOf(false) }
-	val notifications = listOf(
-		"Nuevo registro: Jesús R.",
-		"Pago recibido: 20 USD",
-		"Cambio de estado: Pedro ahora está 'Pendiente'"
-	)
+	val notifications by notificacionesViewModel.notifications.collectAsState()
+	
 	
 	Scaffold(
 		topBar = {
@@ -120,7 +120,7 @@ fun PreferencesContent(
 					},
 					modifier = Modifier
 						.fillMaxWidth()
-					.padding(horizontal = 16.dp),
+						.padding(horizontal = 16.dp),
 					colors = ButtonDefaults.buttonColors(
 						containerColor = colorScheme.primary
 					)
@@ -139,8 +139,8 @@ fun PreferencesContent(
 				.padding(innerPadding)
 				.padding(horizontal = 2.dp)
 				.verticalScroll(rememberScrollState()),
-		
-		) {
+			
+			) {
 			// Sección General en Card
 			Card(
 				modifier = Modifier
@@ -186,7 +186,7 @@ fun PreferencesContent(
 			Card(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(horizontal= 6.dp, vertical = 4.dp),
+					.padding(horizontal = 6.dp, vertical = 4.dp),
 				colors = CardDefaults.cardColors(
 					containerColor = colorScheme.onPrimary,
 					contentColor = colorScheme.onSurfaceVariant
@@ -236,10 +236,12 @@ fun PreferencesContent(
 		isVisible = showNotifications,
 		navController = navController,
 		notifications = notifications,
-		onDismiss = { showNotifications = false }
+		onDismiss = { showNotifications = false },
+		onDeleteAll = {
+			notificacionesViewModel.deleteAllNotifications()
+		}
 	)
 }
-// Los componentes SettingsSectionTitle y SettingsItem permanecen iguales
 
 @Composable
 fun SettingsSectionTitle(title: String) {
@@ -307,6 +309,7 @@ fun SettingsItem(
 		}
 	}
 }
+
 @Preview(showBackground = true)
 @Composable
 fun PreferencesPreview() {

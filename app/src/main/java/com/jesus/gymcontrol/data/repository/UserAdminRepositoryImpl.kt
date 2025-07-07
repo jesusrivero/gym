@@ -63,7 +63,7 @@ class UserAdminRepositoryImpl @Inject constructor(
 				"code" to userData.code,
 				"gimnasioCode" to gymCode,
 				"rol" to userData.rol,
-				"state" to "inactivo",
+				"state" to "activo",
 				"phone" to userData.phone,
 				"date" to userData.date,
 			)

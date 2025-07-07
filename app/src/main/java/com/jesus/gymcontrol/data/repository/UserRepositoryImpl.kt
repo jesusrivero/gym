@@ -76,7 +76,8 @@ class UserRepositoryImpl @Inject constructor(
 				userRef, mapOf(
 					"rol" to rol,
 					"gimnasio" to gym.name,
-					"gimnasioCode" to gym.code
+					"gimnasioCode" to gym.code,
+					"state" to "activo"
 				)
 			)
 			

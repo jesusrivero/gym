@@ -45,6 +45,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -67,6 +68,7 @@ import com.jesus.gymcontrol.domain.viewmodels.AdminViewModel
 import com.jesus.gymcontrol.domain.viewmodels.MembershipViewModel
 import com.jesus.gymcontrol.domain.viewmodels.MovementsViewModel
 import com.jesus.gymcontrol.domain.viewmodels.UserListViewModel
+import com.jesus.gymcontrol.domain.viewmodels.notification.NotificacionesViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 import com.jesus.gymcontrol.presentation.ui.commons.BottomNavigationBar
@@ -90,7 +92,6 @@ fun MainScreen(
 		)
 	}
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainContent(
@@ -101,6 +102,7 @@ fun MainContent(
 	memberviewModel: MembershipViewModel = hiltViewModel(),
 	mviewModel: MovementsViewModel = hiltViewModel(),
 	userListViewModel: UserListViewModel = hiltViewModel(),
+	notificacionesViewModel: NotificacionesViewModel = hiltViewModel()
 ) {
 	val colorScheme = MaterialTheme.colorScheme
 	val summary = viewModel.summary
@@ -117,30 +119,15 @@ fun MainContent(
 	
 	var showNotifications by remember { mutableStateOf(false) }
 	
-	val notifications = listOf(
-		"Nuevo registro: Jesús R.",
-		"Pago recibido: 20 USD",
-		"Cambio de estado: Pedro ahora está 'Pendiente'",
-		"Nuevo registro: Jesús R.",
-		"Pago recibido: 20 USD",
-		"Cambio de estado: Pedro ahora está 'Pendiente'",
-		"Nuevo registro: Jesús R.",
-		"Pago recibido: 20 USD",
-		"Cambio de estado: Pedro ahora está 'Pendiente'",
-		"Nuevo registro: Jesús R.",
-		"Pago recibido: 20 USD",
-		"Cambio de estado: Pedro ahora está 'Pendiente'",
-		"Nuevo registro: Jesús R.",
-		"Pago recibido: 20 USD",
-		"Cambio de estado: Pedro ahora está 'Pendiente'"
-	)
-	
+	// 🚀 Notificaciones reales desde tu ViewModel
+	val notifications by notificacionesViewModel.notifications.collectAsState()
 	
 	LaunchedEffect(Unit) {
 		memberviewModel.loadMemberships()
 		memberviewModel.loadMembershipsSummary()
 		viewModel.loadGymUserSummary()
 		userListViewModel.loadUsers()
+		notificacionesViewModel.loadNotifications()
 	}
 	
 	if (errorMessage != null) {
@@ -154,14 +141,13 @@ fun MainContent(
 		return
 	}
 	
-	
 	Box(modifier = Modifier.fillMaxSize()) {
 		Scaffold(
 			topBar = {
 				TopAppBar(
 					title = {
 						Text(
-							text = "Bienvenido \uD83D\uDCAA\uD83C\uDFFB",
+							text = "Bienvenido 💪🏻",
 							color = colorScheme.onPrimary,
 							fontWeight = FontWeight.Bold
 						)
@@ -221,7 +207,6 @@ fun MainContent(
 							isLoading = isLoadingAdmin
 						)
 						
-						
 						Column(
 							modifier = Modifier
 								.fillMaxWidth()
@@ -254,18 +239,20 @@ fun MainContent(
 							}
 							PaymentsList(payments = payments)
 						}
-						
-						
 					}
 				}
 			}
 		}
 	}
+	
 	NotificationPanel(
 		isVisible = showNotifications,
 		navController = navController,
 		notifications = notifications,
-		onDismiss = { showNotifications = false }
+		onDismiss = { showNotifications = false },
+		onDeleteAll = {
+			notificacionesViewModel.deleteAllNotifications()
+		}
 	)
 }
 
