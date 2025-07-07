@@ -83,9 +83,17 @@ dependencies {
 	implementation(libs.firebase.auth.ktx)                      // Fi rebase Auth
 	implementation(libs.firebase.firestore.ktx)                 // Firebase Firestore
 	implementation(libs.kotlinx.coroutines.play.services)         // Coroutines Play Services
-	implementation(libs.sqldelight.android.driver)
-	implementation(libs.sqldelight.coroutines.extensions)
-	implementation(libs.sqldelight.runtime)
+	implementation(libs.sqldelight.android.driver)              // SQLDelight
+	implementation(libs.sqldelight.coroutines.extensions)     // SQLDelight
+	implementation(libs.sqldelight.runtime)     // SQLDelight
+	implementation (libs.core)
+	implementation (libs.barcode.scanning) // Barcode Scanning
+	implementation (libs.androidx.camera.core) // CameraX Core
+	implementation (libs.androidx.camera.camera2) // CameraX Camera2
+	implementation (libs.androidx.camera.lifecycle) // CameraX Lifecycle
+	implementation (libs.androidx.camera.view) // CameraX View
+	implementation (libs.androidx.camera.extensions)   // CameraX Extensions
+	implementation (libs.accompanist.permissions) // Accompanist Permissions
 	//DEFAULT
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.lifecycle.runtime.ktx)

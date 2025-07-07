@@ -3,7 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- 👇 Necesario para Android 13+ -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         tools:replace="android:label"

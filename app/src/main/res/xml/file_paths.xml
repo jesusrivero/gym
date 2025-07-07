@@ -7,6 +7,11 @@
     <cache-path name="cache" path="." />
 
     <cache-path name="images" path="images/" />
+
+    <cache-path
+        name="shared_qr"
+        path="." />
+
 </paths>
 
 

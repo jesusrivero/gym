@@ -1,8 +1,15 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details.selected
 
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ExperimentalGetImage
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.VpnKey
@@ -41,12 +49,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
+import coil.size.Size
+import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.common.InputImage
 import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.model.Gym
@@ -79,6 +94,7 @@ fun SelectedGymClient(
     val isCodeValid = viewModel.isCodeValid
     val codeValidationError = viewModel.codeValidationError
     val rol by remember { mutableStateOf("cliente") }
+	  var showScanner by remember { mutableStateOf(false)}
 
     LaunchedEffect(Unit) {
         viewModel.fetchAllGyms()
@@ -203,22 +219,25 @@ fun SelectedGymClient(
                                     Text("Dirección: ${gym.direction}")
                                     Text("Teléfono: ${gym.phone}")
                                 }
-
-                                IconButton(
-                                    onClick = { },
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .background(
-                                            color = colorScheme.primary.copy(alpha = 0.1f),
-                                            shape = CircleShape
-                                        )
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.QrCode,
-                                        contentDescription = "Ver código QR",
-                                        tint = colorScheme.primary
-                                    )
-                                }
+	                            
+	                            IconButton(
+		                            onClick = {
+			                          showScanner = true
+		                            },
+		                            modifier = Modifier
+			                            .size(40.dp)
+			                            .background(
+				                            color = colorScheme.primary.copy(alpha = 0.1f),
+				                            shape = CircleShape
+			                            )
+	                            ) {
+		                            Icon(
+			                            imageVector = Icons.Default.QrCode,
+			                            contentDescription = "Escanear código QR",
+			                            tint = colorScheme.primary
+		                            )
+	                            }
+	                            
                             }
                         }
                     }
@@ -302,6 +321,181 @@ fun SelectedGymClient(
                     shape = RoundedCornerShape(16.dp)
                 )
             }
+	        if (showScanner) {
+		        QrScannerScreen(
+			        onCodeScanned = { scannedCode ->
+				        code = scannedCode
+				        showScanner = false
+			        },
+			        onClose = {
+				        showScanner = false
+				        }
+						)
+	        }
         }
     }
+}
+
+
+@androidx.annotation.OptIn(ExperimentalGetImage::class)
+@Composable
+fun ScanQrDialog(
+	onDismiss: () -> Unit,
+	onCodeScanned: (String) -> Unit,
+) {
+	val context = LocalContext.current
+	val lifecycleOwner = LocalLifecycleOwner.current
+	
+	val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
+	val previewView = remember { PreviewView(context) }
+	
+	LaunchedEffect(Unit) {
+		cameraProviderFuture.addListener({
+			val cameraProvider = cameraProviderFuture.get()
+			val preview = Preview.Builder().build().also {
+				it.setSurfaceProvider(previewView.surfaceProvider)
+			}
+			
+			val barcodeScanner = BarcodeScanning.getClient()
+			val analysis = ImageAnalysis.Builder()
+				.setTargetResolution(android.util.Size(1280, 720))
+				.setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+				.build()
+			
+			analysis.setAnalyzer(ContextCompat.getMainExecutor(context)) { imageProxy ->
+				val mediaImage = imageProxy.image
+				if (mediaImage != null) {
+					val inputImage = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+					barcodeScanner.process(inputImage)
+						.addOnSuccessListener { barcodes ->
+							for (barcode in barcodes) {
+								barcode.rawValue?.let { code ->
+									onCodeScanned(code)
+									cameraProvider.unbindAll()
+								}
+							}
+						}
+						.addOnCompleteListener {
+							imageProxy.close()
+						}
+				} else {
+					imageProxy.close()
+				}
+			}
+			
+			val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+			cameraProvider.unbindAll()
+			cameraProvider.bindToLifecycle(
+				lifecycleOwner,
+				cameraSelector,
+				preview,
+				analysis
+			)
+		}, ContextCompat.getMainExecutor(context))
+	}
+	
+	AlertDialog(
+		onDismissRequest = {
+			onDismiss()
+			cameraProviderFuture.get().unbindAll()
+		},
+		title = { Text("Escanea el código QR") },
+		text = {
+			AndroidView(
+				factory = { previewView },
+				modifier = Modifier
+					.fillMaxWidth()
+					.height(300.dp)
+			)
+		},
+		confirmButton = {
+			TextButton(onClick = {
+				onDismiss()
+				cameraProviderFuture.get().unbindAll()
+			}) {
+				Text("Cancelar")
+			}
+		}
+	)
+}
+
+
+@androidx.annotation.OptIn(ExperimentalGetImage::class)
+@Composable
+fun QrScannerScreen(
+	onCodeScanned: (String) -> Unit,
+	onClose: () -> Unit,
+) {
+	val context = LocalContext.current
+	val lifecycleOwner = LocalLifecycleOwner.current
+	val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
+	val previewView = remember { PreviewView(context) }
+	
+	AndroidView(
+		factory = { previewView },
+		modifier = Modifier.fillMaxSize()
+	)
+	
+	LaunchedEffect(Unit) {
+		val cameraProvider = cameraProviderFuture.get()
+		
+		val preview = Preview.Builder().build().also {
+			it.setSurfaceProvider(previewView.surfaceProvider)
+		}
+		
+		val analysis = ImageAnalysis.Builder()
+			.setTargetResolution(android.util.Size(1280, 720))
+			.setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+			.build()
+		
+		val scanner = BarcodeScanning.getClient()
+		
+		analysis.setAnalyzer(ContextCompat.getMainExecutor(context)) { imageProxy ->
+			val mediaImage = imageProxy.image
+			if (mediaImage != null) {
+				val inputImage = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+				scanner.process(inputImage)
+					.addOnSuccessListener { barcodes ->
+						for (barcode in barcodes) {
+							barcode.rawValue?.let { code ->
+								onCodeScanned(code)
+								cameraProvider.unbindAll()
+							}
+						}
+					}
+					.addOnFailureListener {
+						// opcional: log error
+					}
+					.addOnCompleteListener {
+						imageProxy.close()
+					}
+			} else {
+				imageProxy.close()
+			}
+		}
+		
+		try {
+			cameraProvider.unbindAll()
+			cameraProvider.bindToLifecycle(
+				lifecycleOwner,
+				CameraSelector.DEFAULT_BACK_CAMERA,
+				preview,
+				analysis
+			)
+		} catch (e: Exception) {
+			e.printStackTrace()
+		}
+	}
+	
+	Box(
+		modifier = Modifier.fillMaxSize(),
+		contentAlignment = Alignment.TopStart
+	) {
+		IconButton(
+			onClick = onClose,
+			modifier = Modifier.padding(16.dp)
+		) {
+			Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = Color.White)
+		}
+	}
 }
