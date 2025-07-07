@@ -15,20 +15,20 @@ import javax.inject.Inject
 
 class NotificacionRepositoryImpl @Inject constructor(
 	private val firestore: FirebaseFirestore,
-	private val sessionManager: SessionManager
+	private val sessionManager: SessionManager,
 ) : NotificacionRepository {
 	
-	override suspend fun agregarNotificacion(gymId: String, notificacion: Notificacion) {
+	override suspend fun agregarNotificacion(gymCode: String, notificacion: Notificacion) {
 		firestore.collection("gimnasios")
-			.document(gymId)
+			.document(gymCode)
 			.collection("notificaciones")
 			.add(notificacion)
 			.await()
 	}
 	
-	override fun obtenerNotificaciones(gymId: String): Flow<List<Notificacion>> = callbackFlow {
+	override fun obtenerNotificaciones(gymCode: String): Flow<List<Notificacion>> = callbackFlow {
 		val ref = firestore.collection("gimnasios")
-			.document(gymId)
+			.document(gymCode)
 			.collection("notificaciones")
 			.orderBy("fecha", Query.Direction.DESCENDING)
 		
@@ -43,29 +43,28 @@ class NotificacionRepositoryImpl @Inject constructor(
 		awaitClose { listener.remove() }
 	}
 	
-	override suspend fun eliminarNotificacion(gymId: String, notificacionId: String) {
-		firestore.collection("gimnasios")
-			.document(gymId)
+	override suspend fun eliminarTodasNotificaciones(gymCode: String) {
+		val ref = firestore.collection("gimnasios")
+			.document(gymCode)
 			.collection("notificaciones")
-			.document(notificacionId)
-			.delete()
-			.await()
+		
+		val snapshot = ref.get().await()
+		snapshot.documents.forEach { it.reference.delete() }
 	}
 	
-	override suspend fun eliminarNotificacionesAntiguas(gymId: String, max: Int) {
+	override suspend fun eliminarNotificacionesAntiguas(gymCode: String, max: Int) {
 		val ref = firestore.collection("gimnasios")
-			.document(gymId)
+			.document(gymCode)
 			.collection("notificaciones")
 			.orderBy("fecha", Query.Direction.DESCENDING)
 		
 		val snapshot = ref.get().await()
 		val notificaciones = snapshot.documents
 		
-		if (notificaciones.size > max) {
-			val excedentes = notificaciones.drop(max)
-			excedentes.forEach {
-				it.reference.delete()
-			}
-			}
+		val toDelete = if (max == 0) notificaciones else notificaciones.drop(max)
+		
+		toDelete.forEach {
+			it.reference.delete()
 		}
+	}
 }

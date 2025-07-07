@@ -4,10 +4,10 @@ import com.jesus.gymcontrol.domain.repository.notification.NotificacionRepositor
 import javax.inject.Inject
 
 
-class DeleteNotificacionUseCase @Inject constructor(
+class DeleteAllNotificacionesUseCase @Inject constructor(
 	private val repository: NotificacionRepository
 ) {
-	suspend operator fun invoke(gymId: String, notificacionId: String) {
-		repository.eliminarNotificacion(gymId, notificacionId)
+	suspend operator fun invoke(gymCode: String) {
+		repository.eliminarNotificacionesAntiguas(gymCode, max = 0) // Borra todas
 	}
 }

@@ -93,7 +93,7 @@ dependencies {
 	implementation (libs.androidx.camera.lifecycle) // CameraX Lifecycle
 	implementation (libs.androidx.camera.view) // CameraX View
 	implementation (libs.androidx.camera.extensions)   // CameraX Extensions
-	implementation (libs.accompanist.permissions) // Accompanist Permissions
+//	implementation (libs.accompanist.permissions) // Accompanist Permissions
 	//DEFAULT
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.lifecycle.runtime.ktx)

@@ -1,16 +1,30 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details.preferences
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -19,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.LaunchedEffect
@@ -32,6 +47,10 @@ import androidx.navigation.NavController
 import com.jesus.gymcontrol.domain.viewmodels.notification.NotificacionesViewModel
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.jesus.gymcontrol.domain.model.notification.Notificacion
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,91 +63,63 @@ fun NotificationsScreen(
 		val notifications by viewModel.notifications.collectAsState()
 		val isLoading by viewModel.isLoading.collectAsState()
 		val error by viewModel.error.collectAsState()
-//
-//		LaunchedEffect(Unit) {
-//			viewModel.loadNotifications()
-//		}
+		
+		LaunchedEffect(Unit) { viewModel.loadNotifications() }
 		
 		Scaffold(
 			topBar = {
 				TopAppBar(
-					title = {
-						Text(
-							text = "Notificaciones",
-							color = MaterialTheme.colorScheme.onPrimary,
-							fontWeight = FontWeight.Bold
-						)
-					},
+					title = { Text("Notificaciones", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary) },
 					navigationIcon = {
 						IconButton(onClick = { navController.popBackStack() }) {
-							Icon(
-								imageVector = Icons.Default.ArrowBack,
-								contentDescription = "Volver",
-								tint = MaterialTheme.colorScheme.onPrimary
-							)
+							Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = MaterialTheme.colorScheme.onPrimary)
 						}
 					},
-					colors = TopAppBarDefaults.topAppBarColors(
-						containerColor = MaterialTheme.colorScheme.primary
-					)
+					colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
 				)
 			}
 		) { innerPadding ->
 			Box(
-				modifier = Modifier
+				Modifier
 					.fillMaxSize()
 					.padding(innerPadding)
-					.padding(16.dp)
 			) {
 				when {
-					isLoading -> {
-						CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-					}
-					error != null -> {
-						Text(
-							text = "Error: $error",
-							color = MaterialTheme.colorScheme.error,
-							style = MaterialTheme.typography.bodyMedium,
-							modifier = Modifier.align(Alignment.Center)
-						)
-					}
-					notifications.isEmpty() -> {
-						Text(
-							text = "No hay notificaciones por mostrar.",
-							style = MaterialTheme.typography.bodyMedium,
-							color = MaterialTheme.colorScheme.onSurfaceVariant,
-							modifier = Modifier.align(Alignment.Center)
-						)
-					}
-					else -> {
-						Column(
-							modifier = Modifier
-								.verticalScroll(rememberScrollState())
+					isLoading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
+					
+					error != null -> Text(
+						text = "Error: $error",
+						color = MaterialTheme.colorScheme.error,
+						style = MaterialTheme.typography.bodyMedium,
+						modifier = Modifier.align(Alignment.Center)
+					)
+					
+					notifications.isEmpty() -> Text(
+						text = "No hay notificaciones por mostrar.",
+						style = MaterialTheme.typography.bodyMedium,
+						color = MaterialTheme.colorScheme.onSurfaceVariant,
+						modifier = Modifier.align(Alignment.Center)
+					)
+					
+					else -> Column(
+						Modifier
+							.fillMaxSize()
+							.padding(8.dp),
+						verticalArrangement = Arrangement.spacedBy(8.dp)
+					) {
+						Button(
+							onClick = { viewModel.deleteAllNotifications() },
+							modifier = Modifier.fillMaxWidth()
 						) {
-							notifications.forEach { notification ->
-								Card(
-									modifier = Modifier
-										.fillMaxWidth()
-										.padding(vertical = 6.dp),
-									colors = CardDefaults.cardColors(
-										containerColor = MaterialTheme.colorScheme.surfaceVariant
-									),
-									elevation = CardDefaults.cardElevation(2.dp)
-								) {
-									Column(modifier = Modifier.padding(16.dp)) {
-										Text(
-											text = notification.mensaje,
-											style = MaterialTheme.typography.bodyMedium
-										)
-										notification.fecha?.let {
-											Text(
-												text = it.toDate().toString(), // puedes formatear si quieres
-												style = MaterialTheme.typography.labelSmall,
-												color = MaterialTheme.colorScheme.onSurfaceVariant
-											)
-										}
-									}
-								}
+							Text("Limpiar")
+						}
+						
+						LazyColumn(
+							modifier = Modifier.fillMaxSize(),
+							verticalArrangement = Arrangement.spacedBy(8.dp)
+						) {
+							items(notifications) { notification ->
+								NotificationCard(notification)
 							}
 						}
 					}
@@ -137,3 +128,73 @@ fun NotificationsScreen(
 		}
 	}
 }
+
+@Composable
+fun NotificationCard(notification: Notificacion) {
+	val date = remember(notification.fecha) {
+		java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault())
+			.format(java.util.Date(notification.fecha))
+	}
+	
+	var showDetails by remember { mutableStateOf(false) }
+	
+	Card(
+		modifier = Modifier.fillMaxWidth(),
+		colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+		elevation = CardDefaults.cardElevation(1.dp)
+	) {
+		Row(
+			modifier = Modifier
+				.fillMaxWidth()
+				.padding(horizontal = 12.dp, vertical = 14.dp),
+			verticalAlignment = Alignment.CenterVertically
+		) {
+			Icon(
+				imageVector = Icons.Default.Notifications,
+				contentDescription = null,
+				tint = MaterialTheme.colorScheme.primary,
+				modifier = Modifier.size(20.dp)
+			)
+			
+			Spacer(modifier = Modifier.width(8.dp))
+			
+			Text(
+				text = notification.titulo,
+				style = MaterialTheme.typography.bodyMedium,
+				fontWeight = FontWeight.SemiBold,
+				maxLines = 1,
+				modifier = Modifier.weight(1f)
+			)
+			
+			Text(
+				text = date,
+				style = MaterialTheme.typography.labelSmall,
+				color = MaterialTheme.colorScheme.onSurfaceVariant
+			)
+			
+			IconButton(onClick = { showDetails = true }, modifier = Modifier.size(24.dp)) {
+				Icon(
+					imageVector = Icons.Default.Info,
+					contentDescription = "Ver detalles",
+					tint = MaterialTheme.colorScheme.primary,
+					modifier = Modifier.size(24.dp)
+				)
+			}
+		}
+	}
+	
+	if (showDetails) {
+		AlertDialog(
+			containerColor = MaterialTheme.colorScheme.surface,
+			onDismissRequest = { showDetails = false },
+			confirmButton = {
+				TextButton(onClick = { showDetails = false }) {
+					Text("Cerrar")
+				}
+			},
+			title = { Text(notification.titulo, fontWeight = FontWeight.Bold) },
+			text = { Text(notification.mensaje) }
+		)
+	}
+}
+

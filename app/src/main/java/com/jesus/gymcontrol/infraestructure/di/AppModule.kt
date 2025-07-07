@@ -54,7 +54,7 @@ import com.jesus.gymcontrol.domain.usecase.usuario.UpdateUserProfileUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.codes.GetAvailableCodesUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.membership.ToggleMembershipStateUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.notification.AddNotificacionUseCase
-import com.jesus.gymcontrol.domain.usecase.usuario.notification.DeleteNotificacionUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.notification.DeleteAllNotificacionesUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.notification.GetNotificacionesUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.notification.PurgeNotificacionesUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.password.ChangePasswordUseCase
@@ -363,11 +363,9 @@ object AppModule {
 	fun provideGetNotificacionesUseCase(repository: NotificacionRepository): GetNotificacionesUseCase {
 		return GetNotificacionesUseCase(repository)
 	}
-	
 	@Provides
-	fun provideDeleteNotificacionUseCase(repository: NotificacionRepository): DeleteNotificacionUseCase {
-		return DeleteNotificacionUseCase(repository)
-	}
+	fun provideDeleteAllNotificacionesUseCase(repository: NotificacionRepository) = DeleteAllNotificacionesUseCase(repository)
+	
 	
 	@Provides
 	fun providePurgeNotificacionesUseCase(repository: NotificacionRepository): PurgeNotificacionesUseCase {

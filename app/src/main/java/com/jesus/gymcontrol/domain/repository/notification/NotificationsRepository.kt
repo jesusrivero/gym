@@ -5,7 +5,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface NotificacionRepository {
 	suspend fun agregarNotificacion(gymId: String, notificacion: Notificacion)
-	fun obtenerNotificaciones(gymId: String): Flow<List<Notificacion>>
-	suspend fun eliminarNotificacion(gymId: String, notificacionId: String)
-	suspend fun eliminarNotificacionesAntiguas(gymId: String, max:Int=30)
+	fun obtenerNotificaciones(gymCode: String): Flow<List<Notificacion>>
+	suspend fun eliminarTodasNotificaciones(gymCode:String)
+	suspend fun eliminarNotificacionesAntiguas(gymCode: String, max: Int = 0)
+
 }

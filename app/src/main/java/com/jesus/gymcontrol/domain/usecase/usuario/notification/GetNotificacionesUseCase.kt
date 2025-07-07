@@ -8,7 +8,7 @@ import javax.inject.Inject
 class GetNotificacionesUseCase @Inject constructor(
 	private val repository: NotificacionRepository
 ) {
-	operator fun invoke(gymId: String): Flow<List<Notificacion>> {
-		return repository.obtenerNotificaciones(gymId)
+	operator fun invoke(gymCode: String): Flow<List<Notificacion>> {
+		return repository.obtenerNotificaciones(gymCode)
 	}
 }

@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.model.notification.Notificacion
 import com.jesus.gymcontrol.domain.usecase.usuario.notification.AddNotificacionUseCase
-import com.jesus.gymcontrol.domain.usecase.usuario.notification.DeleteNotificacionUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.notification.DeleteAllNotificacionesUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.notification.GetNotificacionesUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.notification.PurgeNotificacionesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +18,7 @@ import javax.inject.Inject
 class NotificacionesViewModel @Inject constructor(
 	private val addNotificacionUseCase: AddNotificacionUseCase,
 	private val getNotificacionesUseCase: GetNotificacionesUseCase,
-	private val deleteNotificacionUseCase: DeleteNotificacionUseCase,
+	private val deleteAllNotificacionesUseCase: DeleteAllNotificacionesUseCase,
 	private val purgeNotificacionesUseCase: PurgeNotificacionesUseCase,
 	private val sessionManager: SessionManager
 ) : ViewModel() {
@@ -32,34 +32,43 @@ class NotificacionesViewModel @Inject constructor(
 	private val _error = MutableStateFlow<String?>(null)
 	val error: StateFlow<String?> = _error
 	
+	
+	
 	init {
 		loadNotifications()
 	}
+	
 	
 	
 	fun loadNotifications() {
 		viewModelScope.launch {
 			_isLoading.value = true
 			_error.value = null
+			
+			val gymCode = sessionManager.getGymCode()
+			if (gymCode.isNullOrBlank()) {
+				_error.value = "No se ha configurado el gimnasio"
+				_isLoading.value = false
+				return@launch
+			}
+			
 			try {
-				val gymId = sessionManager.getGymCode() ?: ""
-				
-				getNotificacionesUseCase(gymId).collect { result ->
+				getNotificacionesUseCase(gymCode).collect { result ->
 					_notifications.value = result
 					
-					// Si supera las 30 notificaciones, purga las más antiguas
 					if (result.size > 30) {
-						purgeNotifications(gymId)
+						purgeNotifications(gymCode)
 					}
+					
+					_isLoading.value = false
 				}
-				
 			} catch (e: Exception) {
 				_error.value = e.message ?: "Error al cargar notificaciones"
-			} finally {
-				_isLoading.value =false
+				_isLoading.value = false
+				}
 			}
-		}
 	}
+	
 	
 	fun addNotification(notificacion: Notificacion) {
 		viewModelScope.launch {
@@ -73,22 +82,26 @@ class NotificacionesViewModel @Inject constructor(
 		}
 	}
 	
-	fun deleteNotification(notificacionId: String) {
+	fun deleteAllNotifications() {
 		viewModelScope.launch {
+			_isLoading.value = true
+			_error.value = null
 			try {
-				val gymId = sessionManager.getGymCode() ?: throw Exception("Gimnasio no encontrado")
-				deleteNotificacionUseCase(gymId, notificacionId)
-				loadNotifications() // refrescar lista
+				val gymCode = sessionManager.getGymCode() ?: throw Exception("Gimnasio no encontrado")
+				deleteAllNotificacionesUseCase(gymCode)
+				loadNotifications()
 			} catch (e: Exception) {
-				_error.value = e.message ?: "Error al eliminar notificación"
+				_error.value = e.message ?: "Error al eliminar notificaciones"
+			} finally {
+				_isLoading.value = false
 			}
 		}
 	}
 	
-	private fun purgeNotifications(gymId: String) {
+	private fun purgeNotifications(gymCode: String) {
 		viewModelScope.launch {
 			try {
-				purgeNotificacionesUseCase(gymId)
+				purgeNotificacionesUseCase(gymCode)
 				loadNotifications() // refrescar lista luego de purgar
 			} catch (e: Exception) {
 				_error.value = e.message ?: "Error al purgar notificaciones"
