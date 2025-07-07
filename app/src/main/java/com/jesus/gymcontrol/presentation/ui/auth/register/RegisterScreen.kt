@@ -85,8 +85,7 @@ fun RegisterContent(navController: NavController) {
 	var passwordVisible by remember { mutableStateOf(false) }
 	var termsAccepted by remember { mutableStateOf(false) }
 	var step by remember { mutableStateOf(0) }
-	
-	val isValidEmail = emailOrUser.trim().matches(Regex("^[A-Za-z0-9+_.-]+@gmail\\.com$"))
+	val isValidEmail = emailOrUser.trim().matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
 	val isValidCedula = idcard.all { it.isDigit() } && idcard.length in 6..8
 	val isFormValid = name.isNotBlank() && lastName.isNotBlank() && isValidCedula
 	val isFullFormValid = isFormValid && isValidEmail && password.length >= 6 && termsAccepted
@@ -192,7 +191,7 @@ fun RegisterContent(navController: NavController) {
 					)
 					if (emailOrUser.isNotBlank() && !isValidEmail) {
 						Text(
-							"Debe ser un correo válido de Gmail",
+							"Debe ser un correo electronico valido",
 							color = MaterialTheme.colorScheme.error,
 							fontSize = 12.sp
 						)

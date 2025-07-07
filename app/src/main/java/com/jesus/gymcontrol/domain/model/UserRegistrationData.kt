@@ -4,7 +4,7 @@ data class UserRegistrationData(
 	val email: String,
 	val password: String,
 	val name: String,
-	val phone: String,
+	val phone: String?,
 	val idCard: String,
 	val gender: String,
 	val age: Int,

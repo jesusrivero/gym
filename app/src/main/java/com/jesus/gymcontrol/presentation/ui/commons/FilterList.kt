@@ -93,7 +93,7 @@ fun PaymentFilters(
 					ExposedDropdownMenu(
 						expanded = expandedFilter,
 						onDismissRequest = { expandedFilter = false },
-						modifier = Modifier.background(Color.White)
+						modifier = Modifier.background(colorScheme.surfaceVariant)
 					) {
 						paymentTypeOptions.forEach { option ->
 							DropdownMenuItem(

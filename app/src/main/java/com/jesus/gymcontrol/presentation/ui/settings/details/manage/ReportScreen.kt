@@ -511,7 +511,7 @@ fun ReportFilters(
 				ExposedDropdownMenu(
 					expanded = expandedFilter,
 					onDismissRequest = { expandedFilter = false },
-					modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+					modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
 				) {
 					reportTypes.forEach { type ->
 						DropdownMenuItem(
@@ -562,7 +562,7 @@ fun ReportFilters(
 					ExposedDropdownMenu(
 						expanded = expandedSubFilter,
 						onDismissRequest = { expandedSubFilter = false },
-						modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+						modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant),
 					) {
 						filters.forEach { filter ->
 							DropdownMenuItem(

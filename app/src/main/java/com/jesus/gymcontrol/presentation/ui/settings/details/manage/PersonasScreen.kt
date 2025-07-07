@@ -316,12 +316,20 @@ fun PersonCard(
 			verticalAlignment = Alignment.CenterVertically,
 			horizontalArrangement = Arrangement.SpaceBetween
 		) {
-			Text(
-				text = user.name,
-				style = MaterialTheme.typography.titleMedium,
-				fontWeight = FontWeight.SemiBold,
+			Column(
 				modifier = Modifier.weight(1f)
-			)
+			) {
+				Text(
+					text = user.name,
+					style = MaterialTheme.typography.titleMedium,
+					fontWeight = FontWeight.SemiBold
+				)
+				Text(
+					text = (user.state ?: "Desconocido").capitalize(),
+					style = MaterialTheme.typography.bodySmall,
+					color = estadoColor(user.state),
+				)
+			}
 			
 			Row(
 				horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -330,9 +338,8 @@ fun PersonCard(
 				if (user.state.equals("pendiente", ignoreCase = true)) {
 					WhatsAppButton(
 						phoneNumber = user.phone,
-						message = """Hola ${user.name}, te recordamos que tu membresía está próxima a vencer.
-             ¡Contáctanos para renovarla a tiempo!
-              """.trimIndent()
+						message = """Hola ${user.name}, te recordamos que tu membresía está próxima a vencer.¡Contáctanos para renovarla a tiempo!
+             """.trimIndent()
 					)
 				}
 				
@@ -359,6 +366,16 @@ fun PersonCard(
 				}
 			}
 		}
+	}
+}
+
+@Composable
+fun estadoColor(estado: String?): Color {
+	return when (estado?.lowercase()) {
+		"activo" -> Color(0xFF2E7D32)        // Verde
+		"inactivo" -> Color.Red              // Rojo
+		"pendiente" -> Color(0xFFF9A825)    // Amarillo
+		else -> MaterialTheme.colorScheme.onSurface
 	}
 }
 

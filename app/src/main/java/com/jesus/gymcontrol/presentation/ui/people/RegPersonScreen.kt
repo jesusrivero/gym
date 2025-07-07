@@ -1,6 +1,7 @@
 package com.jesus.gymcontrol.presentation.ui.people
 
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,12 +19,14 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
@@ -49,6 +52,7 @@ import androidx.navigation.NavController
 import com.jesus.gymcontrol.domain.model.UserRegistrationData
 import com.jesus.gymcontrol.domain.viewmodels.RegisterUserFromAdminViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
+import com.jesus.gymcontrol.presentation.ui.commons.countryCodes
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -134,7 +138,7 @@ fun RegPersonScreen(
 		)
 	}
 }
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegPersonContent(
 	modifier: Modifier = Modifier,
@@ -152,16 +156,18 @@ fun RegPersonContent(
 	var gimnasioCode by rememberSaveable { mutableStateOf("") }
 	var rol by rememberSaveable { mutableStateOf("cliente") }
 	val date by rememberSaveable { mutableStateOf(System.currentTimeMillis()) }
-	
 	var showDialog by remember { mutableStateOf(false) }
 	
-	// Puedes luego mover esto a un validador aparte
+	// Validaciones
 	val isNameValid = name.isNotBlank()
-	val isEmailValid = email.matches(Regex("^[A-Za-z0-9+_.-]+@gmail\\.com$"))
+	val isEmailValid = email.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
 	val isPasswordValid = password.length >= 6
 	val isIdCardValid = idCard.isNotBlank()
 	val isCodeValid = code.isNotBlank()
-	val isPhoneValid = phone.isBlank() || phone.matches(Regex("^\\+?[1-9]\\d{7,14}$"))
+	var selectedCountryCode by rememberSaveable { mutableStateOf("58") }
+	var isCountryDropdownExpanded by rememberSaveable { mutableStateOf(false) }
+	val fullPhone = "$selectedCountryCode$phone"
+	val isPhoneValid = phone.isBlank() || fullPhone.matches(Regex("^[1-9]\\d{7,14}$"))
 	val formIsValid = isNameValid && isEmailValid && isPasswordValid && isCodeValid && isIdCardValid && isPhoneValid
 	
 	if (showDialog) {
@@ -175,10 +181,10 @@ fun RegPersonContent(
 							email = email,
 							password = password,
 							name = name,
-							phone = phone,
+							phone = if (phone.isBlank()) null else fullPhone,
 							idCard = idCard,
-							gender = "", // Puedes añadir campo luego si lo deseas
-							age = 0, // Igual
+							gender = "",
+							age = 0,
 							rol = rol,
 							membership = "",
 							code = code,
@@ -187,14 +193,10 @@ fun RegPersonContent(
 						)
 						viewModel.registerUserAsAdmin(user)
 					}
-				) {
-					Text("Confirmar")
-				}
+				) { Text("Confirmar") }
 			},
 			dismissButton = {
-				TextButton(onClick = { showDialog = false }) {
-					Text("Cancelar")
-				}
+				TextButton(onClick = { showDialog = false }) { Text("Cancelar") }
 			},
 			title = { Text("Confirmar registro") },
 			text = { Text("¿Deseas registrar a esta persona con rol '$rol'?") }
@@ -210,44 +212,40 @@ fun RegPersonContent(
 	) {
 		Card(
 			modifier = Modifier.fillMaxWidth(),
-			elevation = CardDefaults.cardElevation(4.dp),
+			elevation = CardDefaults.cardElevation(2.dp),
 			colors = CardDefaults.cardColors(containerColor = colorScheme.background)
 		) {
-			Column(modifier = Modifier.padding(16.dp)) {
+			Column(modifier = Modifier.padding(12.dp)) {
 				OutlinedTextField(
 					value = name,
 					onValueChange = { name = it },
 					label = { Text("Nombre completo") },
 					isError = !isNameValid && name.isNotEmpty(),
-					maxLines = 1,
 					modifier = Modifier.fillMaxWidth()
 				)
 				if (!isNameValid && name.isNotEmpty()) {
-					Text("El nombre es obligatorio", color = MaterialTheme.colorScheme.error)
+					Text("El nombre es obligatorio", color = colorScheme.error, style = MaterialTheme.typography.labelSmall)
 				}
 			}
 		}
 		
-		Spacer(modifier = Modifier.height(16.dp))
+		Spacer(modifier = Modifier.height(12.dp))
 		
 		Card(
 			modifier = Modifier.fillMaxWidth(),
-			elevation = CardDefaults.cardElevation(4.dp),
+			elevation = CardDefaults.cardElevation(2.dp),
 			colors = CardDefaults.cardColors(containerColor = colorScheme.background)
 		) {
-			Column(modifier = Modifier.padding(16.dp)) {
-				
-				
+			Column(modifier = Modifier.padding(12.dp)) {
 				OutlinedTextField(
 					value = email,
 					onValueChange = { email = it },
-					label = { Text("Correo Gmail") },
+					label = { Text("Correo electrónico") },
 					isError = email.isNotBlank() && !isEmailValid,
-					maxLines = 1,
 					modifier = Modifier.fillMaxWidth()
 				)
 				if (email.isNotBlank() && !isEmailValid) {
-					Text("Correo inválido. Usa un Gmail válido", color = MaterialTheme.colorScheme.error)
+					Text("Debe ser un correo válido", color = colorScheme.error, style = MaterialTheme.typography.labelSmall)
 				}
 				
 				OutlinedTextField(
@@ -256,11 +254,10 @@ fun RegPersonContent(
 					label = { Text("Contraseña (mín. 6 caracteres)") },
 					isError = password.isNotEmpty() && !isPasswordValid,
 					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-					maxLines = 1,
 					modifier = Modifier.fillMaxWidth()
 				)
 				if (password.isNotEmpty() && !isPasswordValid) {
-					Text("Debe tener al menos 6 caracteres", color = MaterialTheme.colorScheme.error)
+					Text("Debe tener al menos 6 caracteres", color = colorScheme.error, style = MaterialTheme.typography.labelSmall)
 				}
 				
 				OutlinedTextField(
@@ -268,29 +265,75 @@ fun RegPersonContent(
 					onValueChange = { idCard = it },
 					label = { Text("Cédula") },
 					isError = !isIdCardValid && idCard.isNotEmpty(),
-					maxLines = 1,
 					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
 					modifier = Modifier.fillMaxWidth()
 				)
 				if (!isIdCardValid && idCard.isNotEmpty()) {
-					Text("La cédula es obligatoria", color = MaterialTheme.colorScheme.error)
+					Text("La cédula es obligatoria", color = colorScheme.error, style = MaterialTheme.typography.labelSmall)
 				}
 				
-				OutlinedTextField(
-					value = phone,
-					onValueChange = { phone = it },
-					label = { Text("Teléfono (opcional, formato internacional)") },
-					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-					maxLines = 1,
-					modifier = Modifier.fillMaxWidth()
-				)
+				Spacer(modifier = Modifier.height(8.dp))
 				
+				Row(
+					modifier = Modifier.fillMaxWidth(),
+					verticalAlignment = Alignment.CenterVertically
+				) {
+					ExposedDropdownMenuBox(
+						expanded = isCountryDropdownExpanded,
+						onExpandedChange = { isCountryDropdownExpanded = it },
+						modifier = Modifier.weight(0.5f)
+					) {
+						OutlinedTextField(
+							readOnly = true,
+							value = "+$selectedCountryCode",
+							onValueChange = {},
+							label = { Text("País") },
+							trailingIcon = {
+								ExposedDropdownMenuDefaults.TrailingIcon(expanded = isCountryDropdownExpanded)
+							},
+							modifier = Modifier
+								.menuAnchor()
+								.fillMaxWidth()
+						)
+						ExposedDropdownMenu(
+							expanded = isCountryDropdownExpanded,
+							modifier = Modifier
+								.background(MaterialTheme.colorScheme.surfaceVariant),
+							onDismissRequest = { isCountryDropdownExpanded = false }
+						) {
+							countryCodes.forEach { (label, code) ->
+								DropdownMenuItem(
+									text = { Text(label) },
+									onClick = {
+										selectedCountryCode = code
+										isCountryDropdownExpanded = false
+									}
+								)
+							}
+						}
+					}
+					
+					Spacer(modifier = Modifier.width(8.dp))
+					
+					OutlinedTextField(
+						value = phone,
+						onValueChange = { phone = it },
+						label = { Text("Número") },
+						keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+						modifier = Modifier.weight(1f),
+						isError = phone.isNotBlank() && !isPhoneValid
+					)
+				}
 				if (phone.isNotBlank() && !isPhoneValid) {
 					Text(
-						text = "Número inválido. Usa formato internacional: ej. 58412XXXXXXX",
-						color = MaterialTheme.colorScheme.error
-						)
+						text = "Número inválido. Ejemplo: 412XXXXXXX",
+						color = colorScheme.error,
+						style = MaterialTheme.typography.labelSmall,
+						modifier = Modifier.padding(top = 2.dp)
+					)
 				}
+				
+				Spacer(modifier = Modifier.height(8.dp))
 				
 				Row(
 					modifier = Modifier.fillMaxWidth(),
@@ -301,7 +344,6 @@ fun RegPersonContent(
 						onValueChange = { code = it },
 						label = { Text("Código") },
 						isError = !isCodeValid && code.isNotEmpty(),
-						maxLines = 1,
 						modifier = Modifier.weight(1f)
 					)
 					Spacer(modifier = Modifier.width(8.dp))
@@ -317,7 +359,7 @@ fun RegPersonContent(
 					}
 				}
 				if (!isCodeValid && code.isNotEmpty()) {
-					Text("El código es obligatorio", color = MaterialTheme.colorScheme.error)
+					Text("El código es obligatorio", color = colorScheme.error, style = MaterialTheme.typography.labelSmall)
 				}
 				
 				OutlinedTextField(
@@ -325,13 +367,8 @@ fun RegPersonContent(
 					onValueChange = {},
 					label = { Text("Rol") },
 					readOnly = true,
-					modifier = Modifier.fillMaxWidth(),
 					enabled = false,
-					colors = OutlinedTextFieldDefaults.colors(
-						disabledBorderColor = colorScheme.outline,
-						disabledTextColor = colorScheme.onSurface,
-						disabledLabelColor = colorScheme.onSurfaceVariant
-					)
+					modifier = Modifier.fillMaxWidth()
 				)
 			}
 		}

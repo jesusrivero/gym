@@ -80,7 +80,9 @@ fun LoginContent(
 				viewModel.password.trim().isNotBlank() &&
 				viewModel.password.trim().length >= 6
 	
-	isValidEmail = viewModel.email.trim().matches(Regex("^[A-Za-z0-9+_.-]+@gmail\\.com$"))
+	
+	isValidEmail =
+		viewModel.email.trim().matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
 	
 	if (errorMessage != null) {
 		LaunchedEffect(errorMessage) {
@@ -114,7 +116,7 @@ fun LoginContent(
 				.fillMaxWidth()
 				.height(56.dp),
 			textStyle = LocalTextStyle.current.copy(color = colorScheme.onSurface),
-			placeholder = { Text("Correo o usuario", color = colorScheme.onSurfaceVariant) },
+			placeholder = { Text("Correo", color = colorScheme.onSurfaceVariant) },
 			leadingIcon = {
 				Icon(
 					imageVector = Icons.Default.Email,
@@ -127,7 +129,7 @@ fun LoginContent(
 		)
 		if (viewModel.email.isNotBlank() && !isValidEmail) {
 			Text(
-				text = "Debe ser un correo válido de Gmail",
+				text = "Debe ser un correo electronico valido",
 				color = MaterialTheme.colorScheme.error,
 				fontSize = 12.sp,
 				modifier = Modifier
@@ -173,7 +175,7 @@ fun LoginContent(
 				fontSize = 12.sp,
 				modifier = Modifier
 					.align(Alignment.Start)
-					.padding(top=4.dp)
+					.padding(top = 4.dp)
 			)
 		}
 		
