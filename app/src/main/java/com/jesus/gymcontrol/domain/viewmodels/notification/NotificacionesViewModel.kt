@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.model.notification.Notificacion
+import com.jesus.gymcontrol.domain.repository.notification.NotificacionRepository
 import com.jesus.gymcontrol.domain.usecase.usuario.notification.AddNotificacionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.notification.DeleteAllNotificacionesUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.notification.GetNotificacionesUseCase
@@ -23,6 +24,7 @@ class NotificacionesViewModel @Inject constructor(
 	private val getNotificacionesUseCase: GetNotificacionesUseCase,
 	private val deleteAllNotificacionesUseCase: DeleteAllNotificacionesUseCase,
 	private val purgeNotificacionesUseCase: PurgeNotificacionesUseCase,
+	private val repository: NotificacionRepository,
 	private val sessionManager: SessionManager
 ) : ViewModel() {
 	
@@ -38,6 +40,9 @@ class NotificacionesViewModel @Inject constructor(
 	private val _error = MutableStateFlow<String?>(null)
 	val error: StateFlow<String?> = _error
 	
+	val unreadCount: StateFlow<Int> =
+		_notifications.map { list -> list.count { !it.leido } }
+			.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000),0)
 	
 	
 	init {
@@ -114,4 +119,28 @@ class NotificacionesViewModel @Inject constructor(
 			}
 			}
 		}
+	
+	fun marcarTodasComoLeidas() {
+		viewModelScope.launch {
+			try {
+				val gymCode = sessionManager.getGymCode() ?: throw Exception("Gimnasio no encontrado")
+				// Llama al repository
+				repository.marcarTodasComoLeidas(gymCode)
+				loadNotifications() // refresca lista
+			} catch (e: Exception) {
+				_error.value = e.message ?: "Error al marcar como leídas"
+				}
+			}
+	}
+	fun markNotificationAsRead(notificacion: Notificacion) {
+		viewModelScope.launch {
+			try {
+				val gymCode = sessionManager.getGymCode() ?: throw Exception("Gimnasio no encontrado")
+				repository.marcarComoLeida(gymCode, notificacion.id ?: throw Exception("ID inválido"))
+				loadNotifications() // refresca lista
+			} catch (e: Exception) {
+				_error.value = e.message ?: "Error al marcar notificación como leída"
+			}
+		}
+	}
 }

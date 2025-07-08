@@ -8,5 +8,7 @@ interface NotificacionRepository {
 	fun obtenerNotificaciones(gymCode: String): Flow<List<Notificacion>>
 	suspend fun eliminarTodasNotificaciones(gymCode:String)
 	suspend fun eliminarNotificacionesAntiguas(gymCode: String, max: Int = 0)
+	suspend fun marcarTodasComoLeidas(gymCode: String)
+	suspend fun marcarComoLeida(gymId: String, notificacionId:String)
 
 }

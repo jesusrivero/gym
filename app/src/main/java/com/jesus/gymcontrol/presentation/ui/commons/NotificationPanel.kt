@@ -19,10 +19,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.DismissDirection
+import androidx.compose.material.DismissValue
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.rememberDismissState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -49,13 +55,17 @@ import com.jesus.gymcontrol.domain.model.notification.Notificacion
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import kotlinx.coroutines.launch
 
+
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun NotificationPanel(
 	navController: NavController,
 	isVisible: Boolean,
 	notifications: List<Notificacion>,
 	onDismiss: () -> Unit,
-	onDeleteAll: () -> Unit
+	onDeleteAll: () -> Unit,
+	onMarkAsRead: (Notificacion) -> Unit
 ) {
 	val offsetY = remember { Animatable(0f) }
 	val coroutineScope = rememberCoroutineScope()
@@ -103,7 +113,6 @@ fun NotificationPanel(
 				elevation = CardDefaults.cardElevation(6.dp)
 			) {
 				Column(modifier = Modifier.fillMaxSize()) {
-					// Indicador de deslizamiento
 					Box(
 						modifier = Modifier
 							.padding(top = 12.dp)
@@ -128,10 +137,6 @@ fun NotificationPanel(
 							fontWeight = FontWeight.Bold
 						)
 						
-						TextButton(onClick = onDeleteAll) {
-							Text("Eliminar todas", color = MaterialTheme.colorScheme.error)
-						}
-						
 						TextButton(onClick = { navController.navigate(AppRoutes.NotificationsScreen) }) {
 							Text("Ver más")
 						}
@@ -147,60 +152,97 @@ fun NotificationPanel(
 							Text("No hay notificaciones", style = MaterialTheme.typography.bodyMedium)
 						} else {
 							notifications.forEach { notification ->
-								Card(
-									modifier = Modifier
-										.fillMaxWidth()
-										.padding(vertical = 4.dp),
-									colors = CardDefaults.cardColors(
-										containerColor = MaterialTheme.colorScheme.surfaceVariant
-									)
-								) {
-									Row(
-										modifier = Modifier
-											.fillMaxWidth()
-											.padding(8.dp),
-										verticalAlignment = Alignment.CenterVertically
+								val dismissState = rememberDismissState()
+								
+								LaunchedEffect(dismissState.currentValue) {
+									if (dismissState.currentValue == DismissValue.DismissedToStart ||
+										dismissState.currentValue == DismissValue.DismissedToEnd
 									) {
-										Icon(
-											imageVector = Icons.Default.Notifications,
-											contentDescription = null,
-											tint = MaterialTheme.colorScheme.primary,
-											modifier = Modifier.size(20.dp)
-										)
-										
-										Spacer(modifier = Modifier.width(8.dp))
-										
-										Column(
-											modifier = Modifier.weight(1f)
-										) {
-											Text(
-												text = notification.titulo,
-												style = MaterialTheme.typography.bodyMedium,
-												fontWeight = FontWeight.SemiBold,
-												maxLines = 1
-											)
-											Text(
-												text = notification.mensaje,
-												style = MaterialTheme.typography.bodySmall,
-												maxLines = 1,
-												color = MaterialTheme.colorScheme.onSurfaceVariant
-											)
-										}
-										
-										val date = remember(notification.fecha) {
-											java.text.SimpleDateFormat(
-												"dd/MM/yyyy HH:mm",
-												java.util.Locale.getDefault()
-											).format(java.util.Date(notification.fecha))
-										}
-										
-										Text(
-											text = date,
-											style = MaterialTheme.typography.labelSmall,
-											color = MaterialTheme.colorScheme.onSurfaceVariant
-										)
+										onMarkAsRead(notification)
 									}
 								}
+								
+								SwipeToDismiss(
+									state = dismissState,
+									directions = setOf(
+										DismissDirection.StartToEnd,
+										DismissDirection.EndToStart
+									),
+									background = {
+										Box(
+											modifier = Modifier
+												.fillMaxSize()
+												.background(Color.Transparent)
+												.padding(8.dp),
+											contentAlignment = Alignment.Center
+										) {
+											Text(
+												"Marcar como leída",
+												color = MaterialTheme.colorScheme.onPrimaryContainer
+											)
+										}
+									},
+									dismissContent = {
+										Card(
+											modifier = Modifier
+												.fillMaxWidth()
+												.padding(vertical = 4.dp),
+											colors = CardDefaults.cardColors(
+												containerColor = if (notification.leido == false) {
+													MaterialTheme.colorScheme.surfaceVariant
+												} else {
+													MaterialTheme.colorScheme.surface
+												}
+											)
+										) {
+											Row(
+												modifier = Modifier
+													.fillMaxWidth()
+													.padding(8.dp),
+												verticalAlignment = Alignment.CenterVertically
+											) {
+												Icon(
+													imageVector = Icons.Default.Notifications,
+													contentDescription = null,
+													tint = MaterialTheme.colorScheme.primary,
+													modifier = Modifier.size(20.dp)
+												)
+												
+												Spacer(modifier = Modifier.width(8.dp))
+												
+												Column(
+													modifier = Modifier.weight(1f)
+												) {
+													Text(
+														text = notification.titulo,
+														style = MaterialTheme.typography.bodyMedium,
+														fontWeight = FontWeight.SemiBold,
+														maxLines = 1
+													)
+													Text(
+														text = notification.mensaje,
+														style = MaterialTheme.typography.bodySmall,
+														maxLines = 1,
+														color = MaterialTheme.colorScheme.onSurfaceVariant
+													)
+												}
+												
+												val date = remember(notification.fecha) {
+													java.text.SimpleDateFormat(
+														"dd/MM/yyyy HH:mm",
+														java.util.Locale.getDefault()
+													).format(java.util.Date(notification.fecha))
+												}
+												
+												Text(
+													text = date,
+													style = MaterialTheme.typography.labelSmall,
+													color = MaterialTheme.colorScheme.onSurfaceVariant
+												)
+											}
+										}
+									}
+								)
 							}
 						}
 						Spacer(modifier = Modifier.height(12.dp))

@@ -1,6 +1,5 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details.preferences
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -16,17 +15,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -52,7 +47,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import com.jesus.gymcontrol.domain.model.notification.Notificacion
 
 
@@ -66,9 +61,11 @@ fun NotificationsScreen(
 		val notifications by viewModel.notifications.collectAsState()
 		val isLoading by viewModel.isLoading.collectAsState()
 		val error by viewModel.error.collectAsState()
-		val notificationCount by viewModel.notificationCount.collectAsState()
 		
-		LaunchedEffect(Unit) { viewModel.loadNotifications() }
+		LaunchedEffect(Unit) {
+			viewModel.loadNotifications()
+			viewModel.marcarTodasComoLeidas()
+		}
 		
 		Scaffold(
 			topBar = {
@@ -82,23 +79,7 @@ fun NotificationsScreen(
 								fontWeight = FontWeight.Bold,
 								color = MaterialTheme.colorScheme.onPrimary
 							)
-							Spacer(modifier = Modifier.width(8.dp))
-							if (notificationCount > 0) {
-								Box(
-									modifier = Modifier
-										.background(
-											color = Color.Red,
-											shape = CircleShape
-										)
-										.padding(horizontal = 6.dp, vertical = 2.dp)
-								) {
-									Text(
-										text = notificationCount.toString(),
-										color = Color.White,
-										style = MaterialTheme.typography.labelSmall
-										)
-									}
-							}
+							
 						}
 					},
 					navigationIcon = {
@@ -174,54 +155,74 @@ fun NotificationsScreen(
 @Composable
 fun NotificationCard(notification: Notificacion) {
 	val date = remember(notification.fecha) {
-		java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault())
-			.format(java.util.Date(notification.fecha))
+		java.text.SimpleDateFormat(
+			"dd/MM/yyyy HH:mm", java.util.Locale.getDefault()
+		).format(java.util.Date(notification.fecha))
 	}
 	
 	var showDetails by remember { mutableStateOf(false) }
 	
 	Card(
-		modifier = Modifier.fillMaxWidth(),
-		colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-		elevation = CardDefaults.cardElevation(1.dp)
+		modifier = Modifier
+			.fillMaxWidth()
+			.padding(vertical = 4.dp), // ligero espaciado entre cards
+		colors = CardDefaults.cardColors(
+			containerColor = MaterialTheme.colorScheme.surface
+		),
+		elevation = CardDefaults.cardElevation(2.dp),
+		shape = RoundedCornerShape(12.dp) // bordes más suaves
 	) {
-		Row(
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(horizontal = 12.dp, vertical = 14.dp),
-			verticalAlignment = Alignment.CenterVertically
+		Column(modifier = Modifier
+			.fillMaxWidth()
+			.padding(horizontal = 16.dp, vertical = 8.dp)
 		) {
-			Icon(
-				imageVector = Icons.Default.Notifications,
-				contentDescription = null,
-				tint = MaterialTheme.colorScheme.primary,
-				modifier = Modifier.size(20.dp)
-			)
-			
-			Spacer(modifier = Modifier.width(8.dp))
-			
-			Text(
-				text = notification.titulo,
-				style = MaterialTheme.typography.bodyMedium,
-				fontWeight = FontWeight.SemiBold,
-				maxLines = 1,
-				modifier = Modifier.weight(1f)
-			)
-			
-			Text(
-				text = date,
-				style = MaterialTheme.typography.labelSmall,
-				color = MaterialTheme.colorScheme.onSurfaceVariant
-			)
-			
-			IconButton(onClick = { showDetails = true }, modifier = Modifier.size(24.dp)) {
+			Row(
+				verticalAlignment = Alignment.CenterVertically
+			) {
 				Icon(
-					imageVector = Icons.Default.Info,
-					contentDescription = "Ver detalles",
+					imageVector = Icons.Default.Notifications,
+					contentDescription = null,
 					tint = MaterialTheme.colorScheme.primary,
 					modifier = Modifier.size(24.dp)
 				)
+				
+				Spacer(modifier = Modifier.width(8.dp))
+				
+				Column(modifier = Modifier.weight(1f)) {
+					Text(
+						text = notification.titulo,
+						style = MaterialTheme.typography.titleSmall,
+						fontWeight = FontWeight.SemiBold,
+						maxLines = 1
+					)
+					Text(
+						text = date,
+						style = MaterialTheme.typography.labelSmall,
+						color = MaterialTheme.colorScheme.onSurfaceVariant
+					)
+				}
+				
+				IconButton(
+					onClick = { showDetails = true },
+					modifier = Modifier.size(32.dp)
+				) {
+					Icon(
+						imageVector = Icons.Default.Info,
+						contentDescription = "Ver detalles",
+						tint = MaterialTheme.colorScheme.primary
+					)
+				}
 			}
+			
+			Spacer(modifier = Modifier.height(6.dp))
+			
+			Text(
+				text = notification.mensaje,
+				style = MaterialTheme.typography.bodySmall,
+				color = MaterialTheme.colorScheme.onSurfaceVariant,
+				maxLines = 2,
+				overflow = TextOverflow.Ellipsis
+			)
 		}
 	}
 	
@@ -234,8 +235,16 @@ fun NotificationCard(notification: Notificacion) {
 					Text("Cerrar")
 				}
 			},
-			title = { Text(notification.titulo, fontWeight = FontWeight.Bold) },
-			text = { Text(notification.mensaje) }
+			title = {
+				Text(
+					notification.titulo,
+					fontWeight = FontWeight.Bold,
+					style = MaterialTheme.typography.titleMedium
+				)
+			},
+			text = {
+				Text(notification.mensaje, style = MaterialTheme.typography.bodyMedium)
+			}
 		)
 	}
 }

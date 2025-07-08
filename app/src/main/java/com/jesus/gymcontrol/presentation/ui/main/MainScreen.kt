@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,8 +31,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -60,6 +59,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.domain.model.GymUserSummary
@@ -94,6 +94,7 @@ fun MainScreen(
 		)
 	}
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainContent(
@@ -104,7 +105,7 @@ fun MainContent(
 	memberviewModel: MembershipViewModel = hiltViewModel(),
 	mviewModel: MovementsViewModel = hiltViewModel(),
 	userListViewModel: UserListViewModel = hiltViewModel(),
-	notificacionesViewModel: NotificacionesViewModel = hiltViewModel()
+	notificacionesViewModel: NotificacionesViewModel = hiltViewModel(),
 ) {
 	val colorScheme = MaterialTheme.colorScheme
 	val summary = viewModel.summary
@@ -117,6 +118,7 @@ fun MainContent(
 		!isLoadingAdmin && !isLoadingMovements && !isLoadingMemberships
 	}
 	
+	val unreadCount by notificacionesViewModel.unreadCount.collectAsState()
 	val payments by remember { derivedStateOf { mviewModel.lastPayments } }
 	
 	var showNotifications by remember { mutableStateOf(false) }
@@ -156,24 +158,36 @@ fun MainContent(
 					},
 					actions = {
 						IconButton(onClick = { showNotifications = !showNotifications }) {
-							BadgedBox(
-								badge = {
-									if (notificationCount > 0) {
-										Badge { Text(notificationCount.toString()) }
-									}
-								}
-							) {
+							Box {
 								Icon(
 									imageVector = Icons.Default.Notifications,
 									contentDescription = "Notificaciones",
 									tint = colorScheme.onPrimary
 								)
+								
+								if (unreadCount > 0) {
+									Box(
+										modifier = Modifier
+											.align(Alignment.TopEnd)
+											.offset(x = 4.dp, y = (-4).dp)
+											.size(16.dp)
+											.background(Color.Red, shape = CircleShape),
+										contentAlignment = Alignment.Center
+									) {
+										Text(
+											text = unreadCount.toString(),
+											color = Color.White,
+											style = MaterialTheme.typography.labelSmall,
+											fontSize = 10.sp
+										)
+									}
+								}
 							}
 						}
 					},
 					colors = TopAppBarDefaults.topAppBarColors(
 						containerColor = colorScheme.primary
-						)
+					)
 				)
 			},
 			floatingActionButton = {
@@ -256,13 +270,12 @@ fun MainContent(
 	}
 	
 	NotificationPanel(
-		isVisible = showNotifications,
 		navController = navController,
+		isVisible = showNotifications,
 		notifications = notifications,
 		onDismiss = { showNotifications = false },
-		onDeleteAll = {
-			notificacionesViewModel.deleteAllNotifications()
-		}
+		onDeleteAll = { notificacionesViewModel.deleteAllNotifications() },
+		onMarkAsRead = { notificacion -> notificacionesViewModel.markNotificationAsRead(notificacion)}
 	)
 }
 
@@ -322,10 +335,10 @@ fun NewClientsSection(
 				horizontalArrangement = Arrangement.SpaceBetween,
 				verticalAlignment = Alignment.CenterVertically
 			) {
-					Text(
-						text = "Clientes Nuevos",
-						style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-					)
+				Text(
+					text = "Clientes Nuevos",
+					style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+				)
 				TextButton(
 					onClick = { navController.navigate(AppRoutes.PersonasScreen) },
 					contentPadding = PaddingValues(horizontal = 8.dp)
@@ -515,7 +528,6 @@ fun MembershipItem(item: MembershipWithCount) {
 		}
 	}
 }
-
 
 
 @Composable

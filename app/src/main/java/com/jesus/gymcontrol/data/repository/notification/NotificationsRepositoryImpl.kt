@@ -67,4 +67,24 @@ class NotificacionRepositoryImpl @Inject constructor(
 			it.reference.delete()
 		}
 	}
+	
+	override suspend fun marcarTodasComoLeidas(gymCode: String) {
+		val ref = firestore.collection("gimnasios")
+			.document(gymCode)
+			.collection("notificaciones")
+		
+		val snapshot = ref.whereEqualTo("leido", false).get().await()
+		snapshot.documents.forEach {
+			it.reference.update("leido", true)
+		}
+	}
+	
+	override suspend fun marcarComoLeida(gymId: String, notificacionId: String) {
+		firestore.collection("gimnasios")
+			.document(gymId)
+			.collection("notificaciones")
+			.document(notificacionId)
+			.update("leido", true)
+			.await()
+	}
 }
