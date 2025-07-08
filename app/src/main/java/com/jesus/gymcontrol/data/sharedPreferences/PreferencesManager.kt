@@ -12,24 +12,24 @@ class PreferencesManager(context: Context) {
 		const val PRICES_MEMBERSHIP = "PricesMembership"
 		private const val NOTIFICATION_PREFS = "NotificationPrefs"
 		const val KEY_NEW_CLIENT = "new_client"
-		const val KEY_PAYMENT_REGISTERED = "payment_registered"
+		const val KEY_PROMOTION_EXPIRATION = "promotion_expiration"
 		const val KEY_MEMBERSHIP_EXPIRATION = "membership_expiration"
 		const val KEY_WEEK_START = "week_start"
 		const val KEY_PUSH_NOTIFICATIONS = "push_notifications"
 	}
-
+	
 	private val sharedPreferences: SharedPreferences =
 		context.getSharedPreferences("GymControlPreferences", Context.MODE_PRIVATE)
 	private val notificationPrefs: SharedPreferences =
 		context.getSharedPreferences(NOTIFICATION_PREFS, Context.MODE_PRIVATE)
-
+	
 	val editor = sharedPreferences.edit()
 	private val notificationEditor = notificationPrefs.edit()
-
+	
 	fun savePrices(value: PricesMembership) {
 		editor.putString(PRICES_MEMBERSHIP, value.getJson()).apply()
 	}
-
+	
 	fun getPrices(): PricesMembership? {
 		val json = sharedPreferences.getString(PRICES_MEMBERSHIP, null)
 		return json?.fromJson()
@@ -37,33 +37,32 @@ class PreferencesManager(context: Context) {
 	
 	fun saveNotificationSettings(
 		newClient: Boolean,
-		paymentRegistered: Boolean,
+		promotionExpiration: Boolean,
 		membershipExpiration: Boolean,
 		weekStart: Boolean,
-		pushNotifications: Boolean
+		pushNotifications: Boolean,
 	) {
 		with(notificationEditor) {
 			putBoolean(KEY_NEW_CLIENT, newClient)
-			putBoolean(KEY_PAYMENT_REGISTERED, paymentRegistered)
+			putBoolean(KEY_PROMOTION_EXPIRATION, promotionExpiration)
 			putBoolean(KEY_MEMBERSHIP_EXPIRATION, membershipExpiration)
 			putBoolean(KEY_WEEK_START, weekStart)
 			putBoolean(KEY_PUSH_NOTIFICATIONS, pushNotifications)
 			apply()
 		}
 	}
-
+	
 	fun getNotificationSettings(): NotificationSettings {
 		return NotificationSettings(
 			newClientEnabled = notificationPrefs.getBoolean(KEY_NEW_CLIENT, true),
-			paymentRegisteredEnabled = notificationPrefs.getBoolean(KEY_PAYMENT_REGISTERED, true),
+			promotionExpirationEnabled = notificationPrefs.getBoolean(KEY_PROMOTION_EXPIRATION, true),
 			membershipExpirationEnabled = notificationPrefs.getBoolean(KEY_MEMBERSHIP_EXPIRATION, true),
 			weekStartEnabled = notificationPrefs.getBoolean(KEY_WEEK_START, true),
 			pushNotificationsEnabled = notificationPrefs.getBoolean(KEY_PUSH_NOTIFICATIONS, true)
 		)
 	}
-
-
-
+	
+	
 }
 
 

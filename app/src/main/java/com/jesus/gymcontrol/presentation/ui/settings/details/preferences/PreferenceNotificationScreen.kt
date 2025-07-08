@@ -68,21 +68,21 @@ fun NotificationScreenContent(
 
     fun updateSettings(
         newClient: Boolean = notificationSettings.newClientEnabled,
-        paymentRegistered: Boolean = notificationSettings.paymentRegisteredEnabled,
+        promotionExpiration: Boolean = notificationSettings.promotionExpirationEnabled,
         membershipExpiration: Boolean = notificationSettings.membershipExpirationEnabled,
         weekStart: Boolean = notificationSettings.weekStartEnabled,
         pushNotifications: Boolean = notificationSettings.pushNotificationsEnabled
     ) {
         notificationSettings = notificationSettings.copy(
             newClientEnabled = newClient,
-            paymentRegisteredEnabled = paymentRegistered,
+            promotionExpirationEnabled = promotionExpiration,
             membershipExpirationEnabled = membershipExpiration,
             weekStartEnabled = weekStart,
             pushNotificationsEnabled = pushNotifications
         )
         preferencesManager.saveNotificationSettings(
             newClient,
-            paymentRegistered,
+            promotionExpiration,
             membershipExpiration,
             weekStart,
             pushNotifications
@@ -136,9 +136,9 @@ fun NotificationScreenContent(
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
 
             NotificationOptionItem(
-                title = "Pago registrado",
-                enabled = notificationSettings.paymentRegisteredEnabled,
-                onCheckedChange = { updateSettings(paymentRegistered = it) }
+                title = "Vencimiento de promocion",
+                enabled = notificationSettings.promotionExpirationEnabled,
+                onCheckedChange = { updateSettings(promotionExpiration = it) }
             )
 
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))

@@ -164,8 +164,7 @@ fun NotificationCard(notification: Notificacion) {
 	
 	Card(
 		modifier = Modifier
-			.fillMaxWidth()
-			.padding(vertical = 4.dp), // ligero espaciado entre cards
+			.fillMaxWidth(),
 		colors = CardDefaults.cardColors(
 			containerColor = MaterialTheme.colorScheme.surface
 		),
@@ -174,7 +173,7 @@ fun NotificationCard(notification: Notificacion) {
 	) {
 		Column(modifier = Modifier
 			.fillMaxWidth()
-			.padding(horizontal = 16.dp, vertical = 8.dp)
+			.padding(horizontal = 16.dp, vertical = 4.dp)
 		) {
 			Row(
 				verticalAlignment = Alignment.CenterVertically
