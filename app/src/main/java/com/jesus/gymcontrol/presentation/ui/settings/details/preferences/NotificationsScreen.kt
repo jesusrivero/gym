@@ -17,10 +17,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.AlertDialog
@@ -50,6 +52,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import com.jesus.gymcontrol.domain.model.notification.Notificacion
 
 
@@ -63,22 +66,68 @@ fun NotificationsScreen(
 		val notifications by viewModel.notifications.collectAsState()
 		val isLoading by viewModel.isLoading.collectAsState()
 		val error by viewModel.error.collectAsState()
+		val notificationCount by viewModel.notificationCount.collectAsState()
 		
 		LaunchedEffect(Unit) { viewModel.loadNotifications() }
 		
 		Scaffold(
 			topBar = {
 				TopAppBar(
-					title = { Text("Notificaciones", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary) },
-					navigationIcon = {
-						IconButton(onClick = { navController.popBackStack() }) {
-							Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = MaterialTheme.colorScheme.onPrimary)
+					title = {
+						Row(
+							verticalAlignment = Alignment.CenterVertically
+						) {
+							Text(
+								"Notificaciones",
+								fontWeight = FontWeight.Bold,
+								color = MaterialTheme.colorScheme.onPrimary
+							)
+							Spacer(modifier = Modifier.width(8.dp))
+							if (notificationCount > 0) {
+								Box(
+									modifier = Modifier
+										.background(
+											color = Color.Red,
+											shape = CircleShape
+										)
+										.padding(horizontal = 6.dp, vertical = 2.dp)
+								) {
+									Text(
+										text = notificationCount.toString(),
+										color = Color.White,
+										style = MaterialTheme.typography.labelSmall
+										)
+									}
+							}
 						}
 					},
-					colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
+					navigationIcon = {
+						IconButton(onClick = { navController.popBackStack() }) {
+							Icon(
+								Icons.Default.ArrowBack,
+								contentDescription = "Volver",
+								tint = MaterialTheme.colorScheme.onPrimary
+							)
+						}
+					},
+					actions = {
+						if (notifications.isNotEmpty()) {
+							IconButton(onClick = { viewModel.deleteAllNotifications() }) {
+								Icon(
+									imageVector = Icons.Default.DeleteSweep,
+									contentDescription = "Eliminar todas",
+									tint = MaterialTheme.colorScheme.onPrimary
+								)
+							}
+						}
+					},
+					colors = TopAppBarDefaults.topAppBarColors(
+						containerColor = MaterialTheme.colorScheme.primary
+					)
 				)
 			}
 		) { innerPadding ->
+
 			Box(
 				Modifier
 					.fillMaxSize()
@@ -107,13 +156,6 @@ fun NotificationsScreen(
 							.padding(8.dp),
 						verticalArrangement = Arrangement.spacedBy(8.dp)
 					) {
-						Button(
-							onClick = { viewModel.deleteAllNotifications() },
-							modifier = Modifier.fillMaxWidth()
-						) {
-							Text("Limpiar")
-						}
-						
 						LazyColumn(
 							modifier = Modifier.fillMaxSize(),
 							verticalArrangement = Arrangement.spacedBy(8.dp)

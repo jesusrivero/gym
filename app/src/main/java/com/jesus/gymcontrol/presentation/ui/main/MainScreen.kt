@@ -30,6 +30,8 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -110,7 +112,7 @@ fun MainContent(
 	val isLoadingAdmin = viewModel.isLoading
 	val isLoadingMovements = mviewModel.isLoading
 	val isLoadingMemberships = memberviewModel.isLoading
-	
+	val notificationCount by notificacionesViewModel.notificationCount.collectAsState()
 	val isAllDataLoaded = remember(isLoadingAdmin, isLoadingMovements, isLoadingMemberships) {
 		!isLoadingAdmin && !isLoadingMovements && !isLoadingMemberships
 	}
@@ -154,16 +156,24 @@ fun MainContent(
 					},
 					actions = {
 						IconButton(onClick = { showNotifications = !showNotifications }) {
-							Icon(
-								imageVector = Icons.Default.Notifications,
-								contentDescription = "Notificaciones",
-								tint = colorScheme.onPrimary
-							)
+							BadgedBox(
+								badge = {
+									if (notificationCount > 0) {
+										Badge { Text(notificationCount.toString()) }
+									}
+								}
+							) {
+								Icon(
+									imageVector = Icons.Default.Notifications,
+									contentDescription = "Notificaciones",
+									tint = colorScheme.onPrimary
+								)
+							}
 						}
 					},
 					colors = TopAppBarDefaults.topAppBarColors(
 						containerColor = colorScheme.primary
-					)
+						)
 				)
 			},
 			floatingActionButton = {

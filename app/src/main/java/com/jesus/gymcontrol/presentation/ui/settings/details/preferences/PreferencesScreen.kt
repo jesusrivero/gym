@@ -28,6 +28,8 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -83,6 +85,7 @@ fun PreferencesContent(
 	val context = LocalContext.current
 	var showNotifications by remember { mutableStateOf(false) }
 	val notifications by notificacionesViewModel.notifications.collectAsState()
+	val notificationCount by notificacionesViewModel.notificationCount.collectAsState()
 	
 	
 	Scaffold(
@@ -97,11 +100,19 @@ fun PreferencesContent(
 				},
 				actions = {
 					IconButton(onClick = { showNotifications = !showNotifications }) {
-						Icon(
-							imageVector = Icons.Default.Notifications,
-							contentDescription = "Notificaciones",
-							tint = colorScheme.onPrimary
-						)
+						BadgedBox(
+							badge = {
+								if (notificationCount > 0) {
+									Badge { Text(notificationCount.toString()) }
+								}
+							}
+						) {
+							Icon(
+								imageVector = Icons.Default.Notifications,
+								contentDescription = "Notificaciones",
+								tint = colorScheme.onPrimary
+							)
+						}
 					}
 				},
 				colors = TopAppBarDefaults.topAppBarColors(

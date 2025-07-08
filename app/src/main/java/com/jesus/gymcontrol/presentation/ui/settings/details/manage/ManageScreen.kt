@@ -16,6 +16,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -70,7 +72,7 @@ fun ManagerContent(
 	val colorScheme = MaterialTheme.colorScheme
 	var showNotifications by remember { mutableStateOf(false) }
 	val notifications by notificacionesViewModel.notifications.collectAsState()
-
+	val notificationCount by notificacionesViewModel.notificationCount.collectAsState()
 	
 	Box(modifier = Modifier.fillMaxSize()) {
 		Scaffold(
@@ -84,11 +86,19 @@ fun ManagerContent(
 						)
 					},actions = {
 						IconButton(onClick = { showNotifications = !showNotifications }) {
-							Icon(
-								imageVector = Icons.Default.Notifications,
-								contentDescription = "Notificaciones",
-								tint = colorScheme.onPrimary
-							)
+							BadgedBox(
+								badge = {
+									if (notificationCount > 0) {
+										Badge { Text(notificationCount.toString()) }
+									}
+								}
+							) {
+								Icon(
+									imageVector = Icons.Default.Notifications,
+									contentDescription = "Notificaciones",
+									tint = colorScheme.onPrimary
+								)
+							}
 						}
 					},
 					colors = TopAppBarDefaults.topAppBarColors(

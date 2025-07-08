@@ -10,7 +10,10 @@ import com.jesus.gymcontrol.domain.usecase.usuario.notification.GetNotificacione
 import com.jesus.gymcontrol.domain.usecase.usuario.notification.PurgeNotificacionesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,6 +31,9 @@ class NotificacionesViewModel @Inject constructor(
 	
 	private val _isLoading = MutableStateFlow(false)
 	val isLoading: StateFlow<Boolean> = _isLoading
+	
+	val notificationCount: StateFlow<Int> = _notifications.map { it.size }
+		.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 	
 	private val _error = MutableStateFlow<String?>(null)
 	val error: StateFlow<String?> = _error
