@@ -1,5 +1,9 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details.selected
 
+import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -48,6 +52,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
@@ -57,6 +62,7 @@ import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
 import com.jesus.gymcontrol.domain.viewmodels.UserViewModel
 import com.jesus.gymcontrol.presentation.theme.GymTheme
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,7 +78,6 @@ fun SelectedGymAdmin(
 	val searchQuery = viewModel.searchQuery
 	val gyms = viewModel.filteredGyms()
 	val isLoading = viewModel.isLoading
-	val codeValidationError = viewModel.codeValidationError
 	val isCodeValid = viewModel.isCodeValid
 	
 	var showDialog by remember { mutableStateOf(false) }
@@ -81,47 +86,65 @@ fun SelectedGymAdmin(
 	var isValidatingCode by remember { mutableStateOf(false) }
 	val rol by remember { mutableStateOf("administrador") }
 	val context = LocalContext.current
+	var showScanner by remember { mutableStateOf(false) }
+	
+	val codeValidationError = viewModel.codeValidationError
+	
+	val cameraPermissionGranted = remember {
+		mutableStateOf(
+			ContextCompat.checkSelfPermission(
+				context,
+				android.Manifest.permission.CAMERA
+			) == PackageManager.PERMISSION_GRANTED
+		)
+	}
+	
+	val permissionLauncher = rememberLauncherForActivityResult(
+		contract = ActivityResultContracts.RequestPermission()
+	) { isGranted ->
+		cameraPermissionGranted.value = isGranted
+		if (isGranted) {
+			showScanner = true
+		} else {
+			Toast.makeText(context, "Permiso de cámara denegado", Toast.LENGTH_SHORT).show()
+		}
+	}
 	
 	LaunchedEffect(Unit) {
 		viewModel.fetchAllGyms()
 	}
-
+	
 	LaunchedEffect(isCodeValid) {
 		if (isValidatingCode && isCodeValid != null) {
 			isValidatingCode = false
-
+			
 			if (isCodeValid) {
 				selectedGym?.let { gym ->
-					// Asignar el gimnasio al usuario con rol "administrador"
 					userViewModel.onConfirmAssignGym(
 						gym = gym,
 						context = context,
 						rol = "administrador",
 						navController = navController
 					)
-
-					// Actualizar sesión y navegar
+					
 					authViewModel.newDatesUserLogin(
 						rol = "administrador",
 						code = code,
 						navController = navController
 					)
-
-					// Marcar el código como usado
+					
 					viewModel.markCodeAsUsed(
 						code = code,
 						rol = "administrador"
 					)
-
-					// Resetear estado y cerrar diálogo
+					
 					gymViewModel.resetValidation()
 					showDialog = false
 				}
-			} else {
-				// Código inválido, no se hace nada más aquí (opcionalmente podrías notificar)
 			}
 		}
 	}
+	
 	GymTheme {
 		Scaffold(
 			topBar = {
@@ -154,7 +177,6 @@ fun SelectedGymAdmin(
 					.fillMaxSize()
 					.padding(innerPadding)
 					.padding(horizontal = 16.dp, vertical = 8.dp)
-			
 			) {
 				OutlinedTextField(
 					value = searchQuery,
@@ -215,7 +237,15 @@ fun SelectedGymAdmin(
 									}
 									
 									IconButton(
-										onClick = { },
+										onClick = {
+											selectedGym = gym
+											viewModel.resetValidation()
+											if (cameraPermissionGranted.value) {
+												showScanner = true
+											} else {
+												permissionLauncher.launch(android.Manifest.permission.CAMERA)
+											}
+										},
 										modifier = Modifier
 											.size(40.dp)
 											.background(
@@ -225,7 +255,7 @@ fun SelectedGymAdmin(
 									) {
 										Icon(
 											imageVector = Icons.Default.QrCode,
-											contentDescription = "Ver código QR",
+											contentDescription = "Escanear código QR",
 											tint = colorScheme.primary
 										)
 									}
@@ -249,7 +279,7 @@ fun SelectedGymAdmin(
 				},
 				text = {
 					Column {
-						Text("IIngresa el código de validación para unirte a ${selectedGym!!.name}")
+						Text("Ingresa el código de validación para unirte a ${selectedGym!!.name}")
 						Spacer(modifier = Modifier.height(8.dp))
 						OutlinedTextField(
 							value = code,
@@ -307,5 +337,22 @@ fun SelectedGymAdmin(
 				shape = RoundedCornerShape(16.dp)
 			)
 		}
+		
+		if (showScanner) {
+			QrScannerScreen(
+				onCodeScanned = { scannedCode ->
+					code = scannedCode
+					showScanner = false
+					selectedGym?.let {
+						viewModel.resetValidation()
+						showDialog = true
+					}
+				},
+				onClose = {
+					showScanner = false
+				}
+			)
+			}
 	}
 }
+
