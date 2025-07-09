@@ -279,9 +279,9 @@ fun PromotionScreen(
 											}
 											IconButton(onClick = { promotionToggle = promo }) {
 												Icon(
-													imageVector = if (promo.activo) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+													imageVector = if (promo.activo) Icons.Default.VisibilityOff else Icons.Default.Visibility,
 													contentDescription = if (promo.activo) "Desactivar" else "Activar",
-													tint = if (promo.activo) MaterialTheme.colorScheme.primary else Color.Red
+													tint = if (promo.activo) Color.Red  else MaterialTheme.colorScheme.primary
 												)
 											}
 											IconButton(onClick = { promotionToShow = promo }) {

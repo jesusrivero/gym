@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 @HiltViewModel
 class MembershipViewModel @Inject constructor(
 	private val createMembershipUseCase: CreateMembershipUseCase,
@@ -33,7 +32,7 @@ class MembershipViewModel @Inject constructor(
 	var membershipsSummary by mutableStateOf<List<MembershipWithCount>>(emptyList())
 		private set
 	
-	var isLoading by mutableStateOf(false)
+	var isLoading by mutableStateOf(true)  // <--- empieza en true
 		private set
 	
 	var memberships by mutableStateOf<List<Membership>>(emptyList())
@@ -45,7 +44,7 @@ class MembershipViewModel @Inject constructor(
 	var errorMessage by mutableStateOf<String?>(null)
 		private set
 	
-	var isFirstLoadDone by mutableStateOf(true)
+	var isFirstLoadDone by mutableStateOf(false)  // <--- empieza en false
 		private set
 	
 	private val _membershipActionMessage = mutableStateOf<String?>(null)
@@ -53,6 +52,11 @@ class MembershipViewModel @Inject constructor(
 	
 	private val _isActionSuccess = MutableStateFlow<Boolean?>(null)
 	val isActionSuccess: StateFlow<Boolean?> = _isActionSuccess
+	
+	init {
+		// Carga inicial al crear el ViewModel
+		loadMembershipsSummary()
+	}
 	
 	fun createMembership(membership: Membership) {
 		viewModelScope.launch {
@@ -66,6 +70,7 @@ class MembershipViewModel @Inject constructor(
 				_membershipActionMessage.value = "Membresía creada exitosamente"
 				_isActionSuccess.value = true
 				loadMemberships()
+				loadMembershipsSummary()
 			}.onFailure {
 				errorMessage = it.message
 				_membershipActionMessage.value = it.message
@@ -98,7 +103,7 @@ class MembershipViewModel @Inject constructor(
 			}.onFailure {
 				errorMessage = it.message
 			}
-			isFirstLoadDone = true
+			isFirstLoadDone = true  // <--- solo aquí lo marcas como cargado
 			isLoading = false
 		}
 	}
@@ -113,6 +118,7 @@ class MembershipViewModel @Inject constructor(
 			
 			result.onSuccess {
 				_membershipActionMessage.value = "Membresía actualizada correctamente"
+				loadMembershipsSummary()
 				_isActionSuccess.value = true
 				loadMemberships()
 			}.onFailure {
@@ -139,7 +145,7 @@ class MembershipViewModel @Inject constructor(
 				loadMembershipsSummary()
 			} else {
 				_membershipActionMessage.value = result.exceptionOrNull()?.message ?: "Error desconocido"
-				_isActionSuccess.value =false
+				_isActionSuccess.value = false
 			}
 		}
 	}
@@ -149,6 +155,7 @@ class MembershipViewModel @Inject constructor(
 		_isActionSuccess.value=null
 	}
 }
+
 	
 	
 	//	VOY A DEJAR ESTA FUNCION PARA UNA FUTURA IMPLEMENTACION

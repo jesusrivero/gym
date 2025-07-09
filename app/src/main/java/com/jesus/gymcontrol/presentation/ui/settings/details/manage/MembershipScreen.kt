@@ -200,7 +200,7 @@ fun MembershipScreen(
 					}
 				}
 				
-				membershipsSummary.isEmpty() -> {
+				!isLoading && viewModel.isFirstLoadDone && membershipsSummary.isEmpty() -> {
 					Box(
 						modifier = Modifier
 							.fillMaxSize()
@@ -216,6 +216,7 @@ fun MembershipScreen(
 				}
 				
 				else -> {
+					
 					val filteredMemberships = when (filter) {
 						PromotionFilter.ACTIVE -> membershipsSummary.filter { it.membership.activo }
 						PromotionFilter.INACTIVE -> membershipsSummary.filter { !it.membership.activo }
@@ -254,9 +255,9 @@ fun MembershipScreen(
 											}
 											IconButton(onClick = { membershipToToggle = membership }) {
 												Icon(
-													imageVector = if (membership.activo) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+													imageVector = if (membership.activo) Icons.Default.VisibilityOff else Icons.Default.Visibility,
 													contentDescription = if (membership.activo) "Desactivar" else "Activar",
-													tint = if (membership.activo) MaterialTheme.colorScheme.primary else Color.Red
+													tint = if (membership.activo)Color.Red  else MaterialTheme.colorScheme.primary
 												)
 											}
 											IconButton(onClick = { membershipToView = membership }) {
@@ -484,6 +485,7 @@ fun MembershipScreen(
 						TextButton(onClick = {
 							viewModel.toggleMembershipState(selected)
 							membershipToToggle = null
+							viewModel.loadMembershipsSummary()
 						}) {
 							Text("Confirmar")
 						}
