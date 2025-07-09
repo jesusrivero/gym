@@ -152,7 +152,7 @@ class MembershipViewModel @Inject constructor(
 	
 	fun clearMembershipMessage() {
 		_membershipActionMessage.value = null
-		_isActionSuccess.value=null
+		_isActionSuccess.value =null
 	}
 }
 

@@ -141,27 +141,36 @@ fun ManagerContent(
 						MenuCard(
 							title = "Personas",
 							subtitle = "Listado de personas",
+							imageRes = R.drawable.ic_person,
 							onClick = { navController.navigate(AppRoutes.PersonasScreen) }
 						)
+						
 						MenuCard(
 							title = "Pagos",
 							subtitle = "Listado de pagos",
+							imageRes = R.drawable.ic_payment,
 							onClick = { navController.navigate(AppRoutes.ListPaymentsScreen) }
 						)
+						
 						MenuCard(
 							title = "Membresías",
 							subtitle = "Listado de membresías",
+							imageRes = R.drawable.ic_memberships,
 							onClick = { navController.navigate(AppRoutes.MembershipScreen) }
 						)
+						
 						MenuCard(
 							title = "Promociones",
-							subtitle = "Listado de membresías",
+							subtitle = "Listado de promociones",
+							imageRes = R.drawable.ic_promotions,
 							onClick = { navController.navigate(AppRoutes.PromotionsScreen) }
 						)
+						
 						MenuCard(
 							title = "Reportes",
 							subtitle = "Listado de reportes",
-							onClick = { navController.navigate(AppRoutes.ReportScreen) }
+							imageRes = R.drawable.ic_reports,
+							onClick = { navController.navigate(AppRoutes.ReportScreen)}
 						)
 					}
 				}
@@ -177,11 +186,11 @@ fun ManagerContent(
 		onMarkAsRead = { notificacion -> notificacionesViewModel.markNotificationAsRead(notificacion)}
 	)
 }
-
 @Composable
 fun MenuCard(
 	title: String,
 	subtitle: String,
+	imageRes: Int,
 	onClick: () -> Unit,
 ) {
 	Card(
@@ -195,19 +204,17 @@ fun MenuCard(
 		Box(modifier = Modifier.fillMaxSize()) {
 			
 			Image(
-				painter = painterResource(id = R.drawable.ic_background),
+				painter = painterResource(id = imageRes),
 				contentDescription = null,
 				modifier = Modifier.fillMaxSize(),
 				contentScale = ContentScale.Crop
 			)
-			
 			
 			Box(
 				modifier = Modifier
 					.fillMaxSize()
 					.background(Color.Black.copy(alpha = 0.5f))
 			)
-			
 			
 			Row(
 				modifier = Modifier
