@@ -63,14 +63,13 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListPaymentsScreen(
 	navBottom: NavController,
 	viewModel: PaymentsViewModel = hiltViewModel(),
-	navPagToScreen: () -> Unit,
+	navPagToScreen: (String, String) -> Unit,
 ) {
 	val payments = viewModel.payments
 	val isLoading = viewModel.isLoading
@@ -82,8 +81,6 @@ fun ListPaymentsScreen(
 	val configuration = LocalConfiguration.current
 	val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 	
-	
-	
 	LaunchedEffect(Unit) {
 		viewModel.loadPayments()
 	}
@@ -94,6 +91,7 @@ fun ListPaymentsScreen(
 			selectedPayment = null
 		})
 	}
+	
 	Scaffold(
 		topBar = {
 			TopAppBar(
@@ -127,11 +125,7 @@ fun ListPaymentsScreen(
 			
 			val matchesFilter = when (selectedPaymentType) {
 				"Todos" -> true
-				"Dólares", "Bolívares", "Mixto" -> payment.paymentType.equals(
-					selectedPaymentType,
-					ignoreCase = true
-				)
-				
+				"Dólares", "Bolívares", "Mixto" -> payment.paymentType.equals(selectedPaymentType, ignoreCase = true)
 				"Promociones" -> !payment.promocionNombre.isNullOrBlank()
 				else -> true
 			}
@@ -158,7 +152,10 @@ fun ListPaymentsScreen(
 						},
 						searchText = searchText,
 						onSearchTextChanged = { searchText = it },
-						onAddClick = navPagToScreen,
+						onAddClick = {
+							// 👇 Aquí pasamos valores predeterminados
+							navPagToScreen("nuevoUid", "Nuevo cliente")
+						},
 						showAddButton = true
 					)
 				}
@@ -209,7 +206,10 @@ fun ListPaymentsScreen(
 					},
 					searchText = searchText,
 					onSearchTextChanged = { searchText = it },
-					onAddClick = navPagToScreen,
+					onAddClick = {
+						// 👇 Aquí también pasamos valores predeterminados
+						navPagToScreen("nuevoUid", "Nuevo cliente")
+					},
 					showAddButton = true
 				)
 				
@@ -245,7 +245,6 @@ fun ListPaymentsScreen(
 									PaymentCard(payment) {
 										selectedPayment = payment
 										showDialog = true
-										
 									}
 								}
 							}
@@ -256,6 +255,7 @@ fun ListPaymentsScreen(
 		}
 	}
 }
+
 
 @Composable
 fun PaymentCard(payment: Payment, onViewDetails: () -> Unit) {

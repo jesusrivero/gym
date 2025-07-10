@@ -11,12 +11,15 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 import com.jesus.gymcontrol.data.repository.SessionManager
+import com.jesus.gymcontrol.domain.usecase.usuario.UpdateDatesUserUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateRolUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.auth.LoginUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.auth.RecoverPasswordUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.auth.RegisterUseCase
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -27,6 +30,7 @@ class AuthViewModel @Inject constructor(
 	private val loginUseCase: LoginUseCase,
 	private val recoverUseCase: RecoverPasswordUseCase,
 	private val updateRolUseCase: UpdateRolUseCase,
+	private val updateDatesUserUseCase: UpdateDatesUserUseCase,
 	val sessionManager: SessionManager,
 ) : ViewModel() {
 	
@@ -42,6 +46,9 @@ class AuthViewModel @Inject constructor(
 	var isRoleAssignedState by mutableStateOf(false)
 	var sessionLoaded by mutableStateOf(false)
 		private set
+	
+	private val _updateDatesSuccess = MutableStateFlow<Boolean?>(null)
+	val updateDatesSuccess: StateFlow<Boolean?> = _updateDatesSuccess
 	
 	var rol by mutableStateOf("Dueño")
 	var rol2 by mutableStateOf("Administrador")
@@ -122,6 +129,35 @@ class AuthViewModel @Inject constructor(
 			}
 		}
 	}
+	
+	
+
+	
+	fun updateDatesUser(
+		uid: String,
+		idcard: String,
+		age: String,
+		phone: String,
+		gender: String
+	) {
+		viewModelScope.launch {
+			isLoading = true
+			errorMessage = null
+			_updateDatesSuccess.value = null
+			
+			val result = updateDatesUserUseCase(uid, idcard, age, phone, gender)
+			
+			result.onSuccess {
+				_updateDatesSuccess.value = true
+			}.onFailure { e ->
+				errorMessage = e.message
+				_updateDatesSuccess.value = false
+			}
+			
+			isLoading = false
+		}
+	}
+	
 	
 	fun recoverPassword(email: String) {
 		viewModelScope.launch {
@@ -210,6 +246,9 @@ class AuthViewModel @Inject constructor(
 		}
 	}
 	
+	fun currentUid(): String? {
+		return FirebaseAuth.getInstance().currentUser?.uid
+	}
 	
 	fun logout() {
 		viewModelScope.launch {

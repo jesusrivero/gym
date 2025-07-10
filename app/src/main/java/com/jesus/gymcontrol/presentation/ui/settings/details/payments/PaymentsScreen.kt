@@ -89,14 +89,23 @@ import kotlinx.coroutines.delay
 import java.util.UUID
 
 @Composable
-fun PaymentsScreen(navController: NavController) {
-	PaymentsScreenContent(navController = navController)
+fun PaymentsScreen(
+	uid: String,
+	nombre: String,
+	navController: NavController
+) {
+	PaymentsScreenContent(
+		uid = uid,
+		nombre = nombre,
+		navController = navController
+	)
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentsScreenContent(
+	uid: String,
+	nombre: String,
 	navController: NavController,
 	viewModel: PaymentsViewModel = hiltViewModel(),
 	promotionViewModel: PromotionViewModel = hiltViewModel(),
@@ -108,15 +117,14 @@ fun PaymentsScreenContent(
 	val memberships = membershipViewModel.memberships
 	val users by remember { derivedStateOf { usersViewModel.listUsers } }
 	
-	// Estados locales
 	var description by remember { mutableStateOf("") }
-	var nameUser by remember { mutableStateOf("") }
+	var nameUser by remember { mutableStateOf(nombre) }
 	var reference by remember { mutableStateOf("") }
 	var isMembershipDropdownExpanded by remember { mutableStateOf(false) }
 	var isTypeDropdownExpanded by remember { mutableStateOf(false) }
 	var showSnackbar by remember { mutableStateOf(false) }
 	var snackbarMessage by remember { mutableStateOf("") }
-	var selectedUserId by remember { mutableStateOf<String?>(null) }
+	var selectedUserId by remember { mutableStateOf<String?>(uid) }
 	var isPromoDropdownExpanded by remember { mutableStateOf(false) }
 	val selectedPromotion = viewModel.selectedPromotion
 	val promotions = promotionViewModel.promotions
@@ -135,8 +143,6 @@ fun PaymentsScreenContent(
 	val isActionSuccess = viewModel.isActionSuccess.value
 	val isLoading = viewModel.isLoading
 	
-	
-	// Limpiar estados locales y del ViewModel cuando el pago es exitoso y el mensaje está listo
 	LaunchedEffect(isActionSuccess, actionMessage) {
 		if (isActionSuccess == true && actionMessage != null) {
 			nameUser = ""
@@ -162,23 +168,18 @@ fun PaymentsScreenContent(
 					)
 		}
 	}
-
 	
 	val formIsValid = selectedUserId != null &&
 			paymentState.frequency.isNotBlank() &&
 			paymentState.type.isNotBlank() &&
 			when (paymentState.type) {
 				"Dólares" -> paymentState.amountDollar.toDoubleOrNull()?.let { it > 0 } == true
-				"Bolívares" -> paymentState.amountBs.toDoubleOrNull()
-					?.let { it > 0 } == true && reference.isNotBlank()
-				
+				"Bolívares" -> paymentState.amountBs.toDoubleOrNull()?.let { it > 0 } == true && reference.isNotBlank()
 				"Mixto" -> paymentState.amountDollar.toDoubleOrNull()?.let { it > 0 } == true &&
 						paymentState.amountBs.toDoubleOrNull()?.let { it > 0 } == true &&
 						reference.isNotBlank()
-				
 				else -> false
 			}
-	
 	
 	LaunchedEffect(Unit) {
 		membershipViewModel.loadMemberships()
@@ -225,17 +226,15 @@ fun PaymentsScreenContent(
 				if (isActionSuccess) {
 					Row {
 						TextButton(onClick = {
-							// Quiere agregar otro pago → reinicia estados
 							viewModel.clearPaymentAction()
 						}) {
 							Text("Sí")
 						}
 						Spacer(Modifier.width(8.dp))
 						TextButton(onClick = {
-							// No quiere → navega
 							viewModel.clearPaymentAction()
 							navController.navigate(AppRoutes.ListPaymentsScreen) {
-								popUpTo(AppRoutes.ListPaymentsScreen) {inclusive = true}
+								popUpTo(AppRoutes.ListPaymentsScreen) { inclusive = true }
 							}
 						}) {
 							Text("No")
@@ -243,7 +242,6 @@ fun PaymentsScreenContent(
 					}
 				} else {
 					TextButton(onClick = {
-						// Solo cierra el diálogo de error
 						viewModel.clearPaymentAction()
 					}) {
 						Text("Cerrar")
@@ -253,8 +251,8 @@ fun PaymentsScreenContent(
 			containerColor = MaterialTheme.colorScheme.surface
 		)
 	}
+	
 	Box(modifier = Modifier.fillMaxSize()) {
-		
 		Scaffold(
 			topBar = {
 				CenterAlignedTopAppBar(

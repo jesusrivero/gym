@@ -2,7 +2,6 @@ package com.jesus.gymcontrol.presentation.navegation
 
 import kotlinx.serialization.Serializable
 
-
 object AppRoutes {
 	@Serializable
 	data object MainScreen
@@ -13,17 +12,32 @@ object AppRoutes {
 	@Serializable
 	data object PreferencesScreen
 	
-	@Serializable
-	data class EditPersonScreen(val idPerson: Int? = null)
+	
+	object EditPersonScreen {
+		const val route = "edit_person_screen"
+		fun routeWithUid(uid: String) = "$route/$uid"
+	}
+	
+	
 	
 	@Serializable
 	data object PromotionsScreen
 	
+	// ✅ Cambiado aquí
 	@Serializable
-	data object PaymentsScreen
+	data object PaymentsScreen {
+		const val baseRoute = "payments_screen/{uid}/{nombre}"
+		
+		fun route(uid: String, nombre: String): String {
+			return "payments_screen/$uid/$nombre"
+		}
+	}
 	
 	@Serializable
-	data object PersonasScreen
+	data object PersonasScreen {
+		const val route = "PersonasScreen"
+	}
+	
 	
 	@Serializable
 	data object ManageScreen
@@ -79,10 +93,8 @@ object AppRoutes {
 	@Serializable
 	data object CodeClientScreen
 	
-	
 	@Serializable
 	data object OwnerMainScreen
-	
 	
 	@Serializable
 	data object ClientMainScreen

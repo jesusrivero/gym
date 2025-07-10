@@ -8,10 +8,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,7 +19,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Payment
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -59,14 +56,15 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PersonsScreen(
 	navBottom: NavController,
 	viewModel: UserListViewModel = hiltViewModel(),
-	navEdit: (String) -> Unit,
-	navPag: (String) -> Unit,
+	navPag: (String, String) -> Unit,
+	navEdit: (String) -> Unit
 ) {
 	LaunchedEffect(Unit) {
 		viewModel.loadUsers()
@@ -100,17 +98,11 @@ fun PersonsScreen(
 			text = {
 				Column {
 					DetailRow("Nombre:", selectedUser?.name ?: "")
-					Spacer(modifier = Modifier.height(8.dp))
 					DetailRow("Rol:", selectedUser?.rol ?: "")
-					Spacer(modifier = Modifier.height(8.dp))
 					DetailRow("Email:", selectedUser?.email ?: "")
-					Spacer(modifier = Modifier.height(8.dp))
 					DetailRow("Cédula:", selectedUser?.idcard ?: "")
-					Spacer(modifier = Modifier.height(8.dp))
 					DetailRow("Estado:", selectedUser?.state ?: "")
-					Spacer(modifier = Modifier.height(8.dp))
 					DetailRow("Teléfono:", selectedUser?.phone ?: "")
-					Spacer(modifier = Modifier.height(8.dp))
 					DetailRow("Fecha de registro:", formattedDate)
 				}
 			},
@@ -121,11 +113,7 @@ fun PersonsScreen(
 						showUserDialog = false
 						selectedUser = null
 					},
-					modifier = Modifier.fillMaxWidth(),
-					colors = ButtonDefaults.buttonColors(
-						containerColor = MaterialTheme.colorScheme.primary,
-						contentColor = MaterialTheme.colorScheme.onPrimary
-					),
+					modifier = Modifier.fillMaxWidth()
 				) {
 					Text("Cerrar")
 				}
@@ -179,116 +167,59 @@ fun PersonsScreen(
 			matchesSearch && matchesState
 		}
 		
-		if (isLandscape) {
-			LazyColumn(
-				modifier = Modifier
-					.fillMaxSize()
-					.padding(innerPadding)
-					.padding(horizontal = 16.dp),
-				verticalArrangement = Arrangement.spacedBy(12.dp)
-			) {
-				item {
-					PaymentFilters(
-						selectedPaymentType = selectedState,
-						paymentTypeOptions = listOf("Todos", "Activos", "Inactivos", "Próximos a pagar"),
-						onPaymentTypeSelected = { selectedState = it },
-						onClearFilters = {
-							selectedState = "Todos"
-							searchText = ""
-						},
-						searchText = searchText,
-						onSearchTextChanged = { searchText = it },
-						onAddClick = { navBottom.navigate(AppRoutes.RegPersonScreen) },
-						showAddButton = true
-					)
-				}
-				
-				when {
-					isLoading -> {
-						item {
-							Column(horizontalAlignment = Alignment.CenterHorizontally) {
-								CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-								Spacer(modifier = Modifier.height(12.dp))
-								Text("Cargando usuarios...", color = MaterialTheme.colorScheme.onSurfaceVariant)
-							}
-						}
-					}
-					
-					filteredList.isEmpty() -> {
-						item {
-							Text(
-								text = if (searchText.isNotEmpty()) "No se encontraron resultados" else "No hay personas registradas",
-								color = MaterialTheme.colorScheme.onSurfaceVariant
-							)
-						}
-					}
-					
-					else -> {
-						items(filteredList) { user ->
-							PersonCard(user, navEdit, navPag, onViewDetails = {
-								selectedUser = user
-								showUserDialog = true
-							})
-						}
-					}
-				}
-			}
-		} else {
-			Column(
-				modifier = Modifier
-					.fillMaxSize()
-					.padding(innerPadding)
-			) {
-				PaymentFilters(
-					selectedPaymentType = selectedState,
-					paymentTypeOptions = listOf("Todos", "Activos", "Inactivos", "Próximos a pagar"),
-					onPaymentTypeSelected = { selectedState = it },
-					onClearFilters = {
-						selectedState = "Todos"
-						searchText = ""
-					},
-					searchText = searchText,
-					onSearchTextChanged = { searchText = it },
-					onAddClick = { navBottom.navigate(AppRoutes.RegPersonScreen) },
-					showAddButton = true
-				)
-				
+		val contentModifier = Modifier
+			.fillMaxSize()
+			.padding(innerPadding)
+			.padding(horizontal = if (isLandscape) 16.dp else 0.dp)
+		
+		Column(
+			modifier = contentModifier
+		) {
+			PaymentFilters(
+				selectedPaymentType = selectedState,
+				paymentTypeOptions = listOf("Todos", "Activos", "Inactivos", "Próximos a pagar"),
+				onPaymentTypeSelected = { selectedState = it },
+				onClearFilters = {
+					selectedState = "Todos"
+					searchText = ""
+				},
+				searchText = searchText,
+				onSearchTextChanged = { searchText = it },
+				onAddClick = { navBottom.navigate(AppRoutes.RegPersonScreen) },
+				showAddButton = true
+			)
+			
+			if (isLoading) {
 				Box(
-					modifier = Modifier
-						.fillMaxSize()
-						.padding(horizontal = 16.dp),
+					modifier = Modifier.fillMaxSize(),
 					contentAlignment = Alignment.Center
 				) {
-					when {
-						isLoading -> {
-							Column(horizontalAlignment = Alignment.CenterHorizontally) {
-								CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-								Spacer(modifier = Modifier.height(12.dp))
-								Text("Cargando usuarios...", color = MaterialTheme.colorScheme.onSurfaceVariant)
+					CircularProgressIndicator()
+				}
+			} else if (filteredList.isEmpty()) {
+				Box(
+					modifier = Modifier.fillMaxSize(),
+					contentAlignment = Alignment.Center
+				) {
+					Text("No hay resultados")
+				}
+			} else {
+				LazyColumn(
+					modifier = Modifier.fillMaxSize(),
+					verticalArrangement = Arrangement.spacedBy(12.dp)
+				) {
+					items(filteredList) { user ->
+						PersonCard(
+							user = user,
+							onEdit = {
+								navEdit(user.id)
+							},
+							navPag = navPag,
+							onViewDetails = {
+								selectedUser = user
+								showUserDialog = true
 							}
-						}
-						
-						filteredList.isEmpty() -> {
-							Text(
-								text = if (searchText.isNotEmpty()) "No se encontraron resultados" else "No hay personas registradas",
-								color = MaterialTheme.colorScheme.onSurfaceVariant
-							)
-						}
-						
-						else -> {
-							LazyColumn(
-								modifier = Modifier
-									.fillMaxSize(),
-								verticalArrangement = Arrangement.spacedBy(12.dp)
-							) {
-								items(filteredList) { user ->
-									PersonCard(user, navEdit, navPag, onViewDetails = {
-										selectedUser = user
-										showUserDialog = true
-									})
-								}
-							}
-						}
+						)
 					}
 				}
 			}
@@ -296,11 +227,14 @@ fun PersonsScreen(
 	}
 }
 
+
+
+
 @Composable
 fun PersonCard(
 	user: ListUser,
-	navEdit: (String) -> Unit,
-	navPag: (String) -> Unit,
+	onEdit: () -> Unit,
+	navPag: (String, String) -> Unit, // uid, nombre
 	onViewDetails: () -> Unit,
 ) {
 	Card(
@@ -325,7 +259,7 @@ fun PersonCard(
 					fontWeight = FontWeight.SemiBold
 				)
 				Text(
-					text = (user.state ?: "Desconocido").capitalize(),
+					text = (user.state ?: "Desconocido").replaceFirstChar { it.uppercase() },
 					style = MaterialTheme.typography.bodySmall,
 					color = estadoColor(user.state),
 				)
@@ -338,25 +272,26 @@ fun PersonCard(
 				if (user.state.equals("pendiente", ignoreCase = true)) {
 					WhatsAppButton(
 						phoneNumber = user.phone,
-						message = """Hola ${user.name}, te recordamos que tu membresía está próxima a vencer.¡Contáctanos para renovarla a tiempo!
-             """.trimIndent()
+						message = "Hola ${user.name}, tu membresía está próxima a vencer."
 					)
 				}
 				
-				IconButton(onClick = { navPag(user.id) }) {
+				IconButton(onClick = { navPag(user.id, user.name) }) {
 					Icon(
 						Icons.Default.Payment,
 						contentDescription = "Pagar",
 						tint = MaterialTheme.colorScheme.primary
 					)
 				}
-				IconButton(onClick = { navEdit(user.id) }) {
+				
+				IconButton(onClick = onEdit) {
 					Icon(
 						Icons.Default.Edit,
 						contentDescription = "Editar",
 						tint = MaterialTheme.colorScheme.primary
 					)
 				}
+				
 				IconButton(onClick = onViewDetails) {
 					Icon(
 						painter = painterResource(id = R.drawable.ic_details),
@@ -368,6 +303,8 @@ fun PersonCard(
 		}
 	}
 }
+
+
 
 @Composable
 fun estadoColor(estado: String?): Color {

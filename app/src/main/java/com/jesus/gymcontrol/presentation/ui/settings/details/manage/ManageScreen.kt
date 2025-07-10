@@ -142,7 +142,7 @@ fun ManagerContent(
 							title = "Personas",
 							subtitle = "Listado de personas",
 							imageRes = R.drawable.ic_person,
-							onClick = { navController.navigate(AppRoutes.PersonasScreen) }
+							onClick = { navController.navigate(AppRoutes.PersonasScreen.route)}
 						)
 						
 						MenuCard(

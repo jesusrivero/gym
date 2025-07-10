@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,212 +34,167 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.jesus.gymcontrol.domain.model.Person
+import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditPersonScreen(
-    navController: NavController,
-    viewModel: PeopleViewModel,
-    id: Int,
-//    usuario: String? = null,
-//    email: String? = null,
-//    cedula: String? = null,
-//    numeroTelefono: String? = null
-) {
-    val colorScheme = MaterialTheme.colorScheme
-    var showSnackbar by remember { mutableStateOf(false) }
-    var snackbarMessage by remember { mutableStateOf("") }
-
-    if (showSnackbar) {
-        LaunchedEffect(Unit) {
-            delay(2000)
-            showSnackbar = false
-        }
-    }
-
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = "Editar Usuario",
-                        color = colorScheme.onPrimary,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = colorScheme.primary
-                ),
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            painter = painterResource(id = com.jesus.gymcontrol.R.drawable.ic_back),
-                            contentDescription = "Regresar",
-                            tint = colorScheme.onPrimary
-                        )
-                    }
-                }
-            )
-        },
-        snackbarHost = {
-            if (showSnackbar) {
-                Snackbar(
-                    modifier = Modifier.padding(8.dp)
-                ) {
-                    Text(text = snackbarMessage)
-                }
-            }
-        }
-    ) { paddingValues ->
-        EditPersonContent(
-            modifier = Modifier.padding(paddingValues),
-            viewModel = viewModel,
-            navController = navController,
-            id = id,
-//            initialUsuario = usuario.orEmpty(),
-//            initialEmail = email.orEmpty(),
-//            initialCedula = cedula.orEmpty(),
-//            initialNumeroTelefono = numeroTelefono.orEmpty(),
-            showSnackbar = { message ->
-                snackbarMessage = message
-                showSnackbar = true
-            }
-        )
-    }
+	navController: NavController,
+	viewModel: AuthViewModel,
+	uid: String
+){
+	val colorScheme = MaterialTheme.colorScheme
+	var showSnackbar by remember { mutableStateOf(false) }
+	var snackbarMessage by remember { mutableStateOf("") }
+	
+	val updateSuccess by viewModel.updateDatesSuccess.collectAsState(initial = null)
+	
+	if (updateSuccess == true) {
+		LaunchedEffect(Unit) {
+			snackbarMessage = "Datos actualizados correctamente"
+			showSnackbar = true
+			delay(2000)
+			navController.popBackStack()
+		}
+	} else if (updateSuccess == false) {
+		LaunchedEffect(Unit) {
+			snackbarMessage = viewModel.errorMessage ?: "Error al actualizar"
+			showSnackbar = true
+		}
+	}
+	
+	if (showSnackbar) {
+		LaunchedEffect(Unit) {
+			delay(2000)
+			showSnackbar = false
+		}
+	}
+	
+	Scaffold(
+		topBar = {
+			CenterAlignedTopAppBar(
+				title = {
+					Text(
+						text = "Editar Usuario",
+						color = colorScheme.onPrimary,
+						fontWeight = FontWeight.Bold
+					)
+				},
+				colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+					containerColor = colorScheme.primary
+				),
+				navigationIcon = {
+					IconButton(onClick = { navController.popBackStack() }) {
+						Icon(
+							painter = painterResource(id = com.jesus.gymcontrol.R.drawable.ic_back),
+							contentDescription = "Regresar",
+							tint = colorScheme.onPrimary
+						)
+					}
+				}
+			)
+		},
+		snackbarHost = {
+			if (showSnackbar) {
+				Snackbar(modifier = Modifier.padding(8.dp)) {
+					Text(text = snackbarMessage)
+				}
+			}
+		}
+	) { paddingValues ->
+		EditPersonContent(
+			modifier = Modifier.padding(paddingValues),
+			viewModel = viewModel
+		)
+	}
 }
-
 @Composable
 fun EditPersonContent(
-    modifier: Modifier = Modifier,
-    viewModel: PeopleViewModel,
-    navController: NavController,
-    id: Int,
-//    initialUsuario: String,
-//    initialEmail: String,
-//    initialCedula: String,
-//    initialNumeroTelefono: String,
-    showSnackbar: (String) -> Unit
+	modifier: Modifier = Modifier,
+	viewModel: AuthViewModel
 ) {
-    var usuario by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var cedula by remember { mutableStateOf("") }
-    var numeroTelefono by remember { mutableStateOf("") }
-
-//    var usuario by remember { mutableStateOf(initialUsuario) }
-//    var email by remember { mutableStateOf(initialEmail) }
-//    var cedula by remember { mutableStateOf(initialCedula) }
-//    var numeroTelefono by remember { mutableStateOf(initialNumeroTelefono) }
-
-    var emailTouched by remember { mutableStateOf(false) }
-    val isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-
-    val formIsValid =
-        usuario.isNotBlank() &&
-                email.isNotBlank() &&
-                cedula.isNotBlank() &&
-                numeroTelefono.isNotBlank() &&
-                isEmailValid
-
-    val colorScheme = MaterialTheme.colorScheme
-
-    Column(
-        modifier = modifier
-            .padding(16.dp)
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        OutlinedTextField(
-            value = usuario,
-            maxLines = 1,
-            onValueChange = { usuario = it },
-            label = { Text("Nombre y apellido") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = email,
-            maxLines = 1,
-            onValueChange = {
-                email = it
-                emailTouched = true
-            },
-            label = { Text("Correo electrónico") },
-            isError = emailTouched && !isEmailValid,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        if (emailTouched && !isEmailValid) {
-            Text(
-                text = "Correo electrónico inválido",
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier
-                    .align(Alignment.Start)
-                    .padding(start = 16.dp, top = 4.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = cedula,
-            maxLines = 1,
-            onValueChange = { cedula = it },
-            label = { Text("Cédula de identidad") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = numeroTelefono,
-            maxLines = 1,
-            onValueChange = { numeroTelefono = it },
-            label = { Text("Número de teléfono") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                if (!isEmailValid) {
-                    emailTouched = true
-                    return@Button
-                }
-
-                val updatedPerson = Person(
-                    id = id,
-                    usuario = usuario,
-                    email = email,
-                    cedula = cedula,
-                    numeroTelefono = numeroTelefono
-                )
-                viewModel.updateUser(updatedPerson)
-
-                showSnackbar("Cambios guardados correctamente")
-                navController.popBackStack()
-            },
-            enabled = formIsValid,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = colorScheme.primary,
-                contentColor = colorScheme.onPrimary,
-                disabledContainerColor = colorScheme.onSurface.copy(alpha = 0.12f),
-                disabledContentColor = colorScheme.onSurface.copy(alpha = 0.38f)
-            ),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Guardar cambios", style = MaterialTheme.typography.labelLarge)
-        }
-    }
+	var idCard by remember { mutableStateOf("") }
+	var age by remember { mutableStateOf("") }
+	var phone by remember { mutableStateOf("") }
+	var gender by remember { mutableStateOf("") }
+	
+	val colorScheme = MaterialTheme.colorScheme
+	
+	val formIsValid =
+		idCard.isNotBlank() && age.isNotBlank() && phone.isNotBlank() && gender.isNotBlank()
+	
+	Column(
+		modifier = modifier
+			.padding(16.dp)
+			.fillMaxSize(),
+		horizontalAlignment = Alignment.CenterHorizontally
+	) {
+		OutlinedTextField(
+			value = idCard,
+			maxLines = 1,
+			onValueChange = { idCard = it },
+			label = { Text("Cédula") },
+			modifier = Modifier.fillMaxWidth()
+		)
+		
+		Spacer(modifier = Modifier.height(8.dp))
+		
+		OutlinedTextField(
+			value = age,
+			maxLines = 1,
+			onValueChange = { age = it },
+			label = { Text("Edad") },
+			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+			modifier = Modifier.fillMaxWidth()
+		)
+		
+		Spacer(modifier = Modifier.height(8.dp))
+		
+		OutlinedTextField(
+			value = phone,
+			maxLines = 1,
+			onValueChange = { phone = it },
+			label = { Text("Teléfono") },
+			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+			modifier = Modifier.fillMaxWidth()
+		)
+		
+		Spacer(modifier = Modifier.height(8.dp))
+		
+		OutlinedTextField(
+			value = gender,
+			maxLines = 1,
+			onValueChange = { gender = it },
+			label = { Text("Género") },
+			modifier = Modifier.fillMaxWidth()
+		)
+		
+		Spacer(modifier = Modifier.height(16.dp))
+		
+		Button(
+			onClick = {
+				val uid = viewModel.currentUid() ?: return@Button
+				viewModel.updateDatesUser(
+					uid = uid,
+					idcard = idCard,
+					age = age,
+					phone = phone,
+					gender = gender
+				)
+			},
+			enabled = formIsValid,
+			colors = ButtonDefaults.buttonColors(
+				containerColor = colorScheme.primary,
+				contentColor = colorScheme.onPrimary,
+				disabledContainerColor = colorScheme.onSurface.copy(alpha = 0.12f),
+				disabledContentColor = colorScheme.onSurface.copy(alpha = 0.38f)
+			),
+			modifier = Modifier.fillMaxWidth()
+		) {
+			Text("Guardar cambios", style = MaterialTheme.typography.labelLarge)
+		}
+	}
 }
-
-
 
 

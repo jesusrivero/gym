@@ -7,11 +7,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
+import com.jesus.gymcontrol.presentation.navegation.AppRoutes.PersonasScreen
 import com.jesus.gymcontrol.presentation.splash.StartScreen
 import com.jesus.gymcontrol.presentation.ui.auth.LoginScreen
 import com.jesus.gymcontrol.presentation.ui.auth.recover.RecoverPasswordScreen
@@ -31,7 +34,6 @@ import com.jesus.gymcontrol.presentation.ui.settings.details.manage.PromotionScr
 import com.jesus.gymcontrol.presentation.ui.settings.details.payments.PaymentsScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.AccountScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.CodeClientScreen
-import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.ContactScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.NotificationScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.NotificationsScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.PreferencesScreen
@@ -39,144 +41,138 @@ import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.Securit
 import com.jesus.gymcontrol.presentation.ui.settings.details.selected.SelectedGymAdmin
 import com.jesus.gymcontrol.presentation.ui.settings.details.selected.SelectedGymClient
 import com.jesus.gymcontrol.presentation.ui.settings.details.selected.SelectedRolScreen
+import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavigationHost(
 	viewModel: PeopleViewModel = hiltViewModel(),
-	
-	) {
+) {
 	val context = LocalContext.current
 	val navController = rememberNavController()
 	val sessionManager = remember { SessionManager(context) }
 	val gymViewModel: GymViewModel = hiltViewModel()
 	
-	
-	NavHost(navController = navController, startDestination = AppRoutes.StartScreen) {
+	NavHost(
+		navController = navController,
+		startDestination = AppRoutes.StartScreen
+	) {
 		
 		composable<AppRoutes.MainScreen> {
-			MainScreen(
-				navController = navController,
-			)
+			MainScreen(navController = navController)
 		}
 		
 		composable<AppRoutes.StartScreen> {
-			StartScreen(
-				navController = navController
-			)
+			StartScreen(navController = navController)
 		}
-		
 		
 		composable<AppRoutes.RegPersonScreen> {
 			RegPersonScreen(navController)
 		}
 		
-		
-		composable<AppRoutes.EditPersonScreen> {
-			val idPerson = it.arguments?.getInt("idPerson")
-			
-			
+		// ❌ EditPersonScreen se queda como estaba
+		composable(
+			route = "edit_person_screen/{uid}",
+			arguments = listOf(
+				navArgument("uid") { type = NavType.StringType }
+			)
+		) {
+			val uid = it.arguments?.getString("uid") ?: ""
 			EditPersonScreen(
 				navController = navController,
-				viewModel = viewModel,
-				id = idPerson ?: 0
+				viewModel = hiltViewModel<AuthViewModel>(),
+				uid = uid
 			)
 		}
 		
+		
+		
 		composable<AppRoutes.PreferencesScreen> {
-			PreferencesScreen(
-				navController = navController,
-				
-				)
+			PreferencesScreen(navController = navController)
 		}
 		
-		
-		composable<AppRoutes.PersonasScreen> {
+		composable(PersonasScreen.route) {
 			PersonsScreen(
-				navEdit = { navController.navigate(AppRoutes.EditPersonScreen()) },
-				navPag = { navController.navigate(AppRoutes.PaymentsScreen) },
 				navBottom = navController,
-				
-				
-				)
+				navPag = { uid, nombre ->
+					navController.navigate(
+						AppRoutes.PaymentsScreen.route(uid, nombre)
+					)
+				},
+				navEdit = { uid ->
+					navController.navigate("${AppRoutes.EditPersonScreen.route}/$uid")
+				}
+			)
 		}
 		
 		
-		composable<AppRoutes.PaymentsScreen> {
-			PaymentsScreen(navController = navController)
-		}
-		
-		composable<AppRoutes.ContactScreen> {
-			ContactScreen(navController = navController)
-			
+		composable(
+			route = AppRoutes.PaymentsScreen.baseRoute,
+			arguments = listOf(
+				navArgument("uid") { type = NavType.StringType },
+				navArgument("nombre") { type = NavType.StringType }
+			)
+		) { backStackEntry ->
+			val uid = backStackEntry.arguments?.getString("uid") ?: ""
+			val nombre = backStackEntry.arguments?.getString("nombre") ?: ""
+			PaymentsScreen(
+				uid = uid,
+				nombre = nombre,
+				navController = navController
+			)
 		}
 		
 		composable<AppRoutes.ListPaymentsScreen> {
 			ListPaymentsScreen(
 				navBottom = navController,
-				navPagToScreen = { navController.navigate(AppRoutes.PaymentsScreen) }
+				navPagToScreen = { uid, nombre ->
+					navController.navigate(
+						AppRoutes.PaymentsScreen.route(uid, nombre)
+					)
+				}
 			)
-			
 		}
+
 		
 		composable<AppRoutes.ManageScreen> {
-			ManageScreen(
-				navController = navController
-			)
+			ManageScreen(navController = navController)
 		}
 		
 		composable<AppRoutes.MembershipScreen> {
-			MembershipScreen(
-				navController = navController,
-				
-				
-				)
-			
+			MembershipScreen(navController = navController)
 		}
 		
 		composable<AppRoutes.PromotionsScreen> {
-			PromotionScreen(
-				navController = navController,
-				
-				
-				)
-			
+			PromotionScreen(navController = navController)
 		}
 		
 		composable<AppRoutes.ReportScreen> {
 			ReportScreen(navController = navController)
-			
 		}
+		
 		composable<AppRoutes.AccountScreen> {
 			AccountScreen(navController = navController)
-			
 		}
 		
 		composable<AppRoutes.LoginScreen> {
 			LoginScreen(navController = navController)
-			
 		}
 		
 		composable<AppRoutes.RegisterScreen> {
 			RegisterScreen(navController = navController)
-			
 		}
 		
 		composable<AppRoutes.RecoverPasswordScreen> {
 			RecoverPasswordScreen(navController = navController)
-			
 		}
-		
 		
 		composable<AppRoutes.SecurityScreen> {
 			SecurityScreen(navController = navController)
-			
 		}
 		
 		composable<AppRoutes.NotificationScreen> {
 			NotificationScreen(navController = navController)
-			
 		}
 		
 		composable<AppRoutes.SelectedRolScreen> {
@@ -186,8 +182,6 @@ fun NavigationHost(
 		composable<AppRoutes.ActivateCodeScreen> {
 			ActivateCodeScreen(navController = navController)
 		}
-		
-		
 		
 		composable<AppRoutes.SelectedGymAdmin> {
 			SelectedGymAdmin(
@@ -223,6 +217,5 @@ fun NavigationHost(
 		composable<AppRoutes.NotificationsScreen> {
 			NotificationsScreen(navController = navController)
 		}
-		
 	}
 }
