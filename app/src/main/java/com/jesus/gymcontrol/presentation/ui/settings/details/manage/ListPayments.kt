@@ -1,5 +1,7 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details.manage
 
+import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -13,6 +15,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -32,7 +36,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -50,14 +53,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
-import com.jesus.gymcontrol.domain.helpers.generateInvoiceBitmap
-import com.jesus.gymcontrol.domain.helpers.shareBitmap
+import com.jesus.gymcontrol.domain.helpers.generateInvoicePdf
 import com.jesus.gymcontrol.domain.model.Payment
 import com.jesus.gymcontrol.domain.viewmodels.PaymentsViewModel
 import com.jesus.gymcontrol.presentation.ui.commons.PaymentFilters
+import java.io.File
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -125,7 +129,11 @@ fun ListPaymentsScreen(
 			
 			val matchesFilter = when (selectedPaymentType) {
 				"Todos" -> true
-				"Dólares", "Bolívares", "Mixto" -> payment.paymentType.equals(selectedPaymentType, ignoreCase = true)
+				"Dólares", "Bolívares", "Mixto" -> payment.paymentType.equals(
+					selectedPaymentType,
+					ignoreCase = true
+				)
+				
 				"Promociones" -> !payment.promocionNombre.isNullOrBlank()
 				else -> true
 			}
@@ -328,26 +336,26 @@ fun PaymentCard(payment: Payment, onViewDetails: () -> Unit) {
 	}
 }
 
-@Composable
-fun PaymentInfoBadge(label: String, value: String) {
-	Surface(
-		shape = RoundedCornerShape(8.dp),
-		color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-		contentColor = MaterialTheme.colorScheme.primary
-	) {
-		Column(
-			modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-			horizontalAlignment = Alignment.CenterHorizontally
-		) {
-			Text(text = label, style = MaterialTheme.typography.labelSmall)
-			Text(
-				text = value,
-				style = MaterialTheme.typography.bodySmall,
-				fontWeight = FontWeight.Bold
-			)
-		}
-	}
-}
+//@Composable
+//fun PaymentInfoBadge(label: String, value: String) {
+//	Surface(
+//		shape = RoundedCornerShape(8.dp),
+//		color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+//		contentColor = MaterialTheme.colorScheme.primary
+//	) {
+//		Column(
+//			modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+//			horizontalAlignment = Alignment.CenterHorizontally
+//		) {
+//			Text(text = label, style = MaterialTheme.typography.labelSmall)
+//			Text(
+//				text = value,
+//				style = MaterialTheme.typography.bodySmall,
+//				fontWeight = FontWeight.Bold
+//			)
+//		}
+//	}
+//}
 
 
 @Composable
@@ -370,30 +378,12 @@ fun PaymentDetailDialog(
 	AlertDialog(
 		onDismissRequest = onDismiss,
 		title = {
-			Row(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(horizontal = 8.dp),
-				verticalAlignment = Alignment.CenterVertically
-			) {
-				Text(
-					text = "Detalles del pago",
-					modifier = Modifier.weight(1f),
-					textAlign = TextAlign.Center,
-					style = MaterialTheme.typography.titleLarge
-				)
-				IconButton(
-					onClick = {
-						val bitmap = generateInvoiceBitmap(payment, context)
-						shareBitmap(context, bitmap)
-					}
-				) {
-					Icon(
-						imageVector = Icons.Default.Share,
-						contentDescription = "Compartir"
-					)
-				}
-			}
+			Text(
+				text = "Detalles del pago",
+				modifier = Modifier.fillMaxWidth(),
+				textAlign = TextAlign.Center,
+				style = MaterialTheme.typography.titleLarge
+			)
 		},
 		text = {
 			Column(modifier = Modifier.fillMaxWidth()) {
@@ -477,19 +467,65 @@ fun PaymentDetailDialog(
 		},
 		containerColor = MaterialTheme.colorScheme.surface,
 		confirmButton = {
-			Button(
-				onClick = onDismiss,
+			Column(
 				modifier = Modifier.fillMaxWidth(),
-				colors = ButtonDefaults.buttonColors(
-					containerColor = MaterialTheme.colorScheme.primary,
-					contentColor = MaterialTheme.colorScheme.onPrimary
-				)
+				verticalArrangement = Arrangement.spacedBy(8.dp)
 			) {
-				Text("Cerrar")
+				Button(
+					onClick = {
+						val pdfFile = generateInvoicePdf(context, payment)
+						shareFile(context, pdfFile, "application/pdf")
+					},
+					modifier = Modifier.fillMaxWidth(),
+					colors = ButtonDefaults.buttonColors(
+						containerColor = MaterialTheme.colorScheme.primary,
+						contentColor = MaterialTheme.colorScheme.onPrimary
+					)
+				) {
+					Icon(
+						imageVector = Icons.Default.Share,
+						contentDescription = "Compartir",
+						modifier = Modifier.size(20.dp)
+					)
+					Spacer(modifier = Modifier.width(8.dp))
+					Text("Compartir factura (PDF)")
+				}
+				Button(
+					onClick = onDismiss,
+					modifier = Modifier.fillMaxWidth(),
+					colors = ButtonDefaults.buttonColors(
+						containerColor = MaterialTheme.colorScheme.primary,
+						contentColor = MaterialTheme.colorScheme.onPrimary
+					)
+				) {
+					Text("Cerrar")
+				}
+				
 			}
 		}
 	)
 }
+
+
+fun shareFile(context: Context, file: File, mimeType: String) {
+	val uri = FileProvider.getUriForFile(
+		context,
+		"${context.packageName}.fileprovider",
+		file
+	)
+	
+	val intent = Intent(Intent.ACTION_SEND).apply {
+		type = mimeType
+		putExtra(Intent.EXTRA_STREAM, uri)
+		addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+	}
+	
+	context.startActivity(
+		Intent.createChooser(intent, "Compartir factura")
+	)
+}
+
+
 //@Composable
 //fun PaymentInvoiceView(payment: Payment) {
 //	Column(

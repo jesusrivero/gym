@@ -5,140 +5,258 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Typeface
+import android.graphics.pdf.PdfDocument
 import com.jesus.gymcontrol.domain.model.Payment
 import com.jesus.gymcontrol.presentation.ui.commons.formatMonto
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-fun generateInvoiceBitmap(payment: Payment, context: Context): Bitmap {
-	val width = 1080
-	val height = 1600
-	val margen = 50f
-	val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-	val canvas = Canvas(bitmap)
+fun generateInvoicePdf(
+	context: Context,
+	payment: Payment,
+	fileName: String = "Factura_${System.currentTimeMillis()}.pdf"
+): File {
+	val pdfDocument = PdfDocument()
+	val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create() // A4
+	val page = pdfDocument.startPage(pageInfo)
 	
-	val headerColor = Color.parseColor("#003366")
-	val textColor = Color.BLACK
-	val grayColor = Color.LTGRAY
+	val canvas = page.canvas
+	val margin = 40f
+	val centerX = pageInfo.pageWidth / 2f
+	var y = 60f
 	
-	val headerPaint = Paint().apply {
-		color = headerColor
-	}
 	val titlePaint = Paint().apply {
-		color = Color.WHITE
-		textSize = 60f
-		isFakeBoldText = true
+		color = Color.BLACK
+		textSize = 20f
+		typeface = Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD)
 		textAlign = Paint.Align.CENTER
 	}
+	
 	val labelPaint = Paint().apply {
-		color = textColor
-		textSize = 38f
-		isFakeBoldText = true
+		color = Color.DKGRAY
+		textSize = 12f
+		typeface = Typeface.DEFAULT_BOLD
 	}
+	
 	val valuePaint = Paint().apply {
-		color = textColor
-		textSize = 38f
+		color = Color.BLACK
+		textSize = 12f
 	}
-	val totalPaint = Paint().apply {
-		color = textColor
-		textSize = 50f
-		isFakeBoldText = true
-	}
+	
 	val dividerPaint = Paint().apply {
-		color = grayColor
-		strokeWidth = 2f
+		color = Color.LTGRAY
+		strokeWidth = 1f
 	}
 	
-	canvas.drawColor(Color.WHITE)
-	
-	// Header
-	canvas.drawRect(0f, 0f, width.toFloat(), 150f, headerPaint)
-	canvas.drawText("FACTURA", width / 2f, 100f, titlePaint)
-	
-	var y = 180f + 30f
-	
-	val date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(payment.date))
-	val venc = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(payment.fechaVencimiento))
-	
-	fun drawLabelValue(label: String, value: String) {
-		canvas.drawText(label, margen, y, labelPaint)
-		canvas.drawText(value, width / 2f, y, valuePaint)
-		y += 50f
+	val totalPaint = Paint().apply {
+		color = Color.BLACK
+		textSize = 14f
+		typeface = Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD)
 	}
 	
-	drawLabelValue("Cliente:", payment.name)
-	drawLabelValue("Membresía:", payment.membershipName)
-	drawLabelValue("Fecha:", date)
-	drawLabelValue("Vence:", venc)
+	val totalValuePaint = Paint().apply {
+		color = Color.parseColor("#388E3C") // verde
+		textSize = 14f
+		typeface = Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD)
+	}
 	
+	// Título
+	canvas.drawText("COMPROBANTE DE PAGO", centerX, y, titlePaint)
 	y += 20f
-	canvas.drawLine(margen, y, width - margen, y, dividerPaint)
-	y += 60f
 	
-	canvas.drawText("Concepto", margen, y, labelPaint)
-	canvas.drawText("Monto", width - margen - 200f, y, labelPaint)
-	y += 40f
-	canvas.drawLine(margen, y, width - margen, y, dividerPaint)
-	y += 50f
+	canvas.drawLine(margin, y, pageInfo.pageWidth - margin, y, dividerPaint)
+	y += 20f
 	
-	// 🔷 Concepto y monto total (precio de la membresía)
-	canvas.drawText("Precio", margen, y, valuePaint)
-	canvas.drawText(formatMembershipPrice(payment), width - margen - 200f, y, valuePaint)
-	y += 50f
+	val col1X = margin
+	val col2X = centerX
 	
-	// 🔷 Detalle del pago según monedas
-	if (payment.amountDollar > 0) {
-		canvas.drawText("Dólares", margen, y, valuePaint)
-		canvas.drawText("$${"%.2f".format(payment.amountDollar)}", width - margen - 200f, y, valuePaint)
-		y += 50f
+	drawRow(canvas, "Cédula:", payment.idCard, col1X, col2X, y, labelPaint, valuePaint)
+	y += 20f
+	drawRow(canvas, "Nombre:", payment.name, col1X, col2X, y, labelPaint, valuePaint)
+	y += 20f
+	drawRow(canvas, "Membresía:", payment.membershipName, col1X, col2X, y, labelPaint, valuePaint)
+	y += 20f
+	
+	// Descripción multilinea
+	val conceptLines = breakTextIntoLines(payment.description, valuePaint, pageInfo.pageWidth - col2X - margin)
+	canvas.drawText("Concepto:", col1X, y, labelPaint)
+	var conceptY = y
+	for (line in conceptLines) {
+		canvas.drawText(line, col2X, conceptY, valuePaint)
+		conceptY += 15f
+	}
+	y = conceptY + 5f
+	
+	drawRow(canvas, "Tipo de Pago:", payment.paymentType, col1X, col2X, y, labelPaint, valuePaint)
+	y += 20f
+	
+	// Mostrar montos según el tipo
+	when (payment.paymentType.lowercase()) {
+		"dólares" -> {
+			drawRow(
+				canvas,
+				"Monto $:",
+				"$${"%.2f".format(payment.amountDollar)}",
+				col1X,
+				col2X,
+				y,
+				labelPaint,
+				valuePaint
+			)
+			y += 20f
+		}
+		"bolívares" -> {
+			drawRow(
+				canvas,
+				"Monto Bs:",
+				"Bs. ${"%.2f".format(payment.amountBs)}",
+				col1X,
+				col2X,
+				y,
+				labelPaint,
+				valuePaint
+			)
+			y += 20f
+		}
+		"mixto" -> {
+			drawRow(
+				canvas,
+				"Monto $:",
+				"$${"%.2f".format(payment.amountDollar)}",
+				col1X,
+				col2X,
+				y,
+				labelPaint,
+				valuePaint
+			)
+			y += 20f
+			
+			drawRow(
+				canvas,
+				"Monto Bs:",
+				"Bs. ${"%.2f".format(payment.amountBs)}",
+				col1X,
+				col2X,
+				y,
+				labelPaint,
+				valuePaint
+			)
+			y += 20f
+		}
 	}
 	
-	if (payment.amountBs > 0) {
-		canvas.drawText("Bolívares", margen, y, valuePaint)
-		canvas.drawText("Bs. ${"%.2f".format(payment.amountBs)}", width - margen - 200f, y, valuePaint)
-		y += 50f
-	}
-	
-	payment.reference?.let {
-		canvas.drawText("Referencia: $it", margen, y, valuePaint)
-		y += 50f
-	}
-	
+	// Promoción, si aplica
 	if (!payment.promocionNombre.isNullOrBlank()) {
-		canvas.drawText("Promoción: ${payment.promocionNombre}", margen, y, valuePaint)
-		y += 50f
+		canvas.drawLine(margin, y, pageInfo.pageWidth - margin, y, dividerPaint)
+		y += 20f
+		
+		drawRow(
+			canvas,
+			"Promoción:",
+			payment.promocionNombre ?: "",
+			col1X,
+			col2X,
+			y,
+			labelPaint,
+			valuePaint
+		)
+		y += 20f
+		
+		payment.promocionPorcentajeDescuento?.let {
+			drawRow(
+				canvas,
+				"Descuento aplicado:",
+				"${"%.0f".format(it)}%",
+				col1X,
+				col2X,
+				y,
+				labelPaint,
+				valuePaint
+			)
+			y += 20f
+		}
 	}
 	
-	if (payment.promocionPorcentajeDescuento != null) {
-		canvas.drawText("Descuento: ${payment.promocionPorcentajeDescuento}%", margen, y, valuePaint)
-		y += 50f
-	}
-	
+	// Fecha de vencimiento
+	val vencimientoFormatted = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(payment.fechaVencimiento))
+	drawRow(
+		canvas,
+		"Fecha de vencimiento:",
+		vencimientoFormatted,
+		col1X,
+		col2X,
+		y,
+		labelPaint,
+		valuePaint
+	)
 	y += 20f
-	canvas.drawLine(margen, y, width - margen, y, dividerPaint)
-	y += 60f
 	
-	canvas.drawText("TOTAL", margen, y, totalPaint)
-	canvas.drawText(formatMembershipPrice(payment), width - margen - 200f, y, totalPaint)
-	y += 100f
+	canvas.drawLine(margin, y, pageInfo.pageWidth - margin, y, dividerPaint)
+	y += 20f
 	
-	canvas.drawText("Descripción:", margen, y, labelPaint)
-	y += 50f
+	// Total resaltado
+	canvas.drawRect(margin, y, pageInfo.pageWidth - margin, y + 20f, dividerPaint)
+	canvas.drawText("Monto Total:", margin + 5f, y + 15f, totalPaint)
+	canvas.drawText(
+		formatMembershipPrice(payment),
+		pageInfo.pageWidth - margin - 5f,
+		y + 15f,
+		totalValuePaint.apply { textAlign = Paint.Align.RIGHT }
+	)
+	y += 40f
 	
-	val maxLineWidth = width - 2 * margen
-	val descriptionLines = breakTextIntoLines(payment.description, valuePaint, maxLineWidth)
+	// Footer
+	canvas.drawLine(margin, pageInfo.pageHeight - 40f, pageInfo.pageWidth - margin, pageInfo.pageHeight - 40f, dividerPaint)
+	canvas.drawText(
+		"¡Gracias por su preferencia!",
+		centerX,
+		pageInfo.pageHeight - 25f,
+		Paint().apply {
+			color = Color.DKGRAY
+			textSize = 10f
+			textAlign = Paint.Align.CENTER
+		}
+	)
 	
-	for (line in descriptionLines) {
-		canvas.drawText(line, margen, y, valuePaint)
-		y += 45f
-	}
+	pdfDocument.finishPage(page)
 	
-	return bitmap
+	val file = File(context.cacheDir, fileName)
+	pdfDocument.writeTo(file.outputStream())
+	pdfDocument.close()
+	
+	return file
 }
 
-// 🔷 helper para partir texto en líneas
-fun breakTextIntoLines(text: String, paint: Paint, maxWidth: Float): List<String> {
+
+// 🔷 Dibuja una fila de dos columnas
+fun drawRow(
+	canvas: Canvas,
+	label: String,
+	value: String,
+	col1X: Float,
+	col2X: Float,
+	y: Float,
+	labelPaint: Paint,
+	valuePaint: Paint
+) {
+	canvas.drawText(label, col1X, y, labelPaint)
+	canvas.drawText(value, col2X, y, valuePaint)
+}
+
+// 🔷 Formatea precio total
+fun formatMembershipPrice(payment: Payment): String {
+	return "$${"%.2f".format(payment.amount)}"
+}
+
+// 🔷 Parte texto en varias líneas
+fun breakTextIntoLines(
+	text: String,
+	paint: Paint,
+	maxWidth: Float
+): List<String> {
 	val words = text.split(" ")
 	val lines = mutableListOf<String>()
 	var currentLine = ""
@@ -157,9 +275,4 @@ fun breakTextIntoLines(text: String, paint: Paint, maxWidth: Float): List<String
 	}
 	
 	return lines
-}
-
-// 🔷 Esta función devuelve el precio original de la membresía:
-fun formatMembershipPrice(payment: Payment): String {
-	return "$${"%.2f".format(payment.amount)}"
 }
