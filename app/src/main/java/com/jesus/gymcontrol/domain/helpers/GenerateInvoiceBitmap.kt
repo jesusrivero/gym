@@ -194,6 +194,21 @@ fun generateInvoicePdf(
 	)
 	y += 20f
 	
+
+	// Fecha de vencimiento
+	val fechaActual = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(payment.date))
+	drawRow(
+		canvas,
+		"Fecha del pago:",
+		fechaActual,
+		col1X,
+		col2X,
+		y,
+		labelPaint,
+		valuePaint
+	)
+	y += 20f
+	
 	canvas.drawLine(margin, y, pageInfo.pageWidth - margin, y, dividerPaint)
 	y += 20f
 	

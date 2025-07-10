@@ -43,6 +43,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -77,7 +78,7 @@ fun ListPaymentsScreen(
 ) {
 	val payments = viewModel.payments
 	val isLoading = viewModel.isLoading
-	var showDialog by rememberSaveable { mutableStateOf(false) }
+	var showDialog by remember { mutableStateOf(false) }
 	var selectedPayment by rememberSaveable { mutableStateOf<Payment?>(null) }
 	var searchText by rememberSaveable { mutableStateOf("") }
 	var selectedPaymentType by rememberSaveable { mutableStateOf("Todos") }
@@ -161,8 +162,8 @@ fun ListPaymentsScreen(
 						searchText = searchText,
 						onSearchTextChanged = { searchText = it },
 						onAddClick = {
-							// 👇 Aquí pasamos valores predeterminados
-							navPagToScreen("nuevoUid", "Nuevo cliente")
+							// 👇 Aquí también pasamos valores predeterminados
+							navPagToScreen("nuevoUid", "")
 						},
 						showAddButton = true
 					)
@@ -216,7 +217,7 @@ fun ListPaymentsScreen(
 					onSearchTextChanged = { searchText = it },
 					onAddClick = {
 						// 👇 Aquí también pasamos valores predeterminados
-						navPagToScreen("nuevoUid", "Nuevo cliente")
+						navPagToScreen("nuevoUid", "")
 					},
 					showAddButton = true
 				)
@@ -336,26 +337,6 @@ fun PaymentCard(payment: Payment, onViewDetails: () -> Unit) {
 	}
 }
 
-//@Composable
-//fun PaymentInfoBadge(label: String, value: String) {
-//	Surface(
-//		shape = RoundedCornerShape(8.dp),
-//		color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-//		contentColor = MaterialTheme.colorScheme.primary
-//	) {
-//		Column(
-//			modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-//			horizontalAlignment = Alignment.CenterHorizontally
-//		) {
-//			Text(text = label, style = MaterialTheme.typography.labelSmall)
-//			Text(
-//				text = value,
-//				style = MaterialTheme.typography.bodySmall,
-//				fontWeight = FontWeight.Bold
-//			)
-//		}
-//	}
-//}
 
 
 @Composable
