@@ -225,12 +225,8 @@ fun PaymentsScreenContent(
 			confirmButton = {
 				if (isActionSuccess) {
 					Row {
-						TextButton(onClick = {
-							viewModel.clearPaymentAction()
-						}) {
-							Text("Sí")
-						}
-						Spacer(Modifier.width(8.dp))
+						
+					
 						TextButton(onClick = {
 							viewModel.clearPaymentAction()
 							navController.navigate(AppRoutes.ListPaymentsScreen) {
@@ -238,6 +234,13 @@ fun PaymentsScreenContent(
 							}
 						}) {
 							Text("No")
+						}
+						
+						Spacer(Modifier.width(8.dp))
+						TextButton(onClick = {
+							viewModel.clearPaymentAction()
+						}) {
+							Text("Sí")
 						}
 					}
 				} else {
