@@ -118,6 +118,8 @@ fun EditPersonContent(
 	var age by remember { mutableStateOf("") }
 	var phone by remember { mutableStateOf("") }
 	var gender by remember { mutableStateOf("") }
+	var name by remember { mutableStateOf("") }
+	
 	
 	val colorScheme = MaterialTheme.colorScheme
 	
@@ -175,12 +177,13 @@ fun EditPersonContent(
 		Button(
 			onClick = {
 				val uid = viewModel.currentUid() ?: return@Button
+				val gymCode = viewModel.currentGymCode() ?: return@Button
+				
 				viewModel.updateDatesUser(
 					uid = uid,
 					idcard = idCard,
-					age = age,
 					phone = phone,
-					gender = gender
+					name = name,
 				)
 			},
 			enabled = formIsValid,

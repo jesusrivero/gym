@@ -131,21 +131,26 @@ class AuthViewModel @Inject constructor(
 	}
 	
 	
-
+	fun currentGymCode(): String? {
+		return sessionManager.getGymCode()
+	}
+	
+	
 	
 	fun updateDatesUser(
 		uid: String,
 		idcard: String,
-		age: String,
 		phone: String,
-		gender: String
+		name: String
 	) {
+		val gymCode = currentGymCode() ?: return  // 👈 Aquí lo tomas
+		
 		viewModelScope.launch {
 			isLoading = true
 			errorMessage = null
 			_updateDatesSuccess.value = null
 			
-			val result = updateDatesUserUseCase(uid, idcard, age, phone, gender)
+			val result = updateDatesUserUseCase(uid, idcard, phone, name, gymCode)
 			
 			result.onSuccess {
 				_updateDatesSuccess.value = true
@@ -157,6 +162,7 @@ class AuthViewModel @Inject constructor(
 			isLoading = false
 		}
 	}
+	
 	
 	
 	fun recoverPassword(email: String) {

@@ -99,9 +99,6 @@ fun NavigationHost(
 					navController.navigate(
 						AppRoutes.PaymentsScreen.route(uid, nombre)
 					)
-				},
-				navEdit = { uid ->
-					navController.navigate("${AppRoutes.EditPersonScreen.route}/$uid")
 				}
 			)
 		}

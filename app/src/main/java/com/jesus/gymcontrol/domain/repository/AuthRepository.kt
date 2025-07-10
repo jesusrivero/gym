@@ -26,14 +26,14 @@ interface AuthRepository {
         rol: String,
         code: String
     ):  Result<Unit>
-
-    suspend fun updateDatesUser(
-        uid: String,
-        idcard: String,
-        age: String,
-        phone: String,
-        gender: String,
-    ):  Result<Unit>
+	
+	suspend fun updateDatesUser(
+		uid: String,
+		idcard: String,
+		name: String,
+		phone: String,
+		gymCode: String
+	): Result<Unit>
 	
 	suspend fun changePassword(request: PasswordChangeRequest): Result<Unit>
 }

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Payment
@@ -26,6 +27,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -34,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -42,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -49,6 +53,7 @@ import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.domain.helpers.WhatsAppButton
 import com.jesus.gymcontrol.domain.model.ListUser
+import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import com.jesus.gymcontrol.domain.viewmodels.UserListViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.ui.commons.PaymentFilters
@@ -62,63 +67,51 @@ import java.util.Locale
 @Composable
 fun PersonsScreen(
 	navBottom: NavController,
-	viewModel: UserListViewModel = hiltViewModel(),
-	navPag: (String, String) -> Unit,
-	navEdit: (String) -> Unit
+	userListViewModel: UserListViewModel = hiltViewModel(),
+	authViewModel: AuthViewModel = hiltViewModel(),
+	navPag: (String, String) -> Unit
 ) {
 	LaunchedEffect(Unit) {
-		viewModel.loadUsers()
+		userListViewModel.loadUsers()
 	}
 	
-	var showUserDialog by rememberSaveable { mutableStateOf(false) }
-	var selectedUser by rememberSaveable { mutableStateOf<ListUser?>(null) }
+	var dialogMode by rememberSaveable { mutableStateOf<DialogMode>(DialogMode.None) }
+	var editableUser by remember { mutableStateOf<ListUser?>(null) }
 	var searchText by rememberSaveable { mutableStateOf("") }
 	var selectedState by rememberSaveable { mutableStateOf("Todos") }
 	
 	val configuration = LocalConfiguration.current
 	val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 	
-	if (showUserDialog && selectedUser != null) {
-		val formattedDate = selectedUser?.date?.takeIf { it > 0L }?.let {
-			SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(it))
-		} ?: "No disponible"
-		
-		AlertDialog(
-			onDismissRequest = {
-				showUserDialog = false
-				selectedUser = null
-			},
-			title = {
-				Text(
-					"Información del usuario",
-					modifier = Modifier.fillMaxWidth(),
-					textAlign = TextAlign.Center
-				)
-			},
-			text = {
-				Column {
-					DetailRow("Nombre:", selectedUser?.name ?: "")
-					DetailRow("Rol:", selectedUser?.rol ?: "")
-					DetailRow("Email:", selectedUser?.email ?: "")
-					DetailRow("Cédula:", selectedUser?.idcard ?: "")
-					DetailRow("Estado:", selectedUser?.state ?: "")
-					DetailRow("Teléfono:", selectedUser?.phone ?: "")
-					DetailRow("Fecha de registro:", formattedDate)
+	if (editableUser != null && dialogMode != DialogMode.None) {
+		if (dialogMode == DialogMode.Edit) {
+			EditUserDialog(
+				user = editableUser!!,
+				onDismiss = {
+					dialogMode = DialogMode.None
+					editableUser = null
+				},
+				onSave = { updatedUser ->
+					authViewModel.updateDatesUser(
+						uid = updatedUser.id,
+						idcard = updatedUser.idcard,
+						phone = updatedUser.phone,
+						name = updatedUser.name ?: ""
+					)
+					userListViewModel.loadUsers()
+					dialogMode = DialogMode.None
+					editableUser = null
 				}
-			},
-			containerColor = MaterialTheme.colorScheme.surface,
-			confirmButton = {
-				Button(
-					onClick = {
-						showUserDialog = false
-						selectedUser = null
-					},
-					modifier = Modifier.fillMaxWidth()
-				) {
-					Text("Cerrar")
+			)
+		} else if (dialogMode == DialogMode.View) {
+			ViewUserDialog(
+				user = editableUser!!,
+				onDismiss = {
+					dialogMode = DialogMode.None
+					editableUser = null
 				}
-			}
-		)
+			)
+		}
 	}
 	
 	Scaffold(
@@ -146,8 +139,8 @@ fun PersonsScreen(
 			)
 		}
 	) { innerPadding ->
-		val users = viewModel.listUsers
-		val isLoading = viewModel.isLoading
+		val users = userListViewModel.listUsers
+		val isLoading = userListViewModel.isLoading
 		
 		val filteredList = users.filter { user ->
 			val matchesSearch = searchText.isBlank() ||
@@ -172,9 +165,7 @@ fun PersonsScreen(
 			.padding(innerPadding)
 			.padding(horizontal = if (isLandscape) 16.dp else 0.dp)
 		
-		Column(
-			modifier = contentModifier
-		) {
+		Column(modifier = contentModifier) {
 			PaymentFilters(
 				selectedPaymentType = selectedState,
 				paymentTypeOptions = listOf("Todos", "Activos", "Inactivos", "Próximos a pagar"),
@@ -190,17 +181,11 @@ fun PersonsScreen(
 			)
 			
 			if (isLoading) {
-				Box(
-					modifier = Modifier.fillMaxSize(),
-					contentAlignment = Alignment.Center
-				) {
+				Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
 					CircularProgressIndicator()
 				}
 			} else if (filteredList.isEmpty()) {
-				Box(
-					modifier = Modifier.fillMaxSize(),
-					contentAlignment = Alignment.Center
-				) {
+				Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
 					Text("No hay resultados")
 				}
 			} else {
@@ -212,12 +197,13 @@ fun PersonsScreen(
 						PersonCard(
 							user = user,
 							onEdit = {
-								navEdit(user.id)
+								editableUser = user
+								dialogMode = DialogMode.Edit
 							},
 							navPag = navPag,
 							onViewDetails = {
-								selectedUser = user
-								showUserDialog = true
+								editableUser = user
+								dialogMode = DialogMode.View
 							}
 						)
 					}
@@ -227,14 +213,16 @@ fun PersonsScreen(
 	}
 }
 
-
+enum class DialogMode {
+	None, View, Edit
+}
 
 
 @Composable
 fun PersonCard(
 	user: ListUser,
 	onEdit: () -> Unit,
-	navPag: (String, String) -> Unit, // uid, nombre
+	navPag: (String, String) -> Unit,
 	onViewDetails: () -> Unit,
 ) {
 	Card(
@@ -304,6 +292,162 @@ fun PersonCard(
 	}
 }
 
+
+@Composable
+fun EditUserDialog(
+	user: ListUser,
+	onDismiss: () -> Unit,
+	onSave: (ListUser) -> Unit
+) {
+	var name by remember { mutableStateOf(user.name) }
+	var idcard by remember { mutableStateOf(user.idcard) }
+	var phone by remember { mutableStateOf(user.phone) }
+	
+	var nameError by remember { mutableStateOf<String?>(null) }
+	var idcardError by remember { mutableStateOf<String?>(null) }
+	var phoneError by remember { mutableStateOf<String?>(null) }
+	
+	AlertDialog(
+		onDismissRequest = onDismiss,
+		containerColor = MaterialTheme.colorScheme.surface,
+		title = {
+			Text("Editar usuario", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+		},
+		text = {
+			Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+				OutlinedTextField(
+					value = name,
+					onValueChange = {
+						if (it.length <= 35) name = it
+					},
+					label = { Text("Nombre") },
+					maxLines = 1,
+					isError = nameError != null,
+					supportingText = {
+						if (nameError != null) Text(nameError!!, color = MaterialTheme.colorScheme.error)
+					}
+				)
+				OutlinedTextField(
+					value = idcard,
+					onValueChange = {
+						if (it.length <= 9) idcard = it.filter { c -> c.isDigit() }
+					},
+					label = { Text("Cédula") },
+					maxLines = 1,
+					isError = idcardError != null,
+					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+					supportingText = {
+						if (idcardError != null) Text(idcardError!!, color = MaterialTheme.colorScheme.error)
+					}
+				)
+				OutlinedTextField(
+					value = phone,
+					onValueChange = {
+						if (it.length <= 15) phone = it.filter { c -> c.isDigit() }
+					},
+					label = { Text("Teléfono") },
+					maxLines = 1,
+					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+					isError = phoneError != null,
+					supportingText = {
+						if (phoneError != null) Text(phoneError!!, color = MaterialTheme.colorScheme.error)
+					}
+				)
+			}
+		},
+		confirmButton = {
+			Row(
+				horizontalArrangement = Arrangement.spacedBy(8.dp),
+				modifier = Modifier.fillMaxWidth()
+			) {
+				Button(
+					onClick = onDismiss,
+					modifier = Modifier.weight(1f)
+				) {
+					Text("Cerrar")
+				}
+				
+				Button(
+					onClick = {
+						var isValid = true
+						
+						if (name.isBlank()) {
+							nameError = "El nombre no puede estar vacío"
+							isValid = false
+						} else {
+							nameError = null
+						}
+						
+						if (idcard.length !in 7..9) {
+							idcardError = "La cédula debe tener entre 7 y 9 dígitos"
+							isValid = false
+						} else {
+							idcardError = null
+						}
+						
+						if (phone.length !in 10..15) {
+							phoneError = "El teléfono debe tener entre 10 y 15 dígitos"
+							isValid = false
+						} else {
+							phoneError = null
+						}
+						
+						if (isValid) {
+							onSave(
+								user.copy(
+									name = name,
+									idcard = idcard,
+									phone = phone
+								)
+							)
+						}
+					},
+					modifier = Modifier.weight(1f)
+				) {
+					Text("Guardar")
+				}
+			}
+		}
+	)
+}
+
+
+@Composable
+fun ViewUserDialog(
+	user: ListUser,
+	onDismiss: () -> Unit
+) {
+	val formattedDate = user.date.takeIf { it != null && it > 0L }?.let {
+		SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(it))
+	} ?: "No disponible"
+	
+	AlertDialog(
+		onDismissRequest = onDismiss,
+		containerColor = MaterialTheme.colorScheme.surface,
+		title = {
+			Text("Información del usuario", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+		},
+		text = {
+			Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+				Text("Nombre: ${user.name}")
+				Text("Rol: ${user.rol}")
+				Text("Email: ${user.email}")
+				Text("Cédula: ${user.idcard}")
+				Text("Estado: ${user.state}")
+				Text("Teléfono: ${user.phone}")
+				Text("Fecha de registro: $formattedDate")
+			}
+		},
+		confirmButton = {
+			Button(
+				onClick = onDismiss,
+				modifier = Modifier.fillMaxWidth()
+			) {
+				Text("Cerrar")
+			}
+		}
+	)
+}
 
 
 @Composable
