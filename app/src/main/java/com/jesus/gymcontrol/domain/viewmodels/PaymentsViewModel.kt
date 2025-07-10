@@ -43,6 +43,7 @@ class PaymentsViewModel @Inject constructor(
 		private set
 	
 	
+	
 	var selectedPromotion by mutableStateOf<Promotion?>(null)
 		private set
 	
