@@ -340,7 +340,7 @@ fun NewClientsSection(
 					style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
 				)
 				TextButton(
-					onClick = { navController.navigate(AppRoutes.PersonasScreen) },
+					onClick = {  navController.navigate(AppRoutes.PersonasScreen.route) },
 					contentPadding = PaddingValues(horizontal = 8.dp)
 				) {
 					Text(

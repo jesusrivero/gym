@@ -167,6 +167,19 @@ class AuthRepositoryImpl(
 	}
 	
 	
+	
+	override suspend fun checkidcardExists(idcard: String): Boolean {
+		return try {
+			val querySnapshot = firestore.collection("users")
+				.whereEqualTo("idcard", idcard)
+				.get()
+				.await()
+			!querySnapshot.isEmpty
+		} catch (e: Exception) {
+			false
+		}
+	}
+	
 }
 
 

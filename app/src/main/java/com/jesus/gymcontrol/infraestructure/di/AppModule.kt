@@ -51,6 +51,7 @@ import com.jesus.gymcontrol.domain.usecase.usuario.UpdateDatesUserUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdatePromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateRolUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateUserProfileUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.auth.CheckidcardExistsUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.codes.GetAvailableCodesUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.membership.ToggleMembershipStateUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.notification.AddNotificacionUseCase
@@ -397,4 +398,9 @@ object AppModule {
 	): GenerarDescripcionPagoUseCase {
 		return GenerarDescripcionPagoUseCase(repository)
 	}
+	
+	@Provides
+	fun provideCheckCedulaExistsUseCase(
+		repository: AuthRepository
+	) = CheckidcardExistsUseCase(repository)
 }

@@ -163,10 +163,21 @@ fun RegisterContent(navController: NavController) {
 					)
 					if (idcard.isNotBlank() && !isValidCedula) {
 						Text("Cédula inválida", color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+					} else if (viewModel.errorMessage?.contains("idcard") == true) {
+						Text(viewModel.errorMessage!!, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
 					}
 					Spacer(modifier = Modifier.height(24.dp))
 					Button(
-						onClick = { step = 1 },
+						onClick = {
+							viewModel.errorMessage = null
+							viewModel.checkidcardExists(idcard) { exists ->
+								if (exists) {
+									viewModel.errorMessage = "La cédula ya está registrada"
+								} else {
+									step = 1
+								}
+							}
+						},
 						enabled = isFormValid,
 						modifier = Modifier
 							.fillMaxWidth()
@@ -175,6 +186,7 @@ fun RegisterContent(navController: NavController) {
 					) {
 						Text("Siguiente")
 					}
+					
 				}
 			} else {
 				Column {

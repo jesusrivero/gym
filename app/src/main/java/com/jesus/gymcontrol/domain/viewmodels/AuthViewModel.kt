@@ -11,8 +11,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 import com.jesus.gymcontrol.data.repository.SessionManager
+import com.jesus.gymcontrol.domain.repository.AuthRepository
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateDatesUserUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateRolUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.auth.CheckidcardExistsUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.auth.LoginUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.auth.RecoverPasswordUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.auth.RegisterUseCase
@@ -31,6 +33,8 @@ class AuthViewModel @Inject constructor(
 	private val recoverUseCase: RecoverPasswordUseCase,
 	private val updateRolUseCase: UpdateRolUseCase,
 	private val updateDatesUserUseCase: UpdateDatesUserUseCase,
+	private val checkidcardExistsUseCase: CheckidcardExistsUseCase,
+	private val authRepository: AuthRepository,
 	val sessionManager: SessionManager,
 ) : ViewModel() {
 	
@@ -222,6 +226,7 @@ class AuthViewModel @Inject constructor(
 	}
 	
 	
+	
 	fun navigateBasedOnRole(navController: NavController) {
 		val rol = sessionManager.getRol()
 		
@@ -249,6 +254,13 @@ class AuthViewModel @Inject constructor(
 					popUpTo(AppRoutes.StartScreen) { inclusive = true }
 				}
 			}
+		}
+	}
+	
+	fun checkidcardExists(idcard: String, onResult: (exists: Boolean) -> Unit) {
+		viewModelScope.launch {
+			val exists = checkidcardExistsUseCase(idcard)
+			onResult(exists)
 		}
 	}
 	
