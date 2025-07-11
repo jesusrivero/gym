@@ -56,6 +56,7 @@ class UserAdminRepositoryImpl @Inject constructor(
 				"uid" to uid,
 				"email" to userData.email,
 				"name" to userData.name,
+				"lastname" to userData.lastname,
 				"idcard" to userData.idCard,
 				"gender" to userData.gender,
 				"age" to userData.age,
@@ -86,6 +87,7 @@ class UserAdminRepositoryImpl @Inject constructor(
 					mapOf(
 						"uid" to uid,
 						"name" to userData.name,
+						"lastname" to userData.lastname,
 						"rol" to userData.rol,
 						"state" to "inactivo",
 						"email" to userData.email,

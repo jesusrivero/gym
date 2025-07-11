@@ -149,6 +149,7 @@ fun RegPersonContent(
 	val colorScheme = MaterialTheme.colorScheme
 	
 	var name by rememberSaveable { mutableStateOf("") }
+	var lastname by rememberSaveable { mutableStateOf("") }
 	var email by rememberSaveable { mutableStateOf("") }
 	var password by rememberSaveable { mutableStateOf("") }
 	var phone by rememberSaveable { mutableStateOf("") }
@@ -162,6 +163,7 @@ fun RegPersonContent(
 	
 	val trimmedEmail = email.trim()
 	val isNameValid = name.isNotBlank()
+	val islastNameValid = lastname.isNotBlank()
 	val isEmailValid = trimmedEmail.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
 	val isPasswordValid = password.length >= 6
 	val isIdCardValid = idCard.length in 7..9
@@ -170,7 +172,7 @@ fun RegPersonContent(
 	var isCountryDropdownExpanded by rememberSaveable { mutableStateOf(false) }
 	val fullPhone = "$selectedCountryCode$phone"
 	val isPhoneValid = phone.isBlank() || fullPhone.matches(Regex("^[1-9]\\d{7,14}$"))
-	val formIsValid = isNameValid && isEmailValid && isPasswordValid && isCodeValid && isIdCardValid && isPhoneValid
+	val formIsValid = isNameValid && islastNameValid && isEmailValid && isPasswordValid && isCodeValid && isIdCardValid && isPhoneValid
 	
 	if (showDialog) {
 		AlertDialog(
@@ -183,6 +185,7 @@ fun RegPersonContent(
 							email = trimmedEmail,
 							password = password,
 							name = name,
+							lastname = lastname,
 							phone = if (phone.isBlank()) null else fullPhone,
 							idCard = idCard,
 							gender = "",
@@ -221,10 +224,20 @@ fun RegPersonContent(
 				OutlinedTextField(
 					value = name,
 					onValueChange = { name = it },
-					label = { Text("Nombre completo") },
+					label = { Text("Nombre") },
 					modifier = Modifier.fillMaxWidth()
 				)
 				if (!isNameValid && name.isNotEmpty()) {
+					Text("El nombre es obligatorio", color = colorScheme.error, style = MaterialTheme.typography.labelSmall)
+				}
+				
+				OutlinedTextField(
+					value = lastname,
+					onValueChange = { lastname = it },
+					label = { Text("Apellido") },
+					modifier = Modifier.fillMaxWidth()
+				)
+				if (!isNameValid && lastname.isNotEmpty()) {
 					Text("El nombre es obligatorio", color = colorScheme.error, style = MaterialTheme.typography.labelSmall)
 				}
 			}
