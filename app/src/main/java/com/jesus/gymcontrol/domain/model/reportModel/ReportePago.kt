@@ -2,6 +2,7 @@ package com.jesus.gymcontrol.domain.model.reportModel
 
 data class ReportePago(
 	val nombreCliente: String,
+	val apellidoCliente: String,
 	val cedula: String,
 	val membresia: String,
 	val tipoPago: String,

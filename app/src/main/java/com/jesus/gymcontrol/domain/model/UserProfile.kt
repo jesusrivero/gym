@@ -2,6 +2,7 @@ package com.jesus.gymcontrol.domain.model
 
 data class UserProfile(
 	val name: String = "",
+	val lastname: String = "",
 	val phone: String = "",
 	val age: Int? = null,
 	val gender: String = "",

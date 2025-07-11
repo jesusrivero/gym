@@ -1,14 +1,12 @@
 package com.jesus.gymcontrol.domain.helpers
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
 import com.jesus.gymcontrol.domain.model.Payment
-import com.jesus.gymcontrol.presentation.ui.commons.formatMonto
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -76,6 +74,8 @@ fun generateInvoicePdf(
 	drawRow(canvas, "Cédula:", payment.idCard, col1X, col2X, y, labelPaint, valuePaint)
 	y += 20f
 	drawRow(canvas, "Nombre:", payment.name, col1X, col2X, y, labelPaint, valuePaint)
+	y += 20f
+	drawRow(canvas, "Apellido:", payment.lastname, col1X, col2X, y, labelPaint, valuePaint)
 	y += 20f
 	drawRow(canvas, "Membresía:", payment.membershipName, col1X, col2X, y, labelPaint, valuePaint)
 	y += 20f

@@ -340,7 +340,7 @@ fun NewClientsSection(
 					style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
 				)
 				TextButton(
-					onClick = {  navController.navigate(AppRoutes.PersonasScreen.route) },
+					onClick = { navController.navigate(AppRoutes.PersonasScreen.route) },
 					contentPadding = PaddingValues(horizontal = 8.dp)
 				) {
 					Text(
@@ -356,7 +356,8 @@ fun NewClientsSection(
 			LazyRow {
 				items(users) { user ->
 					NewClientAvatar(
-						name = user.name,
+						// ✅ ahora mostramos nombre y apellido
+						name = "${user.name} ${user.lastname}".trim(),
 						onClick = { selectedUser = user }
 					)
 				}
@@ -379,16 +380,18 @@ fun NewClientsSection(
 			text = {
 				Column {
 					Text("Nombre: ${user.name}")
+					Text("Apellido: ${user.lastname}")
 					Text("Cédula: ${user.idcard}")
 					Text("Teléfono: ${user.phone}")
 					Text("Correo: ${user.email}")
 					Text("Estado: ${user.state}")
-					Text("rol: ${user.rol}")
+					Text("Rol: ${user.rol}")
 				}
 			}, containerColor = Color.White
 		)
 	}
 }
+
 
 @Composable
 fun SummaryAndMembershipCard(
@@ -587,7 +590,7 @@ fun PaymentsList(payments: List<Payment>) {
 								modifier = Modifier.padding(end = 8.dp)
 							)
 							Text(
-								text = payment.name,
+								text = "${payment.name} ${payment.lastname}",
 								style = MaterialTheme.typography.bodyLarge.copy(
 									fontWeight = FontWeight.SemiBold
 								)

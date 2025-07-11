@@ -21,6 +21,7 @@ class UserRepositoryImpl @Inject constructor(
 			// 1. Obtener datos básicos del usuario
 			val userSnapshot = firestore.collection("users").document(uid).get().await()
 			val userName = userSnapshot.getString("name") ?: "Desconocido"
+			val lastname = userSnapshot.getString("lastname") ?: "Desconocido"
 			val email = userSnapshot.getString("email") ?: "Desconocido"
 			val idcard = userSnapshot.getString("idcard") ?: "Desconocido"
 			val date = userSnapshot.getLong("date")
@@ -29,6 +30,7 @@ class UserRepositoryImpl @Inject constructor(
 			val userGymData = mapOf(
 				"code" to gym.code,
 				"name" to gym.name,
+				"lastname" to lastname,
 				"direction" to gym.direction,
 				"phone" to gym.phone,
 				"state" to "activo",
@@ -39,6 +41,7 @@ class UserRepositoryImpl @Inject constructor(
 			val gymUserData = mapOf(
 				"uid" to uid,
 				"name" to userName,
+				"lastname" to lastname,
 				"rol" to rol,
 				"email" to email,
 				"idcard" to idcard,
@@ -142,6 +145,7 @@ class UserRepositoryImpl @Inject constructor(
 			ListUser(
 				id = doc.id,
 				name = data["name"] as? String ?: "",
+				lastname = data["lastname"] as? String ?: "",
 				idcard = data["idcard"] as? String ?: "",
 				phone = data["phone"] as? String ?: "",
 				email = data["email"] as? String ?: "",
@@ -172,6 +176,7 @@ class UserRepositoryImpl @Inject constructor(
 			// Actualizar Firestore: users/{uid}
 			val userMap = mapOf(
 				"name" to userUpdate.name,
+				"lastname" to userUpdate.lastname,
 				"phone" to userUpdate.phone,
 				"age" to userUpdate.age,
 				"gender" to userUpdate.gender,
@@ -187,6 +192,7 @@ class UserRepositoryImpl @Inject constructor(
 			// Actualizar en gimnasios/{gymCode}/usuarios/{uid}
 			val gymUserMap = mapOf(
 				"name" to userUpdate.name,
+				"lastname" to userUpdate.lastname,
 				"phone" to userUpdate.phone
 			)
 			

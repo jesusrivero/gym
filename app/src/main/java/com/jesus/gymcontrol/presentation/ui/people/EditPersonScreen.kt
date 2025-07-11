@@ -119,6 +119,7 @@ fun EditPersonContent(
 	var phone by remember { mutableStateOf("") }
 	var gender by remember { mutableStateOf("") }
 	var name by remember { mutableStateOf("") }
+	var lastname by remember { mutableStateOf("")}
 	
 	
 	val colorScheme = MaterialTheme.colorScheme
@@ -184,6 +185,7 @@ fun EditPersonContent(
 					idcard = idCard,
 					phone = phone,
 					name = name,
+					lastname = lastname
 				)
 			},
 			enabled = formIsValid,

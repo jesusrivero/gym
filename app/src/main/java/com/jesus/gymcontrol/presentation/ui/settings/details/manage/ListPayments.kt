@@ -125,6 +125,7 @@ fun ListPaymentsScreen(
 		val filteredList = payments.filter { payment ->
 			val matchesSearch = searchText.isBlank() ||
 					payment.name.contains(searchText, ignoreCase = true) ||
+					payment.lastname.contains(searchText, ignoreCase = true) ||
 					payment.reference?.contains(searchText, ignoreCase = true) == true ||
 					payment.membershipName.contains(searchText, ignoreCase = true)
 			
@@ -286,7 +287,7 @@ fun PaymentCard(payment: Payment, onViewDetails: () -> Unit) {
 		) {
 			// Nombre
 			Text(
-				text = payment.name,
+				text = "${payment.name} ${payment.lastname}".trim(),
 				style = MaterialTheme.typography.bodyMedium,
 				fontWeight = FontWeight.SemiBold,
 				modifier = Modifier.weight(1.2f)
@@ -368,7 +369,10 @@ fun PaymentDetailDialog(
 		},
 		text = {
 			Column(modifier = Modifier.fillMaxWidth()) {
-				DetailRow("Nombre:", payment.name)
+				DetailRow("Nombre:", "${payment.lastname}".trim(),)
+				Spacer(modifier = Modifier.height(8.dp))
+				
+				DetailRow("Apellido:", "${payment.lastname}".trim(),)
 				Spacer(modifier = Modifier.height(8.dp))
 				
 				DetailRow("Membresía:", payment.membershipName)

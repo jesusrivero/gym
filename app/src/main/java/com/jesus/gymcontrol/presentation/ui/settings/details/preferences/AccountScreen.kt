@@ -79,6 +79,7 @@ fun AccountContent(
 	
 	// Estados de usuario para los campos del formulario
 	var name by rememberSaveable { mutableStateOf("") }
+	var lastname by rememberSaveable { mutableStateOf("") }
 	var phone by rememberSaveable { mutableStateOf("") }
 	var age by rememberSaveable { mutableStateOf("") }
 	var gender by rememberSaveable { mutableStateOf("") }
@@ -114,6 +115,7 @@ fun AccountContent(
 	LaunchedEffect(profileReloadKey, viewModel.userProfile) {
 		viewModel.userProfile?.let { user ->
 			name = user.name
+			lastname = user.lastname
 			phone = user.phone
 			age = user.age?.toString() ?: ""
 			gender = user.gender
@@ -171,6 +173,15 @@ fun AccountContent(
 					value = name,
 					onValueChange = { name = it },
 					label = { Text("Nombre") },
+					modifier = Modifier.fillMaxWidth(),
+					enabled = isEditing,
+					singleLine = true
+				)
+				
+				OutlinedTextField(
+					value = lastname,
+					onValueChange = { lastname = it },
+					label = { Text("Apellido") },
 					modifier = Modifier.fillMaxWidth(),
 					enabled = isEditing,
 					singleLine = true
@@ -327,6 +338,7 @@ fun AccountContent(
 									viewModel.updateProfile(
 										UserUpdate(
 											name = name,
+											lastname = lastname,
 											phone = phone.ifBlank { null },
 											age = age.toIntOrNull(),
 											gender = gender.ifBlank { null },

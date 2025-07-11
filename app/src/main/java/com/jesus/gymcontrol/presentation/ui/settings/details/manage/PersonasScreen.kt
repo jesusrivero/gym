@@ -96,7 +96,8 @@ fun PersonsScreen(
 						uid = updatedUser.id,
 						idcard = updatedUser.idcard,
 						phone = updatedUser.phone,
-						name = updatedUser.name ?: ""
+						name = updatedUser.name,
+						lastname = updatedUser.lastname
 					)
 					userListViewModel.loadUsers()
 					dialogMode = DialogMode.None
@@ -145,6 +146,7 @@ fun PersonsScreen(
 		val filteredList = users.filter { user ->
 			val matchesSearch = searchText.isBlank() ||
 					user.name.contains(searchText, ignoreCase = true) ||
+					user.lastname.contains(searchText, ignoreCase = true) ||
 					user.email.contains(searchText, ignoreCase = true) ||
 					user.idcard.contains(searchText, ignoreCase = true) ||
 					user.phone.contains(searchText, ignoreCase = true)
@@ -217,7 +219,6 @@ enum class DialogMode {
 	None, View, Edit
 }
 
-
 @Composable
 fun PersonCard(
 	user: ListUser,
@@ -241,8 +242,9 @@ fun PersonCard(
 			Column(
 				modifier = Modifier.weight(1f)
 			) {
+				// 👇 nombre completo
 				Text(
-					text = user.name,
+					text = "${user.name} ${user.lastname}".trim(),
 					style = MaterialTheme.typography.titleMedium,
 					fontWeight = FontWeight.SemiBold
 				)
@@ -260,11 +262,11 @@ fun PersonCard(
 				if (user.state.equals("pendiente", ignoreCase = true)) {
 					WhatsAppButton(
 						phoneNumber = user.phone,
-						message = "Hola ${user.name}, tu membresía está próxima a vencer."
+						message = "Hola ${user.name} ${user.lastname}, tu membresía está próxima a vencer."
 					)
 				}
 				
-				IconButton(onClick = { navPag(user.id, user.name) }) {
+				IconButton(onClick = { navPag(user.id, "${user.name} ${user.lastname}".trim()) }) {
 					Icon(
 						Icons.Default.Payment,
 						contentDescription = "Pagar",
@@ -300,10 +302,12 @@ fun EditUserDialog(
 	onSave: (ListUser) -> Unit
 ) {
 	var name by remember { mutableStateOf(user.name) }
+	var lastname by remember { mutableStateOf(user.lastname) }
 	var idcard by remember { mutableStateOf(user.idcard) }
 	var phone by remember { mutableStateOf(user.phone) }
 	
 	var nameError by remember { mutableStateOf<String?>(null) }
+	var lastnameError by remember { mutableStateOf<String?>(null) }
 	var idcardError by remember { mutableStateOf<String?>(null) }
 	var phoneError by remember { mutableStateOf<String?>(null) }
 	
@@ -325,6 +329,18 @@ fun EditUserDialog(
 					isError = nameError != null,
 					supportingText = {
 						if (nameError != null) Text(nameError!!, color = MaterialTheme.colorScheme.error)
+					}
+				)
+				OutlinedTextField(
+					value = lastname,
+					onValueChange = {
+						if (it.length <= 35) lastname = it
+					},
+					label = { Text("Apellido") },
+					maxLines = 1,
+					isError = lastnameError != null,
+					supportingText = {
+						if (lastnameError != null) Text(lastnameError!!, color = MaterialTheme.colorScheme.error)
 					}
 				)
 				OutlinedTextField(
@@ -396,6 +412,7 @@ fun EditUserDialog(
 							onSave(
 								user.copy(
 									name = name,
+									lastname = lastname,
 									idcard = idcard,
 									phone = phone
 								)
@@ -410,7 +427,6 @@ fun EditUserDialog(
 		}
 	)
 }
-
 
 @Composable
 fun ViewUserDialog(
@@ -430,6 +446,7 @@ fun ViewUserDialog(
 		text = {
 			Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
 				Text("Nombre: ${user.name}")
+				Text("Apellido: ${user.lastname}")
 				Text("Rol: ${user.rol}")
 				Text("Email: ${user.email}")
 				Text("Cédula: ${user.idcard}")
@@ -448,6 +465,7 @@ fun ViewUserDialog(
 		}
 	)
 }
+
 
 
 @Composable

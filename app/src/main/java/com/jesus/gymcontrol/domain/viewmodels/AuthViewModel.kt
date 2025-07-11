@@ -59,13 +59,13 @@ class AuthViewModel @Inject constructor(
 	var rol3 by mutableStateOf("Cliente")
 	
 	
-	fun registerUser(email: String, password: String, name: String, idcard: String) {
+	fun registerUser(email: String, password: String, name: String, lastname:String, idcard: String) {
 		viewModelScope.launch {
 			isLoading = true
 			errorMessage = null
 			isSuccess = false
 			
-			val result = registerUseCase(name.trim(), email.trim(), password.trim(), idcard.trim())
+			val result = registerUseCase(name.trim(),lastname.trim(), email.trim(), password.trim(), idcard.trim())
 			isLoading = false
 			result.onSuccess {
 				isSuccess = true
@@ -145,7 +145,8 @@ class AuthViewModel @Inject constructor(
 		uid: String,
 		idcard: String,
 		phone: String,
-		name: String
+		name: String,
+		lastname: String
 	) {
 		val gymCode = currentGymCode() ?: return  // 👈 Aquí lo tomas
 		
@@ -154,7 +155,7 @@ class AuthViewModel @Inject constructor(
 			errorMessage = null
 			_updateDatesSuccess.value = null
 			
-			val result = updateDatesUserUseCase(uid, idcard, phone, name, gymCode)
+			val result = updateDatesUserUseCase(uid, idcard, phone, name, lastname, gymCode)
 			
 			result.onSuccess {
 				_updateDatesSuccess.value = true

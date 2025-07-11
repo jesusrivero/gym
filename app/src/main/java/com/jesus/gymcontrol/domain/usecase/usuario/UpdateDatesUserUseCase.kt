@@ -12,8 +12,9 @@ class UpdateDatesUserUseCase @Inject constructor(
 		idcard: String,
 		phone: String,
 		name: String,
+		lastname: String,
 		gymCode: String
 	): Result<Unit> {
-		return repository.updateDatesUser(uid, idcard, phone, name, gymCode)
+		return repository.updateDatesUser(uid, idcard, phone, name,lastname, gymCode)
 	}
 }

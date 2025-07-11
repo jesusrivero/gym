@@ -30,6 +30,7 @@ class ReportesRepositoryImpl @Inject constructor(
 				
 				ReportePago(
 					nombreCliente = data["name"] as? String ?: "",
+					apellidoCliente = data["lastname"] as? String ?: "",
 					cedula = data["idcard"] as? String ?: "",
 					membresia = data["membershipName"] as? String ?: "",
 					tipoPago = data["typepayment"] as? String ?: "",
@@ -59,6 +60,7 @@ class ReportesRepositoryImpl @Inject constructor(
 					val date = (data["date"] as? Number)?.toLong() ?: 0L
 					ReporteCliente(
 						nombre = data["name"] as? String ?: "",
+						apellido = data["lastname"] as? String ?: "",
 						cedula = data["idcard"] as? String ?: "",
 						correo = data["email"] as? String ?: "",
 						telefono = data["phone"] as? String ?: "",

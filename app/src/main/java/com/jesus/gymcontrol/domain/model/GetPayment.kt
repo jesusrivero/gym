@@ -4,6 +4,7 @@ data class Payment(
 	val id: String = "",
 	val userId: String = "",
 	val name: String = "",
+	val lastname: String = "",
 	val idCard: String = "",
 	val membershipId: String = "",
 	val membershipName: String = "",

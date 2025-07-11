@@ -5,6 +5,7 @@ data class Pago(
 	val id: String = "",
 	val userId: String = "",
 	val name: String = "",
+	val lastname: String = "",
 	val idcard: String = "",
 	val membershipId: String = "",
 	val membershipName: String = "",

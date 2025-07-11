@@ -78,7 +78,7 @@ fun RegisterContent(navController: NavController) {
 	val viewModel: AuthViewModel = hiltViewModel()
 	
 	var name by remember { mutableStateOf("") }
-	var lastName by remember { mutableStateOf("") }
+	var lastname by remember { mutableStateOf("") }
 	var idcard by remember { mutableStateOf("") }
 	var emailOrUser by remember { mutableStateOf("") }
 	var password by remember { mutableStateOf("") }
@@ -87,7 +87,7 @@ fun RegisterContent(navController: NavController) {
 	var step by remember { mutableStateOf(0) }
 	val isValidEmail = emailOrUser.trim().matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
 	val isValidCedula = idcard.all { it.isDigit() } && idcard.length in 6..8
-	val isFormValid = name.isNotBlank() && lastName.isNotBlank() && isValidCedula
+	val isFormValid = name.isNotBlank() && lastname.isNotBlank() && isValidCedula
 	val isFullFormValid = isFormValid && isValidEmail && password.length >= 6 && termsAccepted
 	
 	val transition = updateTransition(targetState = step, label = "formStep")
@@ -139,8 +139,8 @@ fun RegisterContent(navController: NavController) {
 					)
 					Spacer(modifier = Modifier.height(12.dp))
 					OutlinedTextField(
-						value = lastName,
-						onValueChange = { lastName = it },
+						value = lastname,
+						onValueChange = { lastname = it },
 						modifier = Modifier
 							.fillMaxWidth()
 							.height(56.dp),
@@ -248,7 +248,7 @@ fun RegisterContent(navController: NavController) {
 					
 					Button(
 						onClick = {
-							viewModel.registerUser(emailOrUser, password, "$name $lastName", idcard)
+							viewModel.registerUser(emailOrUser, password, name , lastname, idcard)
 						},
 						enabled = isFullFormValid && !viewModel.isLoading,
 						modifier = Modifier
@@ -289,6 +289,7 @@ fun RegisterContent(navController: NavController) {
 		}
 		
 		Spacer(modifier = Modifier.height(24.dp))
+		
 		
 		Row(verticalAlignment = Alignment.CenterVertically) {
 			Text("¿Ya tienes una cuenta?", fontSize = 14.sp)

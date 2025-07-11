@@ -18,6 +18,7 @@ class AuthRepositoryImpl(
 	
 	override suspend fun registerUser(
 		name: String,
+		lastname: String,
 		email: String,
 		password: String,
 		idcard: String,
@@ -35,6 +36,7 @@ class AuthRepositoryImpl(
 			
 			val userData = mapOf(
 				"name" to name,
+				"lastname" to lastname,
 				"email" to email,
 				"idcard" to idcard,
 				"rol" to "",
@@ -103,13 +105,15 @@ class AuthRepositoryImpl(
 		idcard: String,
 		phone: String,
 		name: String,
+		lastname: String,
 		gymCode: String,
 	): Result<Unit> {
 		return try {
 			val updates = mapOf(
 				"idcard" to idcard,
 				"phone" to phone,
-				"name" to name
+				"name" to name,
+				"lastname" to lastname,
 			)
 			
 			coroutineScope {

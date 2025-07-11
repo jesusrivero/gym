@@ -162,6 +162,7 @@ fun PaymentsScreenContent(
 		users.filter { user ->
 			user.rol == "cliente" && (
 					user.name.contains(nameUser, true) ||
+							user.lastname.contains(nameUser, true) ||
 							user.idcard.contains(nameUser, true) ||
 							user.email.contains(nameUser, true) ||
 							user.phone.contains(nameUser, true)
@@ -306,6 +307,7 @@ fun PaymentsScreenContent(
 								id = UUID.randomUUID().toString(),
 								userId = user.id,
 								name = user.name,
+								lastname = user.lastname,
 								idcard = user.idcard,
 								membershipId = membership.id,
 								membershipName = membership.nombre,

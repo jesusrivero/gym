@@ -168,7 +168,7 @@ fun ReportScreen(
 								listOf("Cliente", "Membresía", "Tipo", "Ref.", "Monto"),
 								pagos.map {
 									listOf(
-										it.nombreCliente,
+										"${it.nombreCliente} ${it.apellidoCliente}".trim(),
 										it.membresia,
 										it.tipoPago,
 										it.referencia ?: "-",
@@ -188,10 +188,10 @@ fun ReportScreen(
 							
 							"Clientes" -> Triple(
 								"Reporte de Clientes",
-								listOf("Nombre", "Cédula", "Estado", "Teléfono"),
+								listOf("Cliente", "Cédula", "Estado", "Teléfono"),
 								clientes.map {
 									listOf(
-										it.nombre,
+										"${it.nombre} ${it.apellido}".trim(),
 										it.cedula,
 										it.activo?.uppercase() ?: "Desconocido",
 										it.telefono,
@@ -299,7 +299,7 @@ fun ReportScreen(
 				selectedReportType == "Pagos" -> {
 					SimpleReportList(
 						items = pagos,
-						field1 = { it.nombreCliente },
+						field1 = { 	"${it.nombreCliente} ${it.apellidoCliente}".trim() },
 						field2 = { it.membresia },
 						extraField = {
 							buildString {
@@ -327,7 +327,7 @@ fun ReportScreen(
 				selectedReportType == "Clientes" -> {
 					SimpleReportList(
 						items = clientes,
-						field1 = { it.nombre },
+						field1 = { "${it.nombre} ${it.apellido}".trim() },
 						field2 = { "C.I: ${it.cedula}" },
 						extraField = { (it.activo ?: "Desconocido").uppercase() },
 						extraFieldColor = {

@@ -64,6 +64,7 @@ class UserPreferencesViewModel @Inject constructor(
 			snapshot?.data?.let { data ->
 				userProfile = UserProfile(
 					name = data["name"] as? String ?: "",
+					lastname = data["lastname"] as? String ?: "",
 					phone = data["phone"] as? String ?: "",
 					age = (data["age"] as? Long)?.toInt(),
 					gender = data["gender"] as? String ?: "",

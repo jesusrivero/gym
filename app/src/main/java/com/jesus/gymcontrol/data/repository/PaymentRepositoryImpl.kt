@@ -40,6 +40,7 @@ class PaymentRepositoryImpl @Inject constructor(
 			"id" to pago.id,
 			"userId" to pago.userId,
 			"name" to pago.name,
+			"lastname" to pago.lastname,
 			"idcard" to pago.idcard,
 			"membershipId" to pago.membershipId,
 			"membershipName" to pago.membershipName,
@@ -106,6 +107,7 @@ class PaymentRepositoryImpl @Inject constructor(
 				gymUserRef,
 				mapOf(
 					"name" to pago.name,
+					"lastname" to pago.lastname,
 					"idcard" to pago.idcard,
 					"state" to "activo",
 					"paymentdate" to pago.date,
@@ -119,6 +121,7 @@ class PaymentRepositoryImpl @Inject constructor(
 				membershipUsersRef,
 				mapOf(
 					"name" to pago.name,
+					"lastname" to pago.lastname,
 					"idcard" to pago.idcard,
 					"paymentdate" to pago.date,
 					"state" to "activo"
@@ -140,6 +143,7 @@ class PaymentRepositoryImpl @Inject constructor(
 					mapOf(
 						"userId" to pago.userId,
 						"name" to pago.name,
+						"lastname" to pago.lastname,
 						"idcard" to pago.idcard,
 						"paymentdate" to pago.date,
 						"state" to "activo",
@@ -176,6 +180,7 @@ class PaymentRepositoryImpl @Inject constructor(
 							id = data["id"] as? String ?: "",
 							userId = data["userId"] as? String ?: "",
 							name = data["name"] as? String ?: "",
+							lastname = data["lastname"] as? String ?: "",
 							idCard = data["idcard"] as? String ?: "",
 							membershipId = data["membershipId"] as? String ?: "",
 							membershipName = data["membershipName"] as? String ?: "",

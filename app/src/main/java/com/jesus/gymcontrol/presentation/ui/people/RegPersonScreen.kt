@@ -42,7 +42,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -50,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.domain.model.UserRegistrationData
+import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import com.jesus.gymcontrol.domain.viewmodels.RegisterUserFromAdminViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.ui.commons.countryCodes
@@ -62,7 +62,6 @@ fun RegPersonScreen(
 	viewModel: RegisterUserFromAdminViewModel = hiltViewModel(),
 ) {
 	val colorScheme = MaterialTheme.colorScheme
-	val context = LocalContext.current
 	
 	val isRegistering = viewModel.isRegistering
 	val registerSuccess = viewModel.registerSuccess
@@ -138,11 +137,13 @@ fun RegPersonScreen(
 		)
 	}
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegPersonContent(
 	modifier: Modifier = Modifier,
 	viewModel: RegisterUserFromAdminViewModel,
+	aviewModel: AuthViewModel = hiltViewModel(),
 	isLoading: Boolean,
 ) {
 	val colorScheme = MaterialTheme.colorScheme
@@ -157,12 +158,13 @@ fun RegPersonContent(
 	var rol by rememberSaveable { mutableStateOf("cliente") }
 	val date by rememberSaveable { mutableStateOf(System.currentTimeMillis()) }
 	var showDialog by remember { mutableStateOf(false) }
+	var idCardError by rememberSaveable { mutableStateOf<String?>(null) }
 	
-	// Validaciones
+	val trimmedEmail = email.trim()
 	val isNameValid = name.isNotBlank()
-	val isEmailValid = email.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
+	val isEmailValid = trimmedEmail.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
 	val isPasswordValid = password.length >= 6
-	val isIdCardValid = idCard.isNotBlank()
+	val isIdCardValid = idCard.length in 7..9
 	val isCodeValid = code.isNotBlank()
 	var selectedCountryCode by rememberSaveable { mutableStateOf("58") }
 	var isCountryDropdownExpanded by rememberSaveable { mutableStateOf(false) }
@@ -178,7 +180,7 @@ fun RegPersonContent(
 					onClick = {
 						showDialog = false
 						val user = UserRegistrationData(
-							email = email,
+							email = trimmedEmail,
 							password = password,
 							name = name,
 							phone = if (phone.isBlank()) null else fullPhone,
@@ -220,7 +222,6 @@ fun RegPersonContent(
 					value = name,
 					onValueChange = { name = it },
 					label = { Text("Nombre completo") },
-					isError = !isNameValid && name.isNotEmpty(),
 					modifier = Modifier.fillMaxWidth()
 				)
 				if (!isNameValid && name.isNotEmpty()) {
@@ -241,7 +242,6 @@ fun RegPersonContent(
 					value = email,
 					onValueChange = { email = it },
 					label = { Text("Correo electrónico") },
-					isError = email.isNotBlank() && !isEmailValid,
 					modifier = Modifier.fillMaxWidth()
 				)
 				if (email.isNotBlank() && !isEmailValid) {
@@ -252,7 +252,6 @@ fun RegPersonContent(
 					value = password,
 					onValueChange = { password = it },
 					label = { Text("Contraseña (mín. 6 caracteres)") },
-					isError = password.isNotEmpty() && !isPasswordValid,
 					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
 					modifier = Modifier.fillMaxWidth()
 				)
@@ -262,15 +261,22 @@ fun RegPersonContent(
 				
 				OutlinedTextField(
 					value = idCard,
-					onValueChange = { idCard = it },
+					onValueChange = {
+						idCard = it
+						idCardError = null
+					},
 					label = { Text("Cédula") },
-					isError = !isIdCardValid && idCard.isNotEmpty(),
 					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
 					modifier = Modifier.fillMaxWidth()
 				)
-				if (!isIdCardValid && idCard.isNotEmpty()) {
-					Text("La cédula es obligatoria", color = colorScheme.error, style = MaterialTheme.typography.labelSmall)
+				if (idCard.isNotEmpty() && !isIdCardValid) {
+					Text("La cédula debe tener entre 7 y 9 dígitos", color = colorScheme.error, style = MaterialTheme.typography.labelSmall)
 				}
+				if (idCardError != null) {
+					Text(idCardError!!, color = colorScheme.error, style = MaterialTheme.typography.labelSmall)
+				}
+
+				
 				
 				Spacer(modifier = Modifier.height(8.dp))
 				
@@ -376,7 +382,16 @@ fun RegPersonContent(
 		Spacer(modifier = Modifier.height(16.dp))
 		
 		Button(
-			onClick = { showDialog = true },
+			onClick = {
+				idCardError = null
+				aviewModel.checkidcardExists(idCard) { exists ->
+					if (exists) {
+						idCardError = "La cédula ya está registrada"
+					} else {
+						showDialog = true
+					}
+				}
+			},
 			enabled = formIsValid && !isLoading,
 			modifier = Modifier.fillMaxWidth()
 		) {
@@ -388,5 +403,6 @@ fun RegPersonContent(
 			else
 				Text("Registrar", style = MaterialTheme.typography.labelLarge)
 		}
+		
 	}
 }
