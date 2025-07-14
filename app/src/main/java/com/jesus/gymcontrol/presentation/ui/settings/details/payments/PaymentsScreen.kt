@@ -67,6 +67,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -142,6 +143,10 @@ fun PaymentsScreenContent(
 	val actionMessage = viewModel.paymentActionMessage.value
 	val isActionSuccess = viewModel.isActionSuccess.value
 	val isLoading = viewModel.isLoading
+	val configuration = LocalConfiguration.current
+	val isPortrait = configuration.orientation == android.content.res.Configuration.ORIENTATION_PORTRAIT
+	
+	
 	
 	LaunchedEffect(isActionSuccess, actionMessage) {
 		if (isActionSuccess == true && actionMessage != null) {
@@ -359,7 +364,9 @@ fun PaymentsScreenContent(
 					modifier = Modifier
 						.fillMaxWidth()
 						.padding(horizontal = 16.dp)
-						.verticalScroll(rememberScrollState())
+						.then(
+							if (!isPortrait) Modifier.verticalScroll(rememberScrollState()) else Modifier
+						)
 						.weight(1f)
 				) {
 					

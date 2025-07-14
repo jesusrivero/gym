@@ -42,6 +42,7 @@ import com.jesus.gymcontrol.presentation.ui.settings.details.selected.SelectedGy
 import com.jesus.gymcontrol.presentation.ui.settings.details.selected.SelectedGymClient
 import com.jesus.gymcontrol.presentation.ui.settings.details.selected.SelectedRolScreen
 import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
+import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.ContactScreen
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -213,6 +214,10 @@ fun NavigationHost(
 		
 		composable<AppRoutes.NotificationsScreen> {
 			NotificationsScreen(navController = navController)
+		}
+		
+		composable<AppRoutes.ContactScreen> {
+			ContactScreen(navController = navController)
 		}
 	}
 }

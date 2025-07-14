@@ -11,76 +11,79 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
+// Light mode: colores deportivos, modernos y no tan "fríos"
 private val LightColorScheme = lightColorScheme(
-	primary = Color(0xFF1E88E5), // Azul sobrio y moderno
+	primary = Color(0xFF1565C0), // Azul fuerte (acento)
 	onPrimary = Color.White,
-	primaryContainer = Color(0xFFD6E4FF),
-	onPrimaryContainer = Color(0xFF001E3C),
-
-	secondary = Color(0xFF6D6D6D),
+	primaryContainer = Color(0xFFBBDEFB),
+	onPrimaryContainer = Color(0xFF003c8f),
+	
+	secondary = Color(0xFF00897B), // Verde-petróleo
 	onSecondary = Color.White,
-	secondaryContainer = Color(0xFFE0E0E0),
-	onSecondaryContainer = Color(0xFF1A1A1A),
-
-	tertiary = Color(0xFF546E7A),
-	onTertiary = Color.White,
-	tertiaryContainer = Color(0xFFD0DAE0),
-	onTertiaryContainer = Color(0xFF0A1F29),
-
+	secondaryContainer = Color(0xFFB2DFDB),
+	onSecondaryContainer = Color(0xFF004D40),
+	
+	tertiary = Color(0xFFF9A825), // Amarillo deportivo
+	onTertiary = Color.Black,
+	tertiaryContainer = Color(0xFFFFF59D),
+	onTertiaryContainer = Color(0xFF795548),
+	
 	error = Color(0xFFD32F2F),
 	onError = Color.White,
-	errorContainer = Color(0xFFFFDAD4),
-	onErrorContainer = Color(0xFF410002),
-
-	background = Color(0xFFF9F9F9),
+	errorContainer = Color(0xFFFFCDD2),
+	onErrorContainer = Color(0xFFB71C1C),
+	
+	// 👇 aquí el nuevo fondo profesional
+	background = Color(0xFFEAEDF0), // Gris piedra suave, elegante
 	onBackground = Color(0xFF121212),
-
-	surface = Color.White,
+	
+	surface = Color(0xFFFFFFFF), // Blanco puro para superficies
 	onSurface = Color(0xFF121212),
-
+	
 	surfaceVariant = Color(0xFFE0E0E0),
-	onSurfaceVariant = Color(0xFF3E3E3E),
-
-	outline = Color(0xFFB0B0B0)
+	onSurfaceVariant = Color(0xFF424242),
+	
+	outline = Color(0xFF9E9E9E)
 )
 
+
+// Dark mode: más neutro y menos saturado para no cansar la vista
 private val DarkColorScheme = darkColorScheme(
-	primary = Color(0xFF90CAF9), // Azul claro elegante
-	onPrimary = Color(0xFF00315D),
+	primary = Color(0xFF90CAF9),
+	onPrimary = Color(0xFF002f6c),
 	primaryContainer = Color(0xFF1565C0),
-	onPrimaryContainer = Color(0xFFD6E4FF),
-
-	secondary = Color(0xFFB0BEC5),
-	onSecondary = Color(0xFF263238),
-	secondaryContainer = Color(0xFF37474F),
-	onSecondaryContainer = Color(0xFFCFD8DC),
-
-	tertiary = Color(0xFFB0C4D0),
-	onTertiary = Color(0xFF102631),
-	tertiaryContainer = Color(0xFF263238),
-	onTertiaryContainer = Color(0xFFD0DAE0),
-
+	onPrimaryContainer = Color(0xFFBBDEFB),
+	
+	secondary = Color(0xFF4DB6AC),
+	onSecondary = Color(0xFF00332C),
+	secondaryContainer = Color(0xFF00695C),
+	onSecondaryContainer = Color(0xFFB2DFDB),
+	
+	tertiary = Color(0xFFFFD54F),
+	onTertiary = Color.Black,
+	tertiaryContainer = Color(0xFFFBC02D),
+	onTertiaryContainer = Color(0xFFFFF9C4),
+	
 	error = Color(0xFFEF5350),
 	onError = Color(0xFF370001),
 	errorContainer = Color(0xFF8C1D18),
 	onErrorContainer = Color(0xFFFFDAD4),
-
+	
 	background = Color(0xFF121212),
 	onBackground = Color(0xFFECECEC),
-
+	
 	surface = Color(0xFF1E1E1E),
 	onSurface = Color(0xFFECECEC),
-
+	
 	surfaceVariant = Color(0xFF2C2C2C),
-	onSurfaceVariant = Color(0xFFB0B0B0),
-
+	onSurfaceVariant = Color(0xFFBDBDBD),
+	
 	outline = Color(0xFF757575)
 )
 
 @Composable
 fun GymTheme(
 	darkTheme: Boolean = isSystemInDarkTheme(),
-	// Dynamic color is available on Android 12+
 	dynamicColor: Boolean = true,
 	content: @Composable () -> Unit
 ) {
@@ -89,11 +92,10 @@ fun GymTheme(
 			val context = LocalContext.current
 			if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
 		}
-
 		darkTheme -> DarkColorScheme
 		else -> LightColorScheme
 	}
-
+	
 	MaterialTheme(
 		colorScheme = colorScheme,
 		typography = Typography,

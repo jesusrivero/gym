@@ -5,7 +5,6 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,7 +16,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Share
@@ -48,6 +49,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -81,11 +83,10 @@ fun ReportScreen(
 ) {
 	val snackbarHostState = remember { SnackbarHostState() }
 	
-	var selectedReportType by remember { mutableStateOf("Todos") }
-	var selectedSubFilter by remember { mutableStateOf("Todos") }
+	var selectedReportType by rememberSaveable { mutableStateOf("Todos") }
+	var selectedSubFilter by rememberSaveable { mutableStateOf("Todos") }
 	
 	val reportTypes = listOf("Todos", "Clientes", "Pagos", "Membresías", "Promociones")
-	
 	val clientesFilters = listOf("Todos", "Activos", "Inactivos", "Pendientes")
 	val pagosFilters = listOf("Todos", "Dólares", "Bolívares", "Mixtos", "Con promociones")
 	
@@ -97,67 +98,55 @@ fun ReportScreen(
 	val isLoading by remember { derivedStateOf { viewModel.isLoading } }
 	val errorMessage by remember { derivedStateOf { viewModel.errorMessage } }
 	
+	var startDate by rememberSaveable { mutableStateOf<LocalDate?>(null) }
+	var endDate by rememberSaveable { mutableStateOf<LocalDate?>(null) }
+	
+	val scrollState = rememberScrollState()
 	val context = LocalContext.current
 	
-	LaunchedEffect(selectedReportType, selectedSubFilter) {
+	LaunchedEffect(selectedReportType, selectedSubFilter, startDate, endDate) {
 		when (selectedReportType) {
-			"Pagos" -> viewModel.cargarReportePagos(filtro = selectedSubFilter)
-			"Clientes" -> viewModel.cargarReporteClientes(filtro = selectedSubFilter)
-			"Membresías" -> viewModel.cargarReporteMembresias()
-			"Promociones" -> viewModel.cargarReportePromociones()
-			else -> { /* no hacer nada */
-			}
+			"Pagos" -> viewModel.cargarReportePagos(
+				filtro = selectedSubFilter,
+				desde = startDate,
+				hasta = endDate
+			)
+			
+			"Clientes" -> viewModel.cargarReporteClientes(
+				filtro = selectedSubFilter,
+				desde = startDate,
+				hasta = endDate
+			)
+			
+			"Membresías" -> viewModel.cargarReporteMembresias(desde = startDate, hasta = endDate)
+			"Promociones" -> viewModel.cargarReportePromociones(
+				filtro = selectedSubFilter,
+				desde = startDate,
+				hasta = endDate
+			)
 		}
 	}
 	
 	Scaffold(
 		snackbarHost = { SnackbarHost(snackbarHostState) },
 		topBar = {
-			Column {
-				TopAppBar(
-					title = {
-						Text("Reportes", color = MaterialTheme.colorScheme.onPrimary)
-					},
-					navigationIcon = {
-						IconButton(onClick = { navController.popBackStack() }) {
-							Icon(
-								painter = painterResource(id = R.drawable.ic_back),
-								contentDescription = "Regresar",
-								tint = MaterialTheme.colorScheme.onPrimary
-							)
-						}
-					},
-					colors = TopAppBarDefaults.topAppBarColors(
-						containerColor = MaterialTheme.colorScheme.primary
-					)
+			TopAppBar(
+				title = { Text("Reportes", color = MaterialTheme.colorScheme.onPrimary) },
+				navigationIcon = {
+					IconButton(onClick = { navController.popBackStack() }) {
+						Icon(
+							painter = painterResource(id = R.drawable.ic_back),
+							contentDescription = "Regresar",
+							tint = MaterialTheme.colorScheme.onPrimary
+						)
+					}
+				},
+				colors = TopAppBarDefaults.topAppBarColors(
+					containerColor = MaterialTheme.colorScheme.primary
 				)
-				
-				ReportFilters(
-					selectedReportType = selectedReportType,
-					reportTypes = reportTypes,
-					onReportTypeSelected = {
-						selectedReportType = it
-						selectedSubFilter = "Todos" // reset filtro secundario al cambiar tipo
-					},
-					selectedSubFilter = selectedSubFilter,
-					onSubFilterSelected = { selectedSubFilter = it },
-					clientesFilters = clientesFilters,
-					pagosFilters = pagosFilters,
-					startDate = null,
-					endDate = null,
-					onStartDateClick = {},
-					onEndDateClick = {},
-					onClearFilters = {
-						selectedReportType = "Todos"
-						selectedSubFilter = "Todos"
-					},
-					dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy"),
-					context = context,
-					pagos = pagos,
-					clientes = clientes
-				)
-			}
+			)
 		},
+		
 		floatingActionButton = {
 			if (selectedReportType != "Todos") {
 				FloatingActionButton(
@@ -267,13 +256,45 @@ fun ReportScreen(
 			}
 		}
 	) { innerPadding ->
-		Box(
+		
+		Column(
 			modifier = Modifier
-				.fillMaxSize()
 				.padding(innerPadding)
-				.padding(16.dp),
-			contentAlignment = Alignment.TopCenter
+				.verticalScroll(scrollState)
+				.padding(vertical = 6.dp, horizontal = 6.dp)
+				.fillMaxSize()
 		) {
+			
+			ReportFilters(
+				isPortrait = true,
+				selectedReportType = selectedReportType,
+				reportTypes = reportTypes,
+				onReportTypeSelected = {
+					selectedReportType = it
+					selectedSubFilter = "Todos"
+				},
+				selectedSubFilter = selectedSubFilter,
+				onSubFilterSelected = { selectedSubFilter = it },
+				clientesFilters = clientesFilters,
+				pagosFilters = pagosFilters,
+				startDate = startDate,
+				endDate = endDate,
+				onStartDateClick = { showDatePicker(context) { date -> startDate = date } },
+				onEndDateClick = { showDatePicker(context) { date -> endDate = date } },
+				onClearFilters = {
+					selectedReportType = "Todos"
+					selectedSubFilter = "Todos"
+					startDate = null
+					endDate = null
+				},
+				dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy"),
+				context = context,
+				pagos = pagos,
+				clientes = clientes
+			)
+			
+			Spacer(Modifier.height(16.dp))
+			
 			when {
 				selectedReportType == "Todos" -> {
 					Text(
@@ -295,83 +316,110 @@ fun ReportScreen(
 					)
 				}
 				
-				
 				selectedReportType == "Pagos" -> {
-					SimpleReportList(
-						items = pagos,
-						field1 = { 	"${it.nombreCliente} ${it.apellidoCliente}".trim() },
-						field2 = { it.membresia },
-						extraField = {
-							buildString {
-								when (it.tipoPago.lowercase()) {
-									"mixto" -> {
-										append(formatDollars(it.monto))
-										append(" (")
-										append(formatDollars(it.montoDolar))
-										append(" + ")
-										append(formatBolivares(it.montoBolivares))
-										append(")")
-									}
-									
-									"dólares" -> append(formatDollars(it.monto))
-									"bolívares" -> append(formatBolivares(it.montoBolivares))
-									else -> append(formatDollars(it.monto))
-								}
-							}
-						},
-						extraFieldColor = { if (it.monto > 0) Color(0xFF2E7D32) else Color.Red },
-						emptyMessage = "No hay pagos para mostrar"
-					)
+					pagos.forEach {
+						SimpleReportItem(
+							title = "${it.nombreCliente} ${it.apellidoCliente}",
+							subtitle = it.membresia,
+							extra = it.tipoPago
+						)
+					}
 				}
 				
 				selectedReportType == "Clientes" -> {
-					SimpleReportList(
-						items = clientes,
-						field1 = { "${it.nombre} ${it.apellido}".trim() },
-						field2 = { "C.I: ${it.cedula}" },
-						extraField = { (it.activo ?: "Desconocido").uppercase() },
-						extraFieldColor = {
-							when ((it.activo ?: "").lowercase()) {
-								"activo" -> Color(0xFF2E7D32)
-								"inactivo" -> Color.Red
-								"pendiente" -> Color(0xFFF9A825)
-								else -> MaterialTheme.colorScheme.onSurface
-							}
-						},
-						emptyMessage = "No hay clientes para mostrar"
-					)
+					clientes.forEach {
+						SimpleReportItem(
+							title = "${it.nombre} ${it.apellido}",
+							subtitle = "C.I: ${it.cedula}",
+							extra = (it.activo ?: "Desconocido").uppercase(), extraColor = estadoColor(it.activo)
+						)
+					}
 				}
 				
 				selectedReportType == "Membresías" -> {
-					SimpleReportList(
-						items = membresias,
-						field1 = { it.name },
-						field2 = { "${"%.2f".format(it.price)} $" },
-						extraField = { "${it.userCount} clientes" },
-						emptyMessage = "No hay membresías para mostrar"
-					)
+					membresias.forEach {
+						SimpleReportItem(
+							title = it.name,
+							subtitle = "${"%.2f".format(it.price)} $",
+							extra = "${it.userCount} clientes"
+						
+						)
+					}
 				}
 				
 				selectedReportType == "Promociones" -> {
-					SimpleReportList(
-						items = promociones,
-						field1 = { it.nombre },
-						field2 = { "${it.porcentaje}%" },
-						extraField = { if (it.activa) "Activa" else "Inactiva" },
-						extraFieldColor = { if (it.activa) Color(0xFF2E7D32) else Color.Red },
-						emptyMessage = "No hay promociones para mostrar",
-					)
-				}
-				
-				else -> {
-					Text(
-						"Reporte para '$selectedReportType' aún no implementado.",
-						textAlign = TextAlign.Center,
-						style = MaterialTheme.typography.bodyMedium
-					)
+					promociones.forEach {
+						SimpleReportItem(
+							title = it.nombre,
+							subtitle = "${it.porcentaje}%",
+							extra = if (it.activa) "Activa" else "Inactiva",
+							extraColor = if (it.activa) Color(0xFF2E7D32) else Color.Red
+						)
+					}
 				}
 			}
 		}
+	}
+}
+
+@Composable
+fun SimpleReportItem(
+	title: String,
+	subtitle: String,
+	extra: String,
+	extraColor: Color? = null,
+) {
+	
+	Card(
+		modifier = Modifier
+			.fillMaxWidth()
+			.padding(vertical = 4.dp), // nuevo padding vertical externo
+		shape = RoundedCornerShape(16.dp),
+		elevation = CardDefaults.cardElevation(2.dp),
+		colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
+	) {
+		Row(
+			modifier = Modifier
+				.fillMaxWidth()
+				.padding(horizontal = 16.dp, vertical = 12.dp),
+			verticalAlignment = Alignment.CenterVertically,
+			horizontalArrangement = Arrangement.SpaceBetween
+		) {
+			Column(
+				modifier = Modifier.weight(1f)
+			) {
+				Text(
+					text = title,
+					style = MaterialTheme.typography.titleMedium,
+					fontWeight = FontWeight.SemiBold,
+					color = MaterialTheme.colorScheme.onSurface
+				)
+				Text(
+					text = subtitle,
+					style = MaterialTheme.typography.bodySmall,
+					color = MaterialTheme.colorScheme.onSurfaceVariant
+				)
+			}
+			
+			Text(
+				text = extra,
+				style = MaterialTheme.typography.bodyMedium,
+				color = extraColor ?: MaterialTheme.colorScheme.primary,
+				modifier = Modifier.padding(start = 8.dp)
+			)
+		}
+	}
+	
+}
+
+
+@Composable
+fun estadoColor(estado: String?): Color {
+	return when (estado?.lowercase()) {
+		"activo" -> Color(0xFF2E7D32)        // Verde
+		"inactivo" -> Color.Red              // Rojo
+		"pendiente" -> Color(0xFFF9A825)    // Amarillo
+		else -> MaterialTheme.colorScheme.onSurface
 	}
 }
 
@@ -448,10 +496,12 @@ fun <T> SimpleReportList(
 	}
 }
 
+
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportFilters(
+	isPortrait: Boolean,
 	selectedReportType: String,
 	reportTypes: List<String>,
 	onReportTypeSelected: (String) -> Unit,
@@ -472,15 +522,24 @@ fun ReportFilters(
 	var expandedFilter by remember { mutableStateOf(false) }
 	var expandedSubFilter by remember { mutableStateOf(false) }
 	
+	val scrollState = rememberScrollState()
+	
 	Surface(
 		modifier = Modifier
 			.fillMaxWidth()
-			.padding(horizontal = 8.dp, vertical = 4.dp),
+			.padding(horizontal = 6.dp, vertical = 4.dp),
 		shape = RoundedCornerShape(12.dp),
 		color = MaterialTheme.colorScheme.surface,
 		shadowElevation = 2.dp
 	) {
-		Column(modifier = Modifier.padding(12.dp)) {
+		Column(
+			modifier = Modifier
+				.padding(12.dp)
+				.then(
+					if (!isPortrait) Modifier.verticalScroll(scrollState)
+					else Modifier
+				)
+		) {
 			
 			// Tipo de reporte
 			Text(
@@ -632,6 +691,7 @@ fun ReportFilters(
 	}
 }
 
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun DateSelectorButton(
@@ -677,4 +737,19 @@ fun formatBolivares(amount: Double?): String {
 	format.minimumFractionDigits = 2
 	val result = format.format(amount).replace("Bs.", "Bs ")
 	return result
+}
+
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun showDatePicker(context: Context, onDateSelected: (LocalDate) -> Unit) {
+	val today = LocalDate.now()
+	val datePicker = android.app.DatePickerDialog(
+		context,
+		{ _, year, month, dayOfMonth ->
+			val selectedDate = LocalDate.of(year, month + 1, dayOfMonth)
+			onDateSelected(selectedDate)
+		},
+		today.year, today.monthValue - 1, today.dayOfMonth
+	)
+	datePicker.show()
 }

@@ -8,6 +8,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -17,6 +18,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.jesus.gymcontrol.domain.helpers.navRoute
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
+
+
 
 @Composable
 fun BottomNavigationBar(
@@ -31,8 +34,8 @@ fun BottomNavigationBar(
 	val preferencesRoute = navRoute<AppRoutes.PreferencesScreen>()
 	
 	NavigationBar(
-		containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-		contentColor = MaterialTheme.colorScheme.onSurface,
+		containerColor = MaterialTheme.colorScheme.surfaceVariant,
+		contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
 		modifier = modifier
 	) {
 		NavigationBarItem(
@@ -41,7 +44,14 @@ fun BottomNavigationBar(
 			selected = currentRoute == mainRoute,
 			onClick = {
 				navigateIfNeeded(navController, mainRoute, currentRoute)
-			}
+			},
+			colors = NavigationBarItemDefaults.colors(
+				selectedIconColor = MaterialTheme.colorScheme.primary,
+				selectedTextColor = MaterialTheme.colorScheme.primary,
+				unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+				unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+				indicatorColor = MaterialTheme.colorScheme.surface
+			)
 		)
 		
 		NavigationBarItem(
@@ -50,7 +60,14 @@ fun BottomNavigationBar(
 			selected = currentRoute == manageRoute,
 			onClick = {
 				navigateIfNeeded(navController, manageRoute, currentRoute)
-			}
+			},
+			colors = NavigationBarItemDefaults.colors(
+				selectedIconColor = MaterialTheme.colorScheme.primary,
+				selectedTextColor = MaterialTheme.colorScheme.primary,
+				unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+				unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+				indicatorColor = MaterialTheme.colorScheme.surface
+			)
 		)
 		
 		NavigationBarItem(
@@ -64,7 +81,14 @@ fun BottomNavigationBar(
 			selected = currentRoute == preferencesRoute,
 			onClick = {
 				navigateIfNeeded(navController, preferencesRoute, currentRoute)
-			}
+			},
+			colors = NavigationBarItemDefaults.colors(
+				selectedIconColor = MaterialTheme.colorScheme.primary,
+				selectedTextColor = MaterialTheme.colorScheme.primary,
+				unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+				unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+				indicatorColor = MaterialTheme.colorScheme.surface
+			)
 		)
 	}
 }

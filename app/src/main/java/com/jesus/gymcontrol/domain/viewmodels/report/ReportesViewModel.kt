@@ -1,5 +1,7 @@
 package com.jesus.gymcontrol.domain.viewmodels.report
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -16,6 +18,9 @@ import com.jesus.gymcontrol.domain.usecase.usuario.report.GeneratePaymentsReport
 import com.jesus.gymcontrol.domain.usecase.usuario.report.GeneratePromotionsReportUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
 import javax.inject.Inject
 
 @HiltViewModel
@@ -54,14 +59,18 @@ class ReportesViewModel @Inject constructor(
 		private set
 	
 	
-	fun cargarReportePagos(filtro: String) {
+	fun cargarReportePagos(
+		filtro: String,
+		desde: LocalDate? = null,
+		hasta: LocalDate? = null
+	) {
 		val gymCode = sessionManager.getGymCode() ?: return
 		
 		viewModelScope.launch {
 			isLoading = true
 			errorMessage = null
 			try {
-				val todosPagos = generatePaymentsReportUseCase(gymCode)
+				val todosPagos = generatePaymentsReportUseCase(gymCode, desde, hasta)
 				
 				val filtrados = when (filtro.lowercase()) {
 					"dólares", "dolares" -> todosPagos.filter { it.tipoPago.equals("dólares", ignoreCase = true) }
@@ -95,24 +104,36 @@ class ReportesViewModel @Inject constructor(
 				errorMessage = e.localizedMessage ?: "Error desconocido"
 			} finally {
 				isLoading = false
-				}
+			}
 		}
 	}
+
 	
-	
-	fun cargarReporteClientes(filtro: String) {
+	@RequiresApi(Build.VERSION_CODES.O)
+	fun cargarReporteClientes(
+		filtro: String,
+		desde: LocalDate? = null,
+		hasta: LocalDate? = null
+	) {
 		val gymCode = sessionManager.getGymCode() ?: return
 		
 		viewModelScope.launch {
 			isLoading = true
 			errorMessage = null
 			try {
-				val todosClientes = generateClientsReportUseCase(gymCode)
+				// Llama al UseCase con las fechas opcionales
+				val todosClientes = generateClientsReportUseCase(
+					gymCode = gymCode,
+					desde = desde,
+					hasta = hasta
+				)
+				
+				// Aplica el filtro por estado
 				clientesReport = when (filtro.lowercase()) {
 					"activos" -> todosClientes.filter { it.activo.equals("activo", ignoreCase = true) }
 					"inactivos" -> todosClientes.filter { it.activo.equals("inactivo", ignoreCase = true) }
 					"pendientes" -> todosClientes.filter { it.activo.equals("pendiente", ignoreCase = true) }
-					"todos" -> todosClientes
+					"todos", "" -> todosClientes // por si llega vacío
 					else -> todosClientes
 				}
 			} catch (e: Exception) {
@@ -124,14 +145,40 @@ class ReportesViewModel @Inject constructor(
 	}
 	
 	
-	fun cargarReporteMembresias() {
+	
+	@RequiresApi(Build.VERSION_CODES.O)
+	fun cargarReporteMembresias(desde: LocalDate?, hasta: LocalDate?) {
 		val gymCode = sessionManager.getGymCode() ?: return
+		val desdeEpoch = desde?.atStartOfDay(ZoneId.systemDefault())?.toEpochSecond()?.times(1000)
+		val hastaEpoch = hasta?.atTime(LocalTime.MAX)?.atZone(ZoneId.systemDefault())?.toEpochSecond()?.times(1000)
 		
 		viewModelScope.launch {
 			isLoading = true
 			errorMessage = null
 			try {
-				membresiasReport = generateMembershipsReportUseCase(gymCode)
+				membresiasReport = generateMembershipsReportUseCase(gymCode, desdeEpoch, hastaEpoch)
+			} catch (e: Exception) {
+				errorMessage = e.localizedMessage ?: "Error desconocido"
+			} finally {
+				isLoading = false
+			}
+		}
+	}
+
+	
+	
+	
+	@RequiresApi(Build.VERSION_CODES.O)
+	fun cargarReportePromociones(	filtro: String, desde: LocalDate?, hasta: LocalDate?) {
+		val gymCode = sessionManager.getGymCode() ?: return
+		val desdeEpoch = desde?.atStartOfDay(ZoneId.systemDefault())?.toEpochSecond()?.times(1000)
+		val hastaEpoch = hasta?.atTime(LocalTime.MAX)?.atZone(ZoneId.systemDefault())?.toEpochSecond()?.times(1000)
+		
+		viewModelScope.launch {
+			isLoading = true
+			errorMessage = null
+			try {
+				promocionesReport = generatePromotionsReportUseCase(gymCode, desdeEpoch, hastaEpoch)
 			} catch (e: Exception) {
 				errorMessage = e.localizedMessage ?: "Error desconocido"
 			} finally {
@@ -141,21 +188,6 @@ class ReportesViewModel @Inject constructor(
 	}
 	
 	
-	fun cargarReportePromociones() {
-		val gymCode = sessionManager.getGymCode() ?: return
-		
-		viewModelScope.launch {
-			isLoading = true
-			errorMessage = null
-			try {
-				promocionesReport = generatePromotionsReportUseCase(gymCode)
-			} catch (e: Exception) {
-				errorMessage = e.localizedMessage ?: "Error desconocido"
-			} finally {
-				isLoading = false
-			}
-		}
-	}
 	
 	fun clearPagos() {
 		pagosReport = emptyList()

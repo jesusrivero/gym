@@ -1,6 +1,7 @@
 package com.jesus.gymcontrol.presentation.ui.people
 
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -42,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -173,6 +175,8 @@ fun RegPersonContent(
 	val fullPhone = "$selectedCountryCode$phone"
 	val isPhoneValid = phone.isBlank() || fullPhone.matches(Regex("^[1-9]\\d{7,14}$"))
 	val formIsValid = isNameValid && islastNameValid && isEmailValid && isPasswordValid && isCodeValid && isIdCardValid && isPhoneValid
+	val configuration = LocalConfiguration.current
+	val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 	
 	if (showDialog) {
 		AlertDialog(
@@ -211,8 +215,10 @@ fun RegPersonContent(
 	Column(
 		modifier = modifier
 			.padding(16.dp)
-			.verticalScroll(rememberScrollState())
-			.fillMaxWidth(),
+			.fillMaxWidth()
+			.let { base ->
+				if (isLandscape) base.verticalScroll(rememberScrollState()) else base
+			},
 		horizontalAlignment = Alignment.CenterHorizontally
 	) {
 		Card(

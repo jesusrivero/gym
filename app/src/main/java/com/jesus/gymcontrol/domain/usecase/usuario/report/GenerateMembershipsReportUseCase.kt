@@ -7,7 +7,11 @@ import javax.inject.Inject
 class GenerateMembershipsReportUseCase @Inject constructor(
 	private val reportesRepository: ReportesRepository
 ) {
-	suspend operator fun invoke(gymCode: String): List<ReporteMembresia> {
-		return reportesRepository.getMembresiasReporte(gymCode)
+	suspend operator fun invoke(
+		gymCode: String,
+		desde: Long? = null,
+		hasta: Long? = null
+	): List<ReporteMembresia> {
+		return reportesRepository.getMembresiasReporte(gymCode, desde, hasta)
 	}
 }

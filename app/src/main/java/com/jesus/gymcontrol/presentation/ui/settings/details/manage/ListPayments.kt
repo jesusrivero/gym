@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -148,8 +147,8 @@ fun ListPaymentsScreen(
 				modifier = Modifier
 					.fillMaxSize()
 					.padding(innerPadding)
-					.padding(horizontal = 16.dp),
-				verticalArrangement = Arrangement.spacedBy(12.dp)
+//					.padding(8.dp),,
+//				,verticalArrangement = Arrangement.spacedBy(12.dp)
 			) {
 				item {
 					PaymentFilters(
@@ -226,8 +225,8 @@ fun ListPaymentsScreen(
 				Box(
 					modifier = Modifier
 						.fillMaxSize()
-						.padding(horizontal = 16.dp),
-					contentAlignment = Alignment.Center
+//						.padding(horizontal = 8.dp),
+					,contentAlignment = Alignment.Center
 				) {
 					when {
 						isLoading -> {
@@ -249,7 +248,7 @@ fun ListPaymentsScreen(
 							LazyColumn(
 								modifier = Modifier
 									.fillMaxSize(),
-								verticalArrangement = Arrangement.spacedBy(12.dp)
+//								verticalArrangement = Arrangement.spacedBy(12.dp)
 							) {
 								items(filteredList) { payment ->
 									PaymentCard(payment) {
@@ -266,14 +265,12 @@ fun ListPaymentsScreen(
 	}
 }
 
-
 @Composable
 fun PaymentCard(payment: Payment, onViewDetails: () -> Unit) {
 	Card(
 		modifier = Modifier
 			.fillMaxWidth()
-			.wrapContentHeight()
-			.padding(horizontal = 2.dp),
+			.padding(horizontal = 6.dp, vertical = 4.dp), // igual que PersonCard
 		shape = RoundedCornerShape(12.dp),
 		elevation = CardDefaults.cardElevation(1.dp),
 		colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
@@ -281,7 +278,7 @@ fun PaymentCard(payment: Payment, onViewDetails: () -> Unit) {
 		Row(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(horizontal = 12.dp, vertical = 8.dp),
+				.padding(horizontal = 16.dp, vertical = 12.dp), // igual que PersonCard
 			verticalAlignment = Alignment.CenterVertically,
 			horizontalArrangement = Arrangement.SpaceBetween
 		) {

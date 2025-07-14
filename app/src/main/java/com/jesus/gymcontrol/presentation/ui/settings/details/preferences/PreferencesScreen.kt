@@ -3,6 +3,7 @@ package com.jesus.gymcontrol.presentation.ui.settings.details.preferences
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -53,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -89,6 +91,9 @@ fun PreferencesContent(
 	val notifications by notificacionesViewModel.notifications.collectAsState()
 	val notificationCount by notificacionesViewModel.notificationCount.collectAsState()
 	val unreadCount by notificacionesViewModel.unreadCount.collectAsState()
+	val configuration = LocalConfiguration.current
+	val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+	
 	
 	
 	Scaffold(
@@ -164,18 +169,16 @@ fun PreferencesContent(
 				.fillMaxSize()
 				.padding(innerPadding)
 				.padding(horizontal = 2.dp)
-				.verticalScroll(rememberScrollState()),
-			
-			) {
+				.let { base ->
+					if (isLandscape) base.verticalScroll(rememberScrollState()) else base
+				}
+		) {
 			// Sección General en Card
 			Card(
 				modifier = Modifier
 					.fillMaxWidth()
 					.padding(6.dp),
-				colors = CardDefaults.cardColors(
-					containerColor = colorScheme.onPrimary,
-					contentColor = colorScheme.onSurfaceVariant
-				),
+				colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
 				elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
 				shape = RoundedCornerShape(16.dp)
 			) {
@@ -213,10 +216,7 @@ fun PreferencesContent(
 				modifier = Modifier
 					.fillMaxWidth()
 					.padding(horizontal = 6.dp, vertical = 4.dp),
-				colors = CardDefaults.cardColors(
-					containerColor = colorScheme.onPrimary,
-					contentColor = colorScheme.onSurfaceVariant
-				),
+				colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
 				elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
 				shape = RoundedCornerShape(16.dp)
 			) {
