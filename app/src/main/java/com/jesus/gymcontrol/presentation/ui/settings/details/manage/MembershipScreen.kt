@@ -81,11 +81,13 @@ fun MembershipScreen(
 	var price by remember { mutableStateOf("") }
 	var duration by remember { mutableStateOf("") }
 	var membershipToToggle by remember { mutableStateOf<Membership?>(null) }
+	var membershipToDelete by remember { mutableStateOf<Membership?>(null) }
 	var showSuccessDialog by remember { mutableStateOf(false) }
 	var membershipToEdit by remember { mutableStateOf<Membership?>(null) }
 	var membershipToView by remember { mutableStateOf<Membership?>(null) }
 	val isActionSuccess by viewModel.isActionSuccess.collectAsState()
 	var filter by remember { mutableStateOf(PromotionFilter.ACTIVE) }
+
 	
 	
 	LaunchedEffect(Unit) {
@@ -266,6 +268,12 @@ fun MembershipScreen(
 													contentDescription = "Detalles"
 												)
 											}
+											IconButton(onClick = { membershipToDelete = membership }) {
+												Icon(
+													painterResource(id = R.drawable.ic_delete),
+													contentDescription = "Detalles"
+												)
+											}
 										}
 									}
 									Spacer(Modifier.height(2.dp))
@@ -291,6 +299,7 @@ fun MembershipScreen(
 							Text("Nombre: ${membership.nombre}")
 							Text("Precio: $${membership.precio}")
 							Text("Duración: ${membership.duracionDias} días")
+							Text("Usuarios: ${membership.cantidadUsuarios} inscritos")
 						}
 					},
 					confirmButton = {
@@ -394,6 +403,9 @@ fun MembershipScreen(
 			
 			// Diálogo para editar membresía
 			membershipToEdit?.let { membership ->
+				val membershipWithCount = membershipsSummary.find { it.membership.id == membership.id }
+				val isEditable = membershipWithCount?.userCount == 0
+				
 				var editedName by remember { mutableStateOf(membership.nombre) }
 				var editedPrice by remember { mutableStateOf(membership.precio.toString()) }
 				var editedDuration by remember { mutableStateOf(membership.duracionDias.toString()) }
@@ -401,25 +413,28 @@ fun MembershipScreen(
 				AlertDialog(
 					onDismissRequest = { membershipToEdit = null },
 					confirmButton = {
-						Button(onClick = {
-							val parsedPrice = editedPrice.toDoubleOrNull()
-							val parsedDuration = editedDuration.toIntOrNull()
-							if (editedName.isBlank() || parsedPrice == null || parsedDuration == null) {
-								Toast.makeText(
-									context,
-									"Complete correctamente los campos",
-									Toast.LENGTH_SHORT
-								).show()
-								return@Button
-							}
-							val updatedMembership = membership.copy(
-								nombre = editedName.trim(),
-								precio = parsedPrice,
-								duracionDias = parsedDuration
-							)
-							viewModel.editMembership(updatedMembership)
-							membershipToEdit = null
-						}) {
+						Button(
+							onClick = {
+								val parsedPrice = editedPrice.toDoubleOrNull()
+								val parsedDuration = editedDuration.toIntOrNull()
+								if (editedName.isBlank() || parsedPrice == null || parsedDuration == null) {
+									Toast.makeText(
+										context,
+										"Complete correctamente los campos",
+										Toast.LENGTH_SHORT
+									).show()
+									return@Button
+								}
+								val updatedMembership = membership.copy(
+									nombre = editedName.trim(),
+									precio = parsedPrice,
+									duracionDias = parsedDuration
+								)
+								viewModel.editMembership(updatedMembership)
+								membershipToEdit = null
+							},
+							enabled = isEditable // 🔷 solo habilitado si es editable
+						) {
 							Text("Guardar")
 						}
 					},
@@ -431,12 +446,23 @@ fun MembershipScreen(
 					title = { Text("Editar membresía") },
 					text = {
 						Column {
+							if (!isEditable) {
+								Text(
+									text = "ℹ️ Esta membresia tiene ${membership.cantidadUsuarios} clientes registrados. No se puede editar sus datos.",
+									color = MaterialTheme.colorScheme.onSurfaceVariant,
+									style = MaterialTheme.typography.bodySmall,
+									modifier = Modifier.padding(bottom = 8.dp)
+								)
+								Spacer(modifier = Modifier.height(8.dp))
+							}
+							
 							OutlinedTextField(
 								value = editedName,
 								onValueChange = { editedName = it },
 								label = { Text("Nombre") },
 								modifier = Modifier.fillMaxWidth(),
-								maxLines = 1
+								maxLines = 1,
+								enabled = isEditable
 							)
 							Spacer(modifier = Modifier.height(12.dp))
 							OutlinedTextField(
@@ -445,7 +471,8 @@ fun MembershipScreen(
 								label = { Text("Precio") },
 								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
 								modifier = Modifier.fillMaxWidth(),
-								maxLines = 1
+								maxLines = 1,
+								enabled = isEditable
 							)
 							Spacer(modifier = Modifier.height(12.dp))
 							OutlinedTextField(
@@ -454,7 +481,8 @@ fun MembershipScreen(
 								label = { Text("Duración (días)") },
 								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
 								modifier = Modifier.fillMaxWidth(),
-								maxLines = 1
+								maxLines = 1,
+								enabled = isEditable
 							)
 						}
 					},
@@ -497,6 +525,31 @@ fun MembershipScreen(
 					}
 				)
 			}
+			
+			
+			// Diálogo para eliminar membresía
+			membershipToDelete?.let { membership ->
+				AlertDialog(
+					onDismissRequest = { membershipToDelete = null },
+					title = { Text("¿Eliminar membresía?") },
+					text = { Text("¿Estás seguro de eliminar la membresía \"${membership.nombre}\"? Esta acción no se puede deshacer.") },
+					confirmButton = {
+						Button(onClick = {
+							viewModel.deleteMembership(membership)
+							membershipToDelete = null
+						}) {
+							Text("Eliminar")
+						}
+					},
+					dismissButton = {
+						OutlinedButton(onClick = { membershipToDelete = null }) {
+							Text("Cancelar")
+						}
+					}, 	containerColor = MaterialTheme.colorScheme.surface
+				)
+			}
+			
+			
 			errorMessage?.let {
 				LaunchedEffect(it) {
 					Toast.makeText(context, it, Toast.LENGTH_LONG).show()
@@ -506,26 +559,4 @@ fun MembershipScreen(
 	}
 }
 
-
-//			// Diálogo para eliminar membresía
-//			membershipToDelete?.let { membership ->
-//				AlertDialog(
-//					onDismissRequest = { membershipToDelete = null },
-//					title = { Text("¿Eliminar membresía?") },
-//					text = { Text("¿Estás seguro de eliminar la membresía \"${membership.nombre}\"? Esta acción no se puede deshacer.") },
-//					confirmButton = {
-//						Button(onClick = {
-//							viewModel.deleteMembership(membership)
-//							membershipToDelete = null
-//						}) {
-//							Text("Eliminar")
-//						}
-//					},
-//					dismissButton = {
-//						OutlinedButton(onClick = { membershipToDelete = null }) {
-//							Text("Cancelar")
-//						}
-//					}, 	containerColor = MaterialTheme.colorScheme.surface
-//				)
-//			}
 

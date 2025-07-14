@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.Source
 import com.jesus.gymcontrol.domain.model.Pago
 import com.jesus.gymcontrol.domain.model.Payment
 import com.jesus.gymcontrol.domain.repository.PaymentRepository
@@ -15,11 +16,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
-import com.google.firebase.firestore.Source
 
 class PaymentRepositoryImpl @Inject constructor(
 	private val firestore: FirebaseFirestore,
 ) : PaymentRepository {
+	
 	
 	override suspend fun addPago(pago: Pago): Result<Unit> = try {
 		Log.d("addPago", "== INICIO DE addPago ==")
@@ -76,6 +77,8 @@ class PaymentRepositoryImpl @Inject constructor(
 			.document(pago.membershipId)
 			.collection("usuarios")
 			.document(pago.userId)
+		
+		val membershipRef = gymRef.collection("membresias").document(pago.membershipId)
 		
 		val promoRef = pago.promocionId?.let { promoId ->
 			gymRef.collection("promociones").document(promoId)
@@ -135,10 +138,12 @@ class PaymentRepositoryImpl @Inject constructor(
 				)
 			)
 			
-			// ✅ NUEVO: incrementa cantidadUsuarios y guarda userId + paymentdate
+			// ✅ Incrementa cantidadUsuarios en promoción
 			promoRef?.let {
 				batch.update(it, "cantidadUsuarios", FieldValue.increment(1))
 			}
+			
+			// ✅ Guarda en colección usuarios de la promoción
 			promoUserRef?.let {
 				batch.set(
 					it,
@@ -148,6 +153,9 @@ class PaymentRepositoryImpl @Inject constructor(
 					)
 				)
 			}
+			
+			// ✅ Incrementa cantidadUsuarios en membresía
+			batch.update(membershipRef, "cantidadUsuarios", FieldValue.increment(1))
 		}.await()
 		
 		Log.d("addPago", "✅ Pago agregado correctamente")
@@ -168,7 +176,7 @@ class PaymentRepositoryImpl @Inject constructor(
 					.orderBy("date", Query.Direction.DESCENDING)
 					.get()
 					.await()
-
+				
 				paymentsSnapshot.documents.mapNotNull { doc ->
 					val data = doc.data ?: return@mapNotNull null
 					try {
@@ -206,7 +214,7 @@ class PaymentRepositoryImpl @Inject constructor(
 	override suspend fun calcularNuevaFechaVencimiento(
 		userId: String,
 		gymCode: String,
-		membershipDays: Int
+		membershipDays: Int,
 	): Long {
 		val userRef = firestore
 			.collection("users")
@@ -218,16 +226,19 @@ class PaymentRepositoryImpl @Inject constructor(
 		val fechaActual = snapshot.getLong("fechaVencimiento") ?: 0L
 		val hoy = System.currentTimeMillis()
 		val base = if (fechaActual > hoy) fechaActual else hoy
-		return base + (membershipDays * 24 * 60*60*1000L)
+		return base + (membershipDays * 24 * 60 * 60 * 1000L)
 	}
 	
 	
 	override suspend fun generarDescripcionPago(
 		userId: String,
 		gymCode: String,
-		nuevaMembresia: String
+		nuevaMembresia: String,
 	): String {
-		Log.d("PagoDebug", "Iniciando generación para userId=$userId gymCode=$gymCode nuevaMembresia=$nuevaMembresia")
+		Log.d(
+			"PagoDebug",
+			"Iniciando generación para userId=$userId gymCode=$gymCode nuevaMembresia=$nuevaMembresia"
+		)
 		
 		val userGymDoc = firestore
 			.collection("gimnasios")
@@ -255,15 +266,17 @@ class PaymentRepositoryImpl @Inject constructor(
 				Log.d("PagoDebug", "Caso: No tenía membresía previa")
 				"Este pago inicia la membresía $nuevaMembresia."
 			}
+			
 			fechaVencimiento < hoy -> {
 				Log.d("PagoDebug", "Caso: Membresía vencida")
 				"Este pago reinicia la membresía $nuevaMembresia. La membresía anterior $membershipActual estaba vencida desde $fechaStr."
 			}
+			
 			else -> {
 				Log.d("PagoDebug", "Caso: Extiende membresía")
 				"Este pago extiende la membresía $membershipActual (vence $fechaStr) con la nueva membresía $nuevaMembresia."
-				}
-				}
+			}
+		}
 	}
 	
 }

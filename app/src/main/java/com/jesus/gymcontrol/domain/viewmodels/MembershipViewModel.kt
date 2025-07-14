@@ -140,7 +140,8 @@ class MembershipViewModel @Inject constructor(
 			)
 			
 			if (result.isSuccess) {
-				_membershipActionMessage.value = "Membresía ${if (newState) "activada" else "desactivada"} correctamente"
+				_membershipActionMessage.value =
+					"Membresía ${if (newState) "activada" else "desactivada"} correctamente"
 				_isActionSuccess.value = true
 				loadMembershipsSummary()
 			} else {
@@ -152,23 +153,29 @@ class MembershipViewModel @Inject constructor(
 	
 	fun clearMembershipMessage() {
 		_membershipActionMessage.value = null
-		_isActionSuccess.value =null
+		_isActionSuccess.value = null
+	}
+	
+	
+	//		VOY A DEJAR ESTA FUNCION PARA UNA FUTURA IMPLEMENTACION
+	fun deleteMembership(membership: Membership) {
+		viewModelScope.launch {
+			isLoading = true
+			errorMessage = null
+			val result = deleteUseCase(membership)
+			isLoading = false
+			result.onSuccess {
+				_membershipActionMessage.value = "Membresía eliminada exitosamente"
+				_isActionSuccess.value = true
+				loadMemberships()
+				loadMembershipsSummary()
+			}
+			deleteUseCase(membership).onSuccess {
+				loadMemberships()
+			}.onFailure {
+				_membershipActionMessage.value = "La membresia no se puede eliminar, tiene usuarios inscritos"
+			}
+			isLoading = false
+		}
 	}
 }
-
-	
-	
-	//	VOY A DEJAR ESTA FUNCION PARA UNA FUTURA IMPLEMENTACION
-//	fun deleteMembership(membership: Membership) {
-//		viewModelScope.launch {
-//			isLoading = true
-//			errorMessage = null
-//
-//			deleteUseCase(membership).onSuccess {
-//				loadMemberships()
-//			}.onFailure {
-//				errorMessage = it.message
-//			}
-//			isLoading = false
-//		}
-//	}

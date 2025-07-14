@@ -64,6 +64,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.domain.model.GymUserSummary
 import com.jesus.gymcontrol.domain.model.ListUser
+import com.jesus.gymcontrol.domain.model.Membership
 import com.jesus.gymcontrol.domain.model.MembershipWithCount
 import com.jesus.gymcontrol.domain.model.Payment
 import com.jesus.gymcontrol.domain.viewmodels.AdminViewModel
@@ -128,7 +129,6 @@ fun MainContent(
 	
 	LaunchedEffect(Unit) {
 		memberviewModel.loadMemberships()
-		memberviewModel.loadMembershipsSummary()
 		viewModel.loadGymUserSummary()
 		userListViewModel.loadUsers()
 		notificacionesViewModel.loadNotifications()
@@ -227,7 +227,7 @@ fun MainContent(
 						SummaryAndMembershipCard(
 							navController = navController,
 							summary = summary,
-							memberships = memberviewModel.membershipsSummary,
+							memberships = memberviewModel.memberships,
 							isLoading = isLoadingAdmin
 						)
 						
@@ -393,11 +393,36 @@ fun NewClientsSection(
 }
 
 
+
+
+@Composable
+fun SummaryItem(title: String, count: Int, isLoading: Boolean) {
+	Column(horizontalAlignment = Alignment.CenterHorizontally) {
+		Text(
+			text = title,
+			style = MaterialTheme.typography.bodyMedium,
+			color = MaterialTheme.colorScheme.onSurface
+		)
+		if (isLoading) {
+			CircularProgressIndicator(
+				modifier = Modifier.size(18.dp),
+				strokeWidth = 2.dp
+			)
+		} else {
+			Text(
+				text = count.toString(),
+				style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+				color = MaterialTheme.colorScheme.primary
+			)
+		}
+	}
+}
+
 @Composable
 fun SummaryAndMembershipCard(
 	navController: NavController,
 	summary: GymUserSummary,
-	memberships: List<MembershipWithCount>,
+	memberships: List<Membership>,
 	isLoading: Boolean,
 ) {
 	var isExpanded by remember { mutableStateOf(false) }
@@ -418,7 +443,7 @@ fun SummaryAndMembershipCard(
 				verticalAlignment = Alignment.CenterVertically
 			) {
 				Text(
-					text = "Resumen de General",
+					text = "Resumen General",
 					style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
 				)
 				TextButton(
@@ -479,31 +504,7 @@ fun SummaryAndMembershipCard(
 }
 
 @Composable
-fun SummaryItem(title: String, count: Int, isLoading: Boolean) {
-	Column(horizontalAlignment = Alignment.CenterHorizontally) {
-		Text(
-			text = title,
-			style = MaterialTheme.typography.bodyMedium,
-			color = MaterialTheme.colorScheme.onSurface
-		)
-		if (isLoading) {
-			CircularProgressIndicator(
-				modifier = Modifier.size(18.dp),
-				strokeWidth = 2.dp
-			)
-		} else {
-			Text(
-				text = count.toString(),
-				style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-				color = MaterialTheme.colorScheme.primary
-			)
-		}
-	}
-}
-
-
-@Composable
-fun MembershipItem(item: MembershipWithCount) {
+fun MembershipItem(item: Membership) {
 	Row(
 		modifier = Modifier
 			.fillMaxWidth()
@@ -511,7 +512,7 @@ fun MembershipItem(item: MembershipWithCount) {
 		horizontalArrangement = Arrangement.SpaceBetween
 	) {
 		Text(
-			text = item.membership.nombre,
+			text = item.nombre,
 			style = MaterialTheme.typography.bodyLarge,
 			color = MaterialTheme.colorScheme.onSurface
 		)
@@ -524,7 +525,7 @@ fun MembershipItem(item: MembershipWithCount) {
 			)
 			Spacer(modifier = Modifier.width(4.dp))
 			Text(
-				text = "${item.userCount}",
+				text = "${item.cantidadUsuarios}",
 				style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
 				color = MaterialTheme.colorScheme.primary
 			)

@@ -135,6 +135,21 @@ class MembershipRepositoryImpl @Inject constructor(
 				return Result.failure(Exception("Datos incompletos para editar la membresía"))
 			}
 			
+			// 🔷 Consultamos la membresía en Firestore para obtener el valor actual de cantidadUsuarios
+			val snapshot = firestore.collection("gimnasios")
+				.document(gymCode)
+				.collection("membresias")
+				.document(id)
+				.get()
+				.await()
+			
+			val usuarios = snapshot.getLong("cantidadUsuarios") ?: 0
+			
+			if (usuarios > 0) {
+				return Result.failure(Exception("No se puede editar la membresía porque tiene usuarios registrados"))
+			}
+			
+			// 🔷 Si usuarios == 0, actualizamos
 			firestore.collection("gimnasios")
 				.document(gymCode)
 				.collection("membresias")
@@ -153,6 +168,7 @@ class MembershipRepositoryImpl @Inject constructor(
 			Result.failure(e)
 		}
 	}
+	
 	
 	
 	override suspend fun setMembershipState(
