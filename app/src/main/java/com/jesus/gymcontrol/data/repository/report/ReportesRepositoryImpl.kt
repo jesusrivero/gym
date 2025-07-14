@@ -151,43 +151,55 @@ class ReportesRepositoryImpl @Inject constructor(
 			}
 		}
 	
-	
-	
 	override suspend fun getPromocionesReporte(
 		gymCode: String,
 		desde: Long?,
-		hasta: Long?
+		hasta: Long?,
+		filtroActivo: Boolean?
 	): List<ReportePromocion> =
 		withContext(Dispatchers.IO) {
-			val promocionesRef = firestore.collection("gimnasios")
+			var promocionesQuery = firestore.collection("gimnasios")
 				.document(gymCode)
-				.collection("promociones")
+				.collection("promociones") as com.google.firebase.firestore.Query
 			
-			val promocionesSnapshot = promocionesRef.get().await()
+			// Aplica filtro por activo si corresponde
+			if (filtroActivo != null) {
+				promocionesQuery = promocionesQuery.whereEqualTo("activo", filtroActivo)
+			}
+			
+			val promocionesSnapshot = promocionesQuery.get().await()
 			
 			val result = promocionesSnapshot.documents.mapNotNull { promoDoc ->
 				val data = promoDoc.data ?: return@mapNotNull null
 				val promoId = promoDoc.id
 				
-				// Obtener usuarios con filtro por rango de fechas
-				val usuariosSnapshot = try {
-					var query = promocionesRef
-						.document(promoId)
-						.collection("usuarios") as com.google.firebase.firestore.Query
-					
-					if (desde != null) {
-						query = query.whereGreaterThanOrEqualTo("paymentdate", desde)
+				// 🧮 Contar usuarios según filtros
+				val cantidadUsuarios: Int = if (desde == null && hasta == null) {
+					// Sin filtro de fechas: usa el campo ya guardado
+					(data["cantidadUsuarios"] as? Number)?.toInt() ?: 0
+				} else {
+					// Con filtro de fechas: cuenta los documentos en la subcolección
+					val usuariosSnapshot = try {
+						var query = firestore.collection("gimnasios")
+							.document(gymCode)
+							.collection("promociones")
+							.document(promoId)
+							.collection("usuarios") as com.google.firebase.firestore.Query
+						
+						if (desde != null) {
+							query = query.whereGreaterThanOrEqualTo("paymentdate", desde)
+						}
+						if (hasta != null) {
+							query = query.whereLessThanOrEqualTo("paymentdate", hasta)
+						}
+						
+						query.get().await()
+					} catch (e: Exception) {
+						null
 					}
-					if (hasta != null) {
-						query = query.whereLessThanOrEqualTo("paymentdate", hasta)
-					}
 					
-					query.get().await()
-				} catch (e: Exception) {
-					null
+					usuariosSnapshot?.size() ?: 0
 				}
-				
-				val cantidadUsuarios = usuariosSnapshot?.size() ?: 0
 				
 				ReportePromocion(
 					nombre = data["nombre"] as? String ?: "",
@@ -203,7 +215,6 @@ class ReportesRepositoryImpl @Inject constructor(
 			
 			return@withContext result
 		}
-	
 	
 	
 	

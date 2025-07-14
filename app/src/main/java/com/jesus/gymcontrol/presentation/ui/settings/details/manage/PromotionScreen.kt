@@ -208,6 +208,34 @@ fun PromotionScreen(
 					containerColor = MaterialTheme.colorScheme.surface
 				)
 			}
+			
+			promotionToDelete?.let { selected ->
+				AlertDialog(
+					onDismissRequest = { promotionToDelete = null },
+					title = {
+						Text("Eliminar promoción")
+					},
+					text = {
+						Text("¿Estás seguro de que deseas eliminar la promoción \"${selected.nombre}\"? Esta acción no se puede deshacer.")
+					},
+					confirmButton = {
+						TextButton(onClick = {
+							viewModel.deletePromotion(selected)
+							promotionToDelete = null
+						}) {
+							Text("Eliminar", color = Color.Red)
+						}
+					},
+					dismissButton = {
+						TextButton(onClick = {
+							promotionToDelete = null
+						}) {
+							Text("Cancelar")
+						}
+					},
+					containerColor = MaterialTheme.colorScheme.surface
+				)
+			}
 			Row(
 				modifier = Modifier.fillMaxWidth(),
 				horizontalArrangement = Arrangement.End
@@ -290,17 +318,26 @@ fun PromotionScreen(
 													contentDescription = "Detalles"
 												)
 											}
+											IconButton(onClick = { promotionToDelete = promo }) {
+												Icon(
+													painterResource(id = R.drawable.ic_delete),
+													contentDescription = "Eliminar promoción",
+												)
+											}
+											
 										}
 									}
 									
 									Spacer(modifier = Modifier.height(4.dp))
 									
 									// Descripción debajo
+									// Descripción debajo
 									Text(
-										"Usuarios: ${viewModel.userCountByPromotion[promo.id] ?: 0}",
+										"Usuarios: ${promo.cantidadUsuarios}",
 										style = MaterialTheme.typography.bodySmall,
 										color = MaterialTheme.colorScheme.onSurfaceVariant
 									)
+									
 								}
 							}
 						}
@@ -459,6 +496,9 @@ fun PromotionScreen(
 				var editedDiscount by remember { mutableStateOf(promo.porcentajeDescuento.toString()) }
 				var editedDuration by remember { mutableStateOf(promo.duracionDias.toString()) }
 				var canEditDuration by remember { mutableStateOf(false) }
+				var showEditDiscountError by remember { mutableStateOf(false) }
+				
+				val editableFully = promo.cantidadUsuarios == 0
 				
 				AlertDialog(
 					onDismissRequest = { promotionToEdit = null },
@@ -467,18 +507,19 @@ fun PromotionScreen(
 							val discountVal = editedDiscount.toDoubleOrNull()
 							val durationVal = editedDuration.toIntOrNull()
 							
-							if (editedName.isBlank() || editedDescription.isBlank() || discountVal == null || durationVal == null) {
-								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT)
-									.show()
+							// Validaciones
+							if (!editableFully && durationVal == null) {
+								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT).show()
 								return@Button
 							}
 							
-							if (discountVal > 100.0) {
-								Toast.makeText(
-									context,
-									"El descuento no puede ser mayor al 100%",
-									Toast.LENGTH_SHORT
-								).show()
+							if (editableFully && (editedName.isBlank() || editedDescription.isBlank() || discountVal == null || durationVal == null)) {
+								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT).show()
+								return@Button
+							}
+							
+							if (discountVal != null && discountVal > 100.0) {
+								Toast.makeText(context, "El descuento no puede ser mayor al 100%", Toast.LENGTH_SHORT).show()
 								return@Button
 							}
 							
@@ -487,8 +528,8 @@ fun PromotionScreen(
 							val updatedPromo = promo.copy(
 								nombre = editedName.trim(),
 								descripcion = editedDescription.trim(),
-								porcentajeDescuento = discountVal,
-								duracionDias = durationVal
+								porcentajeDescuento = discountVal ?: promo.porcentajeDescuento,
+								duracionDias = durationVal ?: promo.duracionDias
 							)
 							
 							viewModel.updatePromotion(updatedPromo, forceRecalculate = vencida || canEditDuration)
@@ -517,49 +558,61 @@ fun PromotionScreen(
 							if (vencida) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurface
 						
 						Column {
-							OutlinedTextField(
-								value = editedName,
-								onValueChange = { editedName = it },
-								label = { Text("Nombre", color = textColor) },
-								modifier = Modifier.fillMaxWidth(),
-								maxLines = 1
-							)
-							OutlinedTextField(
-								value = editedDescription,
-								onValueChange = { editedDescription = it },
-								label = { Text("Descripción", color = textColor) },
-								modifier = Modifier.fillMaxWidth(),
-								maxLines = 1
-							)
-							OutlinedTextField(
-								value = editedDiscount,
-								onValueChange = {
-									val value = it.toDoubleOrNull()
-									if (value == null || value <= 100.0) {
-										editedDiscount = it
-										showEditDiscountError = false
-									} else {
-										showEditDiscountError = true
-									}
-								},
-								label = { Text("Descuento (%)", color = textColor) },
-								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-								modifier = Modifier.fillMaxWidth(),
-								maxLines = 1
-							)
-							
-							if (showEditDiscountError) {
+							if (!editableFully && !vencida) { // <-- Aquí la condición para ocultar cuando está vencida
 								Text(
-									text = "El descuento no puede ser mayor a 100%",
-									color = Color.Red,
-									style = MaterialTheme.typography.labelSmall,
-									modifier = Modifier.padding(top = 4.dp),
-									maxLines = 1
+									text = "ℹ️ Esta promoción tiene ${promo.cantidadUsuarios} uso(s) registrado(s). Solo puedes actualizar la duración.",
+									color = MaterialTheme.colorScheme.onSurfaceVariant,
+									style = MaterialTheme.typography.bodySmall,
+									modifier = Modifier.padding(bottom = 8.dp)
 								)
 							}
 							
+							if (editableFully) {
+								OutlinedTextField(
+									value = editedName,
+									onValueChange = { editedName = it },
+									label = { Text("Nombre", color = textColor) },
+									modifier = Modifier.fillMaxWidth(),
+									maxLines = 1
+								)
+								OutlinedTextField(
+									value = editedDescription,
+									onValueChange = { editedDescription = it },
+									label = { Text("Descripción", color = textColor) },
+									modifier = Modifier.fillMaxWidth(),
+									maxLines = 1
+								)
+								OutlinedTextField(
+									value = editedDiscount,
+									onValueChange = {
+										val value = it.toDoubleOrNull()
+										if (value == null || value <= 100.0) {
+											editedDiscount = it
+											showEditDiscountError = false
+										} else {
+											showEditDiscountError = true
+										}
+									},
+									label = { Text("Descuento (%)", color = textColor) },
+									keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+									modifier = Modifier.fillMaxWidth(),
+									maxLines = 1
+								)
+								
+								if (showEditDiscountError && !vencida) {
+									Text(
+										text = "El descuento no puede ser mayor al 100%",
+										color = Color.Red,
+										style = MaterialTheme.typography.labelSmall,
+										modifier = Modifier.padding(top = 4.dp),
+										maxLines = 1
+									)
+								}
+							}
+							
 							Row(
-								verticalAlignment = Alignment.CenterVertically
+								verticalAlignment = Alignment.CenterVertically,
+								modifier = Modifier.padding(top = 8.dp)
 							) {
 								OutlinedTextField(
 									value = editedDuration,
@@ -567,7 +620,6 @@ fun PromotionScreen(
 									label = { Text("Duración (días)", color = textColor) },
 									keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
 									modifier = Modifier.weight(1f),
-									enabled = canEditDuration,
 									maxLines = 1
 								)
 								IconButton(
@@ -589,6 +641,8 @@ fun PromotionScreen(
 						MaterialTheme.colorScheme.surface
 				)
 			}
+			
+			
 			
 			// Diálogo para eliminar promoción
 			promotionToDelete?.let { promo ->

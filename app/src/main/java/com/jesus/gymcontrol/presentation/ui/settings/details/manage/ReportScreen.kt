@@ -88,6 +88,7 @@ fun ReportScreen(
 	
 	val reportTypes = listOf("Todos", "Clientes", "Pagos", "Membresías", "Promociones")
 	val clientesFilters = listOf("Todos", "Activos", "Inactivos", "Pendientes")
+	val promotionFilter = listOf("Todos", "Activos", "Inactivos")
 	val pagosFilters = listOf("Todos", "Dólares", "Bolívares", "Mixtos", "Con promociones")
 	
 	val pagos by remember { derivedStateOf { viewModel.pagosReport } }
@@ -277,6 +278,7 @@ fun ReportScreen(
 				onSubFilterSelected = { selectedSubFilter = it },
 				clientesFilters = clientesFilters,
 				pagosFilters = pagosFilters,
+				promotionFilter = promotionFilter,
 				startDate = startDate,
 				endDate = endDate,
 				onStartDateClick = { showDatePicker(context) { date -> startDate = date } },
@@ -508,6 +510,7 @@ fun ReportFilters(
 	selectedSubFilter: String,
 	onSubFilterSelected: (String) -> Unit,
 	clientesFilters: List<String>,
+	promotionFilter: List<String>,
 	pagosFilters: List<String>,
 	startDate: LocalDate?,
 	endDate: LocalDate?,
@@ -585,7 +588,7 @@ fun ReportFilters(
 			}
 			
 			// Filtro secundario dinámico según tipo de reporte
-			if (selectedReportType == "Clientes" || selectedReportType == "Pagos") {
+			if (selectedReportType == "Clientes" || selectedReportType == "Pagos" || selectedReportType == "Promociones")  {
 				Spacer(modifier = Modifier.height(8.dp))
 				Text(
 					text = "Filtros",
@@ -596,6 +599,7 @@ fun ReportFilters(
 				val filters = when (selectedReportType) {
 					"Clientes" -> clientesFilters
 					"Pagos" -> pagosFilters
+					"Promociones" -> promotionFilter
 					else -> emptyList()
 				}
 				

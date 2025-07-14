@@ -67,7 +67,6 @@ class PromotionViewModel @Inject constructor(
 		_promotionActionMessage.value = message
 		_isActionSuccess.value = success
 	}
-	
 	fun createPromotion(promotion: Promotion) {
 		viewModelScope.launch {
 			isLoading = true
@@ -78,11 +77,13 @@ class PromotionViewModel @Inject constructor(
 			
 			result.onSuccess {
 				loadPromotions()
+				setActionResult("Promoción creada exitosamente", true)
 			}.onFailure {
 				setActionResult("Error al crear promoción: ${it.message}", false)
 			}
 		}
 	}
+	
 	
 	fun togglePromotionState(promotion: Promotion) {
 		viewModelScope.launch {

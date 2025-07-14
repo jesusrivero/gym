@@ -29,13 +29,14 @@ interface ReportesRepository {
 		desde: Long? = null,
 		hasta: Long? = null
 	): List<ReporteMembresia>
-
+	
 	
 	suspend fun getPromocionesReporte(
 		gymCode: String,
 		desde: Long? = null,
-		hasta: Long? = null
+		hasta: Long? = null,
+		filtroActivo: Boolean? = null
 	): List<ReportePromocion>
-
+	
 	
 }

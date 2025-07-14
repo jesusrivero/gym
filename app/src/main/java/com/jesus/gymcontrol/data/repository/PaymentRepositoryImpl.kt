@@ -1,6 +1,7 @@
 package com.jesus.gymcontrol.data.repository
 
 import android.util.Log
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
@@ -76,13 +77,10 @@ class PaymentRepositoryImpl @Inject constructor(
 			.collection("usuarios")
 			.document(pago.userId)
 		
-		// ✅ NUEVO: usamos ID del pago, no del usuario
-		val promoUserRef = pago.promocionId?.let { promoId ->
-			gymRef.collection("promociones")
-				.document(promoId)
-				.collection("usuarios")
-				.document(pago.id)
+		val promoRef = pago.promocionId?.let { promoId ->
+			gymRef.collection("promociones").document(promoId)
 		}
+		val promoUserRef = promoRef?.collection("usuarios")?.document(pago.id)
 		
 		// 🔁 Desactivar membresías anteriores
 		val membresiasSnapshot = gymRef.collection("membresias").get().await()
@@ -137,19 +135,16 @@ class PaymentRepositoryImpl @Inject constructor(
 				)
 			)
 			
+			// ✅ NUEVO: incrementa cantidadUsuarios y guarda userId + paymentdate
+			promoRef?.let {
+				batch.update(it, "cantidadUsuarios", FieldValue.increment(1))
+			}
 			promoUserRef?.let {
 				batch.set(
 					it,
 					mapOf(
 						"userId" to pago.userId,
-						"name" to pago.name,
-						"lastname" to pago.lastname,
-						"idcard" to pago.idcard,
-						"paymentdate" to pago.date,
-						"state" to "activo",
-						"membershipId" to pago.membershipId,
-						"membershipName" to pago.membershipName,
-						"expirationDate" to fechaVencimientoFinal,
+						"paymentdate" to pago.date
 					)
 				)
 			}
@@ -161,6 +156,7 @@ class PaymentRepositoryImpl @Inject constructor(
 		Log.e("addPago", "❌ Error al agregar pago: ${e.localizedMessage}", e)
 		Result.failure(e)
 	}
+	
 	
 	override suspend fun getAllPayments(gymCode: String): List<Payment> =
 		withContext(Dispatchers.IO) {

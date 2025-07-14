@@ -58,6 +58,16 @@ class ReportesViewModel @Inject constructor(
 	var totalBolivares by mutableStateOf(0.0)
 		private set
 	
+	@RequiresApi(Build.VERSION_CODES.O)
+	private fun LocalDate?.toEpochMillisAtStart(): Long? {
+		return this?.atStartOfDay(ZoneId.systemDefault())?.toInstant()?.toEpochMilli()
+	}
+	
+	@RequiresApi(Build.VERSION_CODES.O)
+	private fun LocalDate?.toEpochMillisAtEnd(): Long? {
+		return this?.atTime(LocalTime.MAX)?.atZone(ZoneId.systemDefault())?.toInstant()?.toEpochMilli()
+	}
+	
 	
 	fun cargarReportePagos(
 		filtro: String,
@@ -164,21 +174,33 @@ class ReportesViewModel @Inject constructor(
 			}
 		}
 	}
-
 	
 	
 	
 	@RequiresApi(Build.VERSION_CODES.O)
-	fun cargarReportePromociones(	filtro: String, desde: LocalDate?, hasta: LocalDate?) {
+	fun cargarReportePromociones(filtro: String, desde: LocalDate?, hasta: LocalDate?) {
 		val gymCode = sessionManager.getGymCode() ?: return
 		val desdeEpoch = desde?.atStartOfDay(ZoneId.systemDefault())?.toEpochSecond()?.times(1000)
 		val hastaEpoch = hasta?.atTime(LocalTime.MAX)?.atZone(ZoneId.systemDefault())?.toEpochSecond()?.times(1000)
+		
+		// Preparamos el filtroEstado para pasarlo al repositorio
+		val filtroActivo: Boolean? = when (filtro.lowercase()) {
+			"activos" -> true
+			"inactivos" -> false
+			else -> null
+		}
+		
 		
 		viewModelScope.launch {
 			isLoading = true
 			errorMessage = null
 			try {
-				promocionesReport = generatePromotionsReportUseCase(gymCode, desdeEpoch, hastaEpoch)
+				promocionesReport = generatePromotionsReportUseCase(
+					gymCode = gymCode,
+					desde = desdeEpoch,
+					hasta = hastaEpoch,
+					filtroActivo = filtroActivo
+				)
 			} catch (e: Exception) {
 				errorMessage = e.localizedMessage ?: "Error desconocido"
 			} finally {
@@ -186,6 +208,8 @@ class ReportesViewModel @Inject constructor(
 			}
 		}
 	}
+
+
 	
 	
 	

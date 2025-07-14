@@ -10,8 +10,10 @@ class GeneratePromotionsReportUseCase @Inject constructor(
 	suspend operator fun invoke(
 		gymCode: String,
 		desde: Long? = null,
-		hasta: Long? = null
+		hasta: Long? = null,
+		filtroActivo: Boolean? = null
 	): List<ReportePromocion> {
-		return reportesRepository.getPromocionesReporte(gymCode, desde, hasta)
+		return reportesRepository.getPromocionesReporte(gymCode, desde, hasta, filtroActivo)
 	}
+	
 }

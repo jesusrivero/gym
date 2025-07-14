@@ -52,7 +52,7 @@ class PromotionRepositoryImpl @Inject constructor(
 		val snapshot = firestore.collection("gimnasios")
 			.document(gymCode)
 			.collection("promociones")
-			.orderBy("fechaCreacion", Query.Direction.DESCENDING) // 👈 aquí
+			.orderBy("fechaCreacion", Query.Direction.DESCENDING)
 			.get()
 			.await()
 		
@@ -64,6 +64,7 @@ class PromotionRepositoryImpl @Inject constructor(
 	} catch (e: Exception) {
 		Result.failure(e)
 	}
+
 	
 	override suspend fun updatePromotion(
 		promotion: Promotion,
@@ -115,24 +116,20 @@ class PromotionRepositoryImpl @Inject constructor(
 			val gymCode = userDoc.getString("gimnasioCode")
 				?: return Result.failure(Exception("No se encontró el gimnasioCode del usuario"))
 			
-			val usuariosSnapshot = firestore.collection("gimnasios")
+			val promotionDoc = firestore.collection("gimnasios")
 				.document(gymCode)
 				.collection("promociones")
 				.document(promotion.id)
-				.collection("usuarios")
 				.get()
 				.await()
 			
-			// Verificamos si hay algún usuario activo
-			val hayUsuariosActivos = usuariosSnapshot.documents.any { doc ->
-				doc.getString("state") == "activo"
+			val cantidadUsuarios = promotionDoc.getLong("cantidadUsuarios") ?: 0L
+			
+			if (cantidadUsuarios > 0) {
+				return Result.failure(Exception("No se puede eliminar la promoción: hay usuarios asociados."))
 			}
 			
-			if (hayUsuariosActivos) {
-				return Result.failure(Exception("No se puede eliminar la promoción: hay usuarios con estado activo."))
-			}
-			
-			// Si no hay usuarios activos, se permite eliminar la promoción
+			// Si no hay usuarios asociados, se permite eliminar la promoción
 			firestore.collection("gimnasios")
 				.document(gymCode)
 				.collection("promociones")
@@ -145,6 +142,7 @@ class PromotionRepositoryImpl @Inject constructor(
 			Result.failure(e)
 		}
 	}
+
 	
 	override suspend fun getUsersCountByPromotion(gymCode: String): Result<Map<String, Int>> = try {
 		val promotionsRef = firestore.collection("gimnasios")
