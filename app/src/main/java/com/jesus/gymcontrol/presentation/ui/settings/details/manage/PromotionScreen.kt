@@ -567,6 +567,7 @@ fun PromotionScreen(
 								)
 							}
 							
+							
 							if (editableFully) {
 								OutlinedTextField(
 									value = editedName,
