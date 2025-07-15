@@ -157,16 +157,27 @@ class ReportesViewModel @Inject constructor(
 	
 	
 	@RequiresApi(Build.VERSION_CODES.O)
-	fun cargarReporteMembresias(desde: LocalDate?, hasta: LocalDate?) {
+	fun cargarReporteMembresias(filtro: String, desde: LocalDate?, hasta: LocalDate?) {
 		val gymCode = sessionManager.getGymCode() ?: return
 		val desdeEpoch = desde?.atStartOfDay(ZoneId.systemDefault())?.toEpochSecond()?.times(1000)
 		val hastaEpoch = hasta?.atTime(LocalTime.MAX)?.atZone(ZoneId.systemDefault())?.toEpochSecond()?.times(1000)
+		
+		val activo: Boolean? = when (filtro.lowercase()) {
+			"activos" -> true
+			"inactivos" -> false
+			else -> null
+		}
 		
 		viewModelScope.launch {
 			isLoading = true
 			errorMessage = null
 			try {
-				membresiasReport = generateMembershipsReportUseCase(gymCode, desdeEpoch, hastaEpoch)
+				membresiasReport = generateMembershipsReportUseCase(
+					gymCode,
+					desdeEpoch,
+					hastaEpoch,
+					activo  // 👉 ahora sí se pasa el filtro
+				)
 			} catch (e: Exception) {
 				errorMessage = e.localizedMessage ?: "Error desconocido"
 			} finally {
@@ -174,6 +185,7 @@ class ReportesViewModel @Inject constructor(
 			}
 		}
 	}
+	
 	
 	
 	

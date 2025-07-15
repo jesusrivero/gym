@@ -85,12 +85,10 @@ fun AccountContent(
 	var gender by rememberSaveable { mutableStateOf("") }
 	var weight by rememberSaveable { mutableStateOf("") }
 	var height by rememberSaveable { mutableStateOf("") }
-	
 	var isGenderDropdownExpanded by rememberSaveable { mutableStateOf(false) }
 	val genderOptions = listOf("Masculino", "Femenino", "Otro")
-	
 	var showSuccessDialog by rememberSaveable { mutableStateOf(false) }
-	
+	val onlyLettersRegex = Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]*\$")
 	var profileReloadKey by rememberSaveable { mutableStateOf(0) }
 	val isPhoneValid = phone.isBlank() || phone.matches(Regex("^\\+?[1-9]\\d{7,14}$"))
 	
@@ -169,9 +167,12 @@ fun AccountContent(
 				modifier = Modifier.fillMaxWidth(),
 				verticalArrangement = Arrangement.spacedBy(16.dp)
 			) {
+				
 				OutlinedTextField(
 					value = name,
-					onValueChange = { name = it },
+					onValueChange = {
+						if (it.matches(onlyLettersRegex)) name = it
+					},
 					label = { Text("Nombre") },
 					modifier = Modifier.fillMaxWidth(),
 					enabled = isEditing,
@@ -180,7 +181,9 @@ fun AccountContent(
 				
 				OutlinedTextField(
 					value = lastname,
-					onValueChange = { lastname = it },
+					onValueChange = {
+						if (it.matches(onlyLettersRegex)) lastname = it
+					},
 					label = { Text("Apellido") },
 					modifier = Modifier.fillMaxWidth(),
 					enabled = isEditing,

@@ -305,7 +305,7 @@ fun EditUserDialog(
 	var lastname by remember { mutableStateOf(user.lastname) }
 	var idcard by remember { mutableStateOf(user.idcard) }
 	var phone by remember { mutableStateOf(user.phone) }
-	
+	val onlyLettersRegex = Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]*\$")
 	var nameError by remember { mutableStateOf<String?>(null) }
 	var lastnameError by remember { mutableStateOf<String?>(null) }
 	var idcardError by remember { mutableStateOf<String?>(null) }
@@ -322,7 +322,7 @@ fun EditUserDialog(
 				OutlinedTextField(
 					value = name,
 					onValueChange = {
-						if (it.length <= 35) name = it
+						if (it.length <= 35 && it.matches(onlyLettersRegex)) name = it
 					},
 					label = { Text("Nombre") },
 					maxLines = 1,
@@ -331,10 +331,11 @@ fun EditUserDialog(
 						if (nameError != null) Text(nameError!!, color = MaterialTheme.colorScheme.error)
 					}
 				)
+				
 				OutlinedTextField(
 					value = lastname,
 					onValueChange = {
-						if (it.length <= 35) lastname = it
+						if (it.length <= 35 && it.matches(onlyLettersRegex)) lastname = it
 					},
 					label = { Text("Apellido") },
 					maxLines = 1,

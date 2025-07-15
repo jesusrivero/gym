@@ -331,13 +331,11 @@ fun PromotionScreen(
 									Spacer(modifier = Modifier.height(4.dp))
 									
 									// Descripción debajo
-									// Descripción debajo
 									Text(
 										"Usuarios: ${promo.cantidadUsuarios}",
 										style = MaterialTheme.typography.bodySmall,
 										color = MaterialTheme.colorScheme.onSurfaceVariant
 									)
-									
 								}
 							}
 						}

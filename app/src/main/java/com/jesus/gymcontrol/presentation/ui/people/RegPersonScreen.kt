@@ -162,11 +162,12 @@ fun RegPersonContent(
 	val date by rememberSaveable { mutableStateOf(System.currentTimeMillis()) }
 	var showDialog by remember { mutableStateOf(false) }
 	var idCardError by rememberSaveable { mutableStateOf<String?>(null) }
-	
+	val onlyLettersRegex = Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]*\$")
 	val trimmedEmail = email.trim()
 	val isNameValid = name.isNotBlank()
 	val islastNameValid = lastname.isNotBlank()
-	val isEmailValid = trimmedEmail.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
+	val isEmailValid =
+		trimmedEmail.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
 	val isPasswordValid = password.length >= 6
 	val isIdCardValid = idCard.length in 7..9
 	val isCodeValid = code.isNotBlank()
@@ -174,7 +175,8 @@ fun RegPersonContent(
 	var isCountryDropdownExpanded by rememberSaveable { mutableStateOf(false) }
 	val fullPhone = "$selectedCountryCode$phone"
 	val isPhoneValid = phone.isBlank() || fullPhone.matches(Regex("^[1-9]\\d{7,14}$"))
-	val formIsValid = isNameValid && islastNameValid && isEmailValid && isPasswordValid && isCodeValid && isIdCardValid && isPhoneValid
+	val formIsValid =
+		isNameValid && islastNameValid && isEmailValid && isPasswordValid && isCodeValid && isIdCardValid && isPhoneValid
 	val configuration = LocalConfiguration.current
 	val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 	
@@ -229,22 +231,34 @@ fun RegPersonContent(
 			Column(modifier = Modifier.padding(12.dp)) {
 				OutlinedTextField(
 					value = name,
-					onValueChange = { name = it },
+					onValueChange = {
+						if (it.matches(onlyLettersRegex)) name = it
+					},
 					label = { Text("Nombre") },
 					modifier = Modifier.fillMaxWidth()
 				)
 				if (!isNameValid && name.isNotEmpty()) {
-					Text("El nombre es obligatorio", color = colorScheme.error, style = MaterialTheme.typography.labelSmall)
+					Text(
+						"El nombre es obligatorio",
+						color = colorScheme.error,
+						style = MaterialTheme.typography.labelSmall
+					)
 				}
 				
 				OutlinedTextField(
 					value = lastname,
-					onValueChange = { lastname = it },
+					onValueChange = {
+						if (it.matches(onlyLettersRegex)) lastname = it
+					},
 					label = { Text("Apellido") },
 					modifier = Modifier.fillMaxWidth()
 				)
 				if (!isNameValid && lastname.isNotEmpty()) {
-					Text("El nombre es obligatorio", color = colorScheme.error, style = MaterialTheme.typography.labelSmall)
+					Text(
+						"El nombre es obligatorio",
+						color = colorScheme.error,
+						style = MaterialTheme.typography.labelSmall
+					)
 				}
 			}
 		}
@@ -264,7 +278,11 @@ fun RegPersonContent(
 					modifier = Modifier.fillMaxWidth()
 				)
 				if (email.isNotBlank() && !isEmailValid) {
-					Text("Debe ser un correo válido", color = colorScheme.error, style = MaterialTheme.typography.labelSmall)
+					Text(
+						"Debe ser un correo válido",
+						color = colorScheme.error,
+						style = MaterialTheme.typography.labelSmall
+					)
 				}
 				
 				OutlinedTextField(
@@ -275,7 +293,11 @@ fun RegPersonContent(
 					modifier = Modifier.fillMaxWidth()
 				)
 				if (password.isNotEmpty() && !isPasswordValid) {
-					Text("Debe tener al menos 6 caracteres", color = colorScheme.error, style = MaterialTheme.typography.labelSmall)
+					Text(
+						"Debe tener al menos 6 caracteres",
+						color = colorScheme.error,
+						style = MaterialTheme.typography.labelSmall
+					)
 				}
 				
 				OutlinedTextField(
@@ -289,12 +311,20 @@ fun RegPersonContent(
 					modifier = Modifier.fillMaxWidth()
 				)
 				if (idCard.isNotEmpty() && !isIdCardValid) {
-					Text("La cédula debe tener entre 7 y 9 dígitos", color = colorScheme.error, style = MaterialTheme.typography.labelSmall)
+					Text(
+						"La cédula debe tener entre 7 y 9 dígitos",
+						color = colorScheme.error,
+						style = MaterialTheme.typography.labelSmall
+					)
 				}
 				if (idCardError != null) {
-					Text(idCardError!!, color = colorScheme.error, style = MaterialTheme.typography.labelSmall)
+					Text(
+						idCardError!!,
+						color = colorScheme.error,
+						style = MaterialTheme.typography.labelSmall
+					)
 				}
-
+				
 				
 				
 				Spacer(modifier = Modifier.height(8.dp))
@@ -384,7 +414,11 @@ fun RegPersonContent(
 					}
 				}
 				if (!isCodeValid && code.isNotEmpty()) {
-					Text("El código es obligatorio", color = colorScheme.error, style = MaterialTheme.typography.labelSmall)
+					Text(
+						"El código es obligatorio",
+						color = colorScheme.error,
+						style = MaterialTheme.typography.labelSmall
+					)
 				}
 				
 				OutlinedTextField(

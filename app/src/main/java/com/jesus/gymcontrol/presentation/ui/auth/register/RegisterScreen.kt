@@ -94,7 +94,7 @@ fun RegisterContent(navController: NavController) {
 	val scroll = rememberScrollState()
 	val isPasswordValid = password.length >= 6
 	
-	
+	val onlyLettersRegex = Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]*\$")
 	
 	LaunchedEffect(viewModel.isSuccess) {
 		if (viewModel.isSuccess) {
@@ -129,23 +129,31 @@ fun RegisterContent(navController: NavController) {
 				Column {
 					OutlinedTextField(
 						value = name,
-						onValueChange = { name = it },
+						onValueChange = {
+							if (it.matches(onlyLettersRegex)) name = it
+						},
 						modifier = Modifier
 							.fillMaxWidth()
 							.height(56.dp),
 						placeholder = { Text("Nombre") },
 						leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+						keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
 						singleLine = true
 					)
+					
 					Spacer(modifier = Modifier.height(12.dp))
+					
 					OutlinedTextField(
 						value = lastname,
-						onValueChange = { lastname = it },
+						onValueChange = {
+							if (it.matches(onlyLettersRegex)) lastname = it
+						},
 						modifier = Modifier
 							.fillMaxWidth()
 							.height(56.dp),
 						placeholder = { Text("Apellido") },
 						leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+						keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
 						singleLine = true
 					)
 					Spacer(modifier = Modifier.height(12.dp))

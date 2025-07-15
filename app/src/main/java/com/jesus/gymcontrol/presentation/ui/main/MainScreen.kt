@@ -64,7 +64,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.domain.model.GymUserSummary
 import com.jesus.gymcontrol.domain.model.ListUser
-import com.jesus.gymcontrol.domain.model.Membership
 import com.jesus.gymcontrol.domain.model.MembershipWithCount
 import com.jesus.gymcontrol.domain.model.Payment
 import com.jesus.gymcontrol.domain.viewmodels.AdminViewModel
@@ -227,7 +226,7 @@ fun MainContent(
 						SummaryAndMembershipCard(
 							navController = navController,
 							summary = summary,
-							memberships = memberviewModel.memberships,
+							memberships = memberviewModel.membershipsSummary,
 							isLoading = isLoadingAdmin
 						)
 						
@@ -275,7 +274,7 @@ fun MainContent(
 		notifications = notifications,
 		onDismiss = { showNotifications = false },
 		onDeleteAll = { notificacionesViewModel.deleteAllNotifications() },
-		onMarkAsRead = { notificacion -> notificacionesViewModel.markNotificationAsRead(notificacion)}
+		onMarkAsRead = { notificacion -> notificacionesViewModel.markNotificationAsRead(notificacion) }
 	)
 }
 
@@ -393,36 +392,11 @@ fun NewClientsSection(
 }
 
 
-
-
-@Composable
-fun SummaryItem(title: String, count: Int, isLoading: Boolean) {
-	Column(horizontalAlignment = Alignment.CenterHorizontally) {
-		Text(
-			text = title,
-			style = MaterialTheme.typography.bodyMedium,
-			color = MaterialTheme.colorScheme.onSurface
-		)
-		if (isLoading) {
-			CircularProgressIndicator(
-				modifier = Modifier.size(18.dp),
-				strokeWidth = 2.dp
-			)
-		} else {
-			Text(
-				text = count.toString(),
-				style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-				color = MaterialTheme.colorScheme.primary
-			)
-		}
-	}
-}
-
 @Composable
 fun SummaryAndMembershipCard(
 	navController: NavController,
 	summary: GymUserSummary,
-	memberships: List<Membership>,
+	memberships: List<MembershipWithCount>,
 	isLoading: Boolean,
 ) {
 	var isExpanded by remember { mutableStateOf(false) }
@@ -443,7 +417,7 @@ fun SummaryAndMembershipCard(
 				verticalAlignment = Alignment.CenterVertically
 			) {
 				Text(
-					text = "Resumen General",
+					text = "Resumen de General",
 					style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
 				)
 				TextButton(
@@ -494,17 +468,44 @@ fun SummaryAndMembershipCard(
 			// Contenido expandible
 			AnimatedVisibility(visible = isExpanded) {
 				Column(modifier = Modifier.padding(top = 8.dp)) {
-					memberships.forEach { item ->
-						MembershipItem(item)
-					}
+					memberships
+						.filter { it.membership.activo }
+						.forEach { item ->
+							MembershipItem(item)
+						}
 				}
 			}
+			
 		}
 	}
 }
 
 @Composable
-fun MembershipItem(item: Membership) {
+fun SummaryItem(title: String, count: Int, isLoading: Boolean) {
+	Column(horizontalAlignment = Alignment.CenterHorizontally) {
+		Text(
+			text = title,
+			style = MaterialTheme.typography.bodyMedium,
+			color = MaterialTheme.colorScheme.onSurface
+		)
+		if (isLoading) {
+			CircularProgressIndicator(
+				modifier = Modifier.size(18.dp),
+				strokeWidth = 2.dp
+			)
+		} else {
+			Text(
+				text = count.toString(),
+				style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+				color = MaterialTheme.colorScheme.primary
+			)
+		}
+	}
+}
+
+
+@Composable
+fun MembershipItem(item: MembershipWithCount) {
 	Row(
 		modifier = Modifier
 			.fillMaxWidth()
@@ -512,7 +513,7 @@ fun MembershipItem(item: Membership) {
 		horizontalArrangement = Arrangement.SpaceBetween
 	) {
 		Text(
-			text = item.nombre,
+			text = item.membership.nombre,
 			style = MaterialTheme.typography.bodyLarge,
 			color = MaterialTheme.colorScheme.onSurface
 		)
@@ -525,7 +526,7 @@ fun MembershipItem(item: Membership) {
 			)
 			Spacer(modifier = Modifier.width(4.dp))
 			Text(
-				text = "${item.cantidadUsuarios}",
+				text = "${item.userCount}",
 				style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
 				color = MaterialTheme.colorScheme.primary
 			)

@@ -5,4 +5,5 @@ data class ReporteMembresia(
 	val price: Double,
 	val duracionDias: Double,
 	val userCount: Int = 0,
+	val activo: Boolean
 )

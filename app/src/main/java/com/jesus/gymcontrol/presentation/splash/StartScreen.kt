@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,13 +29,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
+import com.jesus.gymcontrol.data.sharedPreferences.PreferencesManager
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import kotlinx.coroutines.delay
@@ -46,6 +46,9 @@ fun StartScreen(
 	navController: NavController,
 	viewModel: AuthViewModel = hiltViewModel()
 ) {
+	val context = LocalContext.current
+	val prefs = remember { PreferencesManager(context) }
+	
 	var visible by remember { mutableStateOf(false) }
 	
 	// Animación tipo "bounce" para el logo
@@ -65,20 +68,24 @@ fun StartScreen(
 		viewModel.loadSessionState()
 		delay(600)
 		
+		val isTutorialAlreadyShown = prefs.isTutorialShown()
 		val isLoggedIn = viewModel.isLoggedInState
 		val hasRole = viewModel.isRoleAssignedState
 		
 		when {
+			!isTutorialAlreadyShown -> {
+				navController.navigate(AppRoutes.TutorialScreen) {
+					popUpTo(AppRoutes.StartScreen) { inclusive = true }
+				}
+			}
 			isLoggedIn && hasRole -> {
 				viewModel.navigateBasedOnRole(navController)
 			}
-			
 			isLoggedIn && !hasRole -> {
 				navController.navigate(AppRoutes.SelectedRolScreen) {
 					popUpTo(AppRoutes.StartScreen) { inclusive = true }
 				}
 			}
-			
 			else -> {
 				navController.navigate(AppRoutes.LoginScreen) {
 					popUpTo(AppRoutes.StartScreen) { inclusive = true }
@@ -87,18 +94,11 @@ fun StartScreen(
 		}
 	}
 	
-	// UI con animación de entrada y rebote
+	// UI elegante
 	Box(
 		modifier = Modifier
 			.fillMaxSize()
-			.background(
-				Brush.verticalGradient(
-					colors = listOf(
-						MaterialTheme.colorScheme.primary,
-						MaterialTheme.colorScheme.surface
-					)
-				)
-			),
+			.background(MaterialTheme.colorScheme.background), // fondo blanco por defecto
 		contentAlignment = Alignment.Center
 	) {
 		AnimatedVisibility(
@@ -109,20 +109,18 @@ fun StartScreen(
 				horizontalAlignment = Alignment.CenterHorizontally,
 				verticalArrangement = Arrangement.Center
 			) {
-				// Logo animado con rebote
-				Image(
-					painter = painterResource(id = R.drawable.ic_google),
-					contentDescription = "Logo",
-					modifier = Modifier
-						.size(120.dp)
-						.offset(y = bounceOffset.dp)
-				)
-				
-				Spacer(modifier = Modifier.height(32.dp))
-				
-				CircularProgressIndicator(
-					color = MaterialTheme.colorScheme.primary
-				)
+				// Logo con rebote
+				Box(
+					contentAlignment = Alignment.Center
+				) {
+					Image(
+						painter = painterResource(id = R.drawable.ic_background), // 👈 tu logo elegante aquí
+						contentDescription = "Logo GymControl",
+						modifier = Modifier
+							.size(100.dp)
+							.offset(y = bounceOffset.dp)
+					)
+				}
 				
 				Spacer(modifier = Modifier.height(16.dp))
 				
@@ -137,3 +135,4 @@ fun StartScreen(
 		}
 	}
 }
+

@@ -11,19 +11,23 @@ class PreferencesManager(context: Context) {
 	companion object {
 		const val PRICES_MEMBERSHIP = "PricesMembership"
 		private const val NOTIFICATION_PREFS = "NotificationPrefs"
+		
 		const val KEY_NEW_CLIENT = "new_client"
 		const val KEY_PROMOTION_EXPIRATION = "promotion_expiration"
 		const val KEY_MEMBERSHIP_EXPIRATION = "membership_expiration"
 		const val KEY_WEEK_START = "week_start"
 		const val KEY_PUSH_NOTIFICATIONS = "push_notifications"
+		
+		const val KEY_TUTORIAL_SHOWN = "tutorial_shown"
 	}
 	
 	private val sharedPreferences: SharedPreferences =
 		context.getSharedPreferences("GymControlPreferences", Context.MODE_PRIVATE)
+	
 	private val notificationPrefs: SharedPreferences =
 		context.getSharedPreferences(NOTIFICATION_PREFS, Context.MODE_PRIVATE)
 	
-	val editor = sharedPreferences.edit()
+	private val editor = sharedPreferences.edit()
 	private val notificationEditor = notificationPrefs.edit()
 	
 	fun savePrices(value: PricesMembership) {
@@ -62,10 +66,12 @@ class PreferencesManager(context: Context) {
 		)
 	}
 	
+	// 🔷 NUEVO: bandera para saber si el tutorial/carrusel ya fue mostrado
+	fun setTutorialShown(shown: Boolean) {
+		editor.putBoolean(KEY_TUTORIAL_SHOWN, shown).apply()
+	}
 	
+	fun isTutorialShown(): Boolean {
+		return sharedPreferences.getBoolean(KEY_TUTORIAL_SHOWN, false)
+	}
 }
-
-
-
-
-

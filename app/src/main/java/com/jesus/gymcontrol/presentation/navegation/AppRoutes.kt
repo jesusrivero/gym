@@ -19,6 +19,9 @@ object AppRoutes {
 	}
 	
 	
+	@Serializable
+	data object TutorialScreen
+	
 	
 	@Serializable
 	data object PromotionsScreen

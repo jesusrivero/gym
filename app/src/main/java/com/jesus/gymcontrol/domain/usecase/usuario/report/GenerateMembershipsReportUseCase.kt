@@ -9,9 +9,16 @@ class GenerateMembershipsReportUseCase @Inject constructor(
 ) {
 	suspend operator fun invoke(
 		gymCode: String,
-		desde: Long? = null,
-		hasta: Long? = null
+		desde: Long?,
+		hasta: Long?,
+		filtroActivo: Boolean? = null
 	): List<ReporteMembresia> {
-		return reportesRepository.getMembresiasReporte(gymCode, desde, hasta)
+		val lista = reportesRepository.getMembresiasReporte(gymCode, desde, hasta)
+		return when (filtroActivo) {
+			true -> lista.filter { it.activo }
+			false -> lista.filter { !it.activo }
+			null -> lista
+		}
 	}
+	
 }

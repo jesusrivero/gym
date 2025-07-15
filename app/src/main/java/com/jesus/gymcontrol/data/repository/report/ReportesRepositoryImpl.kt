@@ -110,7 +110,8 @@ class ReportesRepositoryImpl @Inject constructor(
 	override suspend fun getMembresiasReporte(
 		gymCode: String,
 		desde: Long?,
-		hasta: Long?
+		hasta: Long?,
+		filtroActivo: Boolean?
 	): List<ReporteMembresia> =
 		withContext(Dispatchers.IO) {
 			val snapshot = firestore.collection("gimnasios")
@@ -146,10 +147,13 @@ class ReportesRepositoryImpl @Inject constructor(
 					name = name,
 					price = price,
 					duracionDias = duracion,
-					userCount = userCount
+					userCount = userCount,
+					activo = data["activo"] as? Boolean ?: true
 				)
 			}
 		}
+	
+	
 	
 	override suspend fun getPromocionesReporte(
 		gymCode: String,

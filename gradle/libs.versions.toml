@@ -1,5 +1,6 @@
 [versions]
 accompanistPager = "0.28.0"
+accompanistPagerVersion = "0.35.0-alpha"
 accompanistPermissions = "0.34.0-alpha"
 agp = "8.9.2"
 barcodeScanning = "17.3.0"
@@ -16,6 +17,7 @@ firebaseBom = "33.14.0"
 firebaseFirestoreKtx = "25.1.4"
 firebaseMessaging = "24.1.2"
 foundation = "1.8.1"
+foundationVersion = "1.6.0"
 guava = "31.1-android"
 hiltAndroidCompiler = "2.48"
 hiltAndroidGradlePlugin = "2.36"
@@ -46,6 +48,8 @@ sqldelight = "2.0.1"
 
 [libraries]
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
+accompanist-pager-indicators = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "accompanistPagerVersion" }
+accompanist-pager-v0350alpha = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPagerVersion" }
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCore" }
 androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "cameraCore" }
@@ -54,6 +58,7 @@ androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", versi
 androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "cameraCore" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferencesVersion" }
 androidx-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "foundation" }
+androidx-foundation-v160 = { module = "androidx.compose.foundation:foundation", version.ref = "foundationVersion" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-material = { module = "androidx.compose.material:material", version.ref = "material" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }

@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -89,6 +90,7 @@ fun ReportScreen(
 	val reportTypes = listOf("Todos", "Clientes", "Pagos", "Membresías", "Promociones")
 	val clientesFilters = listOf("Todos", "Activos", "Inactivos", "Pendientes")
 	val promotionFilter = listOf("Todos", "Activos", "Inactivos")
+	val membershipFilter = listOf("Todos", "Activos", "Inactivos")
 	val pagosFilters = listOf("Todos", "Dólares", "Bolívares", "Mixtos", "Con promociones")
 	
 	val pagos by remember { derivedStateOf { viewModel.pagosReport } }
@@ -119,7 +121,13 @@ fun ReportScreen(
 				hasta = endDate
 			)
 			
-			"Membresías" -> viewModel.cargarReporteMembresias(desde = startDate, hasta = endDate)
+			"Membresías" -> viewModel.cargarReporteMembresias(
+				filtro = selectedSubFilter,
+				desde = startDate,
+				hasta = endDate
+			)
+			
+			
 			"Promociones" -> viewModel.cargarReportePromociones(
 				filtro = selectedSubFilter,
 				desde = startDate,
@@ -279,6 +287,7 @@ fun ReportScreen(
 				clientesFilters = clientesFilters,
 				pagosFilters = pagosFilters,
 				promotionFilter = promotionFilter,
+				membershipFilter = membershipFilter,
 				startDate = startDate,
 				endDate = endDate,
 				onStartDateClick = { showDatePicker(context) { date -> startDate = date } },
@@ -299,15 +308,25 @@ fun ReportScreen(
 			
 			when {
 				selectedReportType == "Todos" -> {
-					Text(
-						"Seleccione un tipo de reporte para mostrar datos",
-						textAlign = TextAlign.Center,
-						style = MaterialTheme.typography.bodyMedium
-					)
+					Box(
+						modifier = Modifier.fillMaxSize(),
+						contentAlignment = Alignment.Center
+					) {
+						Text(
+							"Seleccione un tipo de reporte para mostrar datos",
+							textAlign = TextAlign.Center,
+							style = MaterialTheme.typography.bodyMedium
+						)
+					}
 				}
 				
 				isLoading -> {
-					CircularProgressIndicator()
+					Box(
+						modifier = Modifier.fillMaxSize(),
+						contentAlignment = Alignment.Center
+					) {
+						CircularProgressIndicator()
+					}
 				}
 				
 				errorMessage != null -> {
@@ -343,7 +362,8 @@ fun ReportScreen(
 						SimpleReportItem(
 							title = it.name,
 							subtitle = "${"%.2f".format(it.price)} $",
-							extra = "${it.userCount} clientes"
+							extra = if (it.activo) "Activa" else "Inactiva",
+							extraColor = if (it.activo) Color(0xFF2E7D32) else Color.Red
 						
 						)
 					}
@@ -511,6 +531,7 @@ fun ReportFilters(
 	onSubFilterSelected: (String) -> Unit,
 	clientesFilters: List<String>,
 	promotionFilter: List<String>,
+	membershipFilter: List<String>,
 	pagosFilters: List<String>,
 	startDate: LocalDate?,
 	endDate: LocalDate?,
@@ -588,7 +609,7 @@ fun ReportFilters(
 			}
 			
 			// Filtro secundario dinámico según tipo de reporte
-			if (selectedReportType == "Clientes" || selectedReportType == "Pagos" || selectedReportType == "Promociones")  {
+			if (selectedReportType == "Clientes" || selectedReportType == "Pagos" || selectedReportType == "Promociones" || selectedReportType == "Membresías") {
 				Spacer(modifier = Modifier.height(8.dp))
 				Text(
 					text = "Filtros",
@@ -600,8 +621,10 @@ fun ReportFilters(
 					"Clientes" -> clientesFilters
 					"Pagos" -> pagosFilters
 					"Promociones" -> promotionFilter
+					"Membresías" -> membershipFilter
 					else -> emptyList()
 				}
+				
 				
 				ExposedDropdownMenuBox(
 					expanded = expandedSubFilter,

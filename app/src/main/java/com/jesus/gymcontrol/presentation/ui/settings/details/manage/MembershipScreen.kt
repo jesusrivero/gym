@@ -299,7 +299,6 @@ fun MembershipScreen(
 							Text("Nombre: ${membership.nombre}")
 							Text("Precio: $${membership.precio}")
 							Text("Duración: ${membership.duracionDias} días")
-							Text("Usuarios: ${membership.cantidadUsuarios} inscritos")
 						}
 					},
 					confirmButton = {
@@ -448,7 +447,7 @@ fun MembershipScreen(
 						Column {
 							if (!isEditable) {
 								Text(
-									text = "ℹ️ Esta membresia tiene ${membership.cantidadUsuarios} clientes registrados. No se puede editar sus datos.",
+									text = "ℹ️No puedes editar una membresia una vez usada. si ya no la usas la puedes desactivar",
 									color = MaterialTheme.colorScheme.onSurfaceVariant,
 									style = MaterialTheme.typography.bodySmall,
 									modifier = Modifier.padding(bottom = 8.dp)
@@ -529,15 +528,26 @@ fun MembershipScreen(
 			
 			// Diálogo para eliminar membresía
 			membershipToDelete?.let { membership ->
+				val isUsed = membership.cantidadUsuarios > 0
+				
 				AlertDialog(
 					onDismissRequest = { membershipToDelete = null },
 					title = { Text("¿Eliminar membresía?") },
-					text = { Text("¿Estás seguro de eliminar la membresía \"${membership.nombre}\"? Esta acción no se puede deshacer.") },
+					text = {
+						Text(
+							"Solo puedes eliminar la membresía \"${membership.nombre}\" si no ha sido usada por ningún cliente. " +
+									if (isUsed) "Ya fue utilizada, por lo que no puedes eliminarla."
+									else "No ha sido utilizada aún, puedes eliminarla sin problemas."
+						)
+					},
 					confirmButton = {
-						Button(onClick = {
-							viewModel.deleteMembership(membership)
-							membershipToDelete = null
-						}) {
+						Button(
+							onClick = {
+								viewModel.deleteMembership(membership)
+								membershipToDelete = null
+							},
+							enabled = !isUsed // 👈 aquí desactivamos si ya fue usada
+						) {
 							Text("Eliminar")
 						}
 					},
@@ -545,9 +555,12 @@ fun MembershipScreen(
 						OutlinedButton(onClick = { membershipToDelete = null }) {
 							Text("Cancelar")
 						}
-					}, 	containerColor = MaterialTheme.colorScheme.surface
+					},
+					containerColor = MaterialTheme.colorScheme.surface
 				)
 			}
+			
+			
 			
 			
 			errorMessage?.let {

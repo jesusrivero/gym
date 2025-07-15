@@ -177,21 +177,15 @@ class MembershipRepositoryImpl @Inject constructor(
 		newState: Boolean
 	): Result<Unit> {
 		return try {
-			// Si se quiere desactivar, verificamos que no haya usuarios activos
-			if (!newState) {
-				val activeUsersSnapshot = firestore.collection("gimnasios")
-					.document(gymCode)
-					.collection("membresias")
-					.document(membershipId)
-					.collection("usuarios")
-					.whereEqualTo("state", "activo")
-					.get()
-					.await()
-				
-				if (!activeUsersSnapshot.isEmpty) {
-					return Result.failure(Exception("No se puede desactivar: hay usuarios activos."))
-				}
-			}
+			// Leemos la membresía para consultar cantidadUsuarios
+			val membershipDoc = firestore.collection("gimnasios")
+				.document(gymCode)
+				.collection("membresias")
+				.document(membershipId)
+				.get()
+				.await()
+			
+			val cantidadUsuarios = (membershipDoc.get("cantidadUsuarios") as? Number)?.toInt() ?: 0
 			
 			// Actualizamos el campo "activo"
 			firestore.collection("gimnasios")
@@ -201,11 +195,14 @@ class MembershipRepositoryImpl @Inject constructor(
 				.update("activo", newState)
 				.await()
 			
+			// Siempre éxito, independientemente de cantidadUsuarios
 			Result.success(Unit)
 		} catch (e: Exception) {
 			Result.failure(e)
 		}
 	}
+	
+	
 	
 	
 }
