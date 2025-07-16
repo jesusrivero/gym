@@ -137,7 +137,7 @@ fun SelectedGymAdmin(
 						code = code,
 						rol = "administrador"
 					)
-					
+					sessionManager.saveRoleState(true)
 					gymViewModel.resetValidation()
 					showDialog = false
 				}
@@ -147,36 +147,36 @@ fun SelectedGymAdmin(
 	
 	GymTheme {
 		Scaffold(
-			topBar = {
-				CenterAlignedTopAppBar(
-					title = {
-						Text(
-							text = "Selecciona un gimnasio",
-							color = colorScheme.onPrimary,
-							fontWeight = FontWeight.Bold,
-							fontSize = 20.sp
-						)
-					},
-					navigationIcon = {
-						IconButton(onClick = { navController.popBackStack() }) {
-							Icon(
-								painter = painterResource(id = R.drawable.ic_back),
-								contentDescription = "Regresar",
-								tint = colorScheme.onPrimary
-							)
-						}
-					},
-					colors = TopAppBarDefaults.topAppBarColors(
-						containerColor = colorScheme.primary
-					)
-				)
-			}
+//			topBar = {
+//				CenterAlignedTopAppBar(
+//					title = {
+//						Text(
+//							text = "Selecciona un gimnasio",
+//							color = colorScheme.onPrimary,
+//							fontWeight = FontWeight.Bold,
+//							fontSize = 20.sp
+//						)
+//					},
+//					navigationIcon = {
+//						IconButton(onClick = { navController.popBackStack() }) {
+//							Icon(
+//								painter = painterResource(id = R.drawable.ic_back),
+//								contentDescription = "Regresar",
+//								tint = colorScheme.onPrimary
+//							)
+//						}
+//					},
+//					colors = TopAppBarDefaults.topAppBarColors(
+//						containerColor = colorScheme.primary
+//					)
+//				)
+//			}
 		) { innerPadding ->
 			Column(
 				modifier = Modifier
 					.fillMaxSize()
 					.padding(innerPadding)
-					.padding(horizontal = 16.dp, vertical = 8.dp)
+					.padding(horizontal = 16.dp, vertical = 25.dp)
 			) {
 				OutlinedTextField(
 					value = searchQuery,
@@ -207,7 +207,6 @@ fun SelectedGymAdmin(
 									.fillMaxWidth()
 									.padding(vertical = 8.dp)
 									.clickable {
-										sessionManager.saveRoleState(!rol.isNullOrBlank())
 										selectedGym = gym
 										viewModel.resetValidation()
 										showDialog = true

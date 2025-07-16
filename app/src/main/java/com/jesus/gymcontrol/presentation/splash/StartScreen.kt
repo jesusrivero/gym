@@ -41,6 +41,10 @@ import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import kotlinx.coroutines.delay
 
+
+
+
+
 @Composable
 fun StartScreen(
 	navController: NavController,

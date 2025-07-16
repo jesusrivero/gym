@@ -44,6 +44,7 @@ class GymViewModel @Inject constructor(
     var gyms by mutableStateOf<List<Gym>>(emptyList())
     var searchQuery by mutableStateOf("")
     var name by mutableStateOf("")
+		var rif by mutableStateOf("")
     var direction by mutableStateOf("")
     var phone by mutableStateOf("")
     var code by mutableStateOf("")
@@ -130,6 +131,7 @@ class GymViewModel @Inject constructor(
 
         val name = name.trim()
         val direction = direction.trim()
+	      val rif = rif.trim()
         val phone = phone.trim()
         val code = code.trim()
         val rol = rol.trim()
@@ -145,6 +147,7 @@ class GymViewModel @Inject constructor(
                 code = code,
                 name = name,
                 direction = direction,
+	              rif = rif,
                 phone = phone,
 
 

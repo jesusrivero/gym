@@ -8,6 +8,7 @@ interface GymRepository {
         uid: String,
         code: String,
         name: String,
+        rif: String,
         direction: String,
         phone: String,
     ): Result<Unit>

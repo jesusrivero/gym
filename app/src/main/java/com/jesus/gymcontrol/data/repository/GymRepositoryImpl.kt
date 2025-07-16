@@ -18,12 +18,14 @@ class GymRepositoryImpl @Inject constructor(
         code: String,
         name: String,
         direction: String,
+        rif: String,
         phone: String
     ): Result<Unit> {
         return try {
             val gymData = mapOf(
                 "owner" to uid,
                 "name" to name,
+	              "rif" to rif,
                 "direction" to direction,
                 "phone" to phone,
                 "code" to code,
