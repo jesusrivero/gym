@@ -1,5 +1,6 @@
 package com.jesus.gymcontrol.domain.repository
 
+import com.jesus.gymcontrol.domain.model.CodeInfo
 import com.jesus.gymcontrol.domain.model.Gym
 
 
@@ -38,7 +39,8 @@ interface GymRepository {
     suspend fun getGymByOwnerUid(uid: String):
             Result<Gym>
 	
-	suspend fun getAvailableCodes(): Result<List<String>>
+	suspend fun getAvailableCodes(): Result<List<CodeInfo>>
+
 	
 	
 }

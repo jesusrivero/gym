@@ -35,6 +35,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -77,16 +78,16 @@ import java.io.FileOutputStream
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CodeClientScreen(navController: NavController) {
-    GymTheme {
-        CodeClientContent(navBottom = navController)
-    }
+	GymTheme {
+		CodeClientContent(navBottom = navController)
+	}
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CodeClientContent(
 	navBottom: NavController,
-	viewModel: GymViewModel = hiltViewModel()
+	viewModel: GymViewModel = hiltViewModel(),
 ) {
 	val colorScheme = MaterialTheme.colorScheme
 	val clipboardManager = LocalClipboardManager.current
@@ -103,9 +104,13 @@ fun CodeClientContent(
 	
 	val availableCodes by viewModel.availableCodes.collectAsState()
 	val codesError by viewModel.codesError.collectAsState()
-
+	val currentUserRole = viewModel.currentUserRole
+	
 	LaunchedEffect(Unit) {
-		userUid?.let { viewModel.loadCurrentUserGymCode(it) }
+		userUid?.let {
+			viewModel.loadCurrentUserGymCode(it)
+			viewModel.loadCurrentUserRole(it)
+		}
 		viewModel.loadAvailableCodes()
 	}
 	
@@ -113,6 +118,15 @@ fun CodeClientContent(
 		errorMessage?.let {
 			snackbarHostState.showSnackbar(it)
 			viewModel.clearErrorMessage()
+		}
+	}
+	
+	// Filtrar códigos según rol
+	val filteredCodes = remember(availableCodes, currentUserRole) {
+		if (currentUserRole == "dueño") {
+			availableCodes
+		} else {
+			availableCodes.filter { it.rol == "cliente" }
 		}
 	}
 	
@@ -129,7 +143,7 @@ fun CodeClientContent(
 				navigationIcon = {
 					IconButton(onClick = { navBottom.popBackStack() }) {
 						Icon(
-							painter = painterResource(id = R.drawable.ic_back),
+							painterResource(id = R.drawable.ic_back),
 							contentDescription = "Regresar",
 							tint = Color.White
 						)
@@ -156,11 +170,12 @@ fun CodeClientContent(
 			) {
 				Icon(Icons.Default.Add, contentDescription = null)
 				Spacer(modifier = Modifier.width(8.dp))
-				Text("Generar código para cliente")
+				Text("Generar código")
 			}
 		},
 		snackbarHost = { SnackbarHost(snackbarHostState) }
 	) { innerPadding ->
+		
 		Column(
 			modifier = Modifier
 				.padding(innerPadding)
@@ -198,7 +213,6 @@ fun CodeClientContent(
 						)
 						Spacer(modifier = Modifier.height(12.dp))
 						
-						// QR generado
 						GeneratedQrWithShare(
 							code = code,
 							onShare = { bitmap ->
@@ -218,7 +232,7 @@ fun CodeClientContent(
 			
 			Spacer(modifier = Modifier.height(8.dp))
 			
-			if (availableCodes.isEmpty()) {
+			if (filteredCodes.isEmpty()) {
 				Text(
 					text = "No hay códigos disponibles actualmente.",
 					style = MaterialTheme.typography.bodyMedium,
@@ -226,14 +240,15 @@ fun CodeClientContent(
 				)
 			} else {
 				LazyColumn {
-					items(availableCodes) { code ->
+					items(filteredCodes) { codeInfo ->
 						Card(
 							modifier = Modifier
 								.fillMaxWidth()
 								.padding(vertical = 6.dp)
 								.clickable {
-									clipboardManager.setText(AnnotatedString(code))
-									Toast.makeText(context, "Código copiado: $code", Toast.LENGTH_SHORT).show()
+									clipboardManager.setText(AnnotatedString(codeInfo.code))
+									Toast.makeText(context, "Código copiado: ${codeInfo.code}", Toast.LENGTH_SHORT)
+										.show()
 								},
 							shape = RoundedCornerShape(12.dp),
 							elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -246,7 +261,18 @@ fun CodeClientContent(
 								horizontalArrangement = Arrangement.SpaceBetween,
 								verticalAlignment = Alignment.CenterVertically
 							) {
-								Text(code, fontWeight = FontWeight.SemiBold)
+								Column {
+									Text(
+										text = codeInfo.code,
+										style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
+									)
+									Spacer(modifier = Modifier.height(4.dp))
+									Text(
+										text = "Rol: ${codeInfo.rol.replaceFirstChar { it.uppercase() }}",
+										style = MaterialTheme.typography.bodySmall,
+										color = colorScheme.primary
+									)
+								}
 								Icon(
 									imageVector = Icons.Default.ContentCopy,
 									contentDescription = "Copiar código",
@@ -264,12 +290,33 @@ fun CodeClientContent(
 		AlertDialog(
 			onDismissRequest = { showDialog = false },
 			title = { Text("Confirmar generación") },
-			text = { Text("¿Deseas generar un nuevo código de acceso para clientes?") },
+			text = {
+				if (currentUserRole == "dueño") {
+					Column {
+						Text("Selecciona el rol para el nuevo código:")
+						Spacer(modifier = Modifier.height(8.dp))
+						Row {
+							listOf("cliente", "administrador").forEach { role ->
+								Row(verticalAlignment = Alignment.CenterVertically) {
+									RadioButton(
+										selected = viewModel.setSelectedRoleForCode == role,
+										onClick = { viewModel.SetSelectedRoleForCode(role) }
+									)
+									Text(role.replaceFirstChar { it.uppercase() })
+									Spacer(Modifier.width(8.dp))
+								}
+							}
+						}
+					}
+				} else {
+					Text("¿Deseas generar un nuevo código de acceso para cliente?")
+					viewModel.SetSelectedRoleForCode("cliente")
+				}
+			},
 			confirmButton = {
 				TextButton(
 					onClick = {
 						showDialog = false
-						viewModel.SetSelectedRoleForCode("cliente")
 						viewModel.generateCodeForRole()
 					}
 				) {
@@ -333,7 +380,7 @@ fun shareQrCode(context: Context, bitmap: Bitmap) {
 @Composable
 fun GeneratedQrWithShare(
 	code: String,
-	onShare: (Bitmap) -> Unit
+	onShare: (Bitmap) -> Unit,
 ) {
 	val context = LocalContext.current
 	var bitmap by remember { mutableStateOf<Bitmap?>(null) }

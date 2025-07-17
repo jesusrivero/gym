@@ -2,6 +2,7 @@ package com.jesus.gymcontrol.data.repository
 
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.jesus.gymcontrol.domain.model.CodeInfo
 import com.jesus.gymcontrol.domain.model.Gym
 import com.jesus.gymcontrol.domain.repository.GymRepository
 import kotlinx.coroutines.tasks.await
@@ -239,19 +240,27 @@ class GymRepositoryImpl @Inject constructor(
         }
     }
 	
-	override suspend fun getAvailableCodes(): Result<List<String>> {
+	override suspend fun getAvailableCodes(): Result<List<CodeInfo>> {
 		return try {
 			val snapshot = firestore.collection("codigos")
 				.whereEqualTo("used", false)
 				.get()
 				.await()
 			
-			val codes = snapshot.documents.mapNotNull { it.getString("code") }
+			val codes = snapshot.documents.mapNotNull { doc ->
+				val code = doc.getString("code")
+				val role = doc.getString("rol")
+				if (code != null && role != null) {
+					CodeInfo(code, role)
+				} else null
+			}
+			
 			Result.success(codes)
 		} catch (e: Exception) {
 			Result.failure(e)
 		}
 	}
+
 	
 	
 	

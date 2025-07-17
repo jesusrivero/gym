@@ -58,6 +58,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.domain.model.Promotion
+import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
 import com.jesus.gymcontrol.domain.viewmodels.PromotionViewModel
 import com.jesus.gymcontrol.presentation.ui.commons.PromotionFilter
 import kotlinx.coroutines.delay
@@ -70,6 +71,7 @@ import java.util.Locale
 @Composable
 fun PromotionScreen(
 	viewModel: PromotionViewModel = hiltViewModel(),
+	gviewModel: GymViewModel = hiltViewModel(),
 	navController: NavController,
 ) {
 	val context = LocalContext.current
@@ -92,7 +94,7 @@ fun PromotionScreen(
 	var showDiscountError by remember { mutableStateOf(false) }
 	var showEditDiscountError by remember { mutableStateOf(false) }
 	var filter by remember { mutableStateOf(PromotionFilter.ACTIVE) }
-	
+	val currentUserRole = gviewModel.currentUserRole
 	
 	
 	LaunchedEffect(Unit) {
@@ -157,11 +159,13 @@ fun PromotionScreen(
 			)
 		},
 		floatingActionButton = {
-			FloatingActionButton(
-				onClick = { showCreateDialog = true },
-				containerColor = MaterialTheme.colorScheme.primary
-			) {
-				Icon(Icons.Default.Add, contentDescription = "Nueva promoción")
+			if (currentUserRole == "dueño") {
+				FloatingActionButton(
+					onClick = { showCreateDialog = true },
+					containerColor = MaterialTheme.colorScheme.primary
+				) {
+					Icon(Icons.Default.Add, contentDescription = "Nueva promoción")
+				}
 			}
 		},
 		
@@ -301,16 +305,20 @@ fun PromotionScreen(
 										)
 										
 										Row {
-											
-											IconButton(onClick = { promotionToEdit = promo }) {
-												Icon(Icons.Default.Edit, contentDescription = "Editar promoción")
+											if (currentUserRole == "dueño") {
+												IconButton(onClick = { promotionToEdit = promo }) {
+													Icon(Icons.Default.Edit, contentDescription = "Editar promoción")
+												}
 											}
-											IconButton(onClick = { promotionToggle = promo }) {
-												Icon(
-													imageVector = if (promo.activo) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-													contentDescription = if (promo.activo) "Desactivar" else "Activar",
-													tint = if (promo.activo) Color.Red  else MaterialTheme.colorScheme.primary
-												)
+											
+											if (currentUserRole == "dueño") {
+												IconButton(onClick = { promotionToggle = promo }) {
+													Icon(
+														imageVector = if (promo.activo) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+														contentDescription = if (promo.activo) "Desactivar" else "Activar",
+														tint = if (promo.activo) Color.Red else MaterialTheme.colorScheme.primary
+													)
+												}
 											}
 											IconButton(onClick = { promotionToShow = promo }) {
 												Icon(
@@ -318,11 +326,13 @@ fun PromotionScreen(
 													contentDescription = "Detalles"
 												)
 											}
-											IconButton(onClick = { promotionToDelete = promo }) {
-												Icon(
-													painterResource(id = R.drawable.ic_delete),
-													contentDescription = "Eliminar promoción",
-												)
+											if (currentUserRole == "dueño") {
+												IconButton(onClick = { promotionToDelete = promo }) {
+													Icon(
+														painterResource(id = R.drawable.ic_delete),
+														contentDescription = "Eliminar promoción",
+													)
+												}
 											}
 											
 										}
@@ -507,17 +517,23 @@ fun PromotionScreen(
 							
 							// Validaciones
 							if (!editableFully && durationVal == null) {
-								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT).show()
+								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT)
+									.show()
 								return@Button
 							}
 							
 							if (editableFully && (editedName.isBlank() || editedDescription.isBlank() || discountVal == null || durationVal == null)) {
-								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT).show()
+								Toast.makeText(context, "Complete correctamente los campos", Toast.LENGTH_SHORT)
+									.show()
 								return@Button
 							}
 							
 							if (discountVal != null && discountVal > 100.0) {
-								Toast.makeText(context, "El descuento no puede ser mayor al 100%", Toast.LENGTH_SHORT).show()
+								Toast.makeText(
+									context,
+									"El descuento no puede ser mayor al 100%",
+									Toast.LENGTH_SHORT
+								).show()
 								return@Button
 							}
 							
@@ -640,7 +656,6 @@ fun PromotionScreen(
 						MaterialTheme.colorScheme.surface
 				)
 			}
-			
 			
 			
 			// Diálogo para eliminar promoción

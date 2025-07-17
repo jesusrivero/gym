@@ -43,8 +43,6 @@ import kotlinx.coroutines.delay
 
 
 
-
-
 @Composable
 fun StartScreen(
 	navController: NavController,
@@ -82,14 +80,40 @@ fun StartScreen(
 					popUpTo(AppRoutes.StartScreen) { inclusive = true }
 				}
 			}
+			
 			isLoggedIn && hasRole -> {
-				viewModel.navigateBasedOnRole(navController)
+				// ✅ Nuevo: verificar estado del usuario en Firestore
+				viewModel.checkUserStatusOnStart { state ->
+					when (state) {
+						"activo" -> {
+							viewModel.navigateBasedOnRole(navController)
+						}
+						"inactivo" -> {
+							navController.navigate(AppRoutes.InactiveScreen) {
+								popUpTo(AppRoutes.StartScreen) { inclusive = true }
+							}
+						}
+//						"pendiente" -> {
+//							navController.navigate(AppRoutes.PendingScreen) {
+//								popUpTo(AppRoutes.StartScreen) { inclusive = true }
+//							}
+//						}
+						else -> {
+							// estado desconocido o error
+							navController.navigate(AppRoutes.LoginScreen) {
+								popUpTo(AppRoutes.StartScreen) { inclusive = true }
+							}
+						}
+					}
+				}
 			}
+			
 			isLoggedIn && !hasRole -> {
 				navController.navigate(AppRoutes.SelectedRolScreen) {
 					popUpTo(AppRoutes.StartScreen) { inclusive = true }
 				}
 			}
+			
 			else -> {
 				navController.navigate(AppRoutes.LoginScreen) {
 					popUpTo(AppRoutes.StartScreen) { inclusive = true }
@@ -114,11 +138,9 @@ fun StartScreen(
 				verticalArrangement = Arrangement.Center
 			) {
 				// Logo con rebote
-				Box(
-					contentAlignment = Alignment.Center
-				) {
+				Box(contentAlignment = Alignment.Center) {
 					Image(
-						painter = painterResource(id = R.drawable.ic_background), // 👈 tu logo elegante aquí
+						painter = painterResource(id = R.drawable.ic_background),
 						contentDescription = "Logo GymControl",
 						modifier = Modifier
 							.size(100.dp)

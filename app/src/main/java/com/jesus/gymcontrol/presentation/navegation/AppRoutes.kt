@@ -13,15 +13,11 @@ object AppRoutes {
 	data object PreferencesScreen
 	
 	
-	object EditPersonScreen {
-		const val route = "edit_person_screen"
-		fun routeWithUid(uid: String) = "$route/$uid"
-	}
-	
-	
 	@Serializable
 	data object TutorialScreen
 	
+	@Serializable
+	data object InactiveScreen
 	
 	@Serializable
 	data object PromotionsScreen
@@ -104,4 +100,7 @@ object AppRoutes {
 	
 	@Serializable
 	data object NotificationsScreen
+	
+	@Serializable
+	data object PerworkersScreen
 }

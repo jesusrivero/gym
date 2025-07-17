@@ -44,7 +44,7 @@ class AuthRepositoryImpl(
 				"age" to "",
 				"phone" to "",
 				"gender" to "",
-				"state" to "",
+				"state" to "activo",
 				"enabled" to "",
 				"lastpayment" to "",
 				"membership" to "",

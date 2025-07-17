@@ -42,8 +42,11 @@ import com.jesus.gymcontrol.presentation.ui.settings.details.selected.SelectedGy
 import com.jesus.gymcontrol.presentation.ui.settings.details.selected.SelectedGymClient
 import com.jesus.gymcontrol.presentation.ui.settings.details.selected.SelectedRolScreen
 import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
+import com.jesus.gymcontrol.presentation.navegation.AppRoutes.InactiveScreen
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes.TutorialScreen
 import com.jesus.gymcontrol.presentation.splash.TutorialScreen
+import com.jesus.gymcontrol.presentation.ui.auth.InactiveScreen
+import com.jesus.gymcontrol.presentation.ui.settings.details.manage.PerworkersScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.preferences.ContactScreen
 
 
@@ -179,6 +182,10 @@ fun NavigationHost(
 			SelectedRolScreen(navController = navController)
 		}
 		
+		composable<AppRoutes.InactiveScreen> {
+			InactiveScreen(navController = navController)
+		}
+		
 		composable<AppRoutes.ActivateCodeScreen> {
 			ActivateCodeScreen(navController = navController)
 		}
@@ -225,5 +232,13 @@ fun NavigationHost(
 		composable<AppRoutes.TutorialScreen> {
 			TutorialScreen(navController =navController )
 		}
+		
+		composable<AppRoutes.PerworkersScreen> {
+			PerworkersScreen(
+				navController = navController
+			)
+		}
+		
+		
 	}
 }

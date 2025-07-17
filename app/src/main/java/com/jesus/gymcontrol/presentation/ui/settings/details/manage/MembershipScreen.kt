@@ -59,6 +59,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.domain.model.Membership
+import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
 import com.jesus.gymcontrol.domain.viewmodels.MembershipViewModel
 import com.jesus.gymcontrol.presentation.ui.commons.PromotionFilter
 import kotlinx.coroutines.delay
@@ -68,6 +69,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun MembershipScreen(
 	viewModel: MembershipViewModel = hiltViewModel(),
+	gviewModel: GymViewModel = hiltViewModel(),
 	navController: NavController,
 ) {
 	val context = LocalContext.current
@@ -87,7 +89,9 @@ fun MembershipScreen(
 	var membershipToView by remember { mutableStateOf<Membership?>(null) }
 	val isActionSuccess by viewModel.isActionSuccess.collectAsState()
 	var filter by remember { mutableStateOf(PromotionFilter.ACTIVE) }
-
+	val currentUserRole = gviewModel.currentUserRole
+	
+	
 	
 	
 	LaunchedEffect(Unit) {
@@ -154,13 +158,15 @@ fun MembershipScreen(
 			)
 		},
 		floatingActionButton = {
-			FloatingActionButton(
-				onClick = { showCreateDialog = true },
-				containerColor = MaterialTheme.colorScheme.primary
-			) {
-				Icon(Icons.Default.Add, contentDescription = "Crear Membresía")
+			if (currentUserRole == "dueño") {
+				FloatingActionButton(
+					onClick = { showCreateDialog = true },
+					containerColor = MaterialTheme.colorScheme.primary
+				) {
+					Icon(Icons.Default.Add, contentDescription = "Crear Membresía")
+				}
 			}
-		},
+		}
 	) { padding ->
 		Column(
 			modifier = Modifier
@@ -223,16 +229,17 @@ fun MembershipScreen(
 						PromotionFilter.ACTIVE -> membershipsSummary.filter { it.membership.activo }
 						PromotionFilter.INACTIVE -> membershipsSummary.filter { !it.membership.activo }
 					}
+					
 					LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
 						items(filteredMemberships) { membershipWithCount ->
 							
-							
 							val membership = membershipWithCount.membership
 							val userCount = membershipWithCount.userCount
+							
 							Card(
 								modifier = Modifier
 									.fillMaxWidth()
-								.padding(vertical = 2.dp),
+									.padding(vertical = 2.dp),
 								shape = RoundedCornerShape(16.dp),
 								elevation = CardDefaults.cardElevation(4.dp),
 								colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -251,32 +258,41 @@ fun MembershipScreen(
 										)
 										
 										Row {
+											if (currentUserRole == "dueño") {
+												IconButton(onClick = { membershipToEdit = membership }) {
+													Icon(Icons.Default.Edit, contentDescription = "Editar")
+												}
+											}
+											if (currentUserRole == "dueño") {
+												IconButton(onClick = { membershipToToggle = membership }) {
+													Icon(
+														imageVector = if (membership.activo) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+														contentDescription = if (membership.activo) "Desactivar" else "Activar",
+														tint = if (membership.activo) Color.Red else MaterialTheme.colorScheme.primary
+													)
+												}
+											}
 											
-											IconButton(onClick = { membershipToEdit = membership }) {
-												Icon(Icons.Default.Edit, contentDescription = "Editar")
-											}
-											IconButton(onClick = { membershipToToggle = membership }) {
-												Icon(
-													imageVector = if (membership.activo) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-													contentDescription = if (membership.activo) "Desactivar" else "Activar",
-													tint = if (membership.activo)Color.Red  else MaterialTheme.colorScheme.primary
-												)
-											}
 											IconButton(onClick = { membershipToView = membership }) {
 												Icon(
 													painterResource(id = R.drawable.ic_details),
 													contentDescription = "Detalles"
 												)
 											}
-											IconButton(onClick = { membershipToDelete = membership }) {
-												Icon(
-													painterResource(id = R.drawable.ic_delete),
-													contentDescription = "Detalles"
-												)
+											
+											if (currentUserRole == "dueño") {
+												IconButton(onClick = { membershipToDelete = membership }) {
+													Icon(
+														painterResource(id = R.drawable.ic_delete),
+														contentDescription = "Eliminar"
+													)
+												}
 											}
 										}
 									}
+									
 									Spacer(Modifier.height(2.dp))
+									
 									Text(
 										"Usuarios registrados: $userCount",
 										style = MaterialTheme.typography.labelSmall,
@@ -284,292 +300,291 @@ fun MembershipScreen(
 									)
 								}
 							}
-							
 						}
 					}
-				}
-			}
-			// Detalles de membresía (nuevo)
-			membershipToView?.let { membership ->
-				AlertDialog(
-					onDismissRequest = { membershipToView = null },
-					title = { Text("Detalles de Membresía") },
-					text = {
-						Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-							Text("Nombre: ${membership.nombre}")
-							Text("Precio: $${membership.precio}")
-							Text("Duración: ${membership.duracionDias} días")
-						}
-					},
-					confirmButton = {
-						Button(onClick = { membershipToView = null }) {
-							Text("Cerrar")
-						}
-					}, containerColor = MaterialTheme.colorScheme.surface
-				)
-			}
-			
-			// Diálogo para crear membresía
-			if (showCreateDialog) {
-				AlertDialog(
-					onDismissRequest = { showCreateDialog = false },
-					confirmButton = {
-						Button(
-							onClick = {
-								val parsedPrice = price.toDoubleOrNull()
-								val parsedDuration = duration.toIntOrNull()
-								if (name.isBlank() || parsedPrice == null || parsedDuration == null) {
-									Toast.makeText(
-										context,
-										"Complete correctamente los campos",
-										Toast.LENGTH_SHORT
-									).show()
-									return@Button
+					
+					// Detalles de membresía (nuevo)
+					membershipToView?.let { membership ->
+						AlertDialog(
+							onDismissRequest = { membershipToView = null },
+							title = { Text("Detalles de Membresía") },
+							text = {
+								Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+									Text("Nombre: ${membership.nombre}")
+									Text("Precio: $${membership.precio}")
+									Text("Duración: ${membership.duracionDias} días")
 								}
-								
-								val membership = Membership(
-									id = "",
-									nombre = name.trim(),
-									precio = parsedPrice,
-									gimnasioCode = "",
-									duracionDias = parsedDuration
-								)
-								
-								viewModel.createMembership(membership)
-								showCreateDialog = false
-								name = ""
-								price = ""
-								duration = ""
-								viewModel.loadMembershipsSummary()
 							},
-							enabled = !isLoading
-						) {
-							if (isLoading) {
-								CircularProgressIndicator(
-									modifier = Modifier.size(16.dp),
-									color = MaterialTheme.colorScheme.onPrimary,
-									strokeWidth = 2.dp
-								)
-							} else {
-								Text("Guardar")
-							}
-						}
-					},
-					dismissButton = {
-						OutlinedButton(onClick = {
-							showCreateDialog = false
-							name = ""
-							price = ""
-							duration = ""
-						}) {
-							Text("Cancelar")
-						}
-					},
-					title = { Text("Nueva Membresía") },
-					text = {
-						Column {
-							OutlinedTextField(
-								value = name,
-								onValueChange = { name = it },
-								label = { Text("Nombre") },
-								modifier = Modifier.fillMaxWidth(),
-								maxLines = 1,
-							)
-							Spacer(modifier = Modifier.height(12.dp))
-							OutlinedTextField(
-								value = price,
-								onValueChange = { price = it },
-								label = { Text("Precio") },
-								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-								modifier = Modifier.fillMaxWidth(),
-								maxLines = 1,
-							)
-							Spacer(modifier = Modifier.height(12.dp))
-							OutlinedTextField(
-								value = duration,
-								onValueChange = { duration = it },
-								label = { Text("Duración (días)") },
-								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-								modifier = Modifier.fillMaxWidth(),
-								maxLines = 1,
-							)
-						}
-					},
-					shape = RoundedCornerShape(16.dp),
-					containerColor = MaterialTheme.colorScheme.surface
-				)
-			}
-			
-			// Diálogo para editar membresía
-			membershipToEdit?.let { membership ->
-				val membershipWithCount = membershipsSummary.find { it.membership.id == membership.id }
-				val isEditable = membershipWithCount?.userCount == 0
-				
-				var editedName by remember { mutableStateOf(membership.nombre) }
-				var editedPrice by remember { mutableStateOf(membership.precio.toString()) }
-				var editedDuration by remember { mutableStateOf(membership.duracionDias.toString()) }
-				
-				AlertDialog(
-					onDismissRequest = { membershipToEdit = null },
-					confirmButton = {
-						Button(
-							onClick = {
-								val parsedPrice = editedPrice.toDoubleOrNull()
-								val parsedDuration = editedDuration.toIntOrNull()
-								if (editedName.isBlank() || parsedPrice == null || parsedDuration == null) {
-									Toast.makeText(
-										context,
-										"Complete correctamente los campos",
-										Toast.LENGTH_SHORT
-									).show()
-									return@Button
+							confirmButton = {
+								Button(onClick = { membershipToView = null }) {
+									Text("Cerrar")
 								}
-								val updatedMembership = membership.copy(
-									nombre = editedName.trim(),
-									precio = parsedPrice,
-									duracionDias = parsedDuration
-								)
-								viewModel.editMembership(updatedMembership)
-								membershipToEdit = null
+							}, containerColor = MaterialTheme.colorScheme.surface
+						)
+					}
+					
+					// Diálogo para crear membresía
+					if (showCreateDialog) {
+						AlertDialog(
+							onDismissRequest = { showCreateDialog = false },
+							confirmButton = {
+								Button(
+									onClick = {
+										val parsedPrice = price.toDoubleOrNull()
+										val parsedDuration = duration.toIntOrNull()
+										if (name.isBlank() || parsedPrice == null || parsedDuration == null) {
+											Toast.makeText(
+												context,
+												"Complete correctamente los campos",
+												Toast.LENGTH_SHORT
+											).show()
+											return@Button
+										}
+										
+										val membership = Membership(
+											id = "",
+											nombre = name.trim(),
+											precio = parsedPrice,
+											gimnasioCode = "",
+											duracionDias = parsedDuration
+										)
+										
+										viewModel.createMembership(membership)
+										showCreateDialog = false
+										name = ""
+										price = ""
+										duration = ""
+										viewModel.loadMembershipsSummary()
+									},
+									enabled = !isLoading
+								) {
+									if (isLoading) {
+										CircularProgressIndicator(
+											modifier = Modifier.size(16.dp),
+											color = MaterialTheme.colorScheme.onPrimary,
+											strokeWidth = 2.dp
+										)
+									} else {
+										Text("Guardar")
+									}
+								}
 							},
-							enabled = isEditable // 🔷 solo habilitado si es editable
-						) {
-							Text("Guardar")
-						}
-					},
-					dismissButton = {
-						OutlinedButton(onClick = { membershipToEdit = null }) {
-							Text("Cancelar")
-						}
-					},
-					title = { Text("Editar membresía") },
-					text = {
-						Column {
-							if (!isEditable) {
+							dismissButton = {
+								OutlinedButton(onClick = {
+									showCreateDialog = false
+									name = ""
+									price = ""
+									duration = ""
+								}) {
+									Text("Cancelar")
+								}
+							},
+							title = { Text("Nueva Membresía") },
+							text = {
+								Column {
+									OutlinedTextField(
+										value = name,
+										onValueChange = { name = it },
+										label = { Text("Nombre") },
+										modifier = Modifier.fillMaxWidth(),
+										maxLines = 1,
+									)
+									Spacer(modifier = Modifier.height(12.dp))
+									OutlinedTextField(
+										value = price,
+										onValueChange = { price = it },
+										label = { Text("Precio") },
+										keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+										modifier = Modifier.fillMaxWidth(),
+										maxLines = 1,
+									)
+									Spacer(modifier = Modifier.height(12.dp))
+									OutlinedTextField(
+										value = duration,
+										onValueChange = { duration = it },
+										label = { Text("Duración (días)") },
+										keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+										modifier = Modifier.fillMaxWidth(),
+										maxLines = 1,
+									)
+								}
+							},
+							shape = RoundedCornerShape(16.dp),
+							containerColor = MaterialTheme.colorScheme.surface
+						)
+					}
+					
+					// Diálogo para editar membresía
+					membershipToEdit?.let { membership ->
+						val membershipWithCount = membershipsSummary.find { it.membership.id == membership.id }
+						val isEditable = membershipWithCount?.userCount == 0
+						
+						var editedName by remember { mutableStateOf(membership.nombre) }
+						var editedPrice by remember { mutableStateOf(membership.precio.toString()) }
+						var editedDuration by remember { mutableStateOf(membership.duracionDias.toString()) }
+						
+						AlertDialog(
+							onDismissRequest = { membershipToEdit = null },
+							confirmButton = {
+								Button(
+									onClick = {
+										val parsedPrice = editedPrice.toDoubleOrNull()
+										val parsedDuration = editedDuration.toIntOrNull()
+										if (editedName.isBlank() || parsedPrice == null || parsedDuration == null) {
+											Toast.makeText(
+												context,
+												"Complete correctamente los campos",
+												Toast.LENGTH_SHORT
+											).show()
+											return@Button
+										}
+										val updatedMembership = membership.copy(
+											nombre = editedName.trim(),
+											precio = parsedPrice,
+											duracionDias = parsedDuration
+										)
+										viewModel.editMembership(updatedMembership)
+										membershipToEdit = null
+									},
+									enabled = isEditable // 🔷 solo habilitado si es editable
+								) {
+									Text("Guardar")
+								}
+							},
+							dismissButton = {
+								OutlinedButton(onClick = { membershipToEdit = null }) {
+									Text("Cancelar")
+								}
+							},
+							title = { Text("Editar membresía") },
+							text = {
+								Column {
+									if (!isEditable) {
+										Text(
+											text = "ℹ️No puedes editar una membresia una vez usada. si ya no la usas la puedes desactivar",
+											color = MaterialTheme.colorScheme.onSurfaceVariant,
+											style = MaterialTheme.typography.bodySmall,
+											modifier = Modifier.padding(bottom = 8.dp)
+										)
+										Spacer(modifier = Modifier.height(8.dp))
+									}
+									
+									OutlinedTextField(
+										value = editedName,
+										onValueChange = { editedName = it },
+										label = { Text("Nombre") },
+										modifier = Modifier.fillMaxWidth(),
+										maxLines = 1,
+										enabled = isEditable
+									)
+									Spacer(modifier = Modifier.height(12.dp))
+									OutlinedTextField(
+										value = editedPrice,
+										onValueChange = { editedPrice = it },
+										label = { Text("Precio") },
+										keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+										modifier = Modifier.fillMaxWidth(),
+										maxLines = 1,
+										enabled = isEditable
+									)
+									Spacer(modifier = Modifier.height(12.dp))
+									OutlinedTextField(
+										value = editedDuration,
+										onValueChange = { editedDuration = it },
+										label = { Text("Duración (días)") },
+										keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+										modifier = Modifier.fillMaxWidth(),
+										maxLines = 1,
+										enabled = isEditable
+									)
+								}
+							},
+							shape = RoundedCornerShape(16.dp),
+							containerColor = MaterialTheme.colorScheme.surface
+						)
+					}
+					
+					membershipToToggle?.let { selected ->
+						AlertDialog(
+							onDismissRequest = { membershipToToggle = null },
+							title = {
 								Text(
-									text = "ℹ️No puedes editar una membresia una vez usada. si ya no la usas la puedes desactivar",
-									color = MaterialTheme.colorScheme.onSurfaceVariant,
-									style = MaterialTheme.typography.bodySmall,
-									modifier = Modifier.padding(bottom = 8.dp)
+									text = if (selected.activo) "Desactivar membresía" else "Activar membresía"
 								)
-								Spacer(modifier = Modifier.height(8.dp))
-							}
-							
-							OutlinedTextField(
-								value = editedName,
-								onValueChange = { editedName = it },
-								label = { Text("Nombre") },
-								modifier = Modifier.fillMaxWidth(),
-								maxLines = 1,
-								enabled = isEditable
-							)
-							Spacer(modifier = Modifier.height(12.dp))
-							OutlinedTextField(
-								value = editedPrice,
-								onValueChange = { editedPrice = it },
-								label = { Text("Precio") },
-								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-								modifier = Modifier.fillMaxWidth(),
-								maxLines = 1,
-								enabled = isEditable
-							)
-							Spacer(modifier = Modifier.height(12.dp))
-							OutlinedTextField(
-								value = editedDuration,
-								onValueChange = { editedDuration = it },
-								label = { Text("Duración (días)") },
-								keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-								modifier = Modifier.fillMaxWidth(),
-								maxLines = 1,
-								enabled = isEditable
-							)
-						}
-					},
-					shape = RoundedCornerShape(16.dp),
-					containerColor = MaterialTheme.colorScheme.surface
-				)
-			}
-			
-			membershipToToggle?.let { selected ->
-				AlertDialog(
-					onDismissRequest = { membershipToToggle = null },
-					title = {
-						Text(
-							text = if (selected.activo) "Desactivar membresía" else "Activar membresía"
-						)
-					},
-					containerColor = MaterialTheme.colorScheme.surface,
-					text = {
-						Text(
-							text = if (selected.activo) {
-								"¿Estás seguro de que deseas desactivar esta membresía? Ya no podrás usarla para agregar pagos nuevos."
-							} else {
-								"¿Estás seguro de que deseas activar esta membresía?"
+							},
+							containerColor = MaterialTheme.colorScheme.surface,
+							text = {
+								Text(
+									text = if (selected.activo) {
+										"¿Estás seguro de que deseas desactivar esta membresía? Ya no podrás usarla para agregar pagos nuevos."
+									} else {
+										"¿Estás seguro de que deseas activar esta membresía?"
+									}
+								)
+							},
+							confirmButton = {
+								TextButton(onClick = {
+									viewModel.toggleMembershipState(selected)
+									membershipToToggle = null
+									viewModel.loadMembershipsSummary()
+								}) {
+									Text("Confirmar")
+								}
+							},
+							dismissButton = {
+								TextButton(onClick = { membershipToToggle = null }) {
+									Text("Cancelar")
+								}
 							}
 						)
-					},
-					confirmButton = {
-						TextButton(onClick = {
-							viewModel.toggleMembershipState(selected)
-							membershipToToggle = null
-							viewModel.loadMembershipsSummary()
-						}) {
-							Text("Confirmar")
-						}
-					},
-					dismissButton = {
-						TextButton(onClick = { membershipToToggle = null }) {
-							Text("Cancelar")
+					}
+					
+					
+					// Diálogo para eliminar membresía
+					membershipToDelete?.let { membership ->
+						val isUsed = membership.cantidadUsuarios > 0
+						
+						AlertDialog(
+							onDismissRequest = { membershipToDelete = null },
+							title = { Text("¿Eliminar membresía?") },
+							text = {
+								Text(
+									"Solo puedes eliminar la membresía \"${membership.nombre}\" si no ha sido usada por ningún cliente. " +
+											if (isUsed) "Ya fue utilizada, por lo que no puedes eliminarla."
+											else "No ha sido utilizada aún, puedes eliminarla sin problemas."
+								)
+							},
+							confirmButton = {
+								Button(
+									onClick = {
+										viewModel.deleteMembership(membership)
+										membershipToDelete = null
+									},
+									enabled = !isUsed // 👈 aquí desactivamos si ya fue usada
+								) {
+									Text("Eliminar")
+								}
+							},
+							dismissButton = {
+								OutlinedButton(onClick = { membershipToDelete = null }) {
+									Text("Cancelar")
+								}
+							},
+							containerColor = MaterialTheme.colorScheme.surface
+						)
+					}
+					
+					
+					
+					
+					errorMessage?.let {
+						LaunchedEffect(it) {
+							Toast.makeText(context, it, Toast.LENGTH_LONG).show()
 						}
 					}
-				)
-			}
-			
-			
-			// Diálogo para eliminar membresía
-			membershipToDelete?.let { membership ->
-				val isUsed = membership.cantidadUsuarios > 0
-				
-				AlertDialog(
-					onDismissRequest = { membershipToDelete = null },
-					title = { Text("¿Eliminar membresía?") },
-					text = {
-						Text(
-							"Solo puedes eliminar la membresía \"${membership.nombre}\" si no ha sido usada por ningún cliente. " +
-									if (isUsed) "Ya fue utilizada, por lo que no puedes eliminarla."
-									else "No ha sido utilizada aún, puedes eliminarla sin problemas."
-						)
-					},
-					confirmButton = {
-						Button(
-							onClick = {
-								viewModel.deleteMembership(membership)
-								membershipToDelete = null
-							},
-							enabled = !isUsed // 👈 aquí desactivamos si ya fue usada
-						) {
-							Text("Eliminar")
-						}
-					},
-					dismissButton = {
-						OutlinedButton(onClick = { membershipToDelete = null }) {
-							Text("Cancelar")
-						}
-					},
-					containerColor = MaterialTheme.colorScheme.surface
-				)
-			}
-			
-			
-			
-			
-			errorMessage?.let {
-				LaunchedEffect(it) {
-					Toast.makeText(context, it, Toast.LENGTH_LONG).show()
 				}
 			}
 		}
 	}
 }
-
 

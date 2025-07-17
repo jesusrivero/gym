@@ -53,6 +53,8 @@ import com.jesus.gymcontrol.domain.usecase.usuario.UpdateRolUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.UpdateUserProfileUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.auth.CheckidcardExistsUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.codes.GetAvailableCodesUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.getAdmin.GetGymAdminsUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.getAdmin.UpdateAdminStateUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.membership.ToggleMembershipStateUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.notification.AddNotificacionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.notification.DeleteAllNotificacionesUseCase
@@ -403,4 +405,14 @@ object AppModule {
 	fun provideCheckCedulaExistsUseCase(
 		repository: AuthRepository
 	) = CheckidcardExistsUseCase(repository)
+	
+	@Provides
+	@Singleton
+	fun provideGetGymAdminsUseCase(
+		repository: UserAdminRepository
+	): GetGymAdminsUseCase = GetGymAdminsUseCase(repository)
+	
+	fun provideUpdateAdminStateUseCase(
+		repository: UserAdminRepository
+	): UpdateAdminStateUseCase = UpdateAdminStateUseCase(repository)
 }

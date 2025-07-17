@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -50,12 +52,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import com.jesus.gymcontrol.domain.model.UserRegistrationData
 import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
+import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
 import com.jesus.gymcontrol.domain.viewmodels.RegisterUserFromAdminViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.ui.commons.countryCodes
+import kotlinx.coroutines.Delay
 import kotlinx.coroutines.delay
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,9 +74,11 @@ fun RegPersonScreen(
 	val isRegistering = viewModel.isRegistering
 	val registerSuccess = viewModel.registerSuccess
 	val errorMessage = viewModel.errorMessage
-	
+	var showSuccessDialog by remember { mutableStateOf(false) }
 	var showSnackbar by remember { mutableStateOf(false) }
 	var snackbarMessage by remember { mutableStateOf("") }
+	var clearFormTrigger by remember { mutableStateOf(false) }
+	
 	
 	if (showSnackbar) {
 		LaunchedEffect(showSnackbar) {
@@ -81,13 +89,51 @@ fun RegPersonScreen(
 	
 	LaunchedEffect(registerSuccess) {
 		if (registerSuccess) {
-			snackbarMessage = "Cliente registrado correctamente"
-			showSnackbar = true
+			showSuccessDialog = true
 			viewModel.resetRegisterState()
-			navController.navigate(AppRoutes.MainScreen) {
-				popUpTo(AppRoutes.RegPersonScreen) { inclusive = true }
-			}
 		}
+	}
+	
+	if (showSuccessDialog) {
+		AlertDialog(
+			onDismissRequest = { showSuccessDialog = false },
+			confirmButton = {
+				TextButton(
+					onClick = {
+						// 👉 Usuario elige NO registrar otro → Navegar
+						showSuccessDialog = false
+						navController.navigate(AppRoutes.PersonasScreen.route) {
+							popUpTo(AppRoutes.RegPersonScreen) { inclusive = true }
+						}
+					}
+				) {
+					Text("No")
+				}
+			},
+			dismissButton = {
+				TextButton(
+					onClick = {
+						// 👉 Usuario elige SÍ registrar otro → limpiar formulario
+						showSuccessDialog = false
+						clearFormTrigger = true
+					}
+				) {
+					Text("Sí")
+				}
+			},
+			title = { Text("¡Éxito!") },
+			text = { Text("Cliente registrado correctamente.\n¿Deseas registrar otra persona?") },
+			icon = {
+				Icon(
+					imageVector = Icons.Default.CheckCircle,
+					contentDescription = null,
+					tint = Color(0xFF4CAF50)
+				)
+			},
+			containerColor = MaterialTheme.colorScheme.surface,
+			titleContentColor = MaterialTheme.colorScheme.onSurface,
+			textContentColor = MaterialTheme.colorScheme.onSurface
+		)
 	}
 	
 	LaunchedEffect(errorMessage) {
@@ -135,10 +181,16 @@ fun RegPersonScreen(
 		RegPersonContent(
 			modifier = Modifier.padding(paddingValues),
 			viewModel = viewModel,
-			isLoading = isRegistering
+			isLoading = isRegistering,
+			clearFormTrigger = clearFormTrigger,
+			onFormCleared = {
+				clearFormTrigger = false
+			}
 		)
 	}
 }
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -146,6 +198,9 @@ fun RegPersonContent(
 	modifier: Modifier = Modifier,
 	viewModel: RegisterUserFromAdminViewModel,
 	aviewModel: AuthViewModel = hiltViewModel(),
+	gviewModel: GymViewModel = hiltViewModel(),
+	clearFormTrigger: Boolean,
+	onFormCleared: () -> Unit,
 	isLoading: Boolean,
 ) {
 	val colorScheme = MaterialTheme.colorScheme
@@ -179,6 +234,30 @@ fun RegPersonContent(
 		isNameValid && islastNameValid && isEmailValid && isPasswordValid && isCodeValid && isIdCardValid && isPhoneValid
 	val configuration = LocalConfiguration.current
 	val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+	val currentUserRole = gviewModel.currentUserRole
+	val rolesDisponibles =
+		if (currentUserRole == "dueño") listOf("cliente", "administrador") else listOf("cliente")
+	var isRolDropdownExpanded by rememberSaveable { mutableStateOf(false) }
+	val userUid = FirebaseAuth.getInstance().currentUser?.uid
+	
+	LaunchedEffect(userUid) {
+		userUid?.let {
+			gviewModel.loadCurrentUserRole(it)
+		}
+	}
+	
+	if (clearFormTrigger) {
+		name = ""
+		lastname = ""
+		email = ""
+		password = ""
+		phone = ""
+		idCard = ""
+		code = ""
+		rol = "cliente"
+		onFormCleared()
+	}
+	
 	
 	if (showDialog) {
 		AlertDialog(
@@ -209,6 +288,9 @@ fun RegPersonContent(
 			dismissButton = {
 				TextButton(onClick = { showDialog = false }) { Text("Cancelar") }
 			},
+			containerColor = MaterialTheme.colorScheme.surface,
+			titleContentColor = MaterialTheme.colorScheme.onSurface,
+			textContentColor = MaterialTheme.colorScheme.onSurface,
 			title = { Text("Confirmar registro") },
 			text = { Text("¿Deseas registrar a esta persona con rol '$rol'?") }
 		)
@@ -336,13 +418,14 @@ fun RegPersonContent(
 					ExposedDropdownMenuBox(
 						expanded = isCountryDropdownExpanded,
 						onExpandedChange = { isCountryDropdownExpanded = it },
-						modifier = Modifier.weight(0.5f)
+						modifier = Modifier.weight(0.3f) // antes: 0.5f
 					) {
 						OutlinedTextField(
 							readOnly = true,
 							value = "+$selectedCountryCode",
 							onValueChange = {},
 							label = { Text("País") },
+							singleLine = true, // 👈 evita salto de línea
 							trailingIcon = {
 								ExposedDropdownMenuDefaults.TrailingIcon(expanded = isCountryDropdownExpanded)
 							},
@@ -375,16 +458,9 @@ fun RegPersonContent(
 						onValueChange = { phone = it },
 						label = { Text("Número") },
 						keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-						modifier = Modifier.weight(1f),
+						singleLine = true,
+						modifier = Modifier.weight(0.7f), // antes: 1f
 						isError = phone.isNotBlank() && !isPhoneValid
-					)
-				}
-				if (phone.isNotBlank() && !isPhoneValid) {
-					Text(
-						text = "Número inválido. Ejemplo: 412XXXXXXX",
-						color = colorScheme.error,
-						style = MaterialTheme.typography.labelSmall,
-						modifier = Modifier.padding(top = 2.dp)
 					)
 				}
 				
@@ -421,14 +497,51 @@ fun RegPersonContent(
 					)
 				}
 				
-				OutlinedTextField(
-					value = rol,
-					onValueChange = {},
-					label = { Text("Rol") },
-					readOnly = true,
-					enabled = false,
-					modifier = Modifier.fillMaxWidth()
-				)
+				// Donde defines el campo de rol actual, quítalo y reemplaza con esto:
+				if (currentUserRole == "dueño") {
+					ExposedDropdownMenuBox(
+						expanded = isRolDropdownExpanded,
+						onExpandedChange = { isRolDropdownExpanded = it },
+						modifier = Modifier.fillMaxWidth()
+					) {
+						OutlinedTextField(
+							readOnly = true,
+							value = if (rol.isNotEmpty()) rol.replaceFirstChar { it.uppercase() } else "",
+							onValueChange = {},
+							label = { Text("Rol") },
+							trailingIcon = {
+								ExposedDropdownMenuDefaults.TrailingIcon(expanded = isRolDropdownExpanded)
+							},
+							modifier = Modifier.menuAnchor()
+						)
+						ExposedDropdownMenu(
+							expanded = isRolDropdownExpanded,
+							onDismissRequest = { isRolDropdownExpanded = false },
+							modifier = Modifier
+								.background(MaterialTheme.colorScheme.surfaceVariant)
+						) {
+							rolesDisponibles.forEach { rolOpcion ->
+								DropdownMenuItem(
+									text = { Text(rolOpcion.replaceFirstChar { it.uppercase() }) },
+									onClick = {
+										rol = rolOpcion
+										isRolDropdownExpanded = false
+									}
+								)
+							}
+						}
+					}
+				} else {
+					OutlinedTextField(
+						value = rol,
+						onValueChange = {},
+						label = { Text("Rol") },
+						readOnly = true,
+						enabled = false,
+						modifier = Modifier.fillMaxWidth()
+					)
+				}
+				
 			}
 		}
 		
@@ -445,17 +558,19 @@ fun RegPersonContent(
 					}
 				}
 			},
-			enabled = formIsValid && !isLoading,
+			enabled = formIsValid && !isLoading && (currentUserRole != "dueño" || rol.isNotEmpty()),
 			modifier = Modifier.fillMaxWidth()
 		) {
-			if (isLoading)
+			if (isLoading) {
 				CircularProgressIndicator(
 					color = Color.White,
 					modifier = Modifier.size(20.dp)
 				)
-			else
+			} else {
 				Text("Registrar", style = MaterialTheme.typography.labelLarge)
+			}
+			
 		}
-		
 	}
+	
 }

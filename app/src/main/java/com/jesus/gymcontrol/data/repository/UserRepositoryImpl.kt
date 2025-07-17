@@ -45,7 +45,7 @@ class UserRepositoryImpl @Inject constructor(
 				"rol" to rol,
 				"email" to email,
 				"idcard" to idcard,
-				"state" to "inactivo",           // ⬅️ NUEVO
+				"state" to "activo",           // ⬅️ NUEVO
 				"enable" to false,            // ⬅️ NUEVO
 				"lastpayment" to null,
 				"date" to date ,               // ⬅️ NUEVO

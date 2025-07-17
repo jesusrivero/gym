@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,7 +47,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
 import com.jesus.gymcontrol.R
+import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
 import com.jesus.gymcontrol.domain.viewmodels.notification.NotificacionesViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
@@ -70,12 +73,25 @@ fun ManagerContent(
 	navController: NavController,
 	navBottom: NavController,
 	notificacionesViewModel: NotificacionesViewModel = hiltViewModel(),
+	gymViewModel: GymViewModel = hiltViewModel() // ya tiene currentUserRole
 ) {
 	val colorScheme = MaterialTheme.colorScheme
+	
+	// Estado de notificaciones
 	var showNotifications by remember { mutableStateOf(false) }
 	val notifications by notificacionesViewModel.notifications.collectAsState()
-	val notificationCount by notificacionesViewModel.notificationCount.collectAsState()
 	val unreadCount by notificacionesViewModel.unreadCount.collectAsState()
+	
+	// Estado del rol
+	val currentUserRole = gymViewModel.currentUserRole
+	
+	// Cargar rol al inicio
+	val userUid = FirebaseAuth.getInstance().currentUser?.uid
+	LaunchedEffect(Unit) {
+		userUid?.let {
+			gymViewModel.loadCurrentUserRole(it)
+		}
+	}
 	
 	Box(modifier = Modifier.fillMaxSize()) {
 		Scaffold(
@@ -87,33 +103,34 @@ fun ManagerContent(
 							color = colorScheme.onPrimary,
 							fontWeight = FontWeight.Bold
 						)
-					}, actions = {
-							IconButton(onClick = { showNotifications = !showNotifications }) {
-								Box {
-									Icon(
-										imageVector = Icons.Default.Notifications,
-										contentDescription = "Notificaciones",
-										tint = colorScheme.onPrimary
-									)
-									if (unreadCount > 0) {
-										Box(
-											modifier = Modifier
-												.align(Alignment.TopEnd)
-												.offset(x = 4.dp, y = (-4).dp)
-												.size(16.dp)
-												.background(Color.Red, shape = CircleShape),
-											contentAlignment = Alignment.Center
-										) {
-											Text(
-												text = unreadCount.toString(),
-												color = Color.White,
-												style = MaterialTheme.typography.labelSmall,
-												fontSize = 10.sp
-											)
-										}
+					},
+					actions = {
+						IconButton(onClick = { showNotifications = !showNotifications }) {
+							Box {
+								Icon(
+									imageVector = Icons.Default.Notifications,
+									contentDescription = "Notificaciones",
+									tint = colorScheme.onPrimary
+								)
+								if (unreadCount > 0) {
+									Box(
+										modifier = Modifier
+											.align(Alignment.TopEnd)
+											.offset(x = 4.dp, y = (-4).dp)
+											.size(16.dp)
+											.background(Color.Red, shape = CircleShape),
+										contentAlignment = Alignment.Center
+									) {
+										Text(
+											text = unreadCount.toString(),
+											color = Color.White,
+											style = MaterialTheme.typography.labelSmall,
+											fontSize = 10.sp
+										)
 									}
 								}
 							}
+						}
 					},
 					colors = TopAppBarDefaults.topAppBarColors(
 						containerColor = colorScheme.primary
@@ -121,11 +138,10 @@ fun ManagerContent(
 				)
 			},
 			bottomBar = {
-				BottomNavigationBar(
-					navController = navBottom,
-				)
+				BottomNavigationBar(navController = navBottom)
 			}
 		) { innerPadding ->
+			
 			Column(
 				modifier = Modifier
 					.fillMaxSize()
@@ -133,8 +149,7 @@ fun ManagerContent(
 					.verticalScroll(rememberScrollState())
 			) {
 				Row(
-					modifier = Modifier
-						.padding(horizontal = 8.dp, vertical = 8.dp),
+					modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
 					horizontalArrangement = Arrangement.spacedBy(16.dp)
 				) {
 					Column {
@@ -142,7 +157,7 @@ fun ManagerContent(
 							title = "Personas",
 							subtitle = "Listado de personas",
 							imageRes = R.drawable.ic_person,
-							onClick = { navController.navigate(AppRoutes.PersonasScreen.route)}
+							onClick = { navController.navigate(AppRoutes.PersonasScreen.route) }
 						)
 						
 						MenuCard(
@@ -170,22 +185,36 @@ fun ManagerContent(
 							title = "Reportes",
 							subtitle = "Listado de reportes",
 							imageRes = R.drawable.ic_reports,
-							onClick = { navController.navigate(AppRoutes.ReportScreen)}
+							onClick = { navController.navigate(AppRoutes.ReportScreen) }
 						)
+						
+						// ✅ Solo mostrar la Card de Personal si es dueño
+						if (currentUserRole == "dueño") {
+							MenuCard(
+								title = "Personal",
+								subtitle = "Listado de administradores",
+								imageRes = R.drawable.ic_reports,
+								onClick = { navController.navigate(AppRoutes.PerworkersScreen) }
+							)
+						}
 					}
 				}
 			}
 		}
 	}
+	
 	NotificationPanel(
 		navController = navController,
 		isVisible = showNotifications,
 		notifications = notifications,
 		onDismiss = { showNotifications = false },
 		onDeleteAll = { notificacionesViewModel.deleteAllNotifications() },
-		onMarkAsRead = { notificacion -> notificacionesViewModel.markNotificationAsRead(notificacion)}
+		onMarkAsRead = { notificacion -> notificacionesViewModel.markNotificationAsRead(notificacion) }
 	)
 }
+
+
+
 @Composable
 fun MenuCard(
 	title: String,

@@ -8,12 +8,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.jesus.gymcontrol.domain.model.CodeInfo
 import com.jesus.gymcontrol.domain.model.Gym
 import com.jesus.gymcontrol.domain.usecase.usuario.CreateGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GenerateCodeUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetAllGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetGymByOwnerUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.MarkCodeAsUseUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.codes.GetAvailableCodesUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.validateCode.ValidateAdminCodeUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.validateCode.ValidateClientCodeUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.validateCode.ValidateOwnerCodeUseCase
@@ -38,7 +40,7 @@ class GymViewModel @Inject constructor(
     private val validateOwnerCodeUseCase: ValidateOwnerCodeUseCase,
     private val validateClientCodeUseCase: ValidateClientCodeUseCase,
     private val validateAdminCodeUseCase: ValidateAdminCodeUseCase,
-	private val getAvailableCodesUseCase: com.jesus.gymcontrol.domain.usecase.usuario.codes.GetAvailableCodesUseCase
+	private val getAvailableCodesUseCase: GetAvailableCodesUseCase
 ) : ViewModel() {
 
     var gyms by mutableStateOf<List<Gym>>(emptyList())
@@ -75,23 +77,37 @@ class GymViewModel @Inject constructor(
     var setSelectedRoleForCode by mutableStateOf("cliente")
         private set
 	
+	
+	private val _availableCodes = MutableStateFlow<List<CodeInfo>>(emptyList())
+	val availableCodes: StateFlow<List<CodeInfo>> = _availableCodes
 
-	private val _availableCodes = MutableStateFlow<List<String>>(emptyList())
-	val availableCodes: StateFlow<List<String>> = _availableCodes
+
 	
 	private val _codesError = MutableStateFlow<String?>(null)
 	val codesError: StateFlow<String?> = _codesError
+	
+	
+	var currentUserRole by mutableStateOf<String?>(null)
+	
+	fun loadCurrentUserRole(uid: String) {
+		firestore.collection("users").document(uid).get()
+			.addOnSuccessListener {
+				currentUserRole = it.getString("rol")
+			}
+	}
+	
 	
 	fun loadAvailableCodes() {
 		viewModelScope.launch {
 			val result = getAvailableCodesUseCase()
 			result.onSuccess { codes ->
-				_availableCodes.value = codes
+				_availableCodes.value = codes // codes ahora es List<CodeInfo>
 			}.onFailure { error ->
 				_codesError.value = error.message
 			}
 		}
 	}
+	
 	
 	
 	
@@ -124,46 +140,45 @@ class GymViewModel @Inject constructor(
     fun SetSelectedRoleForCode(role:String){
         setSelectedRoleForCode = role
     }
-
-
-    fun createGym() {
-        val uid = firebaseAuth.currentUser?.uid ?: return
-
-        val name = name.trim()
-        val direction = direction.trim()
-	      val rif = rif.trim()
-        val phone = phone.trim()
-        val code = code.trim()
-        val rol = rol.trim()
-
-
-        viewModelScope.launch {
-            isLoading = true
-            isSuccess = false
-            errorMessage = null
-
-            val result = createGymUseCase(
-                uid = uid,
-                code = code,
-                name = name,
-                direction = direction,
-	              rif = rif,
-                phone = phone,
-
-
-            )
-
-            isLoading = false
-            result.onSuccess {
-                isSuccess = true
-                markCodeAsUsed(code, rol)
-            }.onFailure {
-                errorMessage = it.message
-            }
-        }
-    }
-
-    fun fetchAllGyms() {
+	
+	
+	fun createGym(onSuccess: (() -> Unit)? = null) {
+		val uid = firebaseAuth.currentUser?.uid ?: return
+		
+		val name = name.trim()
+		val direction = direction.trim()
+		val rif = rif.trim()
+		val phone = phone.trim()
+		val code = code.trim()
+		val rol = rol.trim()
+		
+		viewModelScope.launch {
+			isLoading = true
+			isSuccess = false
+			errorMessage = null
+			
+			val result = createGymUseCase(
+				uid = uid,
+				code = code,
+				name = name,
+				direction = direction,
+				rif = rif,
+				phone = phone,
+			)
+			
+			isLoading = false
+			result.onSuccess {
+				isSuccess = true
+				markCodeAsUsed(code, rol)
+				onSuccess?.invoke()
+			}.onFailure {
+				errorMessage = it.message
+			}
+		}
+	}
+	
+	
+	fun fetchAllGyms() {
         viewModelScope.launch {
             isLoading = true
             errorMessage = null

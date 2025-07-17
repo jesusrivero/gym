@@ -28,6 +28,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
+	private val auth: FirebaseAuth,
+	private val firestore: FirebaseFirestore,
 	private val registerUseCase: RegisterUseCase,
 	private val loginUseCase: LoginUseCase,
 	private val recoverUseCase: RecoverPasswordUseCase,
@@ -58,6 +60,30 @@ class AuthViewModel @Inject constructor(
 	var rol2 by mutableStateOf("Administrador")
 	var rol3 by mutableStateOf("Cliente")
 	
+	var isUserActive by mutableStateOf<Boolean?>(null)
+		private set
+	
+	fun checkUserStatusOnStart(onResult: (String) -> Unit) {
+		val currentUser = auth.currentUser
+		if (currentUser == null) {
+			onResult("sin_sesion") // o null, como prefieras
+			return
+		}
+		
+		firestore.collection("users")
+			.document(currentUser.uid)
+			.get()
+			.addOnSuccessListener { document ->
+				val state = document.getString("state") ?: "inactivo"
+				isUserActive = (state == "activo")
+				onResult(state)  // Devuelve el estado exacto
+			}
+			.addOnFailureListener {
+				isUserActive = false
+				onResult("error")
+			}
+	}
+
 	
 	fun registerUser(email: String, password: String, name: String, lastname:String, idcard: String) {
 		viewModelScope.launch {
@@ -245,7 +271,7 @@ class AuthViewModel @Inject constructor(
 			}
 			
 			"dueño" -> {
-				navController.navigate(AppRoutes.OwnerMainScreen) {
+				navController.navigate(AppRoutes.MainScreen) {
 					popUpTo(AppRoutes.StartScreen) { inclusive = true }
 				}
 			}
