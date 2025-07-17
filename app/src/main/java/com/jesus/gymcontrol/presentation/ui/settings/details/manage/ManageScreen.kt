@@ -29,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,14 +40,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.google.firebase.auth.FirebaseAuth
 import com.jesus.gymcontrol.R
+import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
 import com.jesus.gymcontrol.domain.viewmodels.notification.NotificacionesViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
@@ -58,11 +55,12 @@ import com.jesus.gymcontrol.presentation.ui.commons.NotificationPanel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ManageScreen(navController: NavController) {
+fun ManageScreen(navController: NavController, sessionManager: SessionManager) {
 	GymTheme {
 		ManagerContent(
 			navController = navController,
 			navBottom = navController,
+			sessionManager = sessionManager
 		)
 	}
 }
@@ -72,6 +70,7 @@ fun ManageScreen(navController: NavController) {
 fun ManagerContent(
 	navController: NavController,
 	navBottom: NavController,
+	sessionManager: SessionManager,
 	notificacionesViewModel: NotificacionesViewModel = hiltViewModel(),
 	gymViewModel: GymViewModel = hiltViewModel() // ya tiene currentUserRole
 ) {
@@ -86,12 +85,7 @@ fun ManagerContent(
 	val currentUserRole = gymViewModel.currentUserRole
 	
 	// Cargar rol al inicio
-	val userUid = FirebaseAuth.getInstance().currentUser?.uid
-	LaunchedEffect(Unit) {
-		userUid?.let {
-			gymViewModel.loadCurrentUserRole(it)
-		}
-	}
+	val currentRole = sessionManager.getRol()?.lowercase()
 	
 	Box(modifier = Modifier.fillMaxSize()) {
 		Scaffold(
@@ -189,7 +183,7 @@ fun ManagerContent(
 						)
 						
 						// ✅ Solo mostrar la Card de Personal si es dueño
-						if (currentUserRole == "dueño") {
+						if (currentRole == "dueño") {
 							MenuCard(
 								title = "Personal",
 								subtitle = "Listado de administradores",
@@ -276,13 +270,15 @@ fun MenuCard(
 	}
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ManagerScreenPreview() {
-	GymTheme {
-		ManagerContent(
-			navBottom = rememberNavController(),
-			navController = rememberNavController()
-		)
-	}
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun ManagerScreenPreview() {
+//	GymTheme {
+//		ManagerContent(
+//			navBottom = rememberNavController(),
+//			navController = rememberNavController(),
+//			sessionManager = sessionManager
+//
+//		)
+//	}
+//}

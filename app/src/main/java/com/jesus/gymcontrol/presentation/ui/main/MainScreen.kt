@@ -62,11 +62,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import com.jesus.gymcontrol.domain.model.GymUserSummary
 import com.jesus.gymcontrol.domain.model.ListUser
 import com.jesus.gymcontrol.domain.model.MembershipWithCount
 import com.jesus.gymcontrol.domain.model.Payment
 import com.jesus.gymcontrol.domain.viewmodels.AdminViewModel
+import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
 import com.jesus.gymcontrol.domain.viewmodels.MembershipViewModel
 import com.jesus.gymcontrol.domain.viewmodels.MovementsViewModel
 import com.jesus.gymcontrol.domain.viewmodels.UserListViewModel
@@ -105,6 +107,7 @@ fun MainContent(
 	memberviewModel: MembershipViewModel = hiltViewModel(),
 	mviewModel: MovementsViewModel = hiltViewModel(),
 	userListViewModel: UserListViewModel = hiltViewModel(),
+	gymViewModel: GymViewModel = hiltViewModel(),
 	notificacionesViewModel: NotificacionesViewModel = hiltViewModel(),
 ) {
 	val colorScheme = MaterialTheme.colorScheme
@@ -125,6 +128,16 @@ fun MainContent(
 	
 	// 🚀 Notificaciones reales desde tu ViewModel
 	val notifications by notificacionesViewModel.notifications.collectAsState()
+	
+	
+	val userUid = FirebaseAuth.getInstance().currentUser?.uid
+	LaunchedEffect(userUid) {
+		if (userUid != null) {
+			gymViewModel.loadCurrentUserGymCode(userUid)
+			gymViewModel.loadCurrentUserRole(userUid)
+		}
+	}
+	
 	
 	LaunchedEffect(Unit) {
 		memberviewModel.loadMemberships()

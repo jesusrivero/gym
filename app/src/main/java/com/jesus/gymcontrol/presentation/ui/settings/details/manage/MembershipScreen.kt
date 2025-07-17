@@ -57,7 +57,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import com.jesus.gymcontrol.R
+import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.model.Membership
 import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
 import com.jesus.gymcontrol.domain.viewmodels.MembershipViewModel
@@ -71,6 +73,7 @@ fun MembershipScreen(
 	viewModel: MembershipViewModel = hiltViewModel(),
 	gviewModel: GymViewModel = hiltViewModel(),
 	navController: NavController,
+	sessionManager: SessionManager
 ) {
 	val context = LocalContext.current
 	val isLoading = viewModel.isLoading
@@ -90,9 +93,8 @@ fun MembershipScreen(
 	val isActionSuccess by viewModel.isActionSuccess.collectAsState()
 	var filter by remember { mutableStateOf(PromotionFilter.ACTIVE) }
 	val currentUserRole = gviewModel.currentUserRole
-	
-	
-	
+	val userUid = FirebaseAuth.getInstance().currentUser?.uid
+	val currentRole = sessionManager.getRol()?.lowercase()
 	
 	LaunchedEffect(Unit) {
 		viewModel.loadMembershipsSummary()
@@ -158,7 +160,7 @@ fun MembershipScreen(
 			)
 		},
 		floatingActionButton = {
-			if (currentUserRole == "dueño") {
+			if (currentRole == "dueño") {
 				FloatingActionButton(
 					onClick = { showCreateDialog = true },
 					containerColor = MaterialTheme.colorScheme.primary
@@ -258,12 +260,12 @@ fun MembershipScreen(
 										)
 										
 										Row {
-											if (currentUserRole == "dueño") {
+											if (currentRole == "dueño") {
 												IconButton(onClick = { membershipToEdit = membership }) {
 													Icon(Icons.Default.Edit, contentDescription = "Editar")
 												}
 											}
-											if (currentUserRole == "dueño") {
+											if (currentRole == "dueño") {
 												IconButton(onClick = { membershipToToggle = membership }) {
 													Icon(
 														imageVector = if (membership.activo) Icons.Default.VisibilityOff else Icons.Default.Visibility,
@@ -280,7 +282,7 @@ fun MembershipScreen(
 												)
 											}
 											
-											if (currentUserRole == "dueño") {
+											if (currentRole == "dueño") {
 												IconButton(onClick = { membershipToDelete = membership }) {
 													Icon(
 														painterResource(id = R.drawable.ic_delete),

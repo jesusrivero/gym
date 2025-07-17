@@ -42,8 +42,6 @@ import com.jesus.gymcontrol.presentation.ui.settings.details.selected.SelectedGy
 import com.jesus.gymcontrol.presentation.ui.settings.details.selected.SelectedGymClient
 import com.jesus.gymcontrol.presentation.ui.settings.details.selected.SelectedRolScreen
 import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
-import com.jesus.gymcontrol.presentation.navegation.AppRoutes.InactiveScreen
-import com.jesus.gymcontrol.presentation.navegation.AppRoutes.TutorialScreen
 import com.jesus.gymcontrol.presentation.splash.TutorialScreen
 import com.jesus.gymcontrol.presentation.ui.auth.InactiveScreen
 import com.jesus.gymcontrol.presentation.ui.settings.details.manage.PerworkersScreen
@@ -74,7 +72,7 @@ fun NavigationHost(
 		}
 		
 		composable<AppRoutes.RegPersonScreen> {
-			RegPersonScreen(navController)
+			RegPersonScreen(navController,sessionManager = sessionManager)
 		}
 		
 		// ❌ EditPersonScreen se queda como estaba
@@ -139,15 +137,15 @@ fun NavigationHost(
 
 		
 		composable<AppRoutes.ManageScreen> {
-			ManageScreen(navController = navController)
+			ManageScreen(navController = navController,sessionManager = sessionManager)
 		}
 		
 		composable<AppRoutes.MembershipScreen> {
-			MembershipScreen(navController = navController)
+			MembershipScreen(navController = navController,  sessionManager = sessionManager)
 		}
 		
 		composable<AppRoutes.PromotionsScreen> {
-			PromotionScreen(navController = navController)
+			PromotionScreen(navController = navController, sessionManager = sessionManager)
 		}
 		
 		composable<AppRoutes.ReportScreen> {
@@ -159,7 +157,7 @@ fun NavigationHost(
 		}
 		
 		composable<AppRoutes.LoginScreen> {
-			LoginScreen(navController = navController)
+			LoginScreen(navController = navController,sessionManager = sessionManager)
 		}
 		
 		composable<AppRoutes.RegisterScreen> {
@@ -179,7 +177,7 @@ fun NavigationHost(
 		}
 		
 		composable<AppRoutes.SelectedRolScreen> {
-			SelectedRolScreen(navController = navController)
+			SelectedRolScreen(navController = navController,sessionManager = sessionManager)
 		}
 		
 		composable<AppRoutes.InactiveScreen> {
@@ -187,7 +185,7 @@ fun NavigationHost(
 		}
 		
 		composable<AppRoutes.ActivateCodeScreen> {
-			ActivateCodeScreen(navController = navController)
+			ActivateCodeScreen(navController = navController,sessionManager = sessionManager)
 		}
 		
 		composable<AppRoutes.SelectedGymAdmin> {
@@ -207,7 +205,7 @@ fun NavigationHost(
 		}
 		
 		composable<AppRoutes.CodeClientScreen> {
-			CodeClientScreen(navController = navController)
+			CodeClientScreen(navController = navController,sessionManager = sessionManager)
 		}
 		
 		composable<AppRoutes.ClientMainScreen> {

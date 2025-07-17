@@ -66,6 +66,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.jesus.gymcontrol.R
+import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 import com.jesus.gymcontrol.presentation.ui.commons.generateQrBitmap
@@ -77,9 +78,9 @@ import java.io.FileOutputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CodeClientScreen(navController: NavController) {
+fun CodeClientScreen(navController: NavController, sessionManager: SessionManager) {
 	GymTheme {
-		CodeClientContent(navBottom = navController)
+		CodeClientContent(navBottom = navController, sessionManager= sessionManager)
 	}
 }
 
@@ -88,20 +89,18 @@ fun CodeClientScreen(navController: NavController) {
 fun CodeClientContent(
 	navBottom: NavController,
 	viewModel: GymViewModel = hiltViewModel(),
+	sessionManager: SessionManager
 ) {
 	val colorScheme = MaterialTheme.colorScheme
 	val clipboardManager = LocalClipboardManager.current
 	val context = LocalContext.current
-	
 	var showDialog by remember { mutableStateOf(false) }
-	
 	val generatedCode = viewModel.generatedCode
 	val errorMessage = viewModel.errorMessage
 	val snackbarHostState = remember { SnackbarHostState() }
-	
 	val gymCode = viewModel.gymCode
 	val userUid = FirebaseAuth.getInstance().currentUser?.uid
-	
+	val currentRole = sessionManager.getRol()?.lowercase()
 	val availableCodes by viewModel.availableCodes.collectAsState()
 	val codesError by viewModel.codesError.collectAsState()
 	val currentUserRole = viewModel.currentUserRole
@@ -291,7 +290,7 @@ fun CodeClientContent(
 			onDismissRequest = { showDialog = false },
 			title = { Text("Confirmar generación") },
 			text = {
-				if (currentUserRole == "dueño") {
+				if (currentRole == "dueño") {
 					Column {
 						Text("Selecciona el rol para el nuevo código:")
 						Spacer(modifier = Modifier.height(8.dp))

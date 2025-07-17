@@ -47,16 +47,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.theme.GymTheme
 
+
+
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(navController: NavController, sessionManager: SessionManager) {
 	val viewModel: AuthViewModel = hiltViewModel()
+	
 	GymTheme {
 		Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-			LoginContent(navController = navController, viewModel = viewModel)
+			LoginContent(navController = navController, viewModel = viewModel, sessionManager = sessionManager)
 		}
 	}
 }
@@ -65,6 +69,7 @@ fun LoginScreen(navController: NavController) {
 fun LoginContent(
 	navController: NavController,
 	viewModel: AuthViewModel,
+	sessionManager: SessionManager
 ) {
 	val context = LocalContext.current
 	val colorScheme = MaterialTheme.colorScheme
@@ -202,6 +207,7 @@ fun LoginContent(
 						password = viewModel.password.trim(),
 						navController = navController // ✅ navegación centralizada
 					)
+					
 				} else {
 					Toast.makeText(
 						context,

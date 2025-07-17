@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
+import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.model.Promotion
 import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
 import com.jesus.gymcontrol.domain.viewmodels.PromotionViewModel
@@ -72,6 +73,7 @@ import java.util.Locale
 fun PromotionScreen(
 	viewModel: PromotionViewModel = hiltViewModel(),
 	gviewModel: GymViewModel = hiltViewModel(),
+	sessionManager: SessionManager,
 	navController: NavController,
 ) {
 	val context = LocalContext.current
@@ -94,7 +96,7 @@ fun PromotionScreen(
 	var showDiscountError by remember { mutableStateOf(false) }
 	var showEditDiscountError by remember { mutableStateOf(false) }
 	var filter by remember { mutableStateOf(PromotionFilter.ACTIVE) }
-	val currentUserRole = gviewModel.currentUserRole
+	val currentRole = sessionManager.getRol()?.lowercase()
 	
 	
 	LaunchedEffect(Unit) {
@@ -159,7 +161,7 @@ fun PromotionScreen(
 			)
 		},
 		floatingActionButton = {
-			if (currentUserRole == "dueño") {
+			if (currentRole == "dueño") {
 				FloatingActionButton(
 					onClick = { showCreateDialog = true },
 					containerColor = MaterialTheme.colorScheme.primary
@@ -305,13 +307,13 @@ fun PromotionScreen(
 										)
 										
 										Row {
-											if (currentUserRole == "dueño") {
+											if (currentRole == "dueño") {
 												IconButton(onClick = { promotionToEdit = promo }) {
 													Icon(Icons.Default.Edit, contentDescription = "Editar promoción")
 												}
 											}
 											
-											if (currentUserRole == "dueño") {
+											if (currentRole == "dueño") {
 												IconButton(onClick = { promotionToggle = promo }) {
 													Icon(
 														imageVector = if (promo.activo) Icons.Default.VisibilityOff else Icons.Default.Visibility,
@@ -326,7 +328,7 @@ fun PromotionScreen(
 													contentDescription = "Detalles"
 												)
 											}
-											if (currentUserRole == "dueño") {
+											if (currentRole == "dueño") {
 												IconButton(onClick = { promotionToDelete = promo }) {
 													Icon(
 														painterResource(id = R.drawable.ic_delete),

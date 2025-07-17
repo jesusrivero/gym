@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
+import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.model.Gym
 import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
@@ -60,9 +61,9 @@ fun ActivateCodeScreen(
 	navController: NavController,
 	authViewModel: AuthViewModel = hiltViewModel(),
 	gymViewModel: GymViewModel = hiltViewModel(),
+	sessionManager: SessionManager,
 	userViewModel: UserViewModel = hiltViewModel(),
 ) {
-	
 	
 	Scaffold(
 //			topBar = {

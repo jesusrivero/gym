@@ -101,6 +101,7 @@ class AuthViewModel @Inject constructor(
 		}
 	}
 	
+	
 	fun loginUser(
 		email: String,
 		password: String,
@@ -149,13 +150,17 @@ class AuthViewModel @Inject constructor(
 						sessionManager.saveLoginState(true)
 						
 						// ✅ Navegar según rol
-						navigateBasedOnRole(navController)
+						navigateBasedOnRole(navController, rol)
 						
 					} catch (e: Exception) {
 						errorMessage = "Error al obtener datos del usuario"
 						Log.e("LOGIN", "Firestore Exception", e)
 					}
+				} else {
+					errorMessage = "Error: UID no encontrado"
 				}
+			}.onFailure {
+				errorMessage = it.localizedMessage ?: "Error al iniciar sesión"
 			}
 		}
 	}
@@ -254,35 +259,36 @@ class AuthViewModel @Inject constructor(
 	
 	
 	
-	fun navigateBasedOnRole(navController: NavController) {
-		val rol = sessionManager.getRol()
+	fun navigateBasedOnRole(navController: NavController, rolParam: String? = null) {
+		val rol = rolParam ?: sessionManager.getRol()?.lowercase()
 		
-		when (rol?.lowercase()) {
+		when (rol) {
 			"cliente" -> {
 				navController.navigate(AppRoutes.ClientMainScreen) {
-					popUpTo(AppRoutes.StartScreen) { inclusive = true }
+					popUpTo(0) { inclusive = true }
 				}
 			}
 			
 			"administrador" -> {
-				navController.navigate(AppRoutes.MainScreen) {
-					popUpTo(AppRoutes.StartScreen) { inclusive = true }
+				navController.navigate(AppRoutes.MainScreen) { // mejor nombre
+					popUpTo(0) { inclusive = true }
 				}
 			}
 			
 			"dueño" -> {
-				navController.navigate(AppRoutes.MainScreen) {
-					popUpTo(AppRoutes.StartScreen) { inclusive = true }
+				navController.navigate(AppRoutes.MainScreen) { // mejor nombre
+					popUpTo(0) { inclusive = true }
 				}
 			}
 			
 			else -> {
-				navController.navigate(AppRoutes.StartScreen) {
-					popUpTo(AppRoutes.StartScreen) { inclusive = true }
+				navController.navigate(AppRoutes.SelectedRolScreen) {
+					popUpTo(0) { inclusive = true }
 				}
 			}
 		}
 	}
+	
 	
 	fun checkidcardExists(idcard: String, onResult: (exists: Boolean) -> Unit) {
 		viewModelScope.launch {

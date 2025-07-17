@@ -53,13 +53,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
+import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.model.UserRegistrationData
 import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
 import com.jesus.gymcontrol.domain.viewmodels.RegisterUserFromAdminViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.ui.commons.countryCodes
-import kotlinx.coroutines.Delay
 import kotlinx.coroutines.delay
 
 
@@ -68,6 +68,7 @@ import kotlinx.coroutines.delay
 fun RegPersonScreen(
 	navController: NavController,
 	viewModel: RegisterUserFromAdminViewModel = hiltViewModel(),
+	sessionManager: SessionManager
 ) {
 	val colorScheme = MaterialTheme.colorScheme
 	
@@ -182,6 +183,7 @@ fun RegPersonScreen(
 			modifier = Modifier.padding(paddingValues),
 			viewModel = viewModel,
 			isLoading = isRegistering,
+			sessionManager = sessionManager,
 			clearFormTrigger = clearFormTrigger,
 			onFormCleared = {
 				clearFormTrigger = false
@@ -201,6 +203,7 @@ fun RegPersonContent(
 	gviewModel: GymViewModel = hiltViewModel(),
 	clearFormTrigger: Boolean,
 	onFormCleared: () -> Unit,
+	sessionManager: SessionManager,
 	isLoading: Boolean,
 ) {
 	val colorScheme = MaterialTheme.colorScheme
@@ -239,6 +242,7 @@ fun RegPersonContent(
 		if (currentUserRole == "dueño") listOf("cliente", "administrador") else listOf("cliente")
 	var isRolDropdownExpanded by rememberSaveable { mutableStateOf(false) }
 	val userUid = FirebaseAuth.getInstance().currentUser?.uid
+	val currentRole = sessionManager.getRol()?.lowercase()
 	
 	LaunchedEffect(userUid) {
 		userUid?.let {
@@ -498,7 +502,7 @@ fun RegPersonContent(
 				}
 				
 				// Donde defines el campo de rol actual, quítalo y reemplaza con esto:
-				if (currentUserRole == "dueño") {
+				if (currentRole == "dueño") {
 					ExposedDropdownMenuBox(
 						expanded = isRolDropdownExpanded,
 						onExpandedChange = { isRolDropdownExpanded = it },

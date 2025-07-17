@@ -30,13 +30,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 
@@ -47,10 +47,12 @@ import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 fun SelectedRolScreen(
 	navController: NavController,
 	viewModel: AuthViewModel = hiltViewModel(),
+	sessionManager: SessionManager
 ) {
 	SelectedRolScreenContent(
 		navController = navController,
 		viewModel = viewModel,
+		sessionManager = sessionManager
 	)
 }
 
@@ -60,6 +62,7 @@ fun SelectedRolScreen(
 fun SelectedRolScreenContent(
 	navController: NavController,
 	viewModel: AuthViewModel,
+	sessionManager: SessionManager
 ) {
 	Scaffold(
 //		topBar = {
@@ -133,6 +136,8 @@ fun SelectedRolScreenContent(
 					description = "Como dueño, tendrás control total sobre la configuración de tu gimnasio: podrás digitalizar tu negocio, gestionar al personal (administradores) y mantener un seguimiento completo de los clientes y sus pagos. Es la opción ideal si eres el propietario y responsable principal.",
 					icon = Icons.Default.Home,
 					onClick = {
+						val uid = sessionManager.getUserUid() ?: return@MenuCardRol
+						sessionManager.setUserSessionData(uid, "Dueño", "")
 						viewModel.rol = "Dueño"
 						navController.navigate(AppRoutes.ActivateCodeScreen)
 					}
@@ -143,6 +148,8 @@ fun SelectedRolScreenContent(
 					description = "Como administrador, puedes encargarte de gestionar las operaciones diarias del gimnasio, apoyar al dueño en las tareas administrativas y garantizar que los servicios funcionen correctamente. Es la mejor opción si te asignaron para ayudar a manejar el negocio.",
 					icon = Icons.Default.ManageAccounts,
 					onClick = {
+						val uid = sessionManager.getUserUid() ?: return@MenuCardRol
+						sessionManager.setUserSessionData(uid, "Administrador", "")
 						viewModel.rol2 = "Administrador"
 						navController.navigate(AppRoutes.SelectedGymAdmin)
 					}
