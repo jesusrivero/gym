@@ -163,10 +163,6 @@ const notificarNuevosClientes = async () => {
   console.log("✅ Revisión de nuevos clientes completada.");
 };
 
-// ============================================
-// 3. Revisión de estados de usuarios
-// ============================================
-
 const revisarEstados = async () => {
   console.log("⏰ Iniciando revisión de estados...");
   try {
@@ -229,10 +225,6 @@ const revisarEstados = async () => {
   }
 };
 
-// ============================================
-// 4. Desactivación de promociones vencidas
-// ============================================
-
 const desactivarPromocionesVencidas = async () => {
   console.log("⏳ Verificando promociones vencidas...");
   const now = Date.now();
@@ -278,25 +270,41 @@ const desactivarPromocionesVencidas = async () => {
 };
 
 // ============================================
-// 5. Ejecución
+// 3. Ejecución dinámica
 // ============================================
 
-const ejecutarTodo = async () => {
-  await revisarEstados();
-  await desactivarPromocionesVencidas();
-  await notificarNuevosClientes();
-};
+const main = async () => {
+  const tarea = process.argv[2];
 
-console.log("\n====================================");
-console.log("🚀 INICIANDO SERVICIO DE GESTIÓN DE ESTADOS Y PROMOCIONES");
-console.log("====================================\n");
+  console.log("\n====================================");
+  console.log(`🚀 INICIANDO SERVICIO: ${tarea || "todas las tareas"}`);
+  console.log("====================================\n");
 
-ejecutarTodo()
-  .then(() => {
+  try {
+    switch (tarea) {
+      case "estados":
+        await revisarEstados();
+        await desactivarPromocionesVencidas();
+        break;
+      case "clientes":
+        await notificarNuevosClientes();
+        break;
+      case "semana":
+        await enviarNotificacionInicioDeSemana();
+        break;
+      default:
+        await revisarEstados();
+        await desactivarPromocionesVencidas();
+        await notificarNuevosClientes();
+        await enviarNotificacionInicioDeSemana();
+    }
+
     console.log("\n✅ Ejecución completada correctamente");
     process.exit(0);
-  })
-  .catch(error => {
+  } catch (error) {
     console.error("❌ Error durante la ejecución:", error);
     process.exit(1);
-  });
+  }
+};
+
+main();

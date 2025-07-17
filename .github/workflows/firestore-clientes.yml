@@ -1,0 +1,27 @@
+name: Notificación de nuevos clientes
+
+on:
+  schedule:
+    - cron: '0 6,18 * * *' # 06:00 y 18:00 UTC diario
+  workflow_dispatch:
+
+jobs:
+  run-clientes:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar repo
+        uses: actions/checkout@v3
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Ejecutar notificación de nuevos clientes
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node index.js clientes

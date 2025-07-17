@@ -1,0 +1,27 @@
+name: Revisión de estados y promociones
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # 03:00 UTC diario
+  workflow_dispatch:
+
+jobs:
+  run-estados:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar repo
+        uses: actions/checkout@v3
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Ejecutar revisión de estados
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node index.js estados
