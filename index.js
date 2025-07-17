@@ -22,11 +22,15 @@ const conReintentos = async (operacion, intentosMaximos = 3, delayInicialMs = 50
 };
 
 let serviceAccount;
-try {
-  serviceAccount = require("./serviceAccountKey.json");
-} catch (err) {
-  console.error("❌ No se encontró el archivo serviceAccountKey.json");
-  process.exit(1);
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+} else {
+  try {
+    serviceAccount = require("./serviceAccountKey.json");
+  } catch (err) {
+    console.error("❌ No se encontró el archivo serviceAccountKey.json ni la variable de entorno FIREBASE_SERVICE_ACCOUNT");
+    process.exit(1);
+  }
 }
 
 admin.initializeApp({
