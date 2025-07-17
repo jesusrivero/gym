@@ -1,0 +1,27 @@
+name: Ejecutar script Firestore
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Ejecuta todos los días a la medianoche UTC
+  workflow_dispatch: # Permite ejecutarlo manualmente
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar repo
+        uses: actions/checkout@v3
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Ejecutar script Node.js
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node index.js
