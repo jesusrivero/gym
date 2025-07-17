@@ -1,12 +1,7 @@
 name: Ejecutar script Firestore
 
 on:
-  push:
-    branches:
-      - gym-master  # 👈 activa el workflow cuando hay push en gym-master
-  schedule:
-    - cron: '0 0 * * *' # Ejecuta todos los días a la medianoche UTC
-  workflow_dispatch: # Permite ejecutarlo manualmente
+  workflow_dispatch: # Solo ejecutable manualmente
 
 jobs:
   run-script:
