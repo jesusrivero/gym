@@ -21,6 +21,7 @@ const conReintentos = async (operacion, intentosMaximos = 3, delayInicialMs = 50
   }
 };
 
+
 let serviceAccount;
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
