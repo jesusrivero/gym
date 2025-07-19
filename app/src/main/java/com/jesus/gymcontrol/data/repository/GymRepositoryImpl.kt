@@ -6,6 +6,7 @@ import com.jesus.gymcontrol.domain.model.CodeInfo
 import com.jesus.gymcontrol.domain.model.Gym
 import com.jesus.gymcontrol.domain.repository.GymRepository
 import kotlinx.coroutines.tasks.await
+import java.util.UUID
 import javax.inject.Inject
 
 
@@ -13,43 +14,54 @@ import javax.inject.Inject
 class GymRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : GymRepository {
-
-    override suspend fun createGymForUser(
-        uid: String,
-        code: String,
-        name: String,
-        direction: String,
-        rif: String,
-        phone: String
-    ): Result<Unit> {
-        return try {
-            val gymData = mapOf(
-                "owner" to uid,
-                "name" to name,
-	              "rif" to rif,
-                "direction" to direction,
-                "phone" to phone,
-                "code" to code,
-                "creationDate" to FieldValue.serverTimestamp()
-            )
-
-
-            val globalGymRef = firestore
-                .collection("gimnasios")
-                .document(code)
-
-            val batch = firestore.batch()
-
-            batch.set(globalGymRef, gymData)
-
-            batch.commit().await()
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun getAllGyms(): Result<List<Gym>> {
+	
+	override suspend fun createGymForUser(
+		uid: String,
+		code: String,
+		name: String,
+		direction: String,
+		rif: String,
+		phone: String
+	): Result<Unit> {
+		return try {
+			val gymId = UUID.randomUUID().toString()
+			
+			val gymData = mapOf(
+				"owner" to uid,
+				"name" to name,
+				"rif" to rif,
+				"state" to "activo",
+				"direction" to direction,
+				"phone" to phone,
+				"code" to code,
+				"gymId" to gymId, // 🔷 nuevo campo
+				"creationDate" to FieldValue.serverTimestamp()
+			)
+			
+			val gymRef = firestore
+				.collection("gimnasios")
+				.document(code)
+			
+			val userRef = firestore
+				.collection("users")
+				.document(uid)
+			
+			val batch = firestore.batch()
+			batch.set(gymRef, gymData)
+			batch.update(userRef, "gymId", gymId) // 🔷 actualiza usuario con gymId
+			
+			batch.commit().await()
+			
+			Result.success(Unit)
+		} catch (e: Exception) {
+			Result.failure(e)
+		}
+	}
+	
+	
+	
+	
+	override suspend fun getAllGyms(): Result<List<Gym>> {
         return try {
             val snapshot = firestore
                 .collection("gimnasios")
@@ -61,8 +73,6 @@ class GymRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Result.failure(e)
         }
-
-
     }
 
 

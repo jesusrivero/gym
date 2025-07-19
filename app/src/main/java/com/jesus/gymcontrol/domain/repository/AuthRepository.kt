@@ -40,5 +40,7 @@ interface AuthRepository {
 	suspend fun changePassword(request: PasswordChangeRequest): Result<Unit>
 	
 	suspend fun checkidcardExists(idcard: String): Boolean
+	
+	
 }
 

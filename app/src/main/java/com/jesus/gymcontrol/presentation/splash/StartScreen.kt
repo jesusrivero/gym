@@ -93,11 +93,11 @@ fun StartScreen(
 								popUpTo(AppRoutes.StartScreen) { inclusive = true }
 							}
 						}
-//						"pendiente" -> {
-//							navController.navigate(AppRoutes.PendingScreen) {
-//								popUpTo(AppRoutes.StartScreen) { inclusive = true }
-//							}
-//						}
+						"pendiente" -> {
+							navController.navigate(AppRoutes.MainScreen) {
+								popUpTo(AppRoutes.StartScreen) { inclusive = true }
+							}
+						}
 						else -> {
 							// estado desconocido o error
 							navController.navigate(AppRoutes.LoginScreen) {

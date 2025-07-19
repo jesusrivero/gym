@@ -28,13 +28,13 @@ class AuthRepositoryImpl(
 			val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
 			val uid = result.user?.uid ?: throw Exception("Error al obtener UID del usuario")
 			
-			
 			val profileUpdates = userProfileChangeRequest {
 				displayName = name
 			}
 			result.user?.updateProfile(profileUpdates)?.await()
 			
 			val userData = mapOf(
+				"uid" to uid, // 🔷 nuevo campo con el UID explícito
 				"name" to name,
 				"lastname" to lastname,
 				"email" to email,

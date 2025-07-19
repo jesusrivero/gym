@@ -63,6 +63,9 @@ class AuthViewModel @Inject constructor(
 	var isUserActive by mutableStateOf<Boolean?>(null)
 		private set
 	
+	
+	
+	
 	fun checkUserStatusOnStart(onResult: (String) -> Unit) {
 		val currentUser = auth.currentUser
 		if (currentUser == null) {
@@ -169,6 +172,7 @@ class AuthViewModel @Inject constructor(
 	fun currentGymCode(): String? {
 		return sessionManager.getGymCode()
 	}
+	
 	
 	
 	
@@ -289,6 +293,23 @@ class AuthViewModel @Inject constructor(
 		}
 	}
 	
+	
+	fun checkGymStatusOnStart(onResult: (String) -> Unit) {
+		val gymId = sessionManager.getGymId()
+		if (gymId.isNullOrBlank()) {
+			onResult("desconocido")
+			return
+		}
+		
+		firestore.collection("gimnasios").document(gymId).get()
+			.addOnSuccessListener { doc ->
+				val state = doc.getString("state") ?: "desconocido"
+				onResult(state)
+			}
+			.addOnFailureListener {
+				onResult("desconocido")
+			}
+	}
 	
 	fun checkidcardExists(idcard: String, onResult: (exists: Boolean) -> Unit) {
 		viewModelScope.launch {

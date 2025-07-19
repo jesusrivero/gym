@@ -1,6 +1,7 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details.manage
 
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,6 +48,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -81,7 +83,7 @@ fun MembershipScreen(
 	val errorMessage = viewModel.errorMessage
 	val membershipActionMessage by viewModel.membershipActionMessage
 	
-	var showCreateDialog by remember { mutableStateOf(false) }
+	var showCreateDialog by rememberSaveable { mutableStateOf(false) }
 	var name by remember { mutableStateOf("") }
 	var price by remember { mutableStateOf("") }
 	var duration by remember { mutableStateOf("") }
@@ -92,9 +94,11 @@ fun MembershipScreen(
 	var membershipToView by remember { mutableStateOf<Membership?>(null) }
 	val isActionSuccess by viewModel.isActionSuccess.collectAsState()
 	var filter by remember { mutableStateOf(PromotionFilter.ACTIVE) }
-	val currentUserRole = gviewModel.currentUserRole
-	val userUid = FirebaseAuth.getInstance().currentUser?.uid
-	val currentRole = sessionManager.getRol()?.lowercase()
+	val currentRole = sessionManager.getRol()?.trim()?.lowercase()
+	
+	LaunchedEffect(currentRole) {
+		Log.d("MembershipScreen", "currentRole = $currentRole")
+	}
 	
 	LaunchedEffect(Unit) {
 		viewModel.loadMembershipsSummary()
@@ -160,9 +164,12 @@ fun MembershipScreen(
 			)
 		},
 		floatingActionButton = {
+			
 			if (currentRole == "dueño") {
 				FloatingActionButton(
-					onClick = { showCreateDialog = true },
+					onClick = {
+						Log.d("MembershipScreen", "FAB clicked")
+						showCreateDialog = true },
 					containerColor = MaterialTheme.colorScheme.primary
 				) {
 					Icon(Icons.Default.Add, contentDescription = "Crear Membresía")
@@ -210,96 +217,95 @@ fun MembershipScreen(
 					}
 				}
 				
-				!isLoading && viewModel.isFirstLoadDone && membershipsSummary.isEmpty() -> {
-					Box(
-						modifier = Modifier
-							.fillMaxSize()
-							.padding(top = 32.dp),
-						contentAlignment = Alignment.Center
-					) {
-						Text(
-							text = "No hay membresías creadas",
-							style = MaterialTheme.typography.bodyMedium,
-							color = MaterialTheme.colorScheme.onSurfaceVariant
-						)
-					}
-				}
-				
 				else -> {
-					
 					val filteredMemberships = when (filter) {
 						PromotionFilter.ACTIVE -> membershipsSummary.filter { it.membership.activo }
 						PromotionFilter.INACTIVE -> membershipsSummary.filter { !it.membership.activo }
 					}
 					
-					LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-						items(filteredMemberships) { membershipWithCount ->
-							
-							val membership = membershipWithCount.membership
-							val userCount = membershipWithCount.userCount
-							
-							Card(
-								modifier = Modifier
-									.fillMaxWidth()
-									.padding(vertical = 2.dp),
-								shape = RoundedCornerShape(16.dp),
-								elevation = CardDefaults.cardElevation(4.dp),
-								colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-							) {
-								Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-									Row(
-										modifier = Modifier.fillMaxWidth(),
-										verticalAlignment = Alignment.CenterVertically,
-										horizontalArrangement = Arrangement.SpaceBetween
-									) {
-										Text(
-											membership.nombre,
-											style = MaterialTheme.typography.titleMedium,
-											color = MaterialTheme.colorScheme.primary,
-											modifier = Modifier.weight(1f)
-										)
-										
-										Row {
-											if (currentRole == "dueño") {
-												IconButton(onClick = { membershipToEdit = membership }) {
-													Icon(Icons.Default.Edit, contentDescription = "Editar")
+					if (!isLoading && viewModel.isFirstLoadDone && membershipsSummary.isEmpty()) {
+						Box(
+							modifier = Modifier
+								.fillMaxSize()
+								.padding(top = 32.dp),
+							contentAlignment = Alignment.Center
+						) {
+							Text(
+								text = "No hay membresías creadas",
+								style = MaterialTheme.typography.bodyMedium,
+								color = MaterialTheme.colorScheme.onSurfaceVariant
+							)
+						}
+					} else {
+						LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+							items(filteredMemberships) { membershipWithCount ->
+								
+								val membership = membershipWithCount.membership
+								val userCount = membershipWithCount.userCount
+								
+								Card(
+									modifier = Modifier
+										.fillMaxWidth()
+										.padding(vertical = 2.dp),
+									shape = RoundedCornerShape(16.dp),
+									elevation = CardDefaults.cardElevation(4.dp),
+									colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+								) {
+									Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+										Row(
+											modifier = Modifier.fillMaxWidth(),
+											verticalAlignment = Alignment.CenterVertically,
+											horizontalArrangement = Arrangement.SpaceBetween
+										) {
+											Text(
+												membership.nombre,
+												style = MaterialTheme.typography.titleMedium,
+												color = MaterialTheme.colorScheme.primary,
+												modifier = Modifier.weight(1f)
+											)
+											
+											Row {
+												if (currentRole == "dueño") {
+													IconButton(onClick = { membershipToEdit = membership }) {
+														Icon(Icons.Default.Edit, contentDescription = "Editar")
+													}
 												}
-											}
-											if (currentRole == "dueño") {
-												IconButton(onClick = { membershipToToggle = membership }) {
+												if (currentRole == "dueño") {
+													IconButton(onClick = { membershipToToggle = membership }) {
+														Icon(
+															imageVector = if (membership.activo) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+															contentDescription = if (membership.activo) "Desactivar" else "Activar",
+															tint = if (membership.activo) Color.Red else MaterialTheme.colorScheme.primary
+														)
+													}
+												}
+												
+												IconButton(onClick = { membershipToView = membership }) {
 													Icon(
-														imageVector = if (membership.activo) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-														contentDescription = if (membership.activo) "Desactivar" else "Activar",
-														tint = if (membership.activo) Color.Red else MaterialTheme.colorScheme.primary
+														painterResource(id = R.drawable.ic_details),
+														contentDescription = "Detalles"
 													)
 												}
-											}
-											
-											IconButton(onClick = { membershipToView = membership }) {
-												Icon(
-													painterResource(id = R.drawable.ic_details),
-													contentDescription = "Detalles"
-												)
-											}
-											
-											if (currentRole == "dueño") {
-												IconButton(onClick = { membershipToDelete = membership }) {
-													Icon(
-														painterResource(id = R.drawable.ic_delete),
-														contentDescription = "Eliminar"
-													)
+												
+												if (currentRole == "dueño") {
+													IconButton(onClick = { membershipToDelete = membership }) {
+														Icon(
+															painterResource(id = R.drawable.ic_delete),
+															contentDescription = "Eliminar"
+														)
+													}
 												}
 											}
 										}
+										
+										Spacer(Modifier.height(2.dp))
+										
+										Text(
+											"Usuarios registrados: $userCount",
+											style = MaterialTheme.typography.labelSmall,
+											color = MaterialTheme.colorScheme.onSurfaceVariant
+										)
 									}
-									
-									Spacer(Modifier.height(2.dp))
-									
-									Text(
-										"Usuarios registrados: $userCount",
-										style = MaterialTheme.typography.labelSmall,
-										color = MaterialTheme.colorScheme.onSurfaceVariant
-									)
 								}
 							}
 						}
@@ -415,6 +421,7 @@ fun MembershipScreen(
 							containerColor = MaterialTheme.colorScheme.surface
 						)
 					}
+					
 					
 					// Diálogo para editar membresía
 					membershipToEdit?.let { membership ->
