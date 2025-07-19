@@ -30,8 +30,8 @@ class MainActivity : ComponentActivity() {
 		super.onCreate(savedInstanceState)
 		
 		FirebaseApp.initializeApp(this)
-		enableEdgeToEdge()
 		
+		enableEdgeToEdge()
 		setContent {
 			val viewModel: AuthViewModel = hiltViewModel()
 			var userState by remember { mutableStateOf<String?>(null) }

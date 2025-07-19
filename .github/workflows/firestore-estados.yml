@@ -2,7 +2,8 @@ name: Revisión de estados y promociones
 
 on:
   schedule:
-    - cron: '0 3 * * *' # 03:00 UTC diario
+#    - cron: '0 3 * * *' # 03:00 UTC diario
+    - cron: '0 10 * * *' # 10:00 UTC diario
   workflow_dispatch:
 
 jobs:
