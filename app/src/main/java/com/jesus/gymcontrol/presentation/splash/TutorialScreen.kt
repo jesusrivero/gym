@@ -89,16 +89,6 @@ fun TutorialScreen(
 						horizontalAlignment = Alignment.CenterHorizontally,
 						verticalArrangement = Arrangement.Top
 					) {
-						// 🔷 Nombre de la app encima de la imagen
-						Text(
-							text = "GymControl",
-							style = MaterialTheme.typography.headlineSmall.copy(
-								fontWeight = FontWeight.W500,
-								letterSpacing = 1.2.sp,
-								color = MaterialTheme.colorScheme.primary
-							),
-							modifier = Modifier.padding(bottom = 16.dp)
-						)
 						
 						Image(
 							painter = painterResource(id = item.imageRes),

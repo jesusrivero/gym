@@ -230,7 +230,7 @@ fun PreferencesContent(
 						onClick = {
 							val intent = Intent(Intent.ACTION_SEND).apply {
 								type = "message/rfc822"
-								putExtra(Intent.EXTRA_EMAIL, arrayOf("soporte@tugimnasio.com"))
+								putExtra(Intent.EXTRA_EMAIL, arrayOf("soportegymapp@gmail.com"))
 								putExtra(Intent.EXTRA_SUBJECT, "Reporte de error")
 								putExtra(Intent.EXTRA_TEXT, "Hola, encontré un error en la app:")
 								setPackage("com.google.android.gm")

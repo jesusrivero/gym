@@ -87,17 +87,18 @@ fun MainContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-
-            Icon(
-                painter = painterResource(id = R.drawable.ic_payments),
-                contentDescription = "Logo de la app",
-                modifier = Modifier
-                    .size(100.dp)
-                    .padding(top = 32.dp, bottom = 16.dp)
-            )
+	        
+	        Icon(
+		        painter = painterResource(id = R.drawable.ic_background),
+		        contentDescription = "Logo de la app",
+		        modifier = Modifier
+			        .size(100.dp)
+			        .padding(top = 32.dp, bottom = 16.dp),
+		        tint = Color.Unspecified,
+	        )
 
             Text(
-                text = "NombreApp",
+                text = "GymControl",
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color.DarkGray,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -151,29 +152,15 @@ fun MainContent(
                         modifier = Modifier.size(20.dp),
                     )
                     Text(
-                        text = "  contacto@ejemplo.com",
+                        text = "  soportegymapp@gmail.com",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.Gray,
                         modifier = Modifier.padding(start = 8.dp)
                     )
                 }
 
-                Row(
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Phone,
-                        contentDescription = "Teléfono",
-                        modifier = Modifier.size(20.dp),
-                    )
-                    Text(
-                        text = "  +58 000 0000",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                }
+                
+                
             }
 
         }

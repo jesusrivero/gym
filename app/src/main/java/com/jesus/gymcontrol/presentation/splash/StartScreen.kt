@@ -14,13 +14,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,22 +28,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.data.sharedPreferences.PreferencesManager
-import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
+import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import kotlinx.coroutines.delay
-
 
 
 @Composable
 fun StartScreen(
 	navController: NavController,
-	viewModel: AuthViewModel = hiltViewModel()
+	viewModel: AuthViewModel = hiltViewModel(),
 ) {
 	val context = LocalContext.current
 	val prefs = remember { PreferencesManager(context) }
@@ -88,16 +83,19 @@ fun StartScreen(
 						"activo" -> {
 							viewModel.navigateBasedOnRole(navController)
 						}
+						
 						"inactivo" -> {
 							navController.navigate(AppRoutes.InactiveScreen) {
 								popUpTo(AppRoutes.StartScreen) { inclusive = true }
 							}
 						}
+						
 						"pendiente" -> {
 							navController.navigate(AppRoutes.MainScreen) {
 								popUpTo(AppRoutes.StartScreen) { inclusive = true }
 							}
 						}
+						
 						else -> {
 							// estado desconocido o error
 							navController.navigate(AppRoutes.LoginScreen) {
@@ -148,15 +146,6 @@ fun StartScreen(
 					)
 				}
 				
-				Spacer(modifier = Modifier.height(16.dp))
-				
-				Text(
-					text = "Cargando...",
-					style = MaterialTheme.typography.bodyLarge.copy(
-						fontWeight = FontWeight.Medium,
-						color = MaterialTheme.colorScheme.onSurface
-					)
-				)
 			}
 		}
 	}
