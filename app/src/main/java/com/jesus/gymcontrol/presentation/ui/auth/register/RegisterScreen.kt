@@ -6,6 +6,7 @@ import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.with
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -57,17 +58,19 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
-import com.jesus.gymcontrol.presentation.theme.GymTheme
+
 
 @Composable
 fun RegisterScreen(navController: NavController) {
-	GymTheme {
-		Box(
-			modifier = Modifier.fillMaxSize(),
-			contentAlignment = Alignment.Center
-		) {
-			RegisterContent(navController)
-		}
+	val colorScheme = MaterialTheme.colorScheme
+	
+	Box(
+		modifier = Modifier
+			.fillMaxSize()
+			.background(colorScheme.background),
+		contentAlignment = Alignment.Center
+	) {
+		RegisterContent(navController)
 	}
 }
 
@@ -85,7 +88,8 @@ fun RegisterContent(navController: NavController) {
 	var passwordVisible by remember { mutableStateOf(false) }
 	var termsAccepted by remember { mutableStateOf(false) }
 	var step by remember { mutableStateOf(0) }
-	val isValidEmail = emailOrUser.trim().matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
+	val isValidEmail =
+		emailOrUser.trim().matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
 	val isValidCedula = idcard.all { it.isDigit() } && idcard.length in 6..8
 	val isFormValid = name.isNotBlank() && lastname.isNotBlank() && isValidCedula
 	val isFullFormValid = isFormValid && isValidEmail && password.length >= 6 && termsAccepted
@@ -132,9 +136,7 @@ fun RegisterContent(navController: NavController) {
 						onValueChange = {
 							if (it.matches(onlyLettersRegex)) name = it
 						},
-						modifier = Modifier
-							.fillMaxWidth()
-							.height(56.dp),
+						modifier = Modifier.fillMaxWidth().height(56.dp),
 						placeholder = { Text("Nombre") },
 						leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
 						keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
@@ -148,32 +150,32 @@ fun RegisterContent(navController: NavController) {
 						onValueChange = {
 							if (it.matches(onlyLettersRegex)) lastname = it
 						},
-						modifier = Modifier
-							.fillMaxWidth()
-							.height(56.dp),
+						modifier = Modifier.fillMaxWidth().height(56.dp),
 						placeholder = { Text("Apellido") },
 						leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
 						keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
 						singleLine = true
 					)
+					
 					Spacer(modifier = Modifier.height(12.dp))
+					
 					OutlinedTextField(
 						value = idcard,
 						onValueChange = { idcard = it },
-						modifier = Modifier
-							.fillMaxWidth()
-							.height(56.dp),
+						modifier = Modifier.fillMaxWidth().height(56.dp),
 						placeholder = { Text("Cédula") },
 						leadingIcon = { Icon(Icons.Default.CreditCard, contentDescription = null) },
 						isError = idcard.isNotBlank() && !isValidCedula,
 						singleLine = true,
 						keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
 					)
+					
 					if (idcard.isNotBlank() && !isValidCedula) {
-						Text("Cédula inválida", color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+						Text("Cédula inválida", color = colorScheme.error, fontSize = 12.sp)
 					} else if (viewModel.errorMessage?.contains("idcard") == true) {
-						Text(viewModel.errorMessage!!, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+						Text(viewModel.errorMessage!!, color = colorScheme.error, fontSize = 12.sp)
 					}
+					
 					Spacer(modifier = Modifier.height(24.dp))
 					Button(
 						onClick = {
@@ -187,47 +189,39 @@ fun RegisterContent(navController: NavController) {
 							}
 						},
 						enabled = isFormValid,
-						modifier = Modifier
-							.fillMaxWidth()
-							.height(56.dp),
+						modifier = Modifier.fillMaxWidth().height(56.dp),
 						shape = RoundedCornerShape(28.dp)
 					) {
 						Text("Siguiente")
 					}
-					
 				}
 			} else {
 				Column {
 					OutlinedTextField(
 						value = emailOrUser,
 						onValueChange = { emailOrUser = it },
-						modifier = Modifier
-							.fillMaxWidth()
-							.height(56.dp),
+						modifier = Modifier.fillMaxWidth().height(56.dp),
 						placeholder = { Text("Correo") },
 						leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
 						isError = emailOrUser.isNotBlank() && !isValidEmail,
 						singleLine = true
 					)
+					
 					if (emailOrUser.isNotBlank() && !isValidEmail) {
-						Text(
-							"Debe ser un correo electronico valido",
-							color = MaterialTheme.colorScheme.error,
-							fontSize = 12.sp
-						)
+						Text("Debe ser un correo electrónico válido", color = colorScheme.error, fontSize = 12.sp)
 					}
+					
 					Spacer(modifier = Modifier.height(12.dp))
 					
 					OutlinedTextField(
 						value = password,
 						onValueChange = { password = it },
-						modifier = Modifier
-							.fillMaxWidth()
-							.height(56.dp),
+						modifier = Modifier.fillMaxWidth().height(56.dp),
 						placeholder = { Text("Contraseña") },
 						leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
 						trailingIcon = {
-							val icon = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
+							val icon =
+								if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
 							Icon(
 								imageVector = icon,
 								contentDescription = null,
@@ -235,33 +229,28 @@ fun RegisterContent(navController: NavController) {
 							)
 						},
 						visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-						singleLine = true,
-						isError = password.isNotBlank() && !isPasswordValid
+						isError = password.isNotBlank() && !isPasswordValid,
+						singleLine = true
 					)
 					
 					if (password.isNotBlank() && !isPasswordValid) {
-						Text(
-							text = "La contraseña debe tener al menos 6 caracteres",
-							color = MaterialTheme.colorScheme.error,
-							fontSize=12.sp
-						)
+						Text("La contraseña debe tener al menos 6 caracteres", color = colorScheme.error, fontSize = 12.sp)
 					}
+					
 					Spacer(modifier = Modifier.height(12.dp))
 					Row(verticalAlignment = Alignment.CenterVertically) {
 						Checkbox(checked = termsAccepted, onCheckedChange = { termsAccepted = it })
-						Text("Acepto las políticas de privacidad", fontSize = 14.sp)
+						Text("Acepto las políticas de privacidad", fontSize = 14.sp, color = colorScheme.onBackground)
 					}
 					
 					Spacer(modifier = Modifier.height(24.dp))
 					
 					Button(
 						onClick = {
-							viewModel.registerUser(emailOrUser, password, name , lastname, idcard)
+							viewModel.registerUser(emailOrUser, password, name, lastname, idcard)
 						},
 						enabled = isFullFormValid && !viewModel.isLoading,
-						modifier = Modifier
-							.fillMaxWidth()
-							.height(56.dp),
+						modifier = Modifier.fillMaxWidth().height(56.dp),
 						shape = RoundedCornerShape(28.dp)
 					) {
 						if (viewModel.isLoading) {
@@ -272,16 +261,14 @@ fun RegisterContent(navController: NavController) {
 						} else {
 							Icon(Icons.Default.PersonAdd, contentDescription = null, tint = colorScheme.onPrimary)
 							Spacer(modifier = Modifier.width(8.dp))
-							Text("Registrar", color = colorScheme.onPrimary)
+							Text("Registrar")
 						}
 					}
 					
 					Spacer(modifier = Modifier.height(12.dp))
 					Button(
 						onClick = { step = 0 },
-						modifier = Modifier
-							.fillMaxWidth()
-							.height(56.dp),
+						modifier = Modifier.fillMaxWidth().height(56.dp),
 						shape = RoundedCornerShape(28.dp),
 						colors = ButtonDefaults.buttonColors(
 							containerColor = colorScheme.surfaceVariant,
@@ -298,9 +285,8 @@ fun RegisterContent(navController: NavController) {
 		
 		Spacer(modifier = Modifier.height(24.dp))
 		
-		
 		Row(verticalAlignment = Alignment.CenterVertically) {
-			Text("¿Ya tienes una cuenta?", fontSize = 14.sp)
+			Text("¿Ya tienes una cuenta?", fontSize = 14.sp, color = colorScheme.onBackground)
 			Text(
 				" Inicia sesión",
 				color = colorScheme.primary,
@@ -312,10 +298,11 @@ fun RegisterContent(navController: NavController) {
 		
 		if (viewModel.errorMessage != null) {
 			Spacer(modifier = Modifier.height(16.dp))
-			Text(viewModel.errorMessage!!, color = MaterialTheme.colorScheme.error, fontSize = 14.sp)
+			Text(viewModel.errorMessage!!, color = colorScheme.error, fontSize = 14.sp)
 		}
 		
 		Spacer(modifier = Modifier.height(24.dp))
 	}
 }
+
 

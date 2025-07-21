@@ -75,12 +75,14 @@ class GymViewModel @Inject constructor(
         private set
 
     var setSelectedRoleForCode by mutableStateOf("cliente")
+	    
         private set
-	
+	var currentGym by mutableStateOf<Gym?>(null)
+		private set
 	
 	private val _availableCodes = MutableStateFlow<List<CodeInfo>>(emptyList())
 	val availableCodes: StateFlow<List<CodeInfo>> = _availableCodes
-
+	
 
 	
 	private val _codesError = MutableStateFlow<String?>(null)
@@ -239,8 +241,30 @@ class GymViewModel @Inject constructor(
             }
         }
     }
-
-    fun validateClientCode(code: String, gymCode: String) {
+	
+	fun loadCurrentGymData(uid: String) {
+		viewModelScope.launch {
+			isLoading = true
+			errorMessage = null
+			
+			val result = getGymByOwnerUseCase(uid)
+			result.onSuccess { gym ->
+				currentGym = gym
+				name = gym.name
+				rif = gym.rif
+				direction = gym.direction
+				phone = gym.phone
+				gymCode = gym.code
+			}.onFailure {
+				errorMessage = it.message ?: "No se pudo cargar el gimnasio"
+			}
+			
+			isLoading = false
+		}
+	}
+	
+	
+	fun validateClientCode(code: String, gymCode: String) {
         viewModelScope.launch {
             isCodeValid = null
             codeValidationError = null

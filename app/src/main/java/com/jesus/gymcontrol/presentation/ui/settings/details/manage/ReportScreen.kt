@@ -64,16 +64,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.domain.helpers.PdfReportGenerator
 import com.jesus.gymcontrol.domain.model.reportModel.ReporteCliente
 import com.jesus.gymcontrol.domain.model.reportModel.ReportePago
+import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
 import com.jesus.gymcontrol.domain.viewmodels.report.ReportesViewModel
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,32 +82,34 @@ import java.util.Locale
 fun ReportScreen(
 	navController: NavController,
 	viewModel: ReportesViewModel = hiltViewModel(),
+	gymViewModel: GymViewModel = hiltViewModel(), // <- para acceder al gimnasio
 ) {
 	val snackbarHostState = remember { SnackbarHostState() }
-	
 	var selectedReportType by rememberSaveable { mutableStateOf("Todos") }
 	var selectedSubFilter by rememberSaveable { mutableStateOf("Todos") }
-	
 	val reportTypes = listOf("Todos", "Clientes", "Pagos", "Membresías", "Promociones")
 	val clientesFilters = listOf("Todos", "Activos", "Inactivos", "Pendientes")
 	val promotionFilter = listOf("Todos", "Activos", "Inactivos")
 	val membershipFilter = listOf("Todos", "Activos", "Inactivos")
 	val pagosFilters = listOf("Todos", "Dólares", "Bolívares", "Mixtos", "Con promociones")
-	
 	val pagos by remember { derivedStateOf { viewModel.pagosReport } }
 	val clientes by remember { derivedStateOf { viewModel.clientesReport } }
 	val membresias by remember { derivedStateOf { viewModel.membresiasReport } }
 	val promociones by remember { derivedStateOf { viewModel.promocionesReport } }
-	
 	val isLoading by remember { derivedStateOf { viewModel.isLoading } }
 	val errorMessage by remember { derivedStateOf { viewModel.errorMessage } }
-	
 	var startDate by rememberSaveable { mutableStateOf<LocalDate?>(null) }
 	var endDate by rememberSaveable { mutableStateOf<LocalDate?>(null) }
-	
 	val scrollState = rememberScrollState()
 	val context = LocalContext.current
 	
+	// ✅ Cargar datos del gimnasio actual
+	LaunchedEffect(Unit) {
+		val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+		gymViewModel.loadCurrentGymData(uid)
+	}
+	
+	// ✅ Cargar datos según filtros
 	LaunchedEffect(selectedReportType, selectedSubFilter, startDate, endDate) {
 		when (selectedReportType) {
 			"Pagos" -> viewModel.cargarReportePagos(
@@ -126,7 +129,6 @@ fun ReportScreen(
 				desde = startDate,
 				hasta = endDate
 			)
-			
 			
 			"Promociones" -> viewModel.cargarReportePromociones(
 				filtro = selectedSubFilter,
@@ -171,7 +173,7 @@ fun ReportScreen(
 										it.tipoPago,
 										it.referencia ?: "-",
 										buildString {
-											append(formatDollars(it.monto)) // precio de la membresía
+											append(formatDollars(it.monto))
 											if (it.tipoPago.lowercase() == "mixto") {
 												append(" (")
 												append(formatDollars(it.montoDolar))
@@ -229,23 +231,17 @@ fun ReportScreen(
 						
 						if (headers.isEmpty() || rows.isEmpty()) return@FloatingActionButton
 						
-						val file = if (selectedReportType == "Pagos") {
-							PdfReportGenerator.generateReportPdf(
-								context = context,
-								reportTitle = reportTitle,
-								headers = headers,
-								rows = rows,
-								totalDolares = viewModel.totalDolares,
-								totalBolivares = viewModel.totalBolivares
-							)
-						} else {
-							PdfReportGenerator.generateReportPdf(
-								context = context,
-								reportTitle = reportTitle,
-								headers = headers,
-								rows = rows
-							)
-						}
+						// ✅ Generar PDF con datos del gimnasio
+						val file = PdfReportGenerator.generateReportPdf(
+							context = context,
+							reportTitle = reportTitle,
+							headers = headers,
+							rows = rows,
+							totalDolares = if (selectedReportType == "Pagos") viewModel.totalDolares else null,
+							totalBolivares = if (selectedReportType == "Pagos") viewModel.totalBolivares else null,
+							gymName = gymViewModel.currentGym?.name,
+							gymRif = gymViewModel.currentGym?.rif
+						)
 						
 						file?.let {
 							val uri = PdfReportGenerator.getUriFromFile(context, it)
@@ -395,7 +391,7 @@ fun SimpleReportItem(
 	Card(
 		modifier = Modifier
 			.fillMaxWidth()
-			.padding(vertical = 4.dp), // nuevo padding vertical externo
+			.padding(vertical = 2.dp), // nuevo padding vertical externo
 		shape = RoundedCornerShape(16.dp),
 		elevation = CardDefaults.cardElevation(2.dp),
 		colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
@@ -403,7 +399,7 @@ fun SimpleReportItem(
 		Row(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(horizontal = 16.dp, vertical = 12.dp),
+				.padding(horizontal = 10.dp, vertical = 10.dp),
 			verticalAlignment = Alignment.CenterVertically,
 			horizontalArrangement = Arrangement.SpaceBetween
 		) {

@@ -56,9 +56,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.domain.helpers.generateInvoicePdf
 import com.jesus.gymcontrol.domain.model.Payment
+import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
 import com.jesus.gymcontrol.domain.viewmodels.PaymentsViewModel
 import com.jesus.gymcontrol.presentation.ui.commons.PaymentFilters
 import java.io.File
@@ -73,6 +75,8 @@ import java.util.Locale
 fun ListPaymentsScreen(
 	navBottom: NavController,
 	viewModel: PaymentsViewModel = hiltViewModel(),
+	gymViewModel: GymViewModel = hiltViewModel(), // <- para acceder al gimnasio
+	
 	navPagToScreen: (String, String) -> Unit,
 ) {
 	val payments = viewModel.payments
@@ -84,17 +88,29 @@ fun ListPaymentsScreen(
 	val paymentTypeOptions = listOf("Todos", "Dólares", "Bolívares", "Mixto", "Promociones")
 	val configuration = LocalConfiguration.current
 	val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
 	
 	LaunchedEffect(Unit) {
 		viewModel.loadPayments()
 	}
 	
-	if (showDialog && selectedPayment != null) {
-		PaymentDetailDialog(payment = selectedPayment!!, onDismiss = {
-			showDialog = false
-			selectedPayment = null
-		})
+	LaunchedEffect(Unit) {
+		val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+		gymViewModel.loadCurrentGymData(uid)
 	}
+	
+	
+	if (showDialog && selectedPayment != null) {
+		PaymentDetailDialog(
+			payment = selectedPayment!!,
+			onDismiss = {
+				showDialog = false
+				selectedPayment = null
+			},
+			viewModel = gymViewModel
+		)
+	}
+
 	
 	Scaffold(
 		topBar = {
@@ -147,8 +163,6 @@ fun ListPaymentsScreen(
 				modifier = Modifier
 					.fillMaxSize()
 					.padding(innerPadding)
-//					.padding(8.dp),,
-//				,verticalArrangement = Arrangement.spacedBy(12.dp)
 			) {
 				item {
 					PaymentFilters(
@@ -270,7 +284,7 @@ fun PaymentCard(payment: Payment, onViewDetails: () -> Unit) {
 	Card(
 		modifier = Modifier
 			.fillMaxWidth()
-			.padding(horizontal = 6.dp, vertical = 4.dp), // igual que PersonCard
+			.padding(horizontal = 6.dp, vertical = 2.dp), // igual que PersonCard
 		shape = RoundedCornerShape(12.dp),
 		elevation = CardDefaults.cardElevation(1.dp),
 		colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
@@ -278,7 +292,7 @@ fun PaymentCard(payment: Payment, onViewDetails: () -> Unit) {
 		Row(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(horizontal = 16.dp, vertical = 12.dp), // igual que PersonCard
+				.padding(horizontal = 10.dp, vertical = 10.dp), // igual que PersonCard
 			verticalAlignment = Alignment.CenterVertically,
 			horizontalArrangement = Arrangement.SpaceBetween
 		) {
@@ -347,10 +361,12 @@ fun formatAmount(value: Double): String {
 	return formatter.format(value)
 }
 
+
 @Composable
 fun PaymentDetailDialog(
 	payment: Payment,
 	onDismiss: () -> Unit,
+	viewModel: GymViewModel
 ) {
 	val context = LocalContext.current
 	
@@ -366,10 +382,20 @@ fun PaymentDetailDialog(
 		},
 		text = {
 			Column(modifier = Modifier.fillMaxWidth()) {
-				DetailRow("Nombre:", "${payment.lastname}".trim(),)
+				// ✅ Datos del gimnasio
+//				viewModel.name?.let {
+//					DetailRow("Gimnasio:", it)
+//					Spacer(modifier = Modifier.height(8.dp))
+//				}
+//				viewModel.rif?.let {
+//					DetailRow("RIF:", it)
+//					Spacer(modifier = Modifier.height(8.dp))
+//				}
+				
+				DetailRow("Nombre:", payment.name.trim())
 				Spacer(modifier = Modifier.height(8.dp))
 				
-				DetailRow("Apellido:", "${payment.lastname}".trim(),)
+				DetailRow("Apellido:", payment.lastname.trim())
 				Spacer(modifier = Modifier.height(8.dp))
 				
 				DetailRow("Membresía:", payment.membershipName)
@@ -382,10 +408,10 @@ fun PaymentDetailDialog(
 				
 				when (payment.paymentType) {
 					"Mixto" -> {
-						payment.amountDollar.takeIf { it != null && it > 0 }?.let {
+						payment.amountDollar.takeIf { it > 0 }?.let {
 							DetailRow("Pagado en dólares:", "$${formatAmount(it)}")
 						}
-						payment.amountBs.takeIf { it != null && it > 0 }?.let {
+						payment.amountBs.takeIf { it > 0 }?.let {
 							DetailRow("Pagado en bolívares:", "Bs. ${formatAmount(it)}")
 						}
 					}
@@ -455,7 +481,13 @@ fun PaymentDetailDialog(
 			) {
 				Button(
 					onClick = {
-						val pdfFile = generateInvoicePdf(context, payment)
+						val pdfFile = generateInvoicePdf(
+							context,
+							payment,
+							gymName = viewModel.name,
+							gymRif = viewModel.rif,
+							gymDirection = viewModel.direction
+						)
 						shareFile(context, pdfFile, "application/pdf")
 					},
 					modifier = Modifier.fillMaxWidth(),
@@ -482,11 +514,12 @@ fun PaymentDetailDialog(
 				) {
 					Text("Cerrar")
 				}
-				
 			}
 		}
 	)
 }
+
+
 
 
 fun shareFile(context: Context, file: File, mimeType: String) {

@@ -193,7 +193,6 @@ fun PersonsScreen(
 			} else {
 				LazyColumn(
 					modifier = Modifier.fillMaxSize(),
-					verticalArrangement = Arrangement.spacedBy(12.dp)
 				) {
 					items(filteredList) { user ->
 						PersonCard(
@@ -219,6 +218,7 @@ enum class DialogMode {
 	None, View, Edit
 }
 
+
 @Composable
 fun PersonCard(
 	user: ListUser,
@@ -227,15 +227,17 @@ fun PersonCard(
 	onViewDetails: () -> Unit,
 ) {
 	Card(
-		modifier = Modifier.fillMaxWidth(),
+		modifier = Modifier
+			.fillMaxWidth()
+			.padding(horizontal = 6.dp, vertical = 2.dp), // 👈 padding externo
 		shape = RoundedCornerShape(16.dp),
-		elevation = CardDefaults.cardElevation(2.dp),
+		elevation = CardDefaults.cardElevation(),
 		colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
 	) {
 		Row(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(horizontal = 16.dp, vertical = 12.dp),
+				.padding(horizontal = 10.dp, vertical = 10.dp),
 			verticalAlignment = Alignment.CenterVertically,
 			horizontalArrangement = Arrangement.SpaceBetween
 		) {
@@ -293,6 +295,7 @@ fun PersonCard(
 		}
 	}
 }
+
 
 
 @Composable

@@ -15,8 +15,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.math.ceil
-
-
 object PdfReportGenerator {
 	
 	fun generateReportPdf(
@@ -25,7 +23,9 @@ object PdfReportGenerator {
 		headers: List<String>,
 		rows: List<List<String>>,
 		totalDolares: Double? = null,
-		totalBolivares: Double? = null
+		totalBolivares: Double? = null,
+		gymName: String? = null,
+		gymRif: String? = null
 	): File? {
 		return try {
 			val fileName = "${reportTitle}_${System.currentTimeMillis()}.pdf"
@@ -38,7 +38,7 @@ object PdfReportGenerator {
 			val paint = Paint()
 			val linePaint = Paint().apply {
 				strokeWidth = 1f
-				color = android.graphics.Color.BLACK
+				color = Color.BLACK
 				style = Paint.Style.STROKE
 			}
 			
@@ -82,11 +82,28 @@ object PdfReportGenerator {
 				
 				var y = marginTop
 				
+				// Cabecera: título a la izquierda
 				paint.textSize = 16f
 				paint.isFakeBoldText = true
 				canvas.drawText("Reporte: $reportTitle", marginLeft, y, paint)
-				y += 30f
 				
+				// Cabecera: gimnasio y RIF a la derecha
+				val rightMargin = pageWidth - marginLeft
+				paint.textSize = 12f
+				paint.isFakeBoldText = false
+				gymName?.let {
+					val gymNameWidth = paint.measureText(it)
+					canvas.drawText(it, rightMargin - gymNameWidth, y, paint)
+				}
+				y += 15f
+				
+				gymRif?.let {
+					val gymRifWidth = paint.measureText(it)
+					canvas.drawText(it, rightMargin - gymRifWidth, y, paint)
+				}
+				y += 20f
+				
+				// Encabezados de tabla
 				paint.textSize = 12f
 				paint.isFakeBoldText = true
 				headers.forEachIndexed { index, header ->
@@ -112,28 +129,14 @@ object PdfReportGenerator {
 					rowIndex++
 				}
 				
-				// Si ya es la última página y ya dibujamos todas las filas
 				if (rowIndex >= rows.size && totalDolares != null && totalBolivares != null) {
-					// dibujar fondo gris claro
 					val totalText = "T.: ${formatDollars(totalDolares)} + ${formatBolivares(totalBolivares)}"
 					val totalRow = List(columnCount - 1) { "" } + totalText
 					
 					totalRow.forEachIndexed { index, cell ->
 						val x = marginLeft + columnWidths.take(index).sum()
-						canvas.drawRect(
-							x,
-							y,
-							x + columnWidths[index],
-							y + rowHeight,
-							totalBackgroundPaint
-						)
-						canvas.drawRect(
-							x,
-							y,
-							x + columnWidths[index],
-							y + rowHeight,
-							linePaint
-						)
+						canvas.drawRect(x, y, x + columnWidths[index], y + rowHeight, totalBackgroundPaint)
+						canvas.drawRect(x, y, x + columnWidths[index], y + rowHeight, linePaint)
 						paint.isFakeBoldText = true
 						drawWrappedText(canvas, cell, x + 5, y + 12, columnWidths[index] - 10, paint)
 						paint.isFakeBoldText = false

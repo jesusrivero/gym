@@ -1,6 +1,7 @@
 package com.jesus.gymcontrol.presentation.splash
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -10,14 +11,11 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -48,13 +47,21 @@ fun StartScreen(
 	
 	var visible by remember { mutableStateOf(false) }
 	
-	// Animación tipo "bounce" para el logo
-	val bounceAnim = rememberInfiniteTransition()
-	val bounceOffset by bounceAnim.animateFloat(
+	val infiniteTransition = rememberInfiniteTransition()
+	val bounceOffset by infiniteTransition.animateFloat(
 		initialValue = 0f,
-		targetValue = 10f,
+		targetValue = -12f,
 		animationSpec = infiniteRepeatable(
-			animation = tween(1000, easing = LinearOutSlowInEasing),
+			animation = tween(800, easing = LinearOutSlowInEasing),
+			repeatMode = RepeatMode.Reverse
+		)
+	)
+	
+	val rotation by infiniteTransition.animateFloat(
+		initialValue = -2f,
+		targetValue = 2f,
+		animationSpec = infiniteRepeatable(
+			animation = tween(1200, easing = FastOutSlowInEasing),
 			repeatMode = RepeatMode.Reverse
 		)
 	)
@@ -77,30 +84,19 @@ fun StartScreen(
 			}
 			
 			isLoggedIn && hasRole -> {
-				// ✅ Nuevo: verificar estado del usuario en Firestore
 				viewModel.checkUserStatusOnStart { state ->
 					when (state) {
-						"activo" -> {
-							viewModel.navigateBasedOnRole(navController)
+						"activo" -> viewModel.navigateBasedOnRole(navController)
+						"inactivo" -> navController.navigate(AppRoutes.InactiveScreen) {
+							popUpTo(AppRoutes.StartScreen) { inclusive = true }
 						}
 						
-						"inactivo" -> {
-							navController.navigate(AppRoutes.InactiveScreen) {
-								popUpTo(AppRoutes.StartScreen) { inclusive = true }
-							}
+						"pendiente" -> navController.navigate(AppRoutes.MainScreen) {
+							popUpTo(AppRoutes.StartScreen) { inclusive = true }
 						}
 						
-						"pendiente" -> {
-							navController.navigate(AppRoutes.MainScreen) {
-								popUpTo(AppRoutes.StartScreen) { inclusive = true }
-							}
-						}
-						
-						else -> {
-							// estado desconocido o error
-							navController.navigate(AppRoutes.LoginScreen) {
-								popUpTo(AppRoutes.StartScreen) { inclusive = true }
-							}
+						else -> navController.navigate(AppRoutes.LoginScreen) {
+							popUpTo(AppRoutes.StartScreen) { inclusive = true }
 						}
 					}
 				}
@@ -120,31 +116,33 @@ fun StartScreen(
 		}
 	}
 	
-	// UI elegante
 	Box(
 		modifier = Modifier
-			.fillMaxSize()
-			.background(MaterialTheme.colorScheme.background), // fondo blanco por defecto
+			.fillMaxSize(),
 		contentAlignment = Alignment.Center
 	) {
 		AnimatedVisibility(
 			visible = visible,
-			enter = fadeIn(tween(1000)) + scaleIn(initialScale = 0.8f, animationSpec = tween(1000))
+			enter = fadeIn(tween(1000)) + scaleIn(initialScale = 0.85f, animationSpec = tween(1000))
 		) {
 			Column(
 				horizontalAlignment = Alignment.CenterHorizontally,
 				verticalArrangement = Arrangement.Center
 			) {
-				// Logo con rebote
-				Box(contentAlignment = Alignment.Center) {
+				Box(
+					contentAlignment = Alignment.Center,
+					modifier = Modifier.graphicsLayer {
+						translationY = bounceOffset
+						rotationZ = rotation
+					}
+				) {
 					Image(
 						painter = painterResource(id = R.drawable.ic_background),
 						contentDescription = "Logo GymControl",
-						modifier = Modifier
-							.size(100.dp)
-							.offset(y = bounceOffset.dp)
+						modifier = Modifier.size(120.dp)
 					)
 				}
+				
 				
 			}
 		}

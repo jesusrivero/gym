@@ -187,7 +187,7 @@ fun ManagerContent(
 							MenuCard(
 								title = "Personal",
 								subtitle = "Listado de administradores",
-								imageRes = R.drawable.ic_reports,
+								imageRes = R.drawable.ic_personal,
 								onClick = { navController.navigate(AppRoutes.PerworkersScreen) }
 							)
 						}

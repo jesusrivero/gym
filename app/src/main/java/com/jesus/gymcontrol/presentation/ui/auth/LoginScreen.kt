@@ -2,7 +2,6 @@ package com.jesus.gymcontrol.presentation.ui.auth
 
 
 import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,8 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -26,7 +23,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -39,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -50,18 +45,20 @@ import androidx.navigation.NavController
 import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
-import com.jesus.gymcontrol.presentation.theme.GymTheme
-
 
 
 @Composable
 fun LoginScreen(navController: NavController, sessionManager: SessionManager) {
 	val viewModel: AuthViewModel = hiltViewModel()
+	val colorScheme = MaterialTheme.colorScheme
 	
-	GymTheme {
-		Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-			LoginContent(navController = navController, viewModel = viewModel, sessionManager = sessionManager)
-		}
+	Box(
+		modifier = Modifier
+			.fillMaxSize()
+			.background(colorScheme.background),
+		contentAlignment = Alignment.Center
+	) {
+		LoginContent(navController = navController, viewModel = viewModel, sessionManager = sessionManager)
 	}
 }
 
@@ -79,12 +76,11 @@ fun LoginContent(
 	var isValidEmail by remember(viewModel.email) { mutableStateOf(false) }
 	val isPasswordValid = viewModel.password.trim().length >= 6
 	
-	val isFromValid =
+	val isFormValid =
 		viewModel.email.trim().isNotBlank() &&
 				isValidEmail &&
 				viewModel.password.trim().isNotBlank() &&
-				viewModel.password.trim().length >= 6
-	
+				isPasswordValid
 	
 	isValidEmail =
 		viewModel.email.trim().matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
@@ -120,22 +116,22 @@ fun LoginContent(
 			modifier = Modifier
 				.fillMaxWidth()
 				.height(56.dp),
-			textStyle = LocalTextStyle.current.copy(color = colorScheme.onSurface),
-			placeholder = { Text("Correo", color = colorScheme.onSurfaceVariant) },
+			placeholder = { Text("Correo") },
 			leadingIcon = {
 				Icon(
 					imageVector = Icons.Default.Email,
 					contentDescription = null,
-					tint = colorScheme.onSurfaceVariant
 				)
 			},
 			singleLine = true,
-			isError = viewModel.email.isNotBlank() && !isValidEmail
+			isError = viewModel.email.isNotBlank() && !isValidEmail,
+			
 		)
+		
 		if (viewModel.email.isNotBlank() && !isValidEmail) {
 			Text(
-				text = "Debe ser un correo electronico valido",
-				color = MaterialTheme.colorScheme.error,
+				text = "Debe ser un correo electrónico válido",
+				color = colorScheme.error,
 				fontSize = 12.sp,
 				modifier = Modifier
 					.align(Alignment.Start)
@@ -151,32 +147,29 @@ fun LoginContent(
 			modifier = Modifier
 				.fillMaxWidth()
 				.height(56.dp),
-			textStyle = LocalTextStyle.current.copy(color = colorScheme.onSurface),
-			placeholder = { Text("Contraseña", color = colorScheme.onSurfaceVariant) },
+			placeholder = { Text("Contraseña") },
 			leadingIcon = {
 				Icon(
 					imageVector = Icons.Default.Lock,
 					contentDescription = null,
-					tint = colorScheme.onSurfaceVariant
 				)
 			},
 			trailingIcon = {
 				Icon(
 					imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
 					contentDescription = "Toggle Visibilidad",
-					tint = colorScheme.onSurfaceVariant,
 					modifier = Modifier.clickable { passwordVisible = !passwordVisible }
 				)
 			},
 			visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
 			singleLine = true,
-			isError = viewModel.password.isNotBlank() && !isPasswordValid
+			isError = viewModel.password.isNotBlank() && !isPasswordValid,
 		)
 		
 		if (viewModel.password.isNotBlank() && !isPasswordValid) {
 			Text(
 				text = "La contraseña debe tener al menos 6 caracteres",
-				color = MaterialTheme.colorScheme.error,
+				color = colorScheme.error,
 				fontSize = 12.sp,
 				modifier = Modifier
 					.align(Alignment.Start)
@@ -205,7 +198,7 @@ fun LoginContent(
 					viewModel.loginUser(
 						email = viewModel.email.trim(),
 						password = viewModel.password.trim(),
-						navController = navController // ✅ navegación centralizada
+						navController = navController
 					)
 					
 				} else {
@@ -216,7 +209,7 @@ fun LoginContent(
 					).show()
 				}
 			},
-			enabled = isFromValid,
+			enabled = isFormValid,
 			colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
 			modifier = Modifier
 				.fillMaxWidth()
@@ -235,22 +228,6 @@ fun LoginContent(
 			Divider(modifier = Modifier.weight(1f), color = colorScheme.outline)
 			Text("  o  ", color = colorScheme.outline, fontSize = 14.sp)
 			Divider(modifier = Modifier.weight(1f), color = colorScheme.outline)
-		}
-		
-		Spacer(modifier = Modifier.height(24.dp))
-		
-		Box(
-			modifier = Modifier
-				.size(56.dp)
-				.background(colorScheme.surface, shape = CircleShape)
-				.clickable { },
-			contentAlignment = Alignment.Center
-		) {
-			Image(
-				painter = painterResource(id = com.jesus.gymcontrol.R.drawable.ic_google),
-				contentDescription = "Google Icon",
-				modifier = Modifier.size(32.dp)
-			)
 		}
 		
 		Spacer(modifier = Modifier.height(16.dp))
@@ -275,9 +252,3 @@ fun LoginContent(
 		Spacer(modifier = Modifier.height(24.dp))
 	}
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun LoginContentPreview() {
-//    LoginContent()
-//}

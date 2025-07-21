@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
+
 @HiltViewModel
 class AuthViewModel @Inject constructor(
 	private val auth: FirebaseAuth,
@@ -133,6 +134,7 @@ class AuthViewModel @Inject constructor(
 						val userData = userDocSnapshot.data
 						val rol = userData?.get("rol") as? String
 						val gymCode = userData?.get("gimnasioCode") as? String
+						val state = userData?.get("state") as? String ?: "inactivo"
 						
 						// ✅ Guardamos el token FCM
 						FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
@@ -152,8 +154,20 @@ class AuthViewModel @Inject constructor(
 						sessionManager.saveRoleState(!rol.isNullOrBlank())
 						sessionManager.saveLoginState(true)
 						
-						// ✅ Navegar según rol
-						navigateBasedOnRole(navController, rol)
+						// ✅ Verificar estado
+						when (state) {
+							"activo" -> navigateBasedOnRole(navController, rol)
+							"pendiente" -> {
+								navController.navigate(AppRoutes.MainScreen) {
+									popUpTo(0) { inclusive = true }
+								}
+							}
+							else -> {
+								navController.navigate(AppRoutes.InactiveScreen) {
+									popUpTo(0) { inclusive = true }
+								}
+							}
+						}
 						
 					} catch (e: Exception) {
 						errorMessage = "Error al obtener datos del usuario"
