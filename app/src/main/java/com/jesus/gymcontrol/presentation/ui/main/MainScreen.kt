@@ -329,6 +329,7 @@ fun NewClientAvatar(name: String, photoUrl: String? = null, onClick: () -> Unit)
 	}
 }
 
+
 @Composable
 fun NewClientsSection(
 	viewModel: UserListViewModel = hiltViewModel(),
@@ -338,33 +339,38 @@ fun NewClientsSection(
 	
 	val users = viewModel.listUsers.take(8)
 	
-	if (users.isNotEmpty()) {
-		Column(modifier = Modifier.padding(start = 10.dp, top = 8.dp)) {
-			Row(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(horizontal = 8.dp),
-				horizontalArrangement = Arrangement.SpaceBetween,
-				verticalAlignment = Alignment.CenterVertically
+	Column(modifier = Modifier.padding(start = 10.dp, top = 8.dp)) {
+		Row(
+			modifier = Modifier
+				.fillMaxWidth()
+				.padding(horizontal = 8.dp),
+			horizontalArrangement = Arrangement.SpaceBetween,
+			verticalAlignment = Alignment.CenterVertically
+		) {
+			Text(
+				text = "Clientes Nuevos",
+				style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+			)
+			TextButton(
+				onClick = { navController.navigate(AppRoutes.PersonasScreen.route) },
+				contentPadding = PaddingValues(horizontal = 8.dp)
 			) {
 				Text(
-					text = "Clientes Nuevos",
-					style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+					text = "Ver más",
+					style = MaterialTheme.typography.labelMedium,
+					color = MaterialTheme.colorScheme.primary
 				)
-				TextButton(
-					onClick = { navController.navigate(AppRoutes.PersonasScreen.route) },
-					contentPadding = PaddingValues(horizontal = 8.dp)
-				) {
-					Text(
-						text = "Ver más",
-						style = MaterialTheme.typography.labelMedium,
-						color = MaterialTheme.colorScheme.primary
-					)
-				}
 			}
-			
-			Spacer(modifier = Modifier.height(8.dp))
-			
+		}
+		
+		Spacer(modifier = Modifier.height(8.dp))
+		
+		if (users.isEmpty()) {
+			EmptyState(
+				mensaje = "Aún no tienes clientes registrados",
+				onAccion = { navController.navigate(AppRoutes.RegPersonScreen) }
+			)
+		} else {
 			LazyRow {
 				items(users) { user ->
 					NewClientAvatar(
@@ -373,9 +379,9 @@ fun NewClientsSection(
 					)
 				}
 			}
-			
-			Spacer(modifier = Modifier.height(16.dp))
 		}
+		
+		Spacer(modifier = Modifier.height(16.dp))
 	}
 	
 	// Mostrar AlertDialog si hay un usuario seleccionado
@@ -400,6 +406,99 @@ fun NewClientsSection(
 				}
 			}, containerColor = Color.White
 		)
+	}
+}
+
+
+@Composable
+fun PaymentsList(payments: List<Payment>) {
+	if (payments.isEmpty()) {
+		EmptyState(
+			mensaje = "Aún no hay pagos recientes registrados",
+			onAccion = { }
+		)
+	} else {
+		payments.forEach { payment ->
+			// Determinar el texto del monto según el tipo de pago
+			val formattedAmount = when (payment.paymentType.lowercase()) {
+				"bolívares" -> "Bs${formatBolivares(payment.amountBs)}"
+				"dólares" -> "$${payment.amountDollar}"
+				"mixto" -> "$${payment.amountDollar} - Bs${formatBolivares(payment.amountBs)}"
+				else -> "${payment.amount}"
+			}
+			
+			MovementsCard(color = Color(0xFF4CAF50)) {
+				Row(
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(16.dp),
+					horizontalArrangement = Arrangement.SpaceBetween,
+					verticalAlignment = Alignment.CenterVertically
+				) {
+					Column(
+						modifier = Modifier
+							.weight(1f)
+							.padding(horizontal = 6.dp)
+					) {
+						Row(verticalAlignment = Alignment.CenterVertically) {
+							Text(
+								text = "${payment.name} ${payment.lastname}",
+								style = MaterialTheme.typography.bodyLarge.copy(
+									fontWeight = FontWeight.SemiBold
+								)
+							)
+						}
+						
+						Text(
+							text = formatDate(payment.date),
+							style = MaterialTheme.typography.bodySmall,
+							color = MaterialTheme.colorScheme.onSurfaceVariant,
+							modifier = Modifier.padding(top = 4.dp)
+						)
+					}
+					
+					Box(
+						modifier = Modifier
+							.widthIn(max = 140.dp), // Limita el ancho del texto
+						contentAlignment = Alignment.CenterEnd
+					) {
+						Text(
+							text = formattedAmount,
+							maxLines = 1,
+							overflow = TextOverflow.Ellipsis,
+							style = MaterialTheme.typography.bodyLarge.copy(
+								fontWeight = FontWeight.Bold,
+								color = MaterialTheme.colorScheme.primary
+							)
+						)
+					}
+				}
+			}
+			Spacer(modifier = Modifier.height(6.dp))
+		}
+	}
+}
+
+// 📌 NUEVO COMPOSABLE: EMPTY STATE
+@Composable
+fun EmptyState(
+	mensaje: String,
+	onAccion: () -> Unit
+) {
+	Column(
+		modifier = Modifier
+			.fillMaxWidth()
+			.padding(16.dp),
+		verticalArrangement = Arrangement.Center,
+		horizontalAlignment = Alignment.CenterHorizontally
+	) {
+		Text(
+			text = mensaje,
+			style = MaterialTheme.typography.bodyLarge,
+			color = MaterialTheme.colorScheme.onSurfaceVariant,
+			textAlign = androidx.compose.ui.text.style.TextAlign.Center
+		)
+		Spacer(modifier = Modifier.height(16.dp))
 	}
 }
 
@@ -554,77 +653,6 @@ fun formatBolivares(amount: Double): String {
 	format.maximumFractionDigits = 2
 	return format.format(amount)
 }
-
-@Composable
-fun PaymentsList(payments: List<Payment>) {
-	if (payments.isEmpty()) {
-		Text(
-			text = "Pagos recientes",
-			style = MaterialTheme.typography.bodyMedium,
-			color = MaterialTheme.colorScheme.onSurfaceVariant
-		)
-	} else {
-		payments.forEach { payment ->
-			// Determinar el texto del monto según el tipo de pago
-			val formattedAmount = when (payment.paymentType.lowercase()) {
-				"bolívares" -> "Bs${formatBolivares(payment.amountBs)}"
-				"dólares" -> "$${payment.amountDollar}"
-				"mixto" -> "$${payment.amountDollar} - Bs${formatBolivares(payment.amountBs)}"
-				else -> "${payment.amount}"
-			}
-			
-			MovementsCard(color = Color(0xFF4CAF50)) {
-				Row(
-					modifier = Modifier
-						.fillMaxWidth()
-						.padding(16.dp),
-					horizontalArrangement = Arrangement.SpaceBetween,
-					verticalAlignment = Alignment.CenterVertically
-				) {
-					Column(
-						modifier = Modifier
-							.weight(1f)
-							.padding(horizontal = 6.dp)
-					) {
-						Row(verticalAlignment = Alignment.CenterVertically) {
-							Text(
-								text = "${payment.name} ${payment.lastname}",
-								style = MaterialTheme.typography.bodyLarge.copy(
-									fontWeight = FontWeight.SemiBold
-								)
-							)
-						}
-						
-						Text(
-							text = formatDate(payment.date),
-							style = MaterialTheme.typography.bodySmall,
-							color = MaterialTheme.colorScheme.onSurfaceVariant,
-							modifier = Modifier.padding(top = 4.dp)
-						)
-					}
-					
-					Box(
-						modifier = Modifier
-							.widthIn(max = 140.dp), // Limita el ancho del texto
-						contentAlignment = Alignment.CenterEnd
-					) {
-						Text(
-							text = formattedAmount,
-							maxLines = 1,
-							overflow = TextOverflow.Ellipsis,
-							style = MaterialTheme.typography.bodyLarge.copy(
-								fontWeight = FontWeight.Bold,
-								color = MaterialTheme.colorScheme.primary
-							)
-						)
-					}
-				}
-			}
-			Spacer(modifier = Modifier.height(6.dp))
-		}
-	}
-}
-
 
 
 @Composable

@@ -4,14 +4,13 @@ import com.jesus.gymcontrol.domain.model.PasswordChangeRequest
 
 
 interface AuthRepository {
-    suspend fun registerUser(
-        name:String,
-        lastname: String,
-        email: String,
-        password: String,
-        idcard: String
-    ) : Result<Unit>
-
+	suspend fun registerUser(
+		name:String,
+		lastname: String,
+		email: String,
+		password: String,
+		idcard: String
+	) : Result<Unit>
 
     suspend fun loginUser(
         email: String,

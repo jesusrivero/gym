@@ -1,9 +1,12 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details.manage
 
 
+import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,17 +46,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import com.jesus.gymcontrol.R
 import com.jesus.gymcontrol.domain.helpers.WhatsAppButton
 import com.jesus.gymcontrol.domain.model.ListUser
 import com.jesus.gymcontrol.domain.viewmodels.AuthViewModel
+import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
 import com.jesus.gymcontrol.domain.viewmodels.UserListViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.ui.commons.PaymentFilters
@@ -69,6 +76,7 @@ fun PersonsScreen(
 	navBottom: NavController,
 	userListViewModel: UserListViewModel = hiltViewModel(),
 	authViewModel: AuthViewModel = hiltViewModel(),
+	viewModel: GymViewModel = hiltViewModel(),
 	navPag: (String, String) -> Unit
 ) {
 	LaunchedEffect(Unit) {
@@ -79,7 +87,7 @@ fun PersonsScreen(
 	var editableUser by remember { mutableStateOf<ListUser?>(null) }
 	var searchText by remember { mutableStateOf("") }
 	var selectedState by rememberSaveable { mutableStateOf("Todos") }
-	
+	val gymName = viewModel.name ?: "Gimnasio Desconocido" // 🔷 obtén el nombre del gimnasio
 	val configuration = LocalConfiguration.current
 	val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 	
@@ -110,7 +118,7 @@ fun PersonsScreen(
 				onDismiss = {
 					dialogMode = DialogMode.None
 					editableUser = null
-				}
+				},
 			)
 		}
 	}
@@ -431,27 +439,63 @@ fun EditUserDialog(
 	)
 }
 
+
 @Composable
 fun ViewUserDialog(
 	user: ListUser,
-	onDismiss: () -> Unit
+	onDismiss: () -> Unit,
+	viewModel: GymViewModel = hiltViewModel(),
 ) {
+	val context = LocalContext.current
+	val gymname = viewModel.name ?: "Gimnasio Desconocido"
 	val formattedDate = user.date.takeIf { it != null && it > 0L }?.let {
 		SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(it))
 	} ?: "No disponible"
+	
+	LaunchedEffect(Unit) {
+		val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+		viewModel.loadCurrentGymData(uid)
+	}
 	
 	AlertDialog(
 		onDismissRequest = onDismiss,
 		containerColor = MaterialTheme.colorScheme.surface,
 		title = {
-			Text("Información del usuario", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+			Text(
+				"Información del usuario",
+				modifier = Modifier.fillMaxWidth(),
+				textAlign = TextAlign.Center
+			)
 		},
 		text = {
 			Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
 				Text("Nombre: ${user.name}")
 				Text("Apellido: ${user.lastname}")
 				Text("Rol: ${user.rol}")
-				Text("Email: ${user.email}")
+				
+				// 🔷 Email clicable con asunto y body
+				Row {
+					Text("Email: ")
+					
+					if (!user.email.isNullOrBlank()) {
+						Text(
+							text = user.email,
+							modifier = Modifier.clickable {
+								val subject = Uri.encode("El gimnasio $gymname se comunica contigo")
+								val body = Uri.encode("El gimnasio $gymname se comunica contigo para lo siguiente:\n\n")
+								val intent = Intent(Intent.ACTION_SENDTO).apply {
+									data = Uri.parse("mailto:${user.email}?subject=$subject&body=$body")
+								}
+								context.startActivity(intent)
+							},
+							color = MaterialTheme.colorScheme.primary,
+							textDecoration = TextDecoration.Underline
+						)
+					} else {
+						Text("No disponible")
+					}
+				}
+				
 				Text("Cédula: ${user.idcard}")
 				Text("Estado: ${user.state}")
 				Text("Teléfono: ${user.phone}")
@@ -468,7 +512,6 @@ fun ViewUserDialog(
 		}
 	)
 }
-
 
 
 @Composable

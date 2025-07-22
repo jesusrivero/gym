@@ -224,17 +224,17 @@ fun RegPersonContent(
 	val trimmedEmail = email.trim()
 	val isNameValid = name.isNotBlank()
 	val islastNameValid = lastname.isNotBlank()
-	val isEmailValid =
-		trimmedEmail.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
-	val isPasswordValid = password.length >= 6
+//	val isEmailValid =
+//		trimmedEmail.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
+//	val isPasswordValid = password.length >= 6
 	val isIdCardValid = idCard.length in 7..9
 	val isCodeValid = code.isNotBlank()
 	var selectedCountryCode by rememberSaveable { mutableStateOf("58") }
 	var isCountryDropdownExpanded by rememberSaveable { mutableStateOf(false) }
 	val fullPhone = "$selectedCountryCode$phone"
 	val isPhoneValid = phone.isBlank() || fullPhone.matches(Regex("^[1-9]\\d{7,14}$"))
-	val formIsValid =
-		isNameValid && islastNameValid && isEmailValid && isPasswordValid && isCodeValid && isIdCardValid && isPhoneValid
+//	val formIsValid =
+//		isNameValid && islastNameValid && isEmailValid && isPasswordValid && isCodeValid && isIdCardValid && isPhoneValid
 	val configuration = LocalConfiguration.current
 	val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 	val currentUserRole = gviewModel.currentUserRole
@@ -243,6 +243,20 @@ fun RegPersonContent(
 	var isRolDropdownExpanded by rememberSaveable { mutableStateOf(false) }
 	val userUid = FirebaseAuth.getInstance().currentUser?.uid
 	val currentRole = sessionManager.getRol()?.lowercase()
+	
+	// 🔷 Validaciones específicas
+	val isEmailValid =
+		if (rol == "administrador") trimmedEmail.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
+		else true
+	
+	val isPasswordValid =
+		if (rol == "administrador") password.length >= 6
+		else true
+
+// 🔷 Formulario válido si todos los campos requeridos están bien
+	val formIsValid =
+		isNameValid && islastNameValid && isIdCardValid && isCodeValid && isPhoneValid && isEmailValid && isPasswordValid
+	
 	
 	LaunchedEffect(userUid) {
 		userUid?.let {
@@ -272,7 +286,7 @@ fun RegPersonContent(
 						showDialog = false
 						val user = UserRegistrationData(
 							email = trimmedEmail,
-							password = password,
+							password = if (rol == "administrador") password else "",
 							name = name,
 							lastname = lastname,
 							phone = if (phone.isBlank()) null else fullPhone,
@@ -357,13 +371,14 @@ fun RegPersonContent(
 			colors = CardDefaults.cardColors(containerColor = colorScheme.background)
 		) {
 			Column(modifier = Modifier.padding(12.dp)) {
+				
 				OutlinedTextField(
 					value = email,
 					onValueChange = { email = it },
 					label = { Text("Correo electrónico") },
 					modifier = Modifier.fillMaxWidth()
 				)
-				if (email.isNotBlank() && !isEmailValid) {
+				if (email.isNotBlank() && rol == "administrador" && !isEmailValid) {
 					Text(
 						"Debe ser un correo válido",
 						color = colorScheme.error,
@@ -371,19 +386,21 @@ fun RegPersonContent(
 					)
 				}
 				
-				OutlinedTextField(
-					value = password,
-					onValueChange = { password = it },
-					label = { Text("Contraseña (mín. 6 caracteres)") },
-					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-					modifier = Modifier.fillMaxWidth()
-				)
-				if (password.isNotEmpty() && !isPasswordValid) {
-					Text(
-						"Debe tener al menos 6 caracteres",
-						color = colorScheme.error,
-						style = MaterialTheme.typography.labelSmall
+				if (rol == "administrador") {
+					OutlinedTextField(
+						value = password,
+						onValueChange = { password = it },
+						label = { Text("Contraseña (mín. 6 caracteres)") },
+						keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+						modifier = Modifier.fillMaxWidth()
 					)
+					if (password.isNotEmpty() && !isPasswordValid) {
+						Text(
+							"Debe tener al menos 6 caracteres",
+							color = colorScheme.error,
+							style = MaterialTheme.typography.labelSmall
+						)
+					}
 				}
 				
 				OutlinedTextField(
