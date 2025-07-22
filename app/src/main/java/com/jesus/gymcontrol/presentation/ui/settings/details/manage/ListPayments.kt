@@ -82,7 +82,7 @@ fun ListPaymentsScreen(
 	val payments = viewModel.payments
 	val isLoading = viewModel.isLoading
 	var showDialog by remember { mutableStateOf(false) }
-	var selectedPayment by rememberSaveable { mutableStateOf<Payment?>(null) }
+	var selectedPayment by remember { mutableStateOf<Payment?>(null) }
 	var searchText by rememberSaveable { mutableStateOf("") }
 	var selectedPaymentType by rememberSaveable { mutableStateOf("Todos") }
 	val paymentTypeOptions = listOf("Todos", "Dólares", "Bolívares", "Mixto", "Promociones")
@@ -382,15 +382,7 @@ fun PaymentDetailDialog(
 		},
 		text = {
 			Column(modifier = Modifier.fillMaxWidth()) {
-				// ✅ Datos del gimnasio
-//				viewModel.name?.let {
-//					DetailRow("Gimnasio:", it)
-//					Spacer(modifier = Modifier.height(8.dp))
-//				}
-//				viewModel.rif?.let {
-//					DetailRow("RIF:", it)
-//					Spacer(modifier = Modifier.height(8.dp))
-//				}
+
 				
 				DetailRow("Nombre:", payment.name.trim())
 				Spacer(modifier = Modifier.height(8.dp))

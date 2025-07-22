@@ -368,7 +368,6 @@ fun NewClientsSection(
 			LazyRow {
 				items(users) { user ->
 					NewClientAvatar(
-						// ✅ ahora mostramos nombre y apellido
 						name = "${user.name} ${user.lastname}".trim(),
 						onClick = { selectedUser = user }
 					)
@@ -446,7 +445,7 @@ fun SummaryAndMembershipCard(
 			
 			Spacer(modifier = Modifier.height(16.dp))
 			
-			// Fila de resumen: total, activos, inactivos
+		
 			Row(
 				modifier = Modifier.fillMaxWidth(),
 				horizontalArrangement = Arrangement.SpaceBetween
@@ -556,7 +555,6 @@ fun formatBolivares(amount: Double): String {
 	return format.format(amount)
 }
 
-
 @Composable
 fun PaymentsList(payments: List<Payment>) {
 	if (payments.isEmpty()) {
@@ -569,17 +567,10 @@ fun PaymentsList(payments: List<Payment>) {
 		payments.forEach { payment ->
 			// Determinar el texto del monto según el tipo de pago
 			val formattedAmount = when (payment.paymentType.lowercase()) {
-				"bolívares" -> "${formatBolivares(payment.amountBs)} Bs"
-				"dólares" -> "$ ${payment.amountDollar}"
-				"mixto" -> "${payment.amountDollar} $ - ${formatBolivares(payment.amountBs)} Bs"
+				"bolívares" -> "Bs${formatBolivares(payment.amountBs)}"
+				"dólares" -> "$${payment.amountDollar}"
+				"mixto" -> "$${payment.amountDollar} - Bs${formatBolivares(payment.amountBs)}"
 				else -> "${payment.amount}"
-			}
-			
-			val paymentSymbol = when (payment.paymentType.lowercase()) {
-				"dólares" -> "$"
-				"bolívares" -> "Bs"
-				"mixto" -> "$ - Bs"
-				else -> ""
 			}
 			
 			MovementsCard(color = Color(0xFF4CAF50)) {
@@ -596,14 +587,6 @@ fun PaymentsList(payments: List<Payment>) {
 							.padding(horizontal = 6.dp)
 					) {
 						Row(verticalAlignment = Alignment.CenterVertically) {
-							Text(
-								text = paymentSymbol,
-								style = MaterialTheme.typography.bodyLarge.copy(
-									fontWeight = FontWeight.Bold,
-									color = MaterialTheme.colorScheme.primary
-								),
-								modifier = Modifier.padding(end = 8.dp)
-							)
 							Text(
 								text = "${payment.name} ${payment.lastname}",
 								style = MaterialTheme.typography.bodyLarge.copy(
@@ -641,6 +624,7 @@ fun PaymentsList(payments: List<Payment>) {
 		}
 	}
 }
+
 
 
 @Composable

@@ -163,17 +163,7 @@ fun PaymentsScreenContent(
 		}
 	}
 	
-	val filteredUsers = if (nameUser.isBlank()) emptyList() else {
-		users.filter { user ->
-			user.rol == "cliente" && (
-					user.name.contains(nameUser, true) ||
-							user.lastname.contains(nameUser, true) ||
-							user.idcard.contains(nameUser, true) ||
-							user.email.contains(nameUser, true) ||
-							user.phone.contains(nameUser, true)
-					)
-		}
-	}
+
 	
 	val formIsValid = selectedUserId != null &&
 			paymentState.frequency.isNotBlank() &&
@@ -355,19 +345,16 @@ fun PaymentsScreenContent(
 				
 			}
 		) { innerPadding ->
-			Column(
+			Box(
 				modifier = Modifier
-					.fillMaxWidth()
+					.fillMaxSize()
 					.padding(innerPadding)
 			) {
 				Column(
 					modifier = Modifier
-						.fillMaxWidth()
+						.fillMaxSize()
+						.verticalScroll(rememberScrollState())
 						.padding(horizontal = 16.dp)
-						.then(
-							if (!isPortrait) Modifier.verticalScroll(rememberScrollState()) else Modifier
-						)
-						.weight(1f)
 				) {
 					
 					Spacer(modifier = Modifier.height(10.dp))
@@ -391,6 +378,12 @@ fun PaymentsScreenContent(
 								onValueChange = {
 									nameUser = it
 									selectedUserId = null
+									
+									if (it.isBlank()) {
+										usersViewModel.clearSearch()
+									} else {
+										usersViewModel.searchUser(it)
+									}
 								},
 								label = { Text("Buscar..") },
 								modifier = Modifier.fillMaxWidth(),
@@ -406,7 +399,7 @@ fun PaymentsScreenContent(
 										IconButton(onClick = {
 											nameUser = ""
 											selectedUserId = null
-											
+											usersViewModel.clearSearch() // también aquí por si hace falta
 											
 											viewModel.resetState()
 											description = ""
@@ -418,6 +411,7 @@ fun PaymentsScreenContent(
 									}
 								}
 							)
+							
 							if (selectedUser != null && selectedUser.state != "inactivo") {
 								Text(
 									text = "El usuario ya está ${selectedUser.state}. La fecha de vencimiento se extenderá al registrar este pago.",
@@ -426,8 +420,9 @@ fun PaymentsScreenContent(
 									modifier = Modifier.padding(top = 4.dp)
 								)
 							}
-							
-							if (filteredUsers.isNotEmpty() && selectedUserId == null) {
+
+// ✅ solo muestra la lista si hay texto de búsqueda y resultados
+							if (nameUser.isNotBlank() && users.isNotEmpty() && selectedUserId == null) {
 								Spacer(modifier = Modifier.height(8.dp))
 								LazyColumn(
 									modifier = Modifier
@@ -435,7 +430,7 @@ fun PaymentsScreenContent(
 										.heightIn(max = 200.dp)
 										.background(colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
 								) {
-									items(filteredUsers) { user ->
+									items(users) { user ->
 										Row(
 											modifier = Modifier
 												.fillMaxWidth()

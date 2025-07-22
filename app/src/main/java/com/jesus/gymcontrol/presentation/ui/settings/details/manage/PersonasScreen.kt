@@ -77,7 +77,7 @@ fun PersonsScreen(
 	
 	var dialogMode by rememberSaveable { mutableStateOf<DialogMode>(DialogMode.None) }
 	var editableUser by remember { mutableStateOf<ListUser?>(null) }
-	var searchText by rememberSaveable { mutableStateOf("") }
+	var searchText by remember { mutableStateOf("") }
 	var selectedState by rememberSaveable { mutableStateOf("Todos") }
 	
 	val configuration = LocalConfiguration.current
@@ -166,16 +166,12 @@ fun PersonsScreen(
 				onClearFilters = {
 					selectedState = "Todos"
 					searchText = ""
-					userListViewModel.loadUsers()
+					userListViewModel.searchUser("") // ✅ ahora llama a searchUser("") para cargar todos
 				},
 				searchText = searchText,
 				onSearchTextChanged = { query ->
 					searchText = query
-					if (query.isBlank()) {
-						userListViewModel.loadUsers() // 👈 restaura la lista completa
-					} else {
-						userListViewModel.searchUser(query) // 👈 búsqueda remota
-					}
+					userListViewModel.searchUser(query) // ✅ siempre usa searchUser
 				},
 				onAddClick = { navBottom.navigate(AppRoutes.RegPersonScreen) },
 				showAddButton = true
@@ -212,6 +208,7 @@ fun PersonsScreen(
 		}
 	}
 }
+
 
 
 

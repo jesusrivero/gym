@@ -10,51 +10,58 @@ import com.jesus.gymcontrol.domain.model.ListUser
 import com.jesus.gymcontrol.domain.usecase.usuario.SearchUserUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetUserByGymUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class UserListViewModel @Inject constructor(
-    private val getUsersByGymUseCase: GetUserByGymUseCase,
-    private val searchUserByIdCardUseCase: SearchUserUseCase,
-    private val sessionManager: SessionManager // Para obtener el código del gimnasio
+	private val getUsersByGymUseCase: GetUserByGymUseCase,
+	private val searchUserByIdCardUseCase: SearchUserUseCase,
+	private val sessionManager: SessionManager
 ) : ViewModel() {
-
-    var listUsers by mutableStateOf<List<ListUser>>(emptyList())
-        private set
-
-    var isLoading by mutableStateOf(false)
-        private set
-
-    var errorMessage by mutableStateOf<String?>(null)
-        private set
-
-    fun loadUsers() {
-        val gymCode = sessionManager.getGymCode() ?: return
-        viewModelScope.launch {
-            isLoading = true
-            errorMessage = null
-
-            val result = getUsersByGymUseCase(gymCode)
-
-            result.onSuccess {
-                listUsers = it
-            }.onFailure {
-                errorMessage = it.message ?: "Error desconocido"
-            }
-
-            isLoading = false
-        }
-    }
+	
+	var listUsers by mutableStateOf<List<ListUser>>(emptyList())
+		private set
+	
+	var isLoading by mutableStateOf(false)
+		private set
+	
+	var errorMessage by mutableStateOf<String?>(null)
+		private set
+	
+	private var searchJob: Job? = null // 👈 para cancelar búsquedas anteriores
+	
+	fun loadUsers() {
+		val gymCode = sessionManager.getGymCode() ?: return
+		searchJob?.cancel() // 👈 cancela si hay otra búsqueda en curso
+		
+		searchJob = viewModelScope.launch {
+			isLoading = true
+			errorMessage = null
+			
+			val result = getUsersByGymUseCase(gymCode)
+			
+			result.onSuccess {
+				listUsers = it
+			}.onFailure {
+				errorMessage = it.message ?: "Error desconocido"
+			}
+			
+			isLoading = false
+		}
+	}
 	
 	fun searchUser(idCard: String) {
 		val gymCode = sessionManager.getGymCode() ?: return
+		searchJob?.cancel() // 👈 cancela la búsqueda anterior
+		
 		if (idCard.isBlank()) {
-			loadUsers() // Si la búsqueda está vacía, carga los últimos 100
+			loadUsers()
 			return
 		}
 		
-		viewModelScope.launch {
+		searchJob = viewModelScope.launch {
 			isLoading = true
 			errorMessage = null
 			
@@ -70,4 +77,7 @@ class UserListViewModel @Inject constructor(
 		}
 	}
 	
+	fun clearSearch() {
+		listUsers = emptyList()
+	}
 }

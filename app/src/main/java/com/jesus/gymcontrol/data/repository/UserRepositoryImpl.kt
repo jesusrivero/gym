@@ -139,7 +139,7 @@ class UserRepositoryImpl @Inject constructor(
 			.document(gymCode)
 			.collection("usuarios")
 			.orderBy("date", Query.Direction.DESCENDING)
-			.limit(100)
+			.limit(100) // Limitar a los últimos 100 usuarios
 			.get()
 			.await()
 		
