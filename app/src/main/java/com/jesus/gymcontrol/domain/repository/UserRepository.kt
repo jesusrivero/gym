@@ -24,5 +24,6 @@ interface UserRepository {
 		userUpdate: UserUpdate
 	): Result<Unit>
 	
+	suspend fun searchUserByIdCard(gymCode: String, query: String): Result<List<ListUser>>
 	
 }

@@ -37,6 +37,7 @@ import com.jesus.gymcontrol.domain.usecase.usuario.DeleteMembershipUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.DeletePromotionUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.EditMembershipUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.GenerateCodeUseCase
+import com.jesus.gymcontrol.domain.usecase.usuario.SearchUserUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetAllGymUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetAllPaymentsUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetGymUserSummaryUseCase
@@ -415,4 +416,13 @@ object AppModule {
 	fun provideUpdateAdminStateUseCase(
 		repository: UserAdminRepository
 	): UpdateAdminStateUseCase = UpdateAdminStateUseCase(repository)
+	
+	@Provides
+	fun provideSearchUserUseCase(
+		repository: UserRepository
+	) = SearchUserUseCase(repository)
+	
+
+	
+	
 }

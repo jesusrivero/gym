@@ -174,6 +174,7 @@ class PaymentRepositoryImpl @Inject constructor(
 					.document(gymCode)
 					.collection("pagos")
 					.orderBy("date", Query.Direction.DESCENDING)
+					.limit(100)
 					.get()
 					.await()
 				

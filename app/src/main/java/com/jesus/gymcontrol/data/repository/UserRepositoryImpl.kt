@@ -1,6 +1,7 @@
 package com.jesus.gymcontrol.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.jesus.gymcontrol.domain.model.Gym
@@ -138,6 +139,7 @@ class UserRepositoryImpl @Inject constructor(
 			.document(gymCode)
 			.collection("usuarios")
 			.orderBy("date", Query.Direction.DESCENDING)
+			.limit(100)
 			.get()
 			.await()
 		
@@ -164,6 +166,64 @@ class UserRepositoryImpl @Inject constructor(
 		Result.success(listUsers)
 	} catch (e: Exception) {
 		Result.failure(e)
+	}
+	
+	
+	override suspend fun searchUserByIdCard(
+		gymCode: String,
+		query: String
+	): Result<List<ListUser>> = try {
+		val users = mutableListOf<ListUser>()
+		
+		// Buscar por cédula exacta
+		val idCardSnapshot = firestore.collection("gimnasios")
+			.document(gymCode)
+			.collection("usuarios")
+			.whereEqualTo("idcard", query)
+			.get()
+			.await()
+		
+		users.addAll(idCardSnapshot.documents.map { it.toListUser() })
+		
+		// Buscar por nombre que empiece con el texto
+		val nameSnapshot = firestore.collection("gimnasios")
+			.document(gymCode)
+			.collection("usuarios")
+			.orderBy("name")
+			.startAt(query)
+			.endAt(query + "\uf8ff")
+			.get()
+			.await()
+		
+		users.addAll(
+			nameSnapshot.documents
+				.map { it.toListUser() }
+				.filterNot { newUser -> users.any { it.id == newUser.id } }
+		)
+		
+		Result.success(users)
+	} catch (e: Exception) {
+		Result.failure(e)
+	}
+	
+	private fun DocumentSnapshot.toListUser(): ListUser {
+		val data = data ?: emptyMap<String, Any>()
+		return ListUser(
+			id = id,
+			name = data["name"] as? String ?: "",
+			lastname = data["lastname"] as? String ?: "",
+			idcard = data["idcard"] as? String ?: "",
+			phone = data["phone"] as? String ?: "",
+			email = data["email"] as? String ?: "",
+			state = data["state"] as? String ?: "",
+			rol = data["rol"] as? String ?: "",
+			enabled = data["isActive"] as? Boolean ?: false,
+			date = when (val d = data["date"]) {
+				is Long -> d
+				is Double -> d.toLong()
+				else -> null
+			}
+		)
 	}
 	
 	override suspend fun updateUserProfile(

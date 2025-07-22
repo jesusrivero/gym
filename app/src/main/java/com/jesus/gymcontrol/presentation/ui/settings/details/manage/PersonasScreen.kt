@@ -61,7 +61,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -144,22 +143,13 @@ fun PersonsScreen(
 		val isLoading = userListViewModel.isLoading
 		
 		val filteredList = users.filter { user ->
-			val matchesSearch = searchText.isBlank() ||
-					user.name.contains(searchText, ignoreCase = true) ||
-					user.lastname.contains(searchText, ignoreCase = true) ||
-					user.email.contains(searchText, ignoreCase = true) ||
-					user.idcard.contains(searchText, ignoreCase = true) ||
-					user.phone.contains(searchText, ignoreCase = true)
-			
-			val matchesState = when (selectedState) {
+			when (selectedState) {
 				"Todos" -> true
 				"Activos" -> user.state.equals("activo", ignoreCase = true)
 				"Inactivos" -> user.state.equals("inactivo", ignoreCase = true)
 				"Próximos a pagar" -> user.state.equals("pendiente", ignoreCase = true)
 				else -> true
 			}
-			
-			matchesSearch && matchesState
 		}
 		
 		val contentModifier = Modifier
@@ -175,9 +165,17 @@ fun PersonsScreen(
 				onClearFilters = {
 					selectedState = "Todos"
 					searchText = ""
+					userListViewModel.loadUsers()
 				},
 				searchText = searchText,
-				onSearchTextChanged = { searchText = it },
+				onSearchTextChanged = { query ->
+					searchText = query
+					if (query.isBlank()) {
+						userListViewModel.loadUsers() // 👈 restaura la lista completa
+					} else {
+						userListViewModel.searchUser(query) // 👈 búsqueda remota
+					}
+				},
 				onAddClick = { navBottom.navigate(AppRoutes.RegPersonScreen) },
 				showAddButton = true
 			)
@@ -213,6 +211,9 @@ fun PersonsScreen(
 		}
 	}
 }
+
+
+
 
 enum class DialogMode {
 	None, View, Edit

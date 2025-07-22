@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jesus.gymcontrol.data.repository.SessionManager
 import com.jesus.gymcontrol.domain.model.ListUser
+import com.jesus.gymcontrol.domain.usecase.usuario.SearchUserUseCase
 import com.jesus.gymcontrol.domain.usecase.usuario.getDates.GetUserByGymUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -15,6 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class UserListViewModel @Inject constructor(
     private val getUsersByGymUseCase: GetUserByGymUseCase,
+    private val searchUserByIdCardUseCase: SearchUserUseCase,
     private val sessionManager: SessionManager // Para obtener el código del gimnasio
 ) : ViewModel() {
 
@@ -44,5 +46,28 @@ class UserListViewModel @Inject constructor(
             isLoading = false
         }
     }
+	
+	fun searchUser(idCard: String) {
+		val gymCode = sessionManager.getGymCode() ?: return
+		if (idCard.isBlank()) {
+			loadUsers() // Si la búsqueda está vacía, carga los últimos 100
+			return
+		}
+		
+		viewModelScope.launch {
+			isLoading = true
+			errorMessage = null
+			
+			val result = searchUserByIdCardUseCase(gymCode, idCard)
+			
+			result.onSuccess {
+				listUsers = it
+			}.onFailure {
+				errorMessage = it.message ?: "Error desconocido"
+			}
+			
+			isLoading = false
+		}
+	}
 	
 }
