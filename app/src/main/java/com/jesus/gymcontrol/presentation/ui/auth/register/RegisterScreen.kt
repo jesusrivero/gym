@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -48,10 +49,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -238,10 +242,10 @@ fun RegisterContent(navController: NavController) {
 					}
 					
 					Spacer(modifier = Modifier.height(12.dp))
-					Row(verticalAlignment = Alignment.CenterVertically) {
-						Checkbox(checked = termsAccepted, onCheckedChange = { termsAccepted = it })
-						Text("Acepto las políticas de privacidad", fontSize = 14.sp, color = colorScheme.onBackground)
-					}
+					TermsRow(
+						termsAccepted = termsAccepted,
+						onCheckedChange = { termsAccepted = it }
+					)
 					
 					Spacer(modifier = Modifier.height(24.dp))
 					
@@ -306,3 +310,33 @@ fun RegisterContent(navController: NavController) {
 }
 
 
+@Composable
+fun TermsRow(
+	termsAccepted: Boolean,
+	onCheckedChange: (Boolean) -> Unit
+) {
+	val uriHandler = LocalUriHandler.current
+	
+	Row(
+		verticalAlignment = Alignment.CenterVertically,
+		modifier = Modifier.padding(8.dp)
+	) {
+		Checkbox(
+			checked = termsAccepted,
+			onCheckedChange = onCheckedChange
+		)
+		
+		ClickableText(
+			text = AnnotatedString("Acepto las políticas de privacidad"),
+			onClick = {
+				uriHandler.openUri("https://jesusrivero.github.io/condiciones-app/")
+			},
+			style = MaterialTheme.typography.bodySmall.copy(
+				fontSize = 14.sp,
+				color = MaterialTheme.colorScheme.primary,
+				textDecoration = TextDecoration.Underline
+			),
+			modifier = Modifier.padding(start = 4.dp)
+		)
+	}
+}
