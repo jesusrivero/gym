@@ -136,9 +136,9 @@ fun SelectedRolScreenContent(
 					description = "Como dueño, tendrás control total sobre la configuración de tu gimnasio: podrás digitalizar tu negocio, gestionar al personal (administradores) y mantener un seguimiento completo de los clientes y sus pagos. Es la opción ideal si eres el propietario y responsable principal.",
 					icon = Icons.Default.Home,
 					onClick = {
-						val uid = sessionManager.getUserUid() ?: return@MenuCardRol
-						sessionManager.setUserSessionData(uid, "Dueño", "")
-						viewModel.rol = "Dueño"
+//						val uid = sessionManager.getUserUid() ?: return@MenuCardRol
+//						sessionManager.setUserSessionData(uid, "Dueño", "")
+//						viewModel.rol = "Dueño"
 						navController.navigate(AppRoutes.ActivateCodeScreen)
 					}
 				)
@@ -148,9 +148,9 @@ fun SelectedRolScreenContent(
 					description = "Como administrador, puedes encargarte de gestionar las operaciones diarias del gimnasio, apoyar al dueño en las tareas administrativas y garantizar que los servicios funcionen correctamente. Es la mejor opción si te asignaron para ayudar a manejar el negocio.",
 					icon = Icons.Default.ManageAccounts,
 					onClick = {
-						val uid = sessionManager.getUserUid() ?: return@MenuCardRol
-						sessionManager.setUserSessionData(uid, "Administrador", "")
-						viewModel.rol2 = "Administrador"
+//						val uid = sessionManager.getUserUid() ?: return@MenuCardRol
+//						sessionManager.setUserSessionData(uid, "Administrador", "")
+//						viewModel.rol2 = "Administrador"
 						navController.navigate(AppRoutes.SelectedGymAdmin)
 					}
 				)
