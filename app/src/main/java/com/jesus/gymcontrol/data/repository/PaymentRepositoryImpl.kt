@@ -27,6 +27,7 @@ class PaymentRepositoryImpl @Inject constructor(
 		
 		val gymRef = firestore.collection("gimnasios").document(pago.gimnasioCode)
 		
+		// 🔍 1. Obtener duración de la membresía
 		val duracionDias = gymRef
 			.collection("membresias")
 			.document(pago.membershipId)
@@ -35,8 +36,36 @@ class PaymentRepositoryImpl @Inject constructor(
 			.getLong("duracionDias")
 			?.toInt() ?: 0
 		
-		val fechaVencimientoFinal = pago.fechaVencimiento.takeIf { it > 0 }
-			?: (pago.date + duracionDias * 24 * 60 * 60 * 1000L)
+		// 🔍 2. CONSULTAR la fecha de vencimiento actual del usuario
+		val gymUserRef = gymRef.collection("usuarios").document(pago.userId)
+		val currentUserData = gymUserRef.get().await()
+		
+		val fechaVencimientoActual = if (currentUserData.exists()) {
+			currentUserData.getLong("fechaVencimiento") ?: 0L
+		} else {
+			0L
+		}
+		
+		Log.d("addPago", "📅 Fecha de pago: ${java.util.Date(pago.date)}")
+		Log.d("addPago", "📅 Fecha vencimiento actual: ${if (fechaVencimientoActual > 0) java.util.Date(fechaVencimientoActual) else "No tiene"}")
+		Log.d("addPago", "📅 Duración nueva membresía: $duracionDias días")
+		
+		// 🧮 3. CALCULAR la nueva fecha de vencimiento según la lógica de negocio
+		val fechaVencimientoFinal = when {
+			// Si tiene membresía activa y no ha vencido: extender desde fecha actual de vencimiento
+			fechaVencimientoActual > System.currentTimeMillis() -> {
+				Log.d("addPago", "✅ Usuario con membresía activa - Extendiendo desde vencimiento actual")
+				fechaVencimientoActual + duracionDias * 24 * 60 * 60 * 1000L
+			}
+			
+			// Si no tiene membresía activa o ya venció: calcular desde fecha de pago
+			else -> {
+				Log.d("addPago", "✅ Usuario sin membresía activa - Calculando desde fecha de pago")
+				pago.date + duracionDias * 24 * 60 * 60 * 1000L
+			}
+		}
+		
+		Log.d("addPago", "📅 Fecha vencimiento FINAL: ${java.util.Date(fechaVencimientoFinal)}")
 		
 		val pagoMap = mutableMapOf(
 			"id" to pago.id,
@@ -54,7 +83,7 @@ class PaymentRepositoryImpl @Inject constructor(
 			"reference" to pago.reference,
 			"date" to pago.date,
 			"duracionDias" to duracionDias,
-			"fechaVencimiento" to fechaVencimientoFinal,
+			"fechaVencimiento" to fechaVencimientoFinal, // ✅ Nueva fecha calculada correctamente
 			"gimnasioCode" to pago.gimnasioCode,
 			"promocionId" to pago.promocionId,
 			"promocionNombre" to pago.promocionNombre,
@@ -71,7 +100,6 @@ class PaymentRepositoryImpl @Inject constructor(
 			.document(pago.id)
 		
 		val userRef = firestore.collection("users").document(pago.userId)
-		val gymUserRef = gymRef.collection("usuarios").document(pago.userId)
 		val membershipUsersRef = gymRef
 			.collection("membresias")
 			.document(pago.membershipId)
@@ -113,7 +141,7 @@ class PaymentRepositoryImpl @Inject constructor(
 					"state" to "activo",
 					"paymentdate" to pago.date,
 					"membership" to pago.membershipName,
-					"fechaVencimiento" to fechaVencimientoFinal
+					"fechaVencimiento" to fechaVencimientoFinal // ✅ Usar fecha calculada correctamente
 				),
 				SetOptions.merge()
 			)

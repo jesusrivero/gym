@@ -268,12 +268,13 @@ fun PersonCard(
 				horizontalArrangement = Arrangement.spacedBy(4.dp),
 				verticalAlignment = Alignment.CenterVertically
 			) {
-				if (user.state.equals("pendiente", ignoreCase = true)) {
+				if (user.state.equals("pendiente", ignoreCase = true) || user.state.equals("inactivo", ignoreCase = true)) {
 					WhatsAppButton(
 						phoneNumber = user.phone,
 						message = "Hola ${user.name} ${user.lastname}, tu membresía está próxima a vencer."
 					)
 				}
+			
 				
 				IconButton(onClick = { navPag(user.id, "${user.name} ${user.lastname}".trim()) }) {
 					Icon(
@@ -315,8 +316,10 @@ fun EditUserDialog(
 	var lastname by remember { mutableStateOf(user.lastname) }
 	var idcard by remember { mutableStateOf(user.idcard) }
 	var phone by remember { mutableStateOf(user.phone) }
+	var email by remember { mutableStateOf(user.email ?: "") }
 	val onlyLettersRegex = Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]*\$")
 	var nameError by remember { mutableStateOf<String?>(null) }
+	var emailError by remember { mutableStateOf<String?>(null) }
 	var lastnameError by remember { mutableStateOf<String?>(null) }
 	var idcardError by remember { mutableStateOf<String?>(null) }
 	var phoneError by remember { mutableStateOf<String?>(null) }
@@ -354,6 +357,19 @@ fun EditUserDialog(
 						if (lastnameError != null) Text(lastnameError!!, color = MaterialTheme.colorScheme.error)
 					}
 				)
+				
+				OutlinedTextField(
+					value = email,
+					onValueChange = {
+					},
+					label = { Text("Email") },
+					maxLines = 1,
+					isError = emailError != null,
+					supportingText = {
+						if (emailError != null) Text(emailError!!, color = MaterialTheme.colorScheme.error)
+					}
+				)
+				
 				OutlinedTextField(
 					value = idcard,
 					onValueChange = {

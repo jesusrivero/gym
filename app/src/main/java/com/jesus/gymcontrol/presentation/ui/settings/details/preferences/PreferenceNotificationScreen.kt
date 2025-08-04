@@ -1,4 +1,4 @@
-package com.jesus.gymcontrol.presentation.ui.settings.details.preferences
+ package com.jesus.gymcontrol.presentation.ui.settings.details.preferences
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

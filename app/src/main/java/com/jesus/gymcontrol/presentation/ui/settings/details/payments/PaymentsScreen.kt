@@ -25,6 +25,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Error
@@ -34,12 +35,17 @@ import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -48,13 +54,18 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -87,6 +98,7 @@ import com.jesus.gymcontrol.domain.viewmodels.PromotionViewModel
 import com.jesus.gymcontrol.domain.viewmodels.UserListViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import kotlinx.coroutines.delay
+import java.util.Calendar
 import java.util.UUID
 
 @Composable
@@ -145,8 +157,12 @@ fun PaymentsScreenContent(
 	val isLoading = viewModel.isLoading
 	val configuration = LocalConfiguration.current
 	val isPortrait = configuration.orientation == android.content.res.Configuration.ORIENTATION_PORTRAIT
-	
-	
+
+
+// Agregar estas variables de estado al inicio de tu composable
+	var usarFechaPersonalizada by remember { mutableStateOf(false) }
+	var fechaPagoPersonalizada by remember { mutableStateOf<Long?>(null) }
+	var showDatePicker by remember { mutableStateOf(false) }
 	
 	LaunchedEffect(isActionSuccess, actionMessage) {
 		if (isActionSuccess == true && actionMessage != null) {
@@ -157,6 +173,8 @@ fun PaymentsScreenContent(
 			isMembershipDropdownExpanded = false
 			isTypeDropdownExpanded = false
 			isPromoDropdownExpanded = false
+			usarFechaPersonalizada = false
+			fechaPagoPersonalizada = null
 			description = ""
 			viewModel.resetState()
 			viewModel.clearDescription()
@@ -312,7 +330,12 @@ fun PaymentsScreenContent(
 								amountBs = if (paymentState.type != "Dólares") montoBs else null,
 								description = viewModel.descripcionGenerada,
 								reference = if (paymentState.type != "Dólares") reference else null,
-								date = System.currentTimeMillis(),
+								// Por esta:
+								date = if (usarFechaPersonalizada && fechaPagoPersonalizada != null) {
+									fechaPagoPersonalizada!!
+								} else {
+									System.currentTimeMillis()
+								},
 								gimnasioCode = gimnasioCode.toString(),
 								promocionId = selectedPromotion?.id,
 								promocionNombre = selectedPromotion?.nombre ?: "",
@@ -400,7 +423,8 @@ fun PaymentsScreenContent(
 											nameUser = ""
 											selectedUserId = null
 											usersViewModel.clearSearch() // también aquí por si hace falta
-											
+											usarFechaPersonalizada = false
+											fechaPagoPersonalizada = null
 											viewModel.resetState()
 											description = ""
 											reference = ""
@@ -780,6 +804,191 @@ fun PaymentsScreenContent(
 								},
 								maxLines = 2
 							)
+						}
+						
+						Column(modifier = Modifier.padding(16.dp)) {
+							// Switch para activar fecha personalizada
+							Row(
+								modifier = Modifier.fillMaxWidth(),
+								horizontalArrangement = Arrangement.SpaceBetween,
+								verticalAlignment = Alignment.CenterVertically
+							) {
+								Column(modifier = Modifier.weight(1f)) {
+									Text(
+										text = if (usarFechaPersonalizada) "Fecha personalizada" else "Pago de hoy",
+										style = MaterialTheme.typography.bodyMedium,
+										fontWeight = FontWeight.Medium
+									)
+									Text(
+										text = if (usarFechaPersonalizada) {
+											fechaPagoPersonalizada?.let {
+												java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
+													.format(java.util.Date(it))
+											} ?: "Seleccionar fecha"
+										} else {
+											java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
+												.format(java.util.Date())
+										},
+										style = MaterialTheme.typography.bodySmall,
+										color = colorScheme.onSurfaceVariant
+									)
+								}
+								
+								Switch(
+									checked = usarFechaPersonalizada,
+									onCheckedChange = {
+										usarFechaPersonalizada = it
+										if (!it) {
+											fechaPagoPersonalizada = null
+										}
+									},
+									colors = SwitchDefaults.colors(
+										checkedThumbColor = MaterialTheme.colorScheme.primary,
+										uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+										checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.54f),
+										uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
+									)
+								)
+							}
+							
+							// Botón para seleccionar fecha (solo visible cuando el switch está activado)
+							if (usarFechaPersonalizada) {
+								Spacer(modifier = Modifier.height(8.dp))
+								OutlinedButton(
+									onClick = { showDatePicker = true },
+									modifier = Modifier.fillMaxWidth(),
+									colors = ButtonDefaults.outlinedButtonColors(
+										contentColor = colorScheme.primary
+									)
+								) {
+									Icon(
+										Icons.Default.CalendarToday,
+										contentDescription = "Seleccionar fecha",
+										modifier = Modifier.size(20.dp)
+									)
+									Spacer(modifier = Modifier.width(8.dp))
+									Text(
+										text = fechaPagoPersonalizada?.let {
+											"Cambiar fecha: " + java.text.SimpleDateFormat(
+												"dd/MM/yyyy",
+												java.util.Locale.getDefault()
+											)
+												.format(java.util.Date(it))
+										} ?: "Seleccionar fecha de pago"
+									)
+								}
+								
+								// Mostrar advertencia si la fecha es muy antigua o futura
+								fechaPagoPersonalizada?.let { fechaSeleccionada ->
+									val hoy = System.currentTimeMillis()
+									val diferenciaDias =
+										kotlin.math.abs(fechaSeleccionada - hoy) / (1000 * 60 * 60 * 24)
+									
+									if (diferenciaDias > 30) {
+										Spacer(modifier = Modifier.height(4.dp))
+										Row(
+											verticalAlignment = Alignment.CenterVertically,
+											modifier = Modifier
+												.fillMaxWidth()
+												.background(
+													color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f),
+													shape = RoundedCornerShape(8.dp)
+												)
+												.padding(8.dp)
+										) {
+											Icon(
+												Icons.Default.Warning,
+												contentDescription = null,
+												tint = MaterialTheme.colorScheme.error,
+												modifier = Modifier.size(16.dp)
+											)
+											Spacer(modifier = Modifier.width(8.dp))
+											Text(
+												text = if (fechaSeleccionada < hoy)
+													"Pago registrado como atrasado (${diferenciaDias} días)"
+												else
+													"Pago registrado como adelantado (${diferenciaDias} días)",
+												style = MaterialTheme.typography.bodySmall,
+												color = MaterialTheme.colorScheme.error
+											)
+										}
+									}
+								}
+							}
+						}
+						
+						
+						Spacer(modifier = Modifier.height(10.dp))
+						
+						if (showDatePicker) {
+							val datePickerState = rememberDatePickerState(
+								initialSelectedDateMillis = fechaPagoPersonalizada ?: System.currentTimeMillis()
+							)
+							
+							DatePickerDialog(
+								onDismissRequest = { showDatePicker = false },
+								confirmButton = {
+									Surface(
+										modifier = Modifier.fillMaxWidth(),
+										color = MaterialTheme.colorScheme.surfaceVariant
+									) {
+										Row(
+											modifier = Modifier
+												.fillMaxWidth()
+												.padding(8.dp),
+											horizontalArrangement = Arrangement.End
+										) {
+											OutlinedButton(
+												onClick = { showDatePicker = false },
+												shape = RoundedCornerShape(12.dp),
+												colors = ButtonDefaults.outlinedButtonColors(
+													contentColor = MaterialTheme.colorScheme.primary
+												)
+											) {
+												Text("Cancelar")
+											}
+											
+											Spacer(modifier = Modifier.width(8.dp))
+											
+											Button(
+												onClick = {
+													datePickerState.selectedDateMillis?.let { millis ->
+														// ✅ SOLUCIÓN MÁS DIRECTA: Agregar medio día para evitar problemas de zona horaria
+														fechaPagoPersonalizada = millis + (12 * 60 * 60 * 1000L) // +12 horas
+														usarFechaPersonalizada = true
+													}
+													showDatePicker = false
+												},
+												shape = RoundedCornerShape(12.dp)
+											) {
+												Text("Confirmar")
+											}
+											
+										}
+									}
+								},
+								dismissButton = {}
+							) {
+								DatePicker(
+									state = datePickerState,
+									colors = DatePickerDefaults.colors(
+										containerColor = MaterialTheme.colorScheme.surface,
+										headlineContentColor = MaterialTheme.colorScheme.primary,
+										weekdayContentColor = MaterialTheme.colorScheme.primary,
+										subheadContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+										yearContentColor = MaterialTheme.colorScheme.onSurface,
+										currentYearContentColor = MaterialTheme.colorScheme.primary,
+										selectedYearContentColor = MaterialTheme.colorScheme.onPrimary,
+										selectedYearContainerColor = MaterialTheme.colorScheme.primary,
+										dayContentColor = MaterialTheme.colorScheme.onSurface,
+										disabledDayContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+										selectedDayContentColor = MaterialTheme.colorScheme.onPrimary,
+										selectedDayContainerColor = MaterialTheme.colorScheme.primary,
+										todayContentColor = MaterialTheme.colorScheme.primary,
+										todayDateBorderColor = MaterialTheme.colorScheme.primary
+									)
+								)
+							}
 						}
 					}
 				}

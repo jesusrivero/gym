@@ -255,7 +255,7 @@ fun RegPersonContent(
 
 // 🔷 Formulario válido si todos los campos requeridos están bien
 	val formIsValid =
-		isNameValid && islastNameValid && isIdCardValid && isCodeValid && isPhoneValid && isEmailValid && isPasswordValid
+		isNameValid && islastNameValid && isIdCardValid && isCodeValid && isPhoneValid && isPasswordValid
 	
 	
 	LaunchedEffect(userUid) {

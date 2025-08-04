@@ -66,7 +66,7 @@ dependencies {
 	implementation(libs.androidx.room.runtime)                   // Room runtime
 	implementation(libs.androidx.room.ktx)
 	implementation(libs.androidx.compiler)
-	implementation(libs.androidx.datastore.core.android)                       // Room con corutinas
+	implementation(libs.androidx.datastore.core.android)          // Room con corutinas
 	ksp(libs.androidx.room.compiler)                             // Room compiler
 	implementation(libs.androidx.lifecycle.viewmodel.compose)    // ViewModel + Compose
 	implementation(libs.androidx.navigation.compose)             // Navigation en Compose
@@ -93,10 +93,9 @@ dependencies {
 	implementation (libs.androidx.camera.lifecycle) // CameraX Lifecycle
 	implementation (libs.androidx.camera.view) // CameraX View
 	implementation (libs.androidx.camera.extensions)   // CameraX Extensions
-//	implementation (libs.accompanist.permissions) // Accompanist Permissions
 	implementation (libs.androidx.material)
 	implementation (libs.androidx.foundation.v160)
-
+	implementation (libs.threetenabp)
 //	implementation (libs.accompanist.pager.v0350alpha)
 //	implementation (libs.accompanist.pager.indicators)
 	
