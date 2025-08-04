@@ -32,6 +32,7 @@ interface AuthRepository {
 		idcard: String,
 		name: String,
 		lastname: String,
+		email:String,
 		phone: String,
 		gymCode: String
 	): Result<Unit>

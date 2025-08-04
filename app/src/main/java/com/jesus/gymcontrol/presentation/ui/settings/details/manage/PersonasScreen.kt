@@ -105,6 +105,7 @@ fun PersonsScreen(
 						idcard = updatedUser.idcard,
 						phone = updatedUser.phone,
 						name = updatedUser.name,
+						email = updatedUser.email,
 						lastname = updatedUser.lastname
 					)
 					userListViewModel.loadUsers()
@@ -269,14 +270,22 @@ fun PersonCard(
 				verticalAlignment = Alignment.CenterVertically
 			) {
 				if (user.state.equals("pendiente", ignoreCase = true) || user.state.equals("inactivo", ignoreCase = true)) {
+					val mensaje = if (user.state.equals("pendiente", ignoreCase = true)) {
+						"Hola ${user.name} ${user.lastname}, tu membresía está próxima a vencer."
+					} else {
+						"Hola ${user.name} ${user.lastname}, tu membresía venció. Por favor pasa por administración para actualizarla."
+					}
+					
 					WhatsAppButton(
 						phoneNumber = user.phone,
-						message = "Hola ${user.name} ${user.lastname}, tu membresía está próxima a vencer."
+						message = mensaje
 					)
 				}
 			
-				
-				IconButton(onClick = { navPag(user.id, "${user.name} ${user.lastname}".trim()) }) {
+			
+			
+			
+			IconButton(onClick = { navPag(user.id, "${user.name} ${user.lastname}".trim()) }) {
 					Icon(
 						Icons.Default.Payment,
 						contentDescription = "Pagar",
@@ -360,14 +369,11 @@ fun EditUserDialog(
 				
 				OutlinedTextField(
 					value = email,
-					onValueChange = {
-					},
+					onValueChange = { email = it },
 					label = { Text("Email") },
 					maxLines = 1,
 					isError = emailError != null,
-					supportingText = {
-						if (emailError != null) Text(emailError!!, color = MaterialTheme.colorScheme.error)
-					}
+					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
 				)
 				
 				OutlinedTextField(
@@ -421,6 +427,13 @@ fun EditUserDialog(
 							nameError = null
 						}
 						
+						if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+							emailError = "Correo electrónico no válido"
+							isValid = false
+						} else {
+							emailError = null
+						}
+						
 						if (idcard.length !in 7..9) {
 							idcardError = "La cédula debe tener entre 7 y 9 dígitos"
 							isValid = false
@@ -440,6 +453,7 @@ fun EditUserDialog(
 								user.copy(
 									name = name,
 									lastname = lastname,
+									email = email,
 									idcard = idcard,
 									phone = phone
 								)

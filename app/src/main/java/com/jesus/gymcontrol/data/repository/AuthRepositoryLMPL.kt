@@ -106,6 +106,7 @@ class AuthRepositoryImpl(
 		phone: String,
 		name: String,
 		lastname: String,
+		email: String,
 		gymCode: String,
 	): Result<Unit> {
 		return try {
@@ -113,6 +114,7 @@ class AuthRepositoryImpl(
 				"idcard" to idcard,
 				"phone" to phone,
 				"name" to name,
+				"email" to email,
 				"lastname" to lastname,
 			)
 			

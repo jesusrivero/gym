@@ -10,11 +10,12 @@ class UpdateDatesUserUseCase @Inject constructor(
 	suspend operator fun invoke(
 		uid: String,
 		idcard: String,
+		email:String,
 		phone: String,
 		name: String,
 		lastname: String,
 		gymCode: String
 	): Result<Unit> {
-		return repository.updateDatesUser(uid, idcard, phone, name,lastname, gymCode)
+		return repository.updateDatesUser(uid, idcard , phone, name,lastname,email, gymCode)
 	}
 }

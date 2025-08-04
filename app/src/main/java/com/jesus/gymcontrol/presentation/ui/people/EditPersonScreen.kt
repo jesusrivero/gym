@@ -117,6 +117,7 @@ fun EditPersonContent(
 	var idCard by remember { mutableStateOf("") }
 	var age by remember { mutableStateOf("") }
 	var phone by remember { mutableStateOf("") }
+	var email by remember { mutableStateOf("") }
 	var gender by remember { mutableStateOf("") }
 	var name by remember { mutableStateOf("") }
 	var lastname by remember { mutableStateOf("")}
@@ -185,7 +186,9 @@ fun EditPersonContent(
 					idcard = idCard,
 					phone = phone,
 					name = name,
-					lastname = lastname
+					lastname = lastname,
+					email = email,
+					
 				)
 			},
 			enabled = formIsValid,

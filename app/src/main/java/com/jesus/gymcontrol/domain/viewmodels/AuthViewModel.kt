@@ -193,6 +193,7 @@ class AuthViewModel @Inject constructor(
 	fun updateDatesUser(
 		uid: String,
 		idcard: String,
+		email: String,
 		phone: String,
 		name: String,
 		lastname: String
@@ -204,7 +205,7 @@ class AuthViewModel @Inject constructor(
 			errorMessage = null
 			_updateDatesSuccess.value = null
 			
-			val result = updateDatesUserUseCase(uid, idcard, phone, name, lastname, gymCode)
+			val result = updateDatesUserUseCase(uid, idcard, email, phone, name, lastname, gymCode)
 			
 			result.onSuccess {
 				_updateDatesSuccess.value = true
