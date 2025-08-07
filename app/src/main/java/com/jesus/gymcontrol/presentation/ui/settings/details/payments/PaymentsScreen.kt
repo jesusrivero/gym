@@ -1,6 +1,9 @@
 package com.jesus.gymcontrol.presentation.ui.settings.details.payments
 
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -86,6 +89,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jesus.gymcontrol.R
@@ -97,7 +101,10 @@ import com.jesus.gymcontrol.domain.viewmodels.PaymentsViewModel
 import com.jesus.gymcontrol.domain.viewmodels.PromotionViewModel
 import com.jesus.gymcontrol.domain.viewmodels.UserListViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.UUID
 
@@ -344,10 +351,18 @@ fun PaymentsScreenContent(
 							)
 							
 							// ✅ Aquí se llama a la función nueva
-							viewModel.registrarPago(
-								pago,
-								membership.duracionDias ?: 0
-							)
+							CoroutineScope(Dispatchers.Main).launch {
+								if (!isInternetAvailable(context)) {
+									snackbarMessage = "Sin conexión a internet. Intenta nuevamente."
+									showSnackbar = true
+									return@launch
+								}
+								
+								viewModel.registrarPago(
+									pago,
+									membership.duracionDias ?: 0
+								)
+							}
 							
 						} else {
 							snackbarMessage = "Error: datos de usuario o membresía no encontrados"
@@ -996,17 +1011,38 @@ fun PaymentsScreenContent(
 			if (isLoading) {
 				Box(
 					modifier = Modifier
-						.fillMaxSize(),
+						.fillMaxSize()
+						.background(Color.Black.copy(alpha = 0.3f))
+						.zIndex(2f),
 					contentAlignment = Alignment.Center
 				) {
-					CircularProgressIndicator()
+					Column(
+						horizontalAlignment = Alignment.CenterHorizontally
+					) {
+						CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+						Spacer(modifier = Modifier.height(12.dp))
+						Text(
+							"Procesando tu pago...",
+							color = MaterialTheme.colorScheme.onSurface,
+							style = MaterialTheme.typography.bodyMedium
+						)
+					}
 				}
 			}
 		}
 	}
 }
 
-
+suspend fun isInternetAvailable(context: Context): Boolean {
+	return try {
+		val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+		val network = cm.activeNetwork ?: return false
+		val capabilities = cm.getNetworkCapabilities(network) ?: return false
+		return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+	} catch (e: Exception) {
+		false
+	}
+}
 /*@Preview(showBackground = true)
 @Composable
 fun PaymentsScreenPreview() {

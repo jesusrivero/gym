@@ -2,6 +2,7 @@ package com.jesus.gymcontrol.presentation.ui.people
 
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -60,7 +62,11 @@ import com.jesus.gymcontrol.domain.viewmodels.GymViewModel
 import com.jesus.gymcontrol.domain.viewmodels.RegisterUserFromAdminViewModel
 import com.jesus.gymcontrol.presentation.navegation.AppRoutes
 import com.jesus.gymcontrol.presentation.ui.commons.countryCodes
+import com.jesus.gymcontrol.presentation.ui.settings.details.payments.isInternetAvailable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -207,6 +213,7 @@ fun RegPersonContent(
 	isLoading: Boolean,
 ) {
 	val colorScheme = MaterialTheme.colorScheme
+	val context = LocalContext.current // Mover aquí arriba para usarlo en el toast
 	
 	var name by rememberSaveable { mutableStateOf("") }
 	var lastname by rememberSaveable { mutableStateOf("") }
@@ -224,17 +231,12 @@ fun RegPersonContent(
 	val trimmedEmail = email.trim()
 	val isNameValid = name.isNotBlank()
 	val islastNameValid = lastname.isNotBlank()
-//	val isEmailValid =
-//		trimmedEmail.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
-//	val isPasswordValid = password.length >= 6
 	val isIdCardValid = idCard.length in 7..9
 	val isCodeValid = code.isNotBlank()
 	var selectedCountryCode by rememberSaveable { mutableStateOf("58") }
 	var isCountryDropdownExpanded by rememberSaveable { mutableStateOf(false) }
 	val fullPhone = "$selectedCountryCode$phone"
 	val isPhoneValid = phone.isBlank() || fullPhone.matches(Regex("^[1-9]\\d{7,14}$"))
-//	val formIsValid =
-//		isNameValid && islastNameValid && isEmailValid && isPasswordValid && isCodeValid && isIdCardValid && isPhoneValid
 	val configuration = LocalConfiguration.current
 	val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 	val currentUserRole = gviewModel.currentUserRole
@@ -252,8 +254,8 @@ fun RegPersonContent(
 	val isPasswordValid =
 		if (rol == "administrador") password.length >= 6
 		else true
-
-// 🔷 Formulario válido si todos los campos requeridos están bien
+	
+	// 🔷 Formulario válido si todos los campos requeridos están bien
 	val formIsValid =
 		isNameValid && islastNameValid && isIdCardValid && isCodeValid && isPhoneValid && isPasswordValid
 	
@@ -571,11 +573,23 @@ fun RegPersonContent(
 		Button(
 			onClick = {
 				idCardError = null
-				aviewModel.checkidcardExists(idCard) { exists ->
-					if (exists) {
-						idCardError = "La cédula ya está registrada"
-					} else {
-						showDialog = true
+				CoroutineScope(Dispatchers.Main).launch {
+					if (!isInternetAvailable(context)) {
+						// 🔴 CAMBIO: Mostrar Toast en lugar de error en campo
+						Toast.makeText(
+							context,
+							"No hay conexión a internet. Verifica tu conexión e intenta nuevamente.",
+							Toast.LENGTH_LONG
+						).show()
+						return@launch
+					}
+					
+					aviewModel.checkidcardExists(idCard) { exists ->
+						if (exists) {
+							idCardError = "La cédula ya está registrada"
+						} else {
+							showDialog = true
+						}
 					}
 				}
 			},

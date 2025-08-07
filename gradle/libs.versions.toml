@@ -46,6 +46,7 @@ compiler = "3.2.0-alpha11"
 datastoreCoreAndroid = "1.1.7"
 sqldelight = "2.0.1"
 threetenabp = "1.4.7"
+threetenabpVersion = "1.4.4"
 
 [libraries]
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
@@ -109,6 +110,7 @@ sqldelight-android-driver = { module = "app.cash.sqldelight:android-driver", ver
 sqldelight-runtime = { module = "app.cash.sqldelight:runtime", version.ref = "sqldelight" }
 sqldelight-coroutines-extensions = { module = "app.cash.sqldelight:coroutines-extensions", version.ref ="sqldelight"}
 threetenabp = { module = "com.jakewharton.threetenabp:threetenabp", version.ref = "threetenabp" }
+threetenabp-v144 = { module = "com.jakewharton.threetenabp:threetenabp", version.ref = "threetenabpVersion" }
 
 
 
