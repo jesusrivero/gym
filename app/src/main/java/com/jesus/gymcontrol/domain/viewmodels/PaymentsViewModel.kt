@@ -177,6 +177,13 @@ class PaymentsViewModel @Inject constructor(
 			errorMessage = null
 			
 			try {
+				// 🧠 Validación defensiva por si se pasa una promoción vacía accidentalmente
+				val promocionValida = if (
+					pago.promocionId == null ||
+					pago.promocionNombre.orEmpty().isBlank() ||
+					pago.promocionDescuento == 0.0
+				) null else pago
+				
 				val nuevaFechaVencimiento = calcularNuevaFechaVencimientoUseCase(
 					pago.userId,
 					pago.gimnasioCode,
@@ -188,28 +195,18 @@ class PaymentsViewModel @Inject constructor(
 				val result = addPaymentUseCase(pagoConFecha)
 				
 				result.onSuccess {
-					// 👉 ACTUALIZA la fechaVencimiento también en el documento del usuario
+					// 👉 Actualizar fecha de vencimiento en el documento del usuario
 					firestore.collection("users")
 						.document(pago.userId)
 						.collection("gimnasios")
 						.document(pago.gimnasioCode)
 						.update("fechaVencimiento", nuevaFechaVencimiento)
 					
-					result.onSuccess {
-						firestore.collection("users")
-							.document(pago.userId)
-							.collection("gimnasios")
-							.document(pago.gimnasioCode)
-							.update("fechaVencimiento", nuevaFechaVencimiento)
-						
-						paymentActionMessage.value = "Pago registrado correctamente, deseas registrar otro?"
-						isActionSuccess.value = true
-					}.onFailure {
-						paymentActionMessage.value = "Error al registrar el pago: ${it.message}"
-						isActionSuccess.value = false
-					}
+					paymentActionMessage.value = "Pago registrado correctamente, ¿deseas registrar otro?"
+					isActionSuccess.value = true
 				}.onFailure {
-					errorMessage = it.message
+					paymentActionMessage.value = "Error al registrar el pago: ${it.message}"
+					isActionSuccess.value = false
 				}
 			} catch (e: Exception) {
 				paymentActionMessage.value = "Error al registrar el pago: ${e.message}"
@@ -219,6 +216,7 @@ class PaymentsViewModel @Inject constructor(
 			}
 		}
 	}
+	
 	
 	
 	fun generarDescripcion(userId: String, gymCode: String, nuevaMembresia: String) {

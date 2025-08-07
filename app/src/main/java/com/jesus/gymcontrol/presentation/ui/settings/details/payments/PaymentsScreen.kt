@@ -674,7 +674,7 @@ fun PaymentsScreenContent(
 									DropdownMenuItem(
 										text = { Text("Sin promoción") },
 										onClick = {
-											viewModel.selectedPromotion(null ?: Promotion())
+											viewModel.selectedPromotion(null)
 											isPromoDropdownExpanded = false
 										}
 									)
@@ -1043,6 +1043,7 @@ suspend fun isInternetAvailable(context: Context): Boolean {
 		false
 	}
 }
+
 /*@Preview(showBackground = true)
 @Composable
 fun PaymentsScreenPreview() {
